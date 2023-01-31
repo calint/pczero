@@ -1,3 +1,5 @@
+# built with g++ (Ubuntu 12.2.0-3ubuntu1) 12.2.0
+
 IMG=install.img
 BIN=pc.img
 SRC=pc.cc std.cc main.cc

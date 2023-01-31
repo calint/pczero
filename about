@@ -1,0 +1,4 @@
+2023-01-31:
+  built with g++ (Ubuntu 12.2.0-3ubuntu1) 12.2.0
+  tested on QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
+  tested on asus zenbook
