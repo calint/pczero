@@ -162,7 +162,7 @@ asm("  jmp isr_err");
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ikbd
 asm(".align 16,0x90");
 asm("isr_kbd:");
-asm("  cli");
+asm("  cli");// is disabling interrupts necessary?
 asm("  push %ax");
 asm("  in $0x60,%al");// read keyboard port
 asm("  mov %al,osca_key");// store
