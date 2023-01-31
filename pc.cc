@@ -154,6 +154,7 @@ asm("isr_tck_eax:.long 0x00000000");
 asm("isr_tck_ebx:.long 0x00000000");
 asm("isr_tck_esp:.long 0x00000000");
 asm("isr_tck_eip:.long 0x00000000");
+asm("isr_tck_eflags:.long 0x00000000");
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ierr
 asm(".align 16,0x90");
 asm("isr_err:");
@@ -194,8 +195,9 @@ asm("  mov 8(%esp),%eax");// get eflags from stack
 asm("  mov %eax,8(%ebx)");// save to task.eflags
 asm("  mov %esp,%eax");// adjust esp
 asm("  add $12,%eax");// skip eip,cs,eflags
+//asm("  add $16,%eax");// skip error code,eip,cs,eflags
 asm("  mov %eax,4(%ebx)");// save to task.esp
-asm("  mov %ebx,%esp");// save gprs
+asm("  mov %ebx,%esp");// save gprs by preparing esp and then popal
 asm("  add $48,%esp");// move to end of task record
 asm("  pushal");// pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi
 asm("  mov isr_tck_eax,%eax");// save proper eax,ebx
@@ -212,9 +214,13 @@ asm("  mov 4(%ebx),%esp");// restore esp
 asm("  mov %esp,isr_tck_esp");// save esp, will be used as scratch
 asm("  mov (%ebx),%esp");// restore eip
 asm("  mov %esp,isr_tck_eip");// save for jump
+asm("  mov 8(%ebx),%esp");// restore eflags
+asm("  mov %esp,isr_tck_eflags");// save eflags
 asm("  mov %ebx,%esp");// restore gprs
-asm("  add $16,%esp");// position stack pointer for pop
+asm("  add $16,%esp");// position stack pointer for pop by skipping eip,esp,eflags,bits
 asm("  popal");// write edi,esi,ebp,esp0,ebx,edx,ecx,eax
+asm("  pushl isr_tck_eflags");// restore eflags (push instead of pushl ok?)
+asm("  popf");// restore eflags
 asm("  mov isr_tck_esp,%esp");// restore task esp
 asm("  push %ax");// ack irq
 asm("  mov $0x20,%al");
