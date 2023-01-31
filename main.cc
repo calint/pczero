@@ -2,6 +2,7 @@
 #include "std.h"
 
 extern "C" void osca_keyb_ev(){
+	*(int*)(0xa0000+320-8)=osca_key;
 	static char*p=(char*)0xa4000;
 	*p++=(char)osca_key;
 }
@@ -27,34 +28,37 @@ asm(".global tsk0,tsk1,tsk2,tsk3,tsk4");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk0:");
-asm("  mov $0x00007c00,%esi");
-asm("  mov $0x000a8000,%edi");
-asm("  mov $0x00001000,%ecx");
+asm("  mov $0x07c00,%esi");// start of kernel
+//asm("  mov $0xa7d00,%edi");// destination to screen line 100
+//asm("  mov $0xaaf00,%edi");// destination to screen line 140
+asm("  mov $0xabb80,%edi");// destination to screen line 150
+//asm("  mov $0xac800,%edi");// destination to screen line 160
+asm("  mov $(4*512>>2),%ecx");// copy 4 sectors
 asm("  rep movsl");
 asm("  hlt");
 asm("  jmp tsk0");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk1:");
-asm("  addl $2,0xa0144");
+//asm("  addl $2,0xa0144");
 asm("  hlt");
 asm("  jmp tsk1");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk2:");
-asm("  addl $2,0xa0148");
+//asm("  addl $2,0xa0148");
 asm("  hlt");
 asm("  jmp tsk2");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk3:");
-asm("  addl $2,0xa014c");
+//asm("  addl $2,0xa014c");
 asm("  hlt");
 asm("  jmp tsk3");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk4:");
-asm("  addl $2,0xa0150");
+//asm("  addl $2,0xa0150");
 asm("  hlt");
 asm("  jmp tsk4");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -90,7 +94,7 @@ extern "C" void tsk5(){
 		sprite.to(screen,Coords{x,24});
 		x_prv=x;
 		x+=8;
-		if(x>80){
+		if(x>180){
 			x=24;
 		}
 //		osca_yield();
@@ -100,13 +104,13 @@ extern "C" void tsk5(){
 extern "C" void tsk6(){
 	while(true){
 		osca_yield();
-		*(int*)0xa0154+=3;
+		*(int*)(0xa0000+320-4)=osca_t;
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk7(){
-	static char*p=(char*)0xa0400;
-	static char*nl=(char*)0xa0400;
+	static char*p=(char*)(0xa0000+320);
+	static char*nl=(char*)(0xa0000+320);
 	static char key_prev=0;
 	while(true){
 		osca_yield();
@@ -133,27 +137,27 @@ extern "C" void tsk7(){
 extern "C" void tsk8(){
 	while(true){
 		osca_yield();
-		int*p=(int*)0xa0080;
-		int c=0x010;
-		while(c--)
-			*p++=osca_t;
+//		int*p=(int*)0xa0080;
+//		int c=0x010;
+//		while(c--)
+//			*p++=osca_t;
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk9(){
 	while(true){
 		osca_yield();
-		for(int n=0;n<8;n++)
-			*(int*)(0xa0100+n*4)=osca_t;
+//		for(int n=0;n<8;n++)
+//			*(int*)(0xa0100+n*4)=osca_t;
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk10(){
 	while(true){
 		osca_yield();
-		File src=File(Addr(0x07c00),1*1024);
-		File dst=File(Addr(0xa0800),1*1024);
-		src.to(dst);
+//		File src=File(Addr(0x07c00),1*1024);
+//		File dst=File(Addr(0xa0800),1*1024);
+//		src.to(dst);
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

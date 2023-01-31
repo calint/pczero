@@ -17,11 +17,11 @@ build:
 	@$(CC) -o $(BIN) $(SRC) $(CF) $(CW)
 	@chmod -x $(BIN)
 	@cp $(BIN) $(IMG)
-	@date>>$(IMG)
-	@ls -l Makefile>>$(IMG)
-	@ls -l $(SRC)>>$(IMG)
-	@cat Makefile>>$(IMG)
-	@cat $(SRC)>>$(IMG)
+#	@date>>$(IMG)
+#	@ls -l Makefile>>$(IMG)
+#	@ls -l $(SRC)>>$(IMG)
+#	@cat Makefile>>$(IMG)
+#	@cat $(SRC)>>$(IMG)
 	
 print:
 	@pwd

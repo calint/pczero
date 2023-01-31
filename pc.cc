@@ -47,25 +47,25 @@ asm("xor %bx,%bx");// to es:bx
 asm("mov %bx,%es");
 asm("mov $0x7e00,%bx");// (0:0x7e00)
 asm("int $0x13");
-asm("jnc 1f");// if no error jmp
-asm("  mov $0xb800,%ax");// console segment
-asm("  mov %ax,%es");
-asm("  movw $0x1045,%es:0");// 'E' to top left corner
-asm("  2:cli");// hang
-asm("    hlt");
-asm("    jmp 2b");// enough with cli,hlt?
-asm("1:");
+//asm("jnc 1f");// if no error jmp
+//asm("  mov $0xb800,%ax");// console segment
+//asm("  mov %ax,%es");
+//asm("  movw $0x4045,%es:0");// 'E1' to top left corner
+//asm("  movw $0x4031,%es:2");//
+//asm("  cli");// hang
+//asm("  hlt");
+//asm("1:");
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - mode 13h
 asm("mov $0x13,%ax");// vga mode 320x200x8 bmp @ 0xa0000
 asm("int $0x10");
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - display
 //asm("movw $0x0404,%es:0x100");
-asm("mov $0xa000,%ax");
-asm("mov %ax,%es");
-asm("mov $0x8000,%di");
-asm("mov $0x7c00,%si");
-asm("mov $PROG_SIZE>>1,%cx");
-asm("rep movsw");
+//asm("mov $0xa000,%ax");
+//asm("mov %ax,%es");
+//asm("mov $0x8000,%di");
+//asm("mov $0x7c00,%si");
+//asm("mov $PROG_SIZE>>1,%cx");
+//asm("rep movsw");
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - a20
 //asm("movw $0x0404,%es:0x104");
 asm("in $0x92,%al");// enable a20 line (odd megs)
@@ -134,31 +134,28 @@ asm("jmp *(%ebx)");// jmp to first task
 asm(".align 16,0x90");
 asm("osca_drv_b:.byte 0x00");// boot drive
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partition
-asm(".space _start+436-.,0");// reserved
+asm(".space _start+436-.,0X90");// reserved
 asm(".space 10,0");// partition table
 asm(".space 16,0");// #1
 asm(".space 16,0");// #2
 asm(".space 16,0");// #3
 asm(".space 16,0");// #4
 asm(".word 0xaa55");// pc boot sector signature
-//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - saved
-asm("sector2:");// 0x7e00 (saved at shutdown)
-asm("osca_t:.long 0x00000000");
-asm("osca_t1:.long 0x00000000");
-asm("osca_key:.long 0x00000000");
-asm(".space sector2+512-.");
-//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - vars
-asm("sector3:");// 0x8000 tasks switcher
-asm("osca_tsk_a:.long tsk");
-asm("isr_tck_eax:.long 0x00000000");
-asm("isr_tck_ebx:.long 0x00000000");
-asm("isr_tck_esp:.long 0x00000000");
-asm("isr_tck_eip:.long 0x00000000");
-asm("isr_tck_eflags:.long 0x00000000");
+//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - interrupts
+asm("sector2:");// 0x7e00
+asm("osca_t:.long 0x00000000");// tick lower
+asm("osca_t1:.long 0x00000000");// tick higher
+asm("osca_key:.long 0x00000000");// last key event
+asm("osca_tsk_a:.long tsk");// active task record in task table
+asm("isr_tck_eax:.long 0x00000000");// used in isr_tck
+asm("isr_tck_ebx:.long 0x00000000");// ...
+asm("isr_tck_esp:.long 0x00000000");// ...
+asm("isr_tck_eip:.long 0x00000000");// ...
+asm("isr_tck_eflags:.long 0x00000000");//...
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ierr
 asm(".align 16,0x90");
 asm("isr_err:");
-asm("  cli");
+asm("  cli");// pop error code and print it?
 asm("  incw 0xa0000");
 asm("  jmp isr_err");
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ikbd
@@ -228,21 +225,22 @@ asm("  out %al,$0x20");
 asm("  pop %ax");
 asm("  sti");// enable interrupts
 asm("  jmp *isr_tck_eip");// jmp to restored eip. racing?
-asm(".space sector3+512-.");
-//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - tasks
-asm("sector4:");//0x8200 tasks state table
+//asm(".space sector2+512-.,0X90");
+////-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - tasks
+//asm("sector3:");//0x8200 tasks state table
+asm(".align 16,0x90");
 asm("tsk:");// eip,  esp,       eflags,     bits,       edi        esi        ebp        esp0       ebx        edx        ecx        eax
-asm("  .long tsk0,0x000afa00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
-asm("  .long tsk1,0x000af780,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
-asm("  .long tsk2,0x000af500,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
-asm("  .long tsk3,0x000af280,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
-asm("  .long tsk4,0x000af000,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
-asm("  .long tsk5,0x000aed80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
-asm("  .long tsk6,0x000aeb00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
-asm("  .long tsk7,0x000ae880,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
+asm("  .long tsk0 ,0x000afa00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
+asm("  .long tsk1 ,0x000af780,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
+asm("  .long tsk2 ,0x000af500,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
+asm("  .long tsk3 ,0x000af280,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
+asm("  .long tsk4 ,0x000af000,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
+asm("  .long tsk5 ,0x000aed80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
+asm("  .long tsk6 ,0x000aeb00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
+asm("  .long tsk7 ,0x000ae880,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
 
-asm("  .long tsk8,0x000ae600,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
-asm("  .long tsk9,0x000ae380,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
+asm("  .long tsk8 ,0x000ae600,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
+asm("  .long tsk9 ,0x000ae380,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
 asm("  .long tsk10,0x000ae100,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
 asm("  .long tsk11,0x000ade80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
 asm("  .long tsk12,0x000adc00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
@@ -255,40 +253,38 @@ asm("  .long tsk17,0x000acf80,0x00000000,0x00000000, 0x00000000,0x00000000,0x000
 asm("  .long tsk18,0x000acd00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
 asm("  .long tsk19,0x000aca80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
 asm("tsk_eot:");
-//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - shutdown
-asm(".align 16,0x90");
-asm("mode16:");// protected mode to 16b mode
-asm(".code16");
-asm("mov $0x20,%ax");
-asm("mov %ax,%ds");
-asm("mov %ax,%ss");
-asm("mov $0x7c00,%sp");
-asm("lidt ivtr");
-asm("mov %cr0,%eax");
-asm("and $0xfe,%al");
-asm("mov %eax,%cr0");
-asm("jmp $0x0,$rm");
-asm(".align 16,0x90");
-asm("rm:");
-asm("xor %ax,%ax");
-asm("mov %ax,%ds");
-asm("mov %ax,%ss");
-//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - save
-// save 2nd sector
-asm("mov $0x0301,%ax");// command 3, 1 sector
-asm("mov $0x0002,%cx");// track 0, sector 2
-asm("xor %dh,%dh");// head 0
-asm("mov osca_drv_b,%dl");// saved boot drive
-asm("xor %bx,%bx");// from es:bx (0:0x7e00)
-asm("mov %bx,%es");
-asm("mov $0x7e00,%bx");
-asm("int $0x13");
-asm("jc 8f");// if error
-// display save ack?
-//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
-asm("8:cli");
-asm("  hlt");
-asm("  jmp 8b");
-asm("page0:");
-asm(".align 0x400");
-asm(".space 0x1000,1");
+////-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - shutdown
+//asm(".align 16,0x90");
+//asm("mode16:");// protected mode to 16b mode
+//asm(".code16");
+//asm("mov $0x20,%ax");
+//asm("mov %ax,%ds");
+//asm("mov %ax,%ss");
+//asm("mov $0x7c00,%sp");
+//asm("lidt ivtr");
+//asm("mov %cr0,%eax");
+//asm("and $0xfe,%al");
+//asm("mov %eax,%cr0");
+//asm("jmp $0x0,$rm");
+//asm(".align 16,0x90");
+//asm("rm:");
+//asm("xor %ax,%ax");
+//asm("mov %ax,%ds");
+//asm("mov %ax,%ss");
+////-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - save
+//// save 2nd sector
+//asm("mov $0x0301,%ax");// command 3, 1 sector
+//asm("mov $0x0002,%cx");// track 0, sector 2
+//asm("xor %dh,%dh");// head 0
+//asm("mov osca_drv_b,%dl");// saved boot drive
+//asm("xor %bx,%bx");// from es:bx (0:0x7e00)
+//asm("mov %bx,%es");
+//asm("mov $0x7e00,%bx");
+//asm("int $0x13");
+//asm("jc 8f");// if error
+//// display save ack?
+////-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
+//asm("8:");
+//asm("cli");
+//asm("hlt");
+asm(".space sector2+1024+512-.,0X90");
