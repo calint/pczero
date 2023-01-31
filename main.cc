@@ -23,9 +23,8 @@ extern "C" void tsk17();
 extern "C" void tsk18();
 extern "C" void tsk19();
 
-
 asm(".global tsk0,tsk1,tsk2,tsk3,tsk4");
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk0:");
 asm("  mov $0x00007c00,%esi");
@@ -34,34 +33,31 @@ asm("  mov $0x00001000,%ecx");
 asm("  rep movsl");
 asm("  hlt");
 asm("  jmp tsk0");
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk1:");
 asm("  addl $2,0xa0144");
 asm("  hlt");
 asm("  jmp tsk1");
-asm(".align 16");
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk2:");
 asm("  addl $2,0xa0148");
 asm("  hlt");
 asm("  jmp tsk2");
-asm(".align 16");
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk3:");
 asm("  addl $2,0xa014c");
 asm("  hlt");
 asm("  jmp tsk3");
-asm(".align 16");
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk4:");
 asm("  addl $2,0xa0150");
 asm("  hlt");
 asm("  jmp tsk4");
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk5(){
 //	static char sprite_clear[]{
 //			0,0,0,0,
@@ -100,14 +96,14 @@ extern "C" void tsk5(){
 //		osca_yield();
 	}
 }
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk6(){
 	while(true){
 		osca_yield();
 		*(int*)0xa0154+=3;
 	}
 }
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk7(){
 	static char*p=(char*)0xa0400;
 	static char*nl=(char*)0xa0400;
@@ -133,7 +129,7 @@ extern "C" void tsk7(){
 		}
 	}
 }
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk8(){
 	while(true){
 		osca_yield();
@@ -143,7 +139,7 @@ extern "C" void tsk8(){
 			*p++=osca_t;
 	}
 }
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk9(){
 	while(true){
 		osca_yield();
@@ -151,7 +147,7 @@ extern "C" void tsk9(){
 			*(int*)(0xa0100+n*4)=osca_t;
 	}
 }
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk10(){
 	while(true){
 		osca_yield();
@@ -160,57 +156,58 @@ extern "C" void tsk10(){
 		src.to(dst);
 	}
 }
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk11(){
 	while(true){
 		osca_yield();
 	}
 }
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk12(){
 	while(true){
 		osca_yield();
 	}
 }
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk13(){
 	while(true){
 		osca_yield();
 	}
 }
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk14(){
 	while(true){
 		osca_yield();
 	}
 }
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk15(){
 	while(true){
 		osca_yield();
 	}
 }
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk16(){
 	while(true){
 		osca_yield();
 	}
 }
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk17(){
 	while(true){
 		osca_yield();
 	}
 }
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk18(){
 	while(true){
 		osca_yield();
 	}
 }
-
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk19(){
 	while(true){
 		osca_yield();
 	}
 }
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
