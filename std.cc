@@ -13,7 +13,7 @@ extern "C" void pz_memcpy(Addr from,Addr to,Size size){
 }
 
 inline void pz_write(Addr a,const char b){
-	*reinterpret_cast<char*>(a)=b;
+	*static_cast<char*>(a)=b;
 }
 
 /*
@@ -49,8 +49,8 @@ auto Bitmap::to(Bitmap&b,const Coords&c)->void{
 //	Ref p=b.get_offset_ref(c.get_y()*b.get_width_px()+c.get_x());
 //	p.write_int(0x04040404);
 
-	char*si=reinterpret_cast<char*>(get_addr());
-	char*di=reinterpret_cast<char*>(b.get_addr());
+	char*si=static_cast<char*>(get_addr());
+	char*di=static_cast<char*>(b.get_addr());
 	di+=c.get_y()*b.get_width_px()+c.get_x();
 	const int ln=b.get_width_px()-get_width_px();
 	const int h=get_height_px();
