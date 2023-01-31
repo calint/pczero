@@ -1,5 +1,11 @@
 #include "pc.h"
 #include "std.h"
+
+extern "C" void osca_keyb_ev(){
+	static char*p=(char*)0xa4000;
+	*p++=(char)osca_key;
+}
+
 //extern "C" void __gxx_personality_v0(){}
 extern "C" void tsk5();
 extern "C" void tsk6();
@@ -20,6 +26,7 @@ extern "C" void tsk19();
 
 asm(".global tsk0,tsk1,tsk2,tsk3,tsk4");
 
+asm(".align 16");
 asm("tsk0:");
 asm("  mov $0x00007c00,%esi");
 asm("  mov $0x000a8000,%edi");
@@ -35,18 +42,21 @@ asm("  hlt");
 asm("  jmp tsk1");
 asm(".align 16");
 
+asm(".align 16");
 asm("tsk2:");
 asm("  addl $2,0xa0148");
 asm("  hlt");
 asm("  jmp tsk2");
 asm(".align 16");
 
+asm(".align 16");
 asm("tsk3:");
 asm("  addl $2,0xa014c");
 asm("  hlt");
 asm("  jmp tsk3");
 asm(".align 16");
 
+asm(".align 16");
 asm("tsk4:");
 asm("  addl $2,0xa0150");
 asm("  hlt");
@@ -97,6 +107,7 @@ extern "C" void tsk6(){
 		*(int*)0xa0154+=3;
 	}
 }
+
 extern "C" void tsk7(){
 	static char*p=(char*)0xa0400;
 	static char*nl=(char*)0xa0400;
@@ -132,7 +143,6 @@ extern "C" void tsk8(){
 			*p++=osca_t;
 	}
 }
-
 
 extern "C" void tsk9(){
 	while(true){
@@ -203,16 +213,4 @@ extern "C" void tsk19(){
 	while(true){
 		osca_yield();
 	}
-}
-
-
-
-
-
-
-
-
-extern "C" void osca_keyb_ev(){
-	static char*p=(char*)0xa4000;
-	*p++=(char)osca_key;
 }
