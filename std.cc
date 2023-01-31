@@ -46,7 +46,20 @@ auto File::to(File f,Size nbytes)->void{
 	pz_memcpy(get_addr(),f.get_addr(),nbytes);
 }
 auto Bitmap::to(Bitmap&b,const Coords&c)->void{
-	Ref p=b.get_offset_ref(c.get_y()*b.get_width_px()+c.get_x());
-	p.write_int(0x04040404);
+//	Ref p=b.get_offset_ref(c.get_y()*b.get_width_px()+c.get_x());
+//	p.write_int(0x04040404);
+
+	char*di=reinterpret_cast<char*>(b.get_addr());
+	di+=c.get_y()*b.get_width_px()+c.get_x();
+	const int inc=b.get_width_px()-get_width_px();
+	const int h=get_height_px();
+	const int w=get_width_px();
+	for(int y=0;y<h;y++){
+		for(int x=0;x<w;x++){
+			*di=0x01;
+			di++;
+		}
+		di+=inc;
+	}
 }
 //File screen=File(Addr(0xa0000),Size(100*320));

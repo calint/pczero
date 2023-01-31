@@ -80,7 +80,7 @@ extern "C" void tsk7(){
 
 extern "C" void tsk8(){
 	Bitmap screen{Addr(0xa0000),320,200};
-	Bitmap sprite{Addr(0xa0000),4,4};
+	Bitmap sprite{Addr(0xa0000),8,8};
 	while(true){
 		osca_yield();
 		sprite.to(screen,Coords{25,25});
