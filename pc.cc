@@ -163,16 +163,12 @@ asm("  jmp isr_err");
 asm(".align 16,0x90");
 asm("isr_kbd:");
 asm("  cli");
-//asm("  incl 0xa0000");
-//asm("  incl 0xa0000");
-//asm("  pushal");// save register
 asm("  push %ax");
 asm("  in $0x60,%al");// read keyboard port
 asm("  mov %al,osca_key");// store
-//asm("  mov %al,0xa0100");// to vga remove debugging?
-asm("  mov %al,0xa0000");// to vga remove debugging?
-asm("  pushal");// save register
-asm("  call osca_keyb_ev");// call device keyb function ev
+//asm("  mov %al,0xa0000");// to vga remove debugging?
+asm("  pushal");// save registers
+asm("  call osca_keyb_ev");// call keyb handler function
 asm("  popal");// restore register
 asm("  mov $0x20,%al");// ack interrupt
 asm("  out %al,$0x20");
