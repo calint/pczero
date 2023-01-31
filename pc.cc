@@ -183,17 +183,17 @@ asm("isr_tck:");
 asm("  cli");// disable interrupts while task switching
 //asm("  movw $0x0e0e,0xa0200");// remove debugging?
 asm("  mov %eax,isr_tck_eax");// save eax,ebx
-asm("  mov %ebx,isr_tck_ebx");
+asm("  mov %ebx,isr_tck_ebx");// eax,ebx will be used as scratch
 asm("  incl osca_t");// increase 64b ticker
 asm("  adcl $0,osca_t1");
 //asm("  mov osca_t,%eax");// on screen. remove debugging?
 //asm("  mov %eax,0xa0130");
-asm("  mov osca_tsk_a,%ebx");// ebx points to active task
+asm("  mov osca_tsk_a,%ebx");// point ebx to active task
 asm("  mov (%esp),%eax");// get eip before irq from stack
 asm("  mov %eax,(%ebx)");// save to task.eip
-asm("  mov 8(%esp),%eax");// get eflags from stack
+asm("  mov 8(%esp),%eax");// get eflags before ieq from stack
 asm("  mov %eax,8(%ebx)");// save to task.eflags
-asm("  mov %esp,%eax");// adjust esp
+asm("  mov %esp,%eax");// adjust esp to value before irq
 asm("  add $12,%eax");// skip eip,cs,eflags
 //asm("  add $16,%eax");// skip error code,eip,cs,eflags
 asm("  mov %eax,4(%ebx)");// save to task.esp
@@ -201,21 +201,21 @@ asm("  mov %ebx,%esp");// save gprs by preparing esp and then popal
 asm("  add $48,%esp");// move to end of task record
 asm("  pushal");// pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi
 asm("  mov isr_tck_eax,%eax");// save proper eax,ebx
-asm("  mov %eax,44(%ebx)");// task.eax
-asm("  mov isr_tck_ebx,%eax");
-asm("  mov %eax,32(%ebx)");// task.ebx
+asm("  mov %eax,44(%ebx)");// to task.eax
+asm("  mov isr_tck_ebx,%eax");// save proper ebx
+asm("  mov %eax,32(%ebx)");// to task.ebx
 asm("  add $48,%ebx");// next task
 asm("  cmp $tsk_eot,%ebx");// if last
 asm("  jl 7f");
 asm("    mov $tsk,%ebx");// roll
 asm("  7:");
-asm("  mov %ebx,osca_tsk_a");// save pointer of task
+asm("  mov %ebx,osca_tsk_a");// save pointer to task record
 asm("  mov 4(%ebx),%esp");// restore esp
 asm("  mov %esp,isr_tck_esp");// save esp, will be used as scratch
 asm("  mov (%ebx),%esp");// restore eip
 asm("  mov %esp,isr_tck_eip");// save for jump
-asm("  mov 8(%ebx),%esp");// restore eflags
-asm("  mov %esp,isr_tck_eflags");// save eflags
+asm("  mov 8(%ebx),%esp");// get eflags
+asm("  mov %esp,isr_tck_eflags");// save to restore later
 asm("  mov %ebx,%esp");// restore gprs
 asm("  add $16,%esp");// position stack pointer for pop by skipping eip,esp,eflags,bits
 asm("  popal");// write edi,esi,ebp,esp0,ebx,edx,ecx,eax
