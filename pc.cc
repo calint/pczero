@@ -120,7 +120,7 @@ asm("    movb $0x8e,  5(%ebx)");// type_attrs p,pv0,!s,i32b
 asm("    movw $0x0000,6(%ebx)");// offfset 16..31
 asm("    add $8,%bx");
 asm("loop 1b");
-asm("movl $0x0e0e0f0f,0xa0118");// ? remove debugging
+//asm("movl $0x0e0e0f0f,0xa0118");// on screen
 asm("movw $isr_tck,IDT+0x40");// only the lower offset
 asm("movw $isr_kbd,IDT+0x48");//   handlers within 64K
 asm("lidt idtr");
@@ -168,7 +168,7 @@ asm("  cli");// is disabling interrupts necessary?
 asm("  push %ax");
 asm("  in $0x60,%al");// read keyboard port
 asm("  mov %al,osca_key");// store
-//asm("  mov %al,0xa0000");// to vga remove debugging?
+//asm("  mov %al,0xa0000");// on screen
 asm("  pusha");// save registers
 asm("  call osca_keyb_ev");// call keyb handler function
 asm("  popa");// restore register
@@ -181,12 +181,12 @@ asm("  iret");
 asm(".align 16,0x90");
 asm("isr_tck:");
 asm("  cli");// disable interrupts while task switching
-//asm("  movw $0x0e0e,0xa0200");// remove debugging?
+//asm("  movw $0x0e0e,0xa0200");// on screen
 asm("  mov %eax,isr_tck_eax");// save eax,ebx
 asm("  mov %ebx,isr_tck_ebx");// eax,ebx will be used as scratch
 asm("  incl osca_t");// increase 64b ticker
 asm("  adcl $0,osca_t1");
-//asm("  mov osca_t,%eax");// on screen. remove debugging?
+//asm("  mov osca_t,%eax");// on screen
 //asm("  mov %eax,0xa0130");
 asm("  mov osca_tsk_a,%ebx");// point ebx to active task
 asm("  mov (%esp),%eax");// get eip before irq from stack
@@ -219,7 +219,7 @@ asm("  mov %esp,isr_tck_eflags");// save to restore later
 asm("  mov %ebx,%esp");// restore gprs
 asm("  add $16,%esp");// position stack pointer for popa by skipping eip,esp,eflags,bits
 asm("  popa");// write edi,esi,ebp,esp0,ebx,edx,ecx,eax
-asm("  push isr_tck_eflags");// restore eflags (push instead of pushl ok?)
+asm("  push isr_tck_eflags");// restore eflags
 asm("  popf");// restore eflags. no calculations done to alter it before resuming task.
 asm("  mov isr_tck_esp,%esp");// restore task esp
 asm("  push %ax");// ack irq
