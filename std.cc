@@ -49,6 +49,7 @@ auto Bitmap::to(Bitmap&b,const Coords&c)->void{
 //	Ref p=b.get_offset_ref(c.get_y()*b.get_width_px()+c.get_x());
 //	p.write_int(0x04040404);
 
+	char*si=reinterpret_cast<char*>(get_addr());
 	char*di=reinterpret_cast<char*>(b.get_addr());
 	di+=c.get_y()*b.get_width_px()+c.get_x();
 	const int inc=b.get_width_px()-get_width_px();
@@ -56,7 +57,8 @@ auto Bitmap::to(Bitmap&b,const Coords&c)->void{
 	const int w=get_width_px();
 	for(int y=0;y<h;y++){
 		for(int x=0;x<w;x++){
-			*di=0x01;
+			*di=*si;
+			si++;
 			di++;
 		}
 		di+=inc;
