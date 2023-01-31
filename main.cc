@@ -1,6 +1,12 @@
 #include "pc.h"
 #include "std.h"
 //extern "C" void __gxx_personality_v0(){}
+extern "C" void tsk5();
+extern "C" void tsk6();
+extern "C" void tsk7();
+extern "C" void tsk8();
+extern "C" void tsk9();
+extern "C" void tsk10();
 
 asm(".global tsk0,tsk1,tsk2,tsk3,tsk4");
 
@@ -80,10 +86,10 @@ extern "C" void tsk7(){
 
 extern "C" void tsk8(){
 	static char sprite_data[]{
-			4,4,4,4,
-			4,2,2,4,
-			4,2,2,4,
-			4,4,4,4,
+			0,2,2,0,
+			2,2,2,2,
+			2,2,2,2,
+			0,2,2,0,
 	};
 	Bitmap screen{Addr(0xa0000),320,200};
 //	Bitmap sprite{Addr(0xa0000+320*150),4,4};
@@ -91,6 +97,8 @@ extern "C" void tsk8(){
 	while(true){
 		osca_yield();
 		sprite.to(screen,Coords{25,25});
+		sprite.to(screen,Coords{30,25});
+		sprite.to(screen,Coords{35,25});
 		//*(int*)0xa0480=osca_t;
 	}
 }

@@ -52,7 +52,7 @@ auto Bitmap::to(Bitmap&b,const Coords&c)->void{
 	char*si=reinterpret_cast<char*>(get_addr());
 	char*di=reinterpret_cast<char*>(b.get_addr());
 	di+=c.get_y()*b.get_width_px()+c.get_x();
-	const int inc=b.get_width_px()-get_width_px();
+	const int ln=b.get_width_px()-get_width_px();
 	const int h=get_height_px();
 	const int w=get_width_px();
 	for(int y=0;y<h;y++){
@@ -61,7 +61,7 @@ auto Bitmap::to(Bitmap&b,const Coords&c)->void{
 			si++;
 			di++;
 		}
-		di+=inc;
+		di+=ln;
 	}
 }
 //File screen=File(Addr(0xa0000),Size(100*320));

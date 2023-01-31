@@ -51,3 +51,5 @@ public:
 	inline auto get_height_px()const->Height{return height_px;}
 	auto to(Bitmap&b,const Coords&c)->void;
 };
+
+extern "C" void pz_memcpy(Addr from,Addr to,Size size);
