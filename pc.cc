@@ -169,9 +169,9 @@ asm("  push %ax");
 asm("  in $0x60,%al");// read keyboard port
 asm("  mov %al,osca_key");// store
 //asm("  mov %al,0xa0000");// to vga remove debugging?
-asm("  pushal");// save registers
+asm("  pusha");// save registers
 asm("  call osca_keyb_ev");// call keyb handler function
-asm("  popal");// restore register
+asm("  popa");// restore register
 asm("  mov $0x20,%al");// ack interrupt
 asm("  out %al,$0x20");
 asm("  pop %ax");
@@ -197,9 +197,9 @@ asm("  mov %esp,%eax");// adjust esp to value before irq
 asm("  add $12,%eax");// skip eip,cs,eflags
 //asm("  add $16,%eax");// skip error code,eip,cs,eflags
 asm("  mov %eax,4(%ebx)");// save to task.esp
-asm("  mov %ebx,%esp");// save gprs by preparing esp and then popal
+asm("  mov %ebx,%esp");// save gprs by preparing esp and then pusha
 asm("  add $48,%esp");// move to end of task record
-asm("  pushal");// pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi
+asm("  pusha");// pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
 asm("  mov isr_tck_eax,%eax");// save proper eax,ebx
 asm("  mov %eax,44(%ebx)");// to task.eax
 asm("  mov isr_tck_ebx,%eax");// save proper ebx
@@ -217,10 +217,10 @@ asm("  mov %esp,isr_tck_eip");// save for jump
 asm("  mov 8(%ebx),%esp");// get eflags
 asm("  mov %esp,isr_tck_eflags");// save to restore later
 asm("  mov %ebx,%esp");// restore gprs
-asm("  add $16,%esp");// position stack pointer for pop by skipping eip,esp,eflags,bits
-asm("  popal");// write edi,esi,ebp,esp0,ebx,edx,ecx,eax
-asm("  pushl isr_tck_eflags");// restore eflags (push instead of pushl ok?)
-asm("  popf");// restore eflags
+asm("  add $16,%esp");// position stack pointer for popa by skipping eip,esp,eflags,bits
+asm("  popa");// write edi,esi,ebp,esp0,ebx,edx,ecx,eax
+asm("  push isr_tck_eflags");// restore eflags (push instead of pushl ok?)
+asm("  popf");// restore eflags. no calculations done to alter it before resuming task.
 asm("  mov isr_tck_esp,%esp");// restore task esp
 asm("  push %ax");// ack irq
 asm("  mov $0x20,%al");
