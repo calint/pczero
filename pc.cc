@@ -180,20 +180,20 @@ asm("  iret");
 asm(".align 16,0x90");
 asm("isr_tck:");
 asm("  cli");// disable interrupts while task switching
-asm("  movw $0x0e0e,0xa0200");// remove debugging?
+//asm("  movw $0x0e0e,0xa0200");// remove debugging?
 asm("  mov %eax,isr_tck_eax");// save eax,ebx
 asm("  mov %ebx,isr_tck_ebx");
 asm("  incl osca_t");// increase 64b ticker
 asm("  adcl $0,osca_t1");
-asm("  mov osca_t,%eax");// on screen. remove debugging?
-asm("  mov %eax,0xa0130");
+//asm("  mov osca_t,%eax");// on screen. remove debugging?
+//asm("  mov %eax,0xa0130");
 asm("  mov osca_tsk_a,%ebx");// ebx points to active task
 asm("  mov (%esp),%eax");// get eip before irq from stack
 asm("  mov %eax,(%ebx)");// save to task.eip
 asm("  mov 8(%esp),%eax");// get eflags from stack
 asm("  mov %eax,8(%ebx)");// save to task.eflags
 asm("  mov %esp,%eax");// adjust esp
-asm("  add $12,%eax");// eip,cs,eflags
+asm("  add $12,%eax");// skip eip,cs,eflags
 asm("  mov %eax,4(%ebx)");// save to task.esp
 asm("  mov %ebx,%esp");// save gprs
 asm("  add $48,%esp");// move to end of task record
@@ -214,8 +214,8 @@ asm("  mov (%ebx),%esp");// restore eip
 asm("  mov %esp,isr_tck_eip");// save for jump
 asm("  mov %ebx,%esp");// restore gprs
 asm("  add $16,%esp");// position stack pointer for pop
-asm("  popal");
-asm("  mov isr_tck_esp,%esp");// restore esp
+asm("  popal");// write edi,esi,ebp,esp0,ebx,edx,ecx,eax
+asm("  mov isr_tck_esp,%esp");// restore task esp
 asm("  push %ax");// ack irq
 asm("  mov $0x20,%al");
 asm("  out %al,$0x20");
