@@ -77,9 +77,9 @@ extern "C" void tsk5(){
 			2,2,2,2,
 			0,2,2,0,
 	};
-	Bitmap sprite{Addr(sprite_data),4,4};
-	Bitmap clear{Addr(sprite_clear),4,4};
-	Bitmap screen{Addr(0xa0000),320,200};
+	Bitmap sprite{Addr{sprite_data},4,4};
+	Bitmap clear{Addr{sprite_clear},4,4};
+	Bitmap screen{Addr{reinterpret_cast<void*>(0xa0000)},320,200};
 	Coord x=24;
 	Coord x_prv=x;
 	while(true){
