@@ -2,7 +2,7 @@
 
 IMG=install.img
 BIN=pc.img
-SRC=pc.cc main.cc
+SRC=boot.cc tasks.cc
 CC=g++ -std=c++2a -nostdinc -O3 -m32 -fno-pie
 CW=-Wfatal-errors -Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -Wpadded -Winline\
  -pedantic -pedantic-errors -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization\

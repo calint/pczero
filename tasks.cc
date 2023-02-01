@@ -1,4 +1,4 @@
-#include "pc.h"
+#include "boot.h"
 #include "std.h"
 
 extern "C" void osca_keyb_ev(){
