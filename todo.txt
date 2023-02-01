@@ -14,6 +14,8 @@
 [ ]   c code generated from font file
 [ ] inline assembler character renderer
 [ ] print hex numbers
+[ ] input text
+[ ]   scan code to ascii
 
 .oo..
 o..o.
