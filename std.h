@@ -1,5 +1,18 @@
+#pragma once
+
 typedef void*Addr;
 typedef int Size;
+
+inline void pz_memcpy(Addr from,Addr to,Size nbytes){
+	asm("movl %0,%%esi;"
+		"movl %1,%%edi;"
+		"movl %2,%%ecx;"
+		"rep movsb;"
+		:
+		:"r"(from),"r"(to),"r"(nbytes)
+		:"%esi","%edi","%ecx"
+	);
+}
 
 class Ref{
 	Addr addr;
@@ -17,8 +30,8 @@ public:
 	inline File(Addr a,Size nbytes):
 		Ref{a},size_B{nbytes}
 	{}
-	auto to(File f)->void;
-	auto to(File f,Size nbytes)->void;
+	inline auto to(File f)->void{pz_memcpy(get_addr(),f.get_addr(),size_B);}
+	inline auto to(File f,Size nbytes)->void{pz_memcpy(get_addr(),f.get_addr(),nbytes);}
 	inline auto get_size_B()const->Size{return size_B;}
 };
 
@@ -49,7 +62,20 @@ public:
 	{}
 	inline auto get_width_px()const->Width{return width_px;}
 	inline auto get_height_px()const->Height{return height_px;}
-	auto to(Bitmap&b,const Coords&c)->void;
+	auto to(Bitmap&b,const Coords&c)->void{
+		char*si=static_cast<char*>(get_addr());
+		char*di=static_cast<char*>(b.get_addr());
+		di+=c.get_y()*b.get_width_px()+c.get_x();
+		const int ln=b.get_width_px()-get_width_px();
+		const int h=get_height_px();
+		const int w=get_width_px();
+		for(int y=0;y<h;y++){
+			for(int x=0;x<w;x++){
+				*di=*si;
+				si++;
+				di++;
+			}
+			di+=ln;
+		}
+	}
 };
-
-extern "C" void pz_memcpy(Addr from,Addr to,Size size);
