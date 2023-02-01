@@ -118,8 +118,8 @@ public:
 		const int ln=dst.dim_px().width()-b_.dim_px().width();
 		const int h=b_.dim_px().height();
 		const int w=b_.dim_px().width();
-		for(int y1=0;y1<h;y1++){
-			for(int x1=0;x1<w;x1++){
+		for(int y=0;y<h;y++){
+			for(int x=0;x<w;x++){
 				const char px=*si;
 				if(px){
 					*di=px;
