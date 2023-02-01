@@ -79,9 +79,9 @@ extern "C" void tsk5(){
 		2,4,4,2,
 		0,2,2,0,
 	};
-//	static Bitmap screens[]{
-//		{Addr(0xa0000),320,200},
-//	};
+	static Bitmap screens[]{
+		{Addr(0xa0000),320,200},
+	};
 	static Bitmap bitmaps[]{
 		{Addr{bmp0},4,4},
 		{Addr{bmp1},4,4},
