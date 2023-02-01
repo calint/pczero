@@ -1,2 +1,3 @@
 [ ] inline assembler for memcpy
-[ ] Bitmap
+[ ] bitmap
+[ ] sprite with transparency
