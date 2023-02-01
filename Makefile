@@ -1,8 +1,8 @@
 # built with g++ (Ubuntu 12.2.0-3ubuntu1) 12.2.0
 
-IMG=install.img
-BIN=pc.img
-SRC=boot.cc tasks.cc
+IMG=bin/install.img
+BIN=bin/pc.img
+SRC=src/boot.cc src/tasks.cc
 CC=g++ -std=c++2a -nostdinc -O3 -m32 -fno-pie
 CW=-Wfatal-errors -Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -Wpadded -Winline\
  -pedantic -pedantic-errors -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization\

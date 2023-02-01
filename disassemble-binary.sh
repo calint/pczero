@@ -1,1 +1,1 @@
-objdump -b binary -m i386 -D Debug/pczero | less
+objdump -b binary -m i8086 -D Debug/pczero.img | less
