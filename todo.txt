@@ -1,4 +1,5 @@
 [x] inline assembler for pz_memcpy
+[ ]   clobbers memory?
 [ ]   movsl,movsw,movsb optimization
 [x] test writing to second meg to confirm enabling of a20 line
 [x]   is enabled by default in qemu and on asus zenbook
