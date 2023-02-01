@@ -8,7 +8,7 @@ CW=-Wfatal-errors -Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -Wpadde
  -pedantic -pedantic-errors -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization\
  -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast\
  -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel\
-  -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
+ -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
 CF=-nostdlib -Wl,--oformat,binary -Wl,-Ttext,0x7c00 -fno-stack-protector
 
 # usb device
