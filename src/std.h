@@ -75,3 +75,8 @@ public:
 		}
 	}
 };
+
+class Vga13h:public Bitmap{
+public:
+	Vga13h():Bitmap{Addr(0xa0000),320,200}{}
+};

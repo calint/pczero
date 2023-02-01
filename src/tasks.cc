@@ -79,9 +79,9 @@ extern "C" void tsk5(){
 		2,4,4,2,
 		0,2,2,0,
 	};
-	static Bitmap screens[]{
-		{Addr(0xa0000),320,200},
-	};
+//	static Bitmap screens[]{
+//		{Addr(0xa0000),320,200},
+//	};
 	static Bitmap bitmaps[]{
 		{Addr{bmp0},4,4},
 		{Addr{bmp1},4,4},
@@ -90,11 +90,12 @@ extern "C" void tsk5(){
 	};
 	Coord x=24;
 	Coord x_prv=x;
+	Vga13h dsp;
 	while(true){
-		bitmaps[0].to(screens[0],Coords{x_prv,24});
-		bitmaps[1].to(screens[0],Coords{x,24});
-		bitmaps[2].to(screens[0],Coords{x,19});
-		bitmaps[3].to(screens[0],Coords{x,14});
+		bitmaps[0].to(dsp,Coords{x_prv,24});
+		bitmaps[1].to(dsp,Coords{x,24});
+		bitmaps[2].to(dsp,Coords{x,19});
+		bitmaps[3].to(dsp,Coords{x,14});
 		x_prv=x;
 		x+=8;
 		if(x>180){
