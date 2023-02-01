@@ -42,7 +42,7 @@ install:
 	sudo dd if=/dev/zero of=$(INSTALL_TO) count=1000&&sync
 	sudo dd if=$(BIN) of=$(INSTALL_TO)&&sync
 
-dispinst:
+dispusb:
 	sudo qemu-system-i386 -m 2M -drive file=$(INSTALL_TO),format=raw
 
 readusb:
