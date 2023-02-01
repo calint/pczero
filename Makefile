@@ -1,7 +1,7 @@
 # built with g++ (Ubuntu 12.2.0-3ubuntu1) 12.2.0
 
 IMG=bin/install.img
-BIN=bin/pc.img
+BIN=bin/pczero.img
 SRC=src/boot.cc src/tasks.cc
 CC=g++ -std=c++2a -nostdinc -O3 -m32 -fno-pie
 CW=-Wfatal-errors -Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -Wpadded -Winline\
@@ -20,7 +20,7 @@ build:
 	@clear
 	@$(CC) -o $(BIN) $(SRC) $(CF) $(CW)
 	@chmod -x $(BIN)
-	@cp $(BIN) $(IMG)
+#	@cp $(BIN) $(IMG)
 #	@date>>$(IMG)
 #	@ls -l Makefile>>$(IMG)
 #	@ls -l $(SRC)>>$(IMG)
@@ -29,7 +29,8 @@ build:
 	
 print:
 	@pwd
-	@du -bh $(IMG) $(BIN) $(SRC)
+#	@du -bh $(IMG) $(BIN) $(SRC)
+	@du -bh $(BIN) $(SRC)
 	@echo
 	@echo wc source
 	@wc $(SRC)
@@ -39,13 +40,16 @@ print:
 	@echo
 	
 clean:
-	@rm -f $(IMG) $(BIN)
+#	@rm -f $(IMG) $(BIN)
+	@rm -f $(BIN)
 
 display:
-	qemu-system-i386 -m 2M -drive file=$(IMG),format=raw
+#	qemu-system-i386 -m 2M -drive file=$(IMG),format=raw
+	qemu-system-i386 -m 2M -drive file=$(BIN),format=raw
 	 
 install:
-	sudo dd if=$(IMG) of=$(INSTALL_TO)&&sync
+#	sudo dd if=$(IMG) of=$(INSTALL_TO)&&sync
+	sudo dd if=$(BIN) of=$(INSTALL_TO)&&sync
 
 readusb:
 	sudo dd if=$(INSTALL_TO) count=2|hx|f 00000200
