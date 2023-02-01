@@ -1,2 +1,2 @@
 # pczero
-experiments with x86 assembler bootable image for protected mode i386
+experiments with bootable x86 assembler and C/C++ image for protected mode i386 platform
