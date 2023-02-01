@@ -9,6 +9,7 @@
 [ ]     with background
 [ ]     with other sprites
 [ ] 5x6 font (30 bits/character)
+[ ]   c code generated from font file
 [ ] inline assembler character renderer
 [ ] print hex numbers
 
