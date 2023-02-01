@@ -162,7 +162,7 @@ asm("  jmp isr_err");
 asm(".align 16,0x90");
 asm("isr_kbd:");
 asm("  cli");// is disabling interrupts necessary?
-asm("  push %ax");
+asm("  push %ax");// save to be clobbered %ax
 asm("  in $0x60,%al");// read keyboard port
 asm("  mov %al,osca_key");// store
 //asm("  mov %al,0xa0000");// on screen
@@ -170,14 +170,14 @@ asm("  pusha");// save registers
 asm("  call osca_keyb_ev");// call keyb handler function
 asm("  popa");// restore register
 asm("  mov $0x20,%al");// ack interrupt
-asm("  out %al,$0x20");
-asm("  pop %ax");
-asm("  sti");
+asm("  out %al,$0x20");// ...
+asm("  pop %ax");// restore %ax
+asm("  sti");// enable interrupts
 asm("  iret");
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - itck
 asm(".align 16,0x90");
 asm("isr_tck:");
-asm("  cli");// disable interrupts while task switching
+asm("  cli");// disable interrupts while switching task
 //asm("  movw $0x0e0e,0xa0200");// on screen
 asm("  mov %eax,isr_tck_eax");// save eax,ebx
 asm("  mov %ebx,isr_tck_ebx");// eax,ebx will be used as scratch
@@ -248,10 +248,10 @@ asm("  .long tsk13,0x000ad980,0x00000000,0x00000000, 0x00000000,0x00000000,0x000
 asm("  .long tsk14,0x000ad700,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
 asm("  .long tsk15,0x000ad480,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
 
-asm("  .long tsk16,0x000ad200,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
-asm("  .long tsk17,0x000acf80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
-asm("  .long tsk18,0x000acd00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
-asm("  .long tsk19,0x000aca80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
+//asm("  .long tsk16,0x000ad200,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
+//asm("  .long tsk17,0x000acf80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
+//asm("  .long tsk18,0x000acd00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
+//asm("  .long tsk19,0x000aca80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000");
 asm("tsk_eot:");
 ////-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - shutdown
 //asm(".align 16,0x90");
@@ -287,4 +287,4 @@ asm("tsk_eot:");
 //asm("8:");
 //asm("cli");
 //asm("hlt");
-asm(".space sector2+1024+512-.,0X90");
+asm(".space sector2+1024-.,0X90");

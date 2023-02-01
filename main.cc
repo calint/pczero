@@ -19,10 +19,10 @@ extern "C" void tsk12();
 extern "C" void tsk13();
 extern "C" void tsk14();
 extern "C" void tsk15();
-extern "C" void tsk16();
-extern "C" void tsk17();
-extern "C" void tsk18();
-extern "C" void tsk19();
+//extern "C" void tsk16();
+//extern "C" void tsk17();
+//extern "C" void tsk18();
+//extern "C" void tsk19();
 
 asm(".global tsk0,tsk1,tsk2,tsk3,tsk4");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -33,7 +33,7 @@ asm("  mov $0x07c00,%esi");// start of kernel
 //asm("  mov $0xaaf00,%edi");// destination to screen line 140
 asm("  mov $0xabb80,%edi");// destination to screen line 150
 //asm("  mov $0xac800,%edi");// destination to screen line 160
-asm("  mov $(4*512>>2),%ecx");// copy 4 sectors
+asm("  mov $(3*512>>2),%ecx");// copy 3 sectors
 asm("  rep movsl");
 asm("  hlt");
 asm("  jmp tsk0");
@@ -191,27 +191,27 @@ extern "C" void tsk15(){
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk16(){
-	while(true){
-		osca_yield();
-	}
-}
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk17(){
-	while(true){
-		osca_yield();
-	}
-}
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk18(){
-	while(true){
-		osca_yield();
-	}
-}
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk19(){
-	while(true){
-		osca_yield();
-	}
-}
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+//extern "C" void tsk16(){
+//	while(true){
+//		osca_yield();
+//	}
+//}
+//// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+//extern "C" void tsk17(){
+//	while(true){
+//		osca_yield();
+//	}
+//}
+//// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+//extern "C" void tsk18(){
+//	while(true){
+//		osca_yield();
+//	}
+//}
+//// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+//extern "C" void tsk19(){
+//	while(true){
+//		osca_yield();
+//	}
+//}
+//// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
