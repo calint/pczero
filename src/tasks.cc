@@ -59,7 +59,7 @@ extern "C" void tsk5(){
 //			0,0,0,0,
 //			0,0,0,0,
 //			0,0,0,0,
-//			0,0,0,0,
+//			0,0,0,1,
 //	};
 	static char sprite_clear[]{
 			0,1,1,0,
@@ -73,9 +73,9 @@ extern "C" void tsk5(){
 			2,2,2,2,
 			0,2,2,0,
 	};
-	Bitmap sprite{Addr{sprite_data},4,4};
-	Bitmap clear{Addr{sprite_clear},4,4};
-	Bitmap screen{Addr(0xa0000),320,200};
+	static Bitmap sprite{Addr{sprite_data},4,4};
+	static Bitmap screen{Addr(0xa0000),320,200};
+	static Bitmap clear{Addr{sprite_clear},4,4};
 	Coord x=24;
 	Coord x_prv=x;
 	while(true){
