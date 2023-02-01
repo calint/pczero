@@ -94,6 +94,7 @@ asm("     .long IDT");// idt address
 asm(".align 8,0x90");
 asm("pm:");// protected mode code
 asm(".code32");
+//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - protected mode
 asm("mov $0x10,%ax");
 asm("mov %ax,%ss");
 asm("mov %ax,%ds");
