@@ -38,7 +38,7 @@ clean:
 	@rm -f $(IMG) $(BIN)
 
 display:
-	qemu-system-i386 -m 4M -drive file=$(IMG),format=raw
+	qemu-system-i386 -m 2M -drive file=$(IMG),format=raw
 	 
 install:
 	sudo dd if=$(IMG) of=$(INSTALL_TO)&&sync

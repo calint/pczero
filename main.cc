@@ -7,7 +7,6 @@ extern "C" void osca_keyb_ev(){
 	*p++=(char)osca_key;
 }
 
-//extern "C" void __gxx_personality_v0(){}
 extern "C" void tsk5();
 extern "C" void tsk6();
 extern "C" void tsk7();
@@ -28,37 +27,30 @@ asm(".global tsk0,tsk1,tsk2,tsk3,tsk4");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk0:");
-//asm("  mov $0x07c00,%esi");// start of kernel
-////asm("  mov $0xa7d00,%edi");// destination to screen line 100
-////asm("  mov $0xaaf00,%edi");// destination to screen line 140
-//asm("  mov $0xabb80,%edi");// destination to screen line 150
-////asm("  mov $0xac800,%edi");// destination to screen line 160
-//asm("  mov $(3*512>>2),%ecx");// copy 3 sectors
-//asm("  rep movsl");
 asm("  hlt");
 asm("  jmp tsk0");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk1:");
-//asm("  addl $2,0xa0144");
+asm("  addl $2,0xa0044");
 asm("  hlt");
 asm("  jmp tsk1");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk2:");
-//asm("  addl $2,0xa0148");
+asm("  addl $2,0xa0048");
 asm("  hlt");
 asm("  jmp tsk2");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk3:");
-//asm("  addl $2,0xa014c");
+asm("  addl $2,0xa004c");
 asm("  hlt");
 asm("  jmp tsk3");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk4:");
-//asm("  addl $2,0xa0150");
+asm("  addl $2,0xa0050");
 asm("  hlt");
 asm("  jmp tsk4");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
