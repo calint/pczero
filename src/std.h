@@ -1,9 +1,9 @@
 #pragma once
 
-typedef void*Addr;
+typedef void*Address;
 typedef int Size;
 
-inline void pz_memcpy(Addr from,Addr to,Size nbytes){
+inline void pz_memcpy(Address from,Address to,Size nbytes){
 	asm("movl %0,%%esi;"
 		"movl %1,%%edi;"
 		"movl %2,%%ecx;"
@@ -14,40 +14,42 @@ inline void pz_memcpy(Addr from,Addr to,Size nbytes){
 	);
 }
 
-class Ref{
-	Addr addr;
+class Pointer{
+	Address addr;
 public:
-	inline Ref(Addr a):addr{a}{}
-	inline auto get_addr()const->Addr{return addr;}
-	inline auto write_byte(char b){*static_cast<char*>(addr)=b;}
-	inline auto write_int(int i){*static_cast<int*>(addr)=i;}
-	inline auto get_offset_ref(Size offset_B)->Ref{return Ref{static_cast<char*>(addr)+offset_B};}
+	inline Pointer(const Address a):addr{a}{}
+	inline auto address()const->Address{return addr;}
+	inline auto write_byte(const char b){*static_cast<char*>(addr)=b;}
+	inline auto write_int(const int i){*static_cast<int*>(addr)=i;}
+	inline auto offset(const Size offset_B)const->Pointer{return Pointer{static_cast<char*>(addr)+offset_B};}
 };
 
-class File:public Ref{
-	Size size_B;
+class Span{
+	Pointer bgn;
+	Size sz_B;
 public:
-	inline File(Addr a,Size nbytes):Ref{a},size_B{nbytes}{}
-	inline auto to(File f){pz_memcpy(get_addr(),f.get_addr(),size_B);}
-	inline auto to(File f,Size nbytes){pz_memcpy(get_addr(),f.get_addr(),nbytes);}
-	inline auto get_size_B()const->Size{return size_B;}
+	inline Span(const Address a,const Size nbytes):bgn{a},sz_B{nbytes}{}
+	inline auto to(const Span&s){pz_memcpy(bgn.address(),s.begin().address(),sz_B);}
+	inline auto to(const Span&s,const Size nbytes){pz_memcpy(bgn.address(),s.begin().address(),nbytes);}
+	inline auto size_B()const->Size{return sz_B;}
+	inline auto begin()const->Pointer{return bgn;}
 };
 
 typedef int Coord;
 
 class Coords{
-	Coord x;
-	Coord y;
+	Coord x_;
+	Coord y_;
 public:
-	inline Coords(Coord x_,Coord y_):x{x_},y{y_}{}
-	inline auto get_x()const->Coord{return x;}
-	inline auto get_y()const->Coord{return y;}
-	inline auto set_x(Coord x_){x=x_;}
-	inline auto set_y(Coord y_){y=y_;}
-	inline auto set(Coord x_,Coord y_){set_x(x_);set_y(y_);}
-	inline auto increment_x(Coord dx){x+=dx;}
-	inline auto increment_y(Coord dy){y+=dy;}
-	inline auto increment(const Coords&dc){x+=dc.x;y+=dc.y;}
+	inline Coords(const Coord x,const Coord y):x_{x},y_{y}{}
+	inline auto x()const->Coord{return x_;}
+	inline auto y()const->Coord{return y_;}
+	inline auto set_x(const Coord x){x_=x;}
+	inline auto set_y(const Coord y){y_=y;}
+	inline auto set(const Coord x,const Coord y){set_x(x);set_y(y);}
+	inline auto inc_x(const Coord dx){x_+=dx;}
+	inline auto inc_y(const Coord dy){y_+=dy;}
+	inline auto inc(const Coords&dc){x_+=dc.x_;y_+=dc.y_;}
 };
 
 typedef int Width;
@@ -57,23 +59,25 @@ class Dimension{
 	Width wi;
 	Height hi;
 public:
-	inline Dimension(Width w,Height h):wi{w},hi{h}{}
-	inline auto get_width()const->Width{return wi;}
-	inline auto get_height()const->Height{return hi;}
+	inline Dimension(const Width w,const Height h):wi{w},hi{h}{}
+	inline auto width()const->Width{return wi;}
+	inline auto height()const->Height{return hi;}
 };
 
-class Bitmap:public File{
-	Dimension dim_px;
+class Bitmap{
+	Span spn;
+	Dimension dpx;
 public:
-	inline Bitmap(Addr a,const Dimension&px):File{a,px.get_width()*px.get_height()},dim_px{px}{}
-	inline auto get_dimension_px()const->const Dimension&{return dim_px;}
-	auto to(Bitmap&dst,const Coords&c){
-		char*si=static_cast<char*>(get_addr());
-		char*di=static_cast<char*>(dst.get_addr());
-		di+=c.get_y()*dst.get_dimension_px().get_width()+c.get_x();
-		const int ln=dst.get_dimension_px().get_width()-dim_px.get_width();
-		const int h=dim_px.get_height();
-		const int w=dim_px.get_width();
+	inline Bitmap(const Address a,const Dimension&px):spn{a,px.width()*px.height()},dpx{px}{}
+	inline auto dim_px()const->const Dimension&{return dpx;}
+	inline auto span()const->const Span&{return spn;}
+	auto to(const Bitmap&dst,const Coords&c){
+		char*si=static_cast<char*>(spn.begin().address());
+		char*di=static_cast<char*>(dst.spn.begin().address());
+		di+=c.y()*dst.dim_px().width()+c.x();
+		const int ln=dst.dim_px().width()-dpx.width();
+		const int h=dpx.height();
+		const int w=dpx.width();
 		for(int y=0;y<h;y++){
 			for(int x=0;x<w;x++){
 				*di=*si;
@@ -85,27 +89,30 @@ public:
 	}
 };
 
-class Vga13h:public Bitmap{
+class Vga13h{
+	Bitmap b;
 public:
-	inline Vga13h():Bitmap{Addr(0xa0000),Dimension{320,200}}{}
+	inline Vga13h():b{Address(0xa0000),Dimension{320,200}}{}
+//	inline auto bmp_for_write()->Bitmap&{return b;}
+	inline auto bmp()const->const Bitmap&{return b;}
 };
 
 typedef Coords Position;
 typedef Coords Velocity;
 
 class Sprite{
-	Bitmap bmp;
-	Position pos;
-	Velocity dpos;
+	Bitmap bp;
+	Position ps;
+	Velocity dps;
 public:
-	inline Sprite(Bitmap b,Position p,Velocity v):bmp{b},pos{p},dpos{v}{}
-	auto to(Bitmap&dst){
-		const char*si=static_cast<const char*>(bmp.get_addr());
-		char*di=static_cast<char*>(dst.get_addr());
-		di+=pos.get_y()*dst.get_dimension_px().get_width()+pos.get_x();
-		const int ln=dst.get_dimension_px().get_width()-bmp.get_dimension_px().get_width();
-		const int h=bmp.get_dimension_px().get_height();
-		const int w=bmp.get_dimension_px().get_width();
+	inline Sprite(const Bitmap&b,const Position&p,const Velocity&v):bp{b},ps{p},dps{v}{}
+	auto to(const Bitmap&dst){
+		const char*si=static_cast<const char*>(bp.span().begin().address());
+		char*di=static_cast<char*>(dst.span().begin().address());
+		di+=ps.y()*dst.dim_px().width()+ps.x();
+		const int ln=dst.dim_px().width()-bp.dim_px().width();
+		const int h=bp.dim_px().height();
+		const int w=bp.dim_px().width();
 		for(int y1=0;y1<h;y1++){
 			for(int x1=0;x1<w;x1++){
 				const char px=*si;
@@ -118,7 +125,9 @@ public:
 			di+=ln;
 		}
 	}
-	inline auto get_position()const->const Position&{return pos;}
-	inline auto set_position(const Position&c){pos=c;}
-	inline auto update(){pos.increment(dpos);}
+	inline auto pos()const->const Position&{return ps;}
+	inline auto set_pos(const Position&c){ps=c;}
+	inline auto velocity()const->const Velocity&{return dps;}
+	inline auto set_velocity(const Velocity&v){dps=v;}
+	inline auto update(){ps.inc(dps);}
 };

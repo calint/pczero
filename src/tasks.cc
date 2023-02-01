@@ -89,10 +89,10 @@ extern "C" void tsk5(){
 //		{Addr(0xa0000),320,200},
 //	};
 	static Bitmap bitmaps[]{
-		{Addr{bmp0},Dimension{4,4}},
-		{Addr{bmp1},Dimension{4,4}},
-		{Addr{bmp2},Dimension{4,4}},
-		{Addr{bmp3},Dimension{4,4}},
+		{Address{bmp0},Dimension{4,4}},
+		{Address{bmp1},Dimension{4,4}},
+		{Address{bmp2},Dimension{4,4}},
+		{Address{bmp3},Dimension{4,4}},
 	};
 	static Sprite sprites[]{
 		{bitmaps[0],Coords{20,20},Velocity{0,1}},
@@ -104,10 +104,11 @@ extern "C" void tsk5(){
 	Coord x_prv=x;
 	Vga13h dsp;
 	while(true){
-		bitmaps[0].to(dsp,Coords{x_prv,44});
-		bitmaps[1].to(dsp,Coords{x,44});
-		bitmaps[2].to(dsp,Coords{x,36});
-		bitmaps[3].to(dsp,Coords{x,28});
+		const Bitmap&dbmp=dsp.bmp();
+		bitmaps[0].to(dbmp,Coords{x_prv,44});
+		bitmaps[1].to(dbmp,Coords{x,44});
+		bitmaps[2].to(dbmp,Coords{x,36});
+		bitmaps[3].to(dbmp,Coords{x,28});
 		x_prv=x;
 		x+=8;
 		if(x>180){
@@ -117,14 +118,14 @@ extern "C" void tsk5(){
 		for(unsigned i=0;i<n;i++){
 			Sprite&s=sprites[i];
 			s.update();
-			if(s.get_position().get_y()>100){
-				Position p{s.get_position()};
+			if(s.pos().y()>100){
+				Position p{s.pos()};
 				p.set_y(20);
-				sprites[i].set_position(p);
+				sprites[i].set_pos(p);
 			}
 		}
 		for(unsigned i=0;i<n;i++){
-			sprites[i].to(dsp);
+			sprites[i].to(dbmp);
 		}
 		osca_yield();
 	}
@@ -185,10 +186,10 @@ extern "C" void tsk10(){
 	while(true){
 		osca_yield();
 		// copy kernel to screen
-		File src=File(Addr(0x07c00),512*3);// kernel binary
+		Span src=Span(Address(0x07c00),512*3);// kernel binary
 //		File dst1=File(Addr(0x100000),512*3);// to odd meg testing a20 enabled line
-		File dst1=File(Addr(0x100000),512*3);// to odd meg testing a20 enabled line
-		File dst2=File(Addr(0xabb80),512*3);// on screen line 150
+		Span dst1=Span(Address(0x100000),512*3);// to odd meg testing a20 enabled line
+		Span dst2=Span(Address(0xabb80),512*3);// on screen line 150
 		src.to(dst1);
 		osca_yield();
 		dst1.to(dst2);
