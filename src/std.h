@@ -15,24 +15,24 @@ inline void pz_memcpy(Address from,Address to,Size nbytes){
 }
 
 class Pointer{
-	Address addr;
+	Address a_;
 public:
-	inline Pointer(const Address a):addr{a}{}
-	inline auto address()const->Address{return addr;}
-	inline auto write_byte(const char b){*static_cast<char*>(addr)=b;}
-	inline auto write_int(const int i){*static_cast<int*>(addr)=i;}
-	inline auto offset(const Size offset_B)const->Pointer{return Pointer{static_cast<char*>(addr)+offset_B};}
+	inline Pointer(const Address a):a_{a}{}
+	inline auto address()const->Address{return a_;}
+	inline auto write_byte(const char b){*static_cast<char*>(a_)=b;}
+	inline auto write_int(const int i){*static_cast<int*>(a_)=i;}
+	inline auto offset(const Size offset_B)const->Pointer{return Pointer{static_cast<char*>(a_)+offset_B};}
 };
 
 class Span{
-	Pointer bgn;
-	Size sz_B;
+	Pointer p_;
+	Size s_;
 public:
-	inline Span(const Address a,const Size nbytes):bgn{a},sz_B{nbytes}{}
-	inline auto to(const Span&s){pz_memcpy(bgn.address(),s.begin().address(),sz_B);}
-	inline auto to(const Span&s,const Size nbytes){pz_memcpy(bgn.address(),s.begin().address(),nbytes);}
-	inline auto size_B()const->Size{return sz_B;}
-	inline auto begin()const->Pointer{return bgn;}
+	inline Span(const Address a,const Size nbytes):p_{a},s_{nbytes}{}
+	inline auto to(const Span&s){pz_memcpy(p_.address(),s.begin().address(),s_);}
+	inline auto to(const Span&s,const Size nbytes){pz_memcpy(p_.address(),s.begin().address(),nbytes);}
+	inline auto size_B()const->Size{return s_;}
+	inline auto begin()const->Pointer{return p_;}
 };
 
 typedef int Coord;
@@ -56,28 +56,28 @@ typedef int Width;
 typedef int Height;
 
 class Dimension{
-	Width wi;
-	Height hi;
+	Width w_;
+	Height h_;
 public:
-	inline Dimension(const Width w,const Height h):wi{w},hi{h}{}
-	inline auto width()const->Width{return wi;}
-	inline auto height()const->Height{return hi;}
+	inline Dimension(const Width w,const Height h):w_{w},h_{h}{}
+	inline auto width()const->Width{return w_;}
+	inline auto height()const->Height{return h_;}
 };
 
 class Bitmap{
-	Span spn;
-	Dimension dpx;
+	Span s_;
+	Dimension d_;
 public:
-	inline Bitmap(const Address a,const Dimension&px):spn{a,px.width()*px.height()},dpx{px}{}
-	inline auto dim_px()const->const Dimension&{return dpx;}
-	inline auto span()const->const Span&{return spn;}
+	inline Bitmap(const Address a,const Dimension&px):s_{a,px.width()*px.height()},d_{px}{}
+	inline auto dim_px()const->const Dimension&{return d_;}
+	inline auto span()const->const Span&{return s_;}
 	auto to(const Bitmap&dst,const Coords&c){
-		char*si=static_cast<char*>(spn.begin().address());
-		char*di=static_cast<char*>(dst.spn.begin().address());
+		char*si=static_cast<char*>(s_.begin().address());
+		char*di=static_cast<char*>(dst.s_.begin().address());
 		di+=c.y()*dst.dim_px().width()+c.x();
-		const int ln=dst.dim_px().width()-dpx.width();
-		const int h=dpx.height();
-		const int w=dpx.width();
+		const int ln=dst.dim_px().width()-d_.width();
+		const int h=d_.height();
+		const int w=d_.width();
 		for(int y=0;y<h;y++){
 			for(int x=0;x<w;x++){
 				*di=*si;
@@ -90,29 +90,29 @@ public:
 };
 
 class Vga13h{
-	Bitmap b;
+	Bitmap b_;
 public:
-	inline Vga13h():b{Address(0xa0000),Dimension{320,200}}{}
+	inline Vga13h():b_{Address(0xa0000),Dimension{320,200}}{}
 //	inline auto bmp_for_write()->Bitmap&{return b;}
-	inline auto bmp()const->const Bitmap&{return b;}
+	inline auto bmp()const->const Bitmap&{return b_;}
 };
 
 typedef Coords Position;
 typedef Coords Velocity;
 
 class Sprite{
-	Bitmap bp;
-	Position ps;
-	Velocity dps;
+	Bitmap b_;
+	Position p_;
+	Velocity v_;
 public:
-	inline Sprite(const Bitmap&b,const Position&p,const Velocity&v):bp{b},ps{p},dps{v}{}
+	inline Sprite(const Bitmap&b,const Position&p,const Velocity&v):b_{b},p_{p},v_{v}{}
 	auto to(const Bitmap&dst){
-		const char*si=static_cast<const char*>(bp.span().begin().address());
+		const char*si=static_cast<const char*>(b_.span().begin().address());
 		char*di=static_cast<char*>(dst.span().begin().address());
-		di+=ps.y()*dst.dim_px().width()+ps.x();
-		const int ln=dst.dim_px().width()-bp.dim_px().width();
-		const int h=bp.dim_px().height();
-		const int w=bp.dim_px().width();
+		di+=p_.y()*dst.dim_px().width()+p_.x();
+		const int ln=dst.dim_px().width()-b_.dim_px().width();
+		const int h=b_.dim_px().height();
+		const int w=b_.dim_px().width();
 		for(int y1=0;y1<h;y1++){
 			for(int x1=0;x1<w;x1++){
 				const char px=*si;
@@ -125,9 +125,9 @@ public:
 			di+=ln;
 		}
 	}
-	inline auto pos()const->const Position&{return ps;}
-	inline auto set_pos(const Position&c){ps=c;}
-	inline auto velocity()const->const Velocity&{return dps;}
-	inline auto set_velocity(const Velocity&v){dps=v;}
-	inline auto update(){ps.inc(dps);}
+	inline auto pos()const->const Position&{return p_;}
+	inline auto set_pos(const Position&c){p_=c;}
+	inline auto velocity()const->const Velocity&{return v_;}
+	inline auto set_velocity(const Velocity&v){v_=v;}
+	inline auto update(){p_.inc(v_);}
 };

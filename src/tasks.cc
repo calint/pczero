@@ -132,9 +132,11 @@ extern "C" void tsk5(){
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk6(){
+	const Vga13h dsp;
 	while(true){
 		osca_yield();
-		*(int*)(0xa0000+320-4)=osca_t;
+//		*(int*)(0xa0000+320-4)=osca_t;
+		dsp.bmp().span().begin().offset(320-4).write_int(osca_t);
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
