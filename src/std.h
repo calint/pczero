@@ -14,16 +14,18 @@ inline void pz_memcpy(Address from,Address to,Size nbytes){
 	);
 }
 
-using Offset=Size;
+using Offset=int;
 
 class Pointer{
 	Address a_;
 public:
 	inline Pointer(const Address a):a_{a}{}
 	inline auto address()const->Address{return a_;}
-	inline auto write_byte(const char v){*static_cast<char*>(a_)=v;}
+	inline auto write_byte(const unsigned char v){*static_cast<unsigned char*>(a_)=v;}
+	inline auto write_char(const char v){*static_cast<char*>(a_)=v;}
 	inline auto write_short(const short v){*static_cast<short*>(a_)=v;}
 	inline auto write_int(const int v){*static_cast<int*>(a_)=v;}
+	inline auto write_long(const long v){*static_cast<long*>(a_)=v;}
 	inline auto offset(const Offset nbytes)const->Pointer{return Pointer{static_cast<char*>(a_)+nbytes};}
 };
 
