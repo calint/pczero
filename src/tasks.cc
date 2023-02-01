@@ -89,26 +89,26 @@ extern "C" void tsk5(){
 //		{Addr(0xa0000),320,200},
 //	};
 	static Bitmap bitmaps[]{
-		{Address{bmp0},Dimension{4,4}},
-		{Address{bmp1},Dimension{4,4}},
-		{Address{bmp2},Dimension{4,4}},
-		{Address{bmp3},Dimension{4,4}},
+		{Address{bmp0},DimensionPx{4,4}},
+		{Address{bmp1},DimensionPx{4,4}},
+		{Address{bmp2},DimensionPx{4,4}},
+		{Address{bmp3},DimensionPx{4,4}},
 	};
 	static Sprite sprites[]{
-		{bitmaps[0],Coords{20,20},Velocity{0,1}},
-		{bitmaps[1],Coords{30,20},Velocity{0,2}},
-		{bitmaps[2],Coords{40,20},Velocity{0,3}},
-		{bitmaps[3],Coords{50,20},Velocity{0,4}},
+		{bitmaps[0],Position{20.0f,20.f},Velocity{5,0.5f},Acceleration{0,0.5f}},
+		{bitmaps[1],Position{30.0f,20.f},Velocity{5,1.0f},Acceleration{0,0.5f}},
+		{bitmaps[2],Position{40.0f,20.f},Velocity{5,1.5f},Acceleration{0,0.5f}},
+		{bitmaps[3],Position{50.0f,20.f},Velocity{5,2.0f},Acceleration{0,0.5f}},
 	};
-	Coord x=24;
-	Coord x_prv=x;
+	CoordPx x=24;
+	CoordPx x_prv=x;
 	Vga13h dsp;
 	const Bitmap&dbmp=dsp.bmp();
 	while(true){
-		bitmaps[0].to(dbmp,Coords{x_prv,44});
-		bitmaps[1].to(dbmp,Coords{x,44});
-		bitmaps[2].to(dbmp,Coords{x,36});
-		bitmaps[3].to(dbmp,Coords{x,28});
+		bitmaps[0].to(dbmp,CoordsPx{x_prv,44});
+		bitmaps[1].to(dbmp,CoordsPx{x,44});
+		bitmaps[2].to(dbmp,CoordsPx{x,36});
+		bitmaps[3].to(dbmp,CoordsPx{x,28});
 		x_prv=x;
 		x+=8;
 		if(x>180){
@@ -116,12 +116,15 @@ extern "C" void tsk5(){
 		}
 		for(auto&s:sprites){
 			s.update();
-			if(s.pos().y()>100){
-				Position p{s.pos().x()+5,20};
-				if(p.x()>dsp.bmp().dim_px().width()){
-					p.set_x(Coord{0});
+			if(s.pos().y()>140){
+				Position p{s.pos().x(),140};
+				if(p.x()>static_cast<Coord>(dsp.bmp().dim_px().width())){
+					p.set_x(0);
 				}
 				s.set_pos(p);
+				Velocity v{s.velocity()};
+				v.set_y(-5);
+				s.set_velocity(v);
 			}
 		}
 		for(const auto&s:sprites){

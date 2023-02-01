@@ -41,43 +41,49 @@ public:
 	inline auto pointer()const->Pointer{return p_;}
 };
 
-using Coord=int;
-
-class Coords{
-	Coord x_;
-	Coord y_;
+template<class T>
+class CoordsT{
+	T x_;
+	T y_;
 public:
-	inline Coords(const Coord x,const Coord y):x_{x},y_{y}{}
-	inline auto x()const->Coord{return x_;}
-	inline auto y()const->Coord{return y_;}
-	inline auto set_x(const Coord x){x_=x;}
-	inline auto set_y(const Coord y){y_=y;}
-	inline auto set(const Coord x,const Coord y){set_x(x);set_y(y);}
-	inline auto inc_x(const Coord dx){x_+=dx;}
-	inline auto inc_y(const Coord dy){y_+=dy;}
-	inline auto inc(const Coords&dc){x_+=dc.x_;y_+=dc.y_;}
+	inline CoordsT(const T&x,const T&y):x_{x},y_{y}{}
+	inline auto x()const->const T&{return x_;}
+	inline auto y()const->const T&{return y_;}
+	inline auto set_x(const T&x){x_=x;}
+	inline auto set_y(const T&y){y_=y;}
+	inline auto set(const T&x,const T&y){set_x(x);set_y(y);}
+	inline auto inc_x(const T&dx){x_+=dx;}
+	inline auto inc_y(const T&dy){y_+=dy;}
+	inline auto inc_by(const CoordsT<T>&delta){x_+=delta.x_;y_+=delta.y_;}
 };
 
-using Height=int;
-using Width=int;
+using CoordPx=int;
+using CoordsPx=CoordsT<CoordPx>;
 
-class Dimension{
-	Width w_;
-	Height h_;
+using Coord=float;
+using Coords=CoordsT<Coord>;
+
+template<class T>
+class DimensionT{
+	T w_;
+	T h_;
 public:
-	inline Dimension(const Width w,const Height h):w_{w},h_{h}{}
-	inline auto width()const->Width{return w_;}
-	inline auto height()const->Height{return h_;}
+	inline DimensionT(const T&width,const T&height):w_{width},h_{height}{}
+	inline auto width()const->const T&{return w_;}
+	inline auto height()const->const T&{return h_;}
 };
+
+using Pixels=int;
+using DimensionPx=DimensionT<Pixels>;
 
 class Bitmap{
 	Span s_;
-	Dimension d_;
+	DimensionPx d_;
 public:
-	inline Bitmap(const Address a,const Dimension&px):s_{a,px.width()*px.height()},d_{px}{}
-	inline auto dim_px()const->const Dimension&{return d_;}
+	inline Bitmap(const Address a,const DimensionPx&px):s_{a,px.width()*px.height()},d_{px}{}
+	inline auto dim_px()const->const DimensionPx&{return d_;}
 	inline auto span()const->const Span&{return s_;}
-	auto to(const Bitmap&dst,const Coords&c)const{
+	auto to(const Bitmap&dst,const CoordsPx&c)const{
 		char*si=static_cast<char*>(s_.begin().address());
 		char*di=static_cast<char*>(dst.s_.begin().address());
 		di+=c.y()*dst.dim_px().width()+c.x();
@@ -98,23 +104,27 @@ public:
 class Vga13h{
 	Bitmap b_;
 public:
-	inline Vga13h():b_{Address(0xa0000),Dimension{320,200}}{}
+	inline Vga13h():b_{Address(0xa0000),DimensionPx{320,200}}{}
 	inline auto bmp()const->const Bitmap&{return b_;}
 };
 
+using PositionPx=CoordsPx;
 using Position=Coords;
 using Velocity=Coords;
+using Acceleration=Coords;
 
 class Sprite{
-	Bitmap b_;
+	const Bitmap&b_;
 	Position p_;
 	Velocity v_;
+	Acceleration a_;
 public:
-	inline Sprite(const Bitmap&b,const Position&p,const Velocity&v):b_{b},p_{p},v_{v}{}
+	inline Sprite(const Bitmap&b,const Position&p,const Velocity&v,const Acceleration&a):b_{b},p_{p},v_{v},a_{a}{}
 	auto to(const Bitmap&dst)const{
 		const char*si=static_cast<const char*>(b_.span().begin().address());
 		char*di=static_cast<char*>(dst.span().begin().address());
-		di+=p_.y()*dst.dim_px().width()+p_.x();
+		PositionPx p{static_cast<CoordPx>(p_.x()),static_cast<CoordPx>(p_.y())};
+		di+=p.y()*dst.dim_px().width()+p.x();
 		const int ln=dst.dim_px().width()-b_.dim_px().width();
 		const int h=b_.dim_px().height();
 		const int w=b_.dim_px().width();
@@ -131,8 +141,8 @@ public:
 		}
 	}
 	inline auto pos()const->const Position&{return p_;}
-	inline auto set_pos(const Position&c){p_=c;}
+	inline auto set_pos(const Position&p){p_=p;}
 	inline auto velocity()const->const Velocity&{return v_;}
 	inline auto set_velocity(const Velocity&v){v_=v;}
-	inline auto update(){p_.inc(v_);}
+	inline auto update(){v_.inc_by(a_);p_.inc_by(v_);}
 };
