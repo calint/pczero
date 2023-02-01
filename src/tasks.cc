@@ -103,8 +103,8 @@ extern "C" void tsk5(){
 	Coord x=24;
 	Coord x_prv=x;
 	Vga13h dsp;
+	const Bitmap&dbmp=dsp.bmp();
 	while(true){
-		const Bitmap&dbmp=dsp.bmp();
 		bitmaps[0].to(dbmp,Coords{x_prv,44});
 		bitmaps[1].to(dbmp,Coords{x,44});
 		bitmaps[2].to(dbmp,Coords{x,36});
