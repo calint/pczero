@@ -1,5 +1,7 @@
-[ ] inline assembler for memcpy
-[ ] test writing in second meg to confirm enabling of a20 line
+[x] inline assembler for pz_memcpy
+[ ]   movsl,movsw,movsb optimization
+[x] test writing in second meg to confirm enabling of a20 line
+[x]   is enabled by default in qemu and on asus zenbook
 [ ] key event to task
 [ ] bitmap
 [ ]   optimized for 32b memcpy?

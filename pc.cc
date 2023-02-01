@@ -66,11 +66,12 @@ asm("int $0x10");
 //asm("mov $0x7c00,%si");
 //asm("mov $PROG_SIZE>>1,%cx");
 //asm("rep movsw");
-//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - a20
+//-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
+// enabled by default on non ancient pc?
 //asm("movw $0x0404,%es:0x104");
-asm("in $0x92,%al");// enable a20 line (odd megs)
-asm("or $2,%al");
-asm("out %al,$0x92");
+//asm("in $0x92,%al");// enable a20 line (odd megs)
+//asm("or $2,%al");
+//asm("out %al,$0x92");
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 32b
 //asm("movw $0x0404,%es:0x108");
 asm("lgdt gdtr");// load global descriptor tables

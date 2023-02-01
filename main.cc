@@ -28,13 +28,13 @@ asm(".global tsk0,tsk1,tsk2,tsk3,tsk4");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk0:");
-asm("  mov $0x07c00,%esi");// start of kernel
-//asm("  mov $0xa7d00,%edi");// destination to screen line 100
-//asm("  mov $0xaaf00,%edi");// destination to screen line 140
-asm("  mov $0xabb80,%edi");// destination to screen line 150
-//asm("  mov $0xac800,%edi");// destination to screen line 160
-asm("  mov $(3*512>>2),%ecx");// copy 3 sectors
-asm("  rep movsl");
+//asm("  mov $0x07c00,%esi");// start of kernel
+////asm("  mov $0xa7d00,%edi");// destination to screen line 100
+////asm("  mov $0xaaf00,%edi");// destination to screen line 140
+//asm("  mov $0xabb80,%edi");// destination to screen line 150
+////asm("  mov $0xac800,%edi");// destination to screen line 160
+//asm("  mov $(3*512>>2),%ecx");// copy 3 sectors
+//asm("  rep movsl");
 asm("  hlt");
 asm("  jmp tsk0");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -155,9 +155,13 @@ extern "C" void tsk9(){
 extern "C" void tsk10(){
 	while(true){
 		osca_yield();
-//		File src=File(Addr(0x07c00),1*1024);
-//		File dst=File(Addr(0xa0800),1*1024);
-//		src.to(dst);
+		// copy kernel to screen
+		File src=File(Addr(0x07c00),512*3);// kernel binary
+//		File dst1=File(Addr(0x100000),512*3);// to odd meg testing a20 enabled line
+		File dst1=File(Addr(0x1abb80),512*3);// to odd meg testing a20 enabled line
+		File dst2=File(Addr(0xabb80),512*3);// on screen line 150
+		src.to(dst1);
+		dst1.to(dst2);
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
