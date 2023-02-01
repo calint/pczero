@@ -127,7 +127,7 @@ extern "C" void tsk5(){
 		for(const auto&s:sprites){
 			s.to(dbmp);
 		}
-		osca_yield();
+//		osca_yield();
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
