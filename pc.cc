@@ -42,7 +42,7 @@ asm("mov $_start,%sp");// 0x7c00
 asm("cld");// clear direction (forward)
 asm("mov $(0x0200+LOAD_SECTORS),%ax");// command 2, 0x1f sectors
 asm("mov $0x0002,%cx");// from cylinder 0, sector 2
-asm("mov $0,%dh");// head 0
+asm("xor %dh,%dh");// head 0
 asm("xor %bx,%bx");// to es:bx
 asm("mov %bx,%es");
 asm("mov $0x7e00,%bx");// (0:0x7e00)
