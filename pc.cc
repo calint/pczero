@@ -17,7 +17,7 @@
 asm(".set IDT,0x600");// interrupt descriptor table address
 asm(".set LOAD_SECTORS,0x1f");// 15½K
 //asm(".set LOAD_SECTORS,0x3f");// 31½K
-asm(".set PROG_SIZE,0x200+LOAD_SECTORS*0x200");
+//asm(".set PROG_SIZE,0x200+LOAD_SECTORS*0x200");
 asm(".global osca_key");// last pressed key
 asm(".global osca_t");// lower ticker value
 asm(".global osca_t1");// high ticker value
@@ -40,13 +40,13 @@ asm("mov $_start,%sp");// 0x7c00
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
 // %dl is the unchanged boot drive
 asm("cld");// clear direction (forward)
-asm("mov $(0x0200+LOAD_SECTORS),%ax");// command 2, 1fh sectors
+asm("mov $(0x0200+LOAD_SECTORS),%ax");// command 2, 0x1f sectors
 asm("mov $0x0002,%cx");// from cylinder 0, sector 2
 asm("mov $0,%dh");// head 0
 asm("xor %bx,%bx");// to es:bx
 asm("mov %bx,%es");
 asm("mov $0x7e00,%bx");// (0:0x7e00)
-asm("int $0x13");
+asm("int $0x13");// read disks
 //asm("jnc 1f");// if no error jmp
 //asm("  mov $0xb800,%ax");// console segment
 //asm("  mov %ax,%es");
@@ -77,7 +77,7 @@ asm("lgdt gdtr");// load global descriptor tables
 asm("mov %cr0,%eax");// enter 32b protected mode
 asm("or $0x1,%al");
 asm("mov %eax,%cr0");
-asm("jmp $8,$pm");// jmp to flush
+asm("jmp $8,$pm");// jmp and flush
 asm(".align 16,0x90");
 asm("gdt:.quad 0x0000000000000000");//0x00:
 asm("    .quad 0x00cf9a000000ffff");//0x08: 32b code 4g pl0 rx
@@ -90,7 +90,7 @@ asm("     .long 0x00000000");
 asm(".align 8,0");
 asm("idtr:.word 0x03ff");
 asm("     .long IDT");// idt address
-asm(".align 8,0");
+asm(".align 8,0x90");
 asm("pm:");// protected mode code
 asm(".code32");
 asm("mov $0x10,%ax");
@@ -127,7 +127,7 @@ asm("lidt idtr");
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 //asm("movw $0x0404,0xa4000");
 asm("mov osca_tsk_a,%ebx");// ebx points to active task record
-asm("mov 4(%ebx),%esp");// restore esp
+asm("mov 4(%ebx),%esp");// restore esp (only?)
 asm("sti");// enable interrupts (racing?)
 asm("jmp *(%ebx)");// jmp to first task
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - vars
@@ -146,7 +146,7 @@ asm("sector2:");// 0x7e00
 asm("osca_t:.long 0x00000000");// tick lower
 asm("osca_t1:.long 0x00000000");// tick higher
 asm("osca_key:.long 0x00000000");// last key event
-asm("osca_tsk_a:.long tsk");// active task record in task table
+asm("osca_tsk_a:.long tsk");// pointer to task record in task table
 asm("isr_tck_eax:.long 0x00000000");// used in isr_tck
 asm("isr_tck_ebx:.long 0x00000000");// ...
 asm("isr_tck_esp:.long 0x00000000");// ...
