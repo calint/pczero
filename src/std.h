@@ -97,7 +97,6 @@ class Vga13h{
 	Bitmap b_;
 public:
 	inline Vga13h():b_{Address(0xa0000),Dimension{320,200}}{}
-//	inline auto bmp_for_write()->Bitmap&{return b;}
 	inline auto bmp()const->const Bitmap&{return b_;}
 };
 

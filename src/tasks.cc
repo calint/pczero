@@ -74,15 +74,15 @@ extern "C" void tsk5(){
 		0,2,2,0,
 	};
 	static char bmp2[]{
-		4,4,4,4,
-		2,4,4,2,
-		0,2,2,0,
-		0,2,2,0,
+		0,3,3,0,
+		3,3,3,3,
+		3,3,3,3,
+		0,3,3,0,
 	};
 	static char bmp3[]{
-		0,2,2,0,
-		2,4,4,2,
-		2,4,4,2,
+		0,4,4,0,
+		4,4,4,4,
+		4,4,4,4,
 		0,4,4,0,
 	};
 //	static Bitmap screens[]{
@@ -119,8 +119,10 @@ extern "C" void tsk5(){
 			Sprite&s=sprites[i];
 			s.update();
 			if(s.pos().y()>100){
-				Position p{s.pos()};
-				p.set_y(20);
+				Position p{s.pos().x()+5,20};
+				if(p.x()>dsp.bmp().dim_px().width()){
+					p.set_x(Coord{0});
+				}
 				sprites[i].set_pos(p);
 			}
 		}
