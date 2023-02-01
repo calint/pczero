@@ -22,6 +22,7 @@ asm(".global osca_key");// last pressed key
 asm(".global osca_t");// lower ticker value
 asm(".global osca_t1");// high ticker value
 asm(".global _start");// export entry point
+//asm(".text");
 asm(".code16");// boot in 16 bit mode
 asm("_start:");
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - bpb

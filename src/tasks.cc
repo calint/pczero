@@ -76,7 +76,7 @@ extern "C" void tsk5(){
 	static char bmp2[]{
 		4,4,4,4,
 		2,4,4,2,
-		0,4,4,0,
+		0,2,2,0,
 		0,2,2,0,
 	};
 	static char bmp3[]{
@@ -89,10 +89,16 @@ extern "C" void tsk5(){
 //		{Addr(0xa0000),320,200},
 //	};
 	static Bitmap bitmaps[]{
-		{Addr{bmp0},4,4},
-		{Addr{bmp1},4,4},
-		{Addr{bmp2},4,4},
-		{Addr{bmp3},4,4},
+		{Addr{bmp0},Dimension{4,4}},
+		{Addr{bmp1},Dimension{4,4}},
+		{Addr{bmp2},Dimension{4,4}},
+		{Addr{bmp3},Dimension{4,4}},
+	};
+	static Sprite sprites[]{
+		{bitmaps[0],Coords{20,20},Velocity{0,1}},
+		{bitmaps[1],Coords{30,20},Velocity{0,2}},
+		{bitmaps[2],Coords{40,20},Velocity{0,3}},
+		{bitmaps[3],Coords{50,20},Velocity{0,4}},
 	};
 	Coord x=24;
 	Coord x_prv=x;
@@ -107,7 +113,20 @@ extern "C" void tsk5(){
 		if(x>180){
 			x=24;
 		}
-//		osca_yield();
+		const unsigned n=sizeof(sprites)/sizeof(Sprite);
+		for(unsigned i=0;i<n;i++){
+			Sprite&s=sprites[i];
+			s.update();
+			if(s.get_position().get_y()>100){
+				Position p{s.get_position()};
+				p.set_y(20);
+				sprites[i].set_position(p);
+			}
+		}
+		for(unsigned i=0;i<n;i++){
+			sprites[i].to(dsp);
+		}
+		osca_yield();
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
