@@ -6,7 +6,6 @@
 [ ] bitmap
 [ ]   optimized for 32b memcpy?
 [ ] sprite with transparency
-[ ]   optimized for 32b memcpy?
 [ ]   collision detection
 [ ]     with background
 [ ]     with other sprites
