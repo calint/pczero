@@ -61,29 +61,40 @@ extern "C" void tsk5(){
 //			0,0,0,0,
 //			0,0,0,1,
 //	};
-	static char sprite_clear[]{
-			0,1,1,0,
-			1,1,1,1,
-			1,1,1,1,
-			0,1,1,0,
+	static char bmp0[]{
+		0,1,1,0,
+		1,1,1,1,
+		1,1,1,1,
+		0,1,1,0,
 	};
-	static char sprite_data[]{
-			0,2,2,0,
-			2,2,2,2,
-			2,2,2,2,
-			0,2,2,0,
+	static char bmp1[]{
+		0,2,2,0,
+		2,2,2,2,
+		2,2,2,2,
+		0,2,2,0,
 	};
-	Bitmap sprite{Addr{sprite_data},4,4};
-	Bitmap screen{Addr(0xa0000),320,200};
-	Bitmap clear{Addr{sprite_clear},4,4};
+	static char bmp2[]{
+		4,4,4,4,
+		2,4,4,2,
+		2,4,4,2,
+		0,2,2,0,
+	};
+	static Bitmap screens[]{
+		{Addr(0xa0000),320,200},
+	};
+	static Bitmap bitmaps[]{
+		{Addr{bmp0},4,4},
+		{Addr{bmp1},4,4},
+		{Addr{bmp2},4,4},
+		{Addr{bmp1},4,4},
+	};
 	Coord x=24;
 	Coord x_prv=x;
 	while(true){
-//		sprite.to(screen,Coords{24,24});
-//		sprite.to(screen,Coords{32,24});
-//		sprite.to(screen,Coords{40,24});
-		clear.to(screen,Coords{x_prv,24});
-		sprite.to(screen,Coords{x,24});
+		bitmaps[0].to(screens[0],Coords{x_prv,24});
+		bitmaps[1].to(screens[0],Coords{x,24});
+		bitmaps[2].to(screens[0],Coords{x,19});
+		bitmaps[3].to(screens[0],Coords{x,14});
 		x_prv=x;
 		x+=8;
 		if(x>180){
@@ -150,9 +161,10 @@ extern "C" void tsk10(){
 		// copy kernel to screen
 		File src=File(Addr(0x07c00),512*3);// kernel binary
 //		File dst1=File(Addr(0x100000),512*3);// to odd meg testing a20 enabled line
-		File dst1=File(Addr(0x1abb80),512*3);// to odd meg testing a20 enabled line
+		File dst1=File(Addr(0x100000),512*3);// to odd meg testing a20 enabled line
 		File dst2=File(Addr(0xabb80),512*3);// on screen line 150
 		src.to(dst1);
+		osca_yield();
 		dst1.to(dst2);
 	}
 }

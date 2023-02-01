@@ -27,9 +27,7 @@ public:
 class File:public Ref{
 	Size size_B;
 public:
-	inline File(Addr a,Size nbytes):
-		Ref{a},size_B{nbytes}
-	{}
+	inline File(Addr a,Size nbytes):Ref{a},size_B{nbytes}{}
 	inline auto to(File f)->void{pz_memcpy(get_addr(),f.get_addr(),size_B);}
 	inline auto to(File f,Size nbytes)->void{pz_memcpy(get_addr(),f.get_addr(),nbytes);}
 	inline auto get_size_B()const->Size{return size_B;}
@@ -57,9 +55,7 @@ class Bitmap:public File{
 	Height height_px;
 public:
 	inline Bitmap(Addr a,Width w_px,Height h_px):
-		File{a,w_px*h_px},
-		width_px{w_px},height_px{h_px}
-	{}
+		File{a,w_px*h_px},width_px{w_px},height_px{h_px}{}
 	inline auto get_width_px()const->Width{return width_px;}
 	inline auto get_height_px()const->Height{return height_px;}
 	auto to(Bitmap&b,const Coords&c)->void{
