@@ -76,26 +76,32 @@ extern "C" void tsk5(){
 	static char bmp2[]{
 		4,4,4,4,
 		2,4,4,2,
-		2,4,4,2,
+		0,4,4,0,
 		0,2,2,0,
 	};
-	static Bitmap screens[]{
-		{Addr(0xa0000),320,200},
+	static char bmp3[]{
+		0,2,2,0,
+		2,4,4,2,
+		2,4,4,2,
+		0,4,4,0,
 	};
+//	static Bitmap screens[]{
+//		{Addr(0xa0000),320,200},
+//	};
 	static Bitmap bitmaps[]{
 		{Addr{bmp0},4,4},
 		{Addr{bmp1},4,4},
 		{Addr{bmp2},4,4},
-		{Addr{bmp1},4,4},
+		{Addr{bmp3},4,4},
 	};
 	Coord x=24;
 	Coord x_prv=x;
 	Vga13h dsp;
 	while(true){
-		bitmaps[0].to(dsp,Coords{x_prv,24});
-		bitmaps[1].to(dsp,Coords{x,24});
-		bitmaps[2].to(dsp,Coords{x,19});
-		bitmaps[3].to(dsp,Coords{x,14});
+		bitmaps[0].to(dsp,Coords{x_prv,44});
+		bitmaps[1].to(dsp,Coords{x,44});
+		bitmaps[2].to(dsp,Coords{x,36});
+		bitmaps[3].to(dsp,Coords{x,28});
 		x_prv=x;
 		x+=8;
 		if(x>180){
