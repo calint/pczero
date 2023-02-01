@@ -1,7 +1,7 @@
 #pragma once
 
-typedef void*Address;
-typedef int Size;
+using Address=void*;
+using Size=int;
 
 inline void pz_memcpy(Address from,Address to,Size nbytes){
 	asm("movl %0,%%esi;"
@@ -14,28 +14,32 @@ inline void pz_memcpy(Address from,Address to,Size nbytes){
 	);
 }
 
+using Offset=Size;
+
 class Pointer{
 	Address a_;
 public:
 	inline Pointer(const Address a):a_{a}{}
 	inline auto address()const->Address{return a_;}
-	inline auto write_byte(const char b){*static_cast<char*>(a_)=b;}
-	inline auto write_int(const int i){*static_cast<int*>(a_)=i;}
-	inline auto offset(const Size offset_B)const->Pointer{return Pointer{static_cast<char*>(a_)+offset_B};}
+	inline auto write_byte(const char v){*static_cast<char*>(a_)=v;}
+	inline auto write_short(const short v){*static_cast<short*>(a_)=v;}
+	inline auto write_int(const int v){*static_cast<int*>(a_)=v;}
+	inline auto offset(const Offset nbytes)const->Pointer{return Pointer{static_cast<char*>(a_)+nbytes};}
 };
 
 class Span{
 	Pointer p_;
 	Size s_;
 public:
-	inline Span(const Address a,const Size nbytes):p_{a},s_{nbytes}{}
+	inline Span(const Address a,const Size bytes):p_{a},s_{bytes}{}
 	inline auto to(const Span&s){pz_memcpy(p_.address(),s.begin().address(),s_);}
-	inline auto to(const Span&s,const Size nbytes){pz_memcpy(p_.address(),s.begin().address(),nbytes);}
+	inline auto to(const Span&s,const Size bytes){pz_memcpy(p_.address(),s.begin().address(),bytes);}
 	inline auto size_B()const->Size{return s_;}
 	inline auto begin()const->Pointer{return p_;}
+	inline auto pointer()const->Pointer{return p_;}
 };
 
-typedef int Coord;
+using Coord=int;
 
 class Coords{
 	Coord x_;
@@ -52,8 +56,8 @@ public:
 	inline auto inc(const Coords&dc){x_+=dc.x_;y_+=dc.y_;}
 };
 
-typedef int Width;
-typedef int Height;
+using Height=int;
+using Width=int;
 
 class Dimension{
 	Width w_;
@@ -97,8 +101,8 @@ public:
 	inline auto bmp()const->const Bitmap&{return b_;}
 };
 
-typedef Coords Position;
-typedef Coords Velocity;
+using Position=Coords;
+using Velocity=Coords;
 
 class Sprite{
 	Bitmap b_;
