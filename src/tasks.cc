@@ -114,20 +114,18 @@ extern "C" void tsk5(){
 		if(x>180){
 			x=24;
 		}
-		const unsigned n=sizeof(sprites)/sizeof(Sprite);
-		for(unsigned i=0;i<n;i++){
-			Sprite&s=sprites[i];
+		for(auto&s:sprites){
 			s.update();
 			if(s.pos().y()>100){
 				Position p{s.pos().x()+5,20};
 				if(p.x()>dsp.bmp().dim_px().width()){
 					p.set_x(Coord{0});
 				}
-				sprites[i].set_pos(p);
+				s.set_pos(p);
 			}
 		}
-		for(unsigned i=0;i<n;i++){
-			sprites[i].to(dbmp);
+		for(const auto&s:sprites){
+			s.to(dbmp);
 		}
 		osca_yield();
 	}

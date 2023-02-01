@@ -34,8 +34,8 @@ class Span{
 	Size s_;
 public:
 	inline Span(const Address a,const Size bytes):p_{a},s_{bytes}{}
-	inline auto to(const Span&s){pz_memcpy(p_.address(),s.begin().address(),s_);}
-	inline auto to(const Span&s,const Size bytes){pz_memcpy(p_.address(),s.begin().address(),bytes);}
+	inline auto to(const Span&s)const{pz_memcpy(p_.address(),s.begin().address(),s_);}
+	inline auto to(const Span&s,const Size bytes)const{pz_memcpy(p_.address(),s.begin().address(),bytes);}
 	inline auto size_B()const->Size{return s_;}
 	inline auto begin()const->Pointer{return p_;}
 	inline auto pointer()const->Pointer{return p_;}
@@ -77,7 +77,7 @@ public:
 	inline Bitmap(const Address a,const Dimension&px):s_{a,px.width()*px.height()},d_{px}{}
 	inline auto dim_px()const->const Dimension&{return d_;}
 	inline auto span()const->const Span&{return s_;}
-	auto to(const Bitmap&dst,const Coords&c){
+	auto to(const Bitmap&dst,const Coords&c)const{
 		char*si=static_cast<char*>(s_.begin().address());
 		char*di=static_cast<char*>(dst.s_.begin().address());
 		di+=c.y()*dst.dim_px().width()+c.x();
@@ -111,7 +111,7 @@ class Sprite{
 	Velocity v_;
 public:
 	inline Sprite(const Bitmap&b,const Position&p,const Velocity&v):b_{b},p_{p},v_{v}{}
-	auto to(const Bitmap&dst){
+	auto to(const Bitmap&dst)const{
 		const char*si=static_cast<const char*>(b_.span().begin().address());
 		char*di=static_cast<char*>(dst.span().begin().address());
 		di+=p_.y()*dst.dim_px().width()+p_.x();
