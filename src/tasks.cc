@@ -122,7 +122,7 @@ extern "C" void tsk5(){
 	pb.print_char(' ');
 	pb.foreground(6).print_string("hello world!");
 	pb.pos_next_line().print_string("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
-//	pb.pos(3,30).print_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
+	pb.foreground(7).print_char(' ').print_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
 	pb.pos(1,10).foreground(4).background(0);
 
