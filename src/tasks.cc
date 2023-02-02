@@ -96,10 +96,10 @@ extern "C" void tsk5(){
 		{Address{bmp3},DimensionPx{4,4}},
 	};
 	static Sprite sprites[]{
-		{bitmaps[0],Position{20.0f,20.f},Velocity{5,0.5f},Acceleration{0,0.5f}},
-		{bitmaps[1],Position{30.0f,20.f},Velocity{5,1.0f},Acceleration{0,0.5f}},
-		{bitmaps[2],Position{40.0f,20.f},Velocity{5,1.5f},Acceleration{0,0.5f}},
-		{bitmaps[3],Position{50.0f,20.f},Velocity{5,2.0f},Acceleration{0,0.5f}},
+		{bitmaps[0],Position{20.0f,25.f},Velocity{5,0.5f},Acceleration{0,0.5f}},
+		{bitmaps[1],Position{30.0f,25.f},Velocity{5,1.0f},Acceleration{0,0.5f}},
+		{bitmaps[2],Position{40.0f,25.f},Velocity{5,1.5f},Acceleration{0,0.5f}},
+		{bitmaps[3],Position{50.0f,25.f},Velocity{5,2.0f},Acceleration{0,0.5f}},
 	};
 	CoordPx x=24;
 	CoordPx x_prv=x;
@@ -120,8 +120,9 @@ extern "C" void tsk5(){
 		pb.print_char(i);
 	}
 	pb.print_char(' ');
-	pb.foreground(6).print_string("hello world");
-	pb.pos(3,30).print_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
+	pb.foreground(6).print_string("hello world!");
+	pb.pos_next_line().print_string("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
+//	pb.pos(3,30).print_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
 	pb.pos(1,10).foreground(4).background(0);
 
