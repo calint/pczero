@@ -43,7 +43,7 @@ public:
 	inline auto pointer()const->Pointer{return p_;}
 };
 
-template<class T>
+template<typename T>
 class CoordsT{
 	T x_;
 	T y_;
@@ -65,7 +65,7 @@ using CoordsPx=CoordsT<CoordPx>;
 using Coord=float;
 using Coords=CoordsT<Coord>;
 
-template<class T>
+template<typename T>
 class DimensionT{
 	T w_;
 	T h_;
