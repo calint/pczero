@@ -6,13 +6,18 @@
 [ ] key event to task
 [ ] bitmap
 [ ]   optimized for 32b memcpy?
-[ ] sprite with transparency
+[o] sprite with transparency
 [ ]   collision detection
 [ ]     with background
 [ ]     with other sprites
 [o] 5x6 font (30 bits/character)
-[ ]   c code generated from font file
+[x]   c code generated from font file -> done manually
 [x] inline assembler character renderer -> written in C++.
 [x] print hex numbers
-[ ] input text
 [x] scan code to ascii
+[o] bmp printer
+[x]   hex
+[x]   characters
+[x]   strings
+[ ]   integers
+[ ] input text
