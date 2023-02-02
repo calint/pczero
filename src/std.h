@@ -154,9 +154,10 @@ public:
 	auto position(Row r,Column c){
 		di_=static_cast<char*>(b_.data().begin().address());
 		di_+=bwi_*r*ch_hi_+c*ch_wi_;
+		dil_=di_;
 	}
 	auto next_line(){
-		di_=dil_+bwi_;
+		di_=dil_+bwi_*ch_hi_;
 	}
 	auto print_pixels(int fpx){
 		for(int y=0;y<ch_hi_;y++){
@@ -180,6 +181,10 @@ public:
 	auto print(){
 		BitmapHexPrinter p{b_};
 		p.position(1,10);
+		for(int i=0;i<16;i++){
+			p.print_pixels(hexpx[i]);
+		}
+		p.next_line();
 		for(int i=0;i<16;i++){
 			p.print_pixels(hexpx[i]);
 		}
