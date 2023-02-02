@@ -326,29 +326,29 @@ public:
 		di_=di_-bmp_wi_*font_hi_+font_wi_;
 		return*this;
 	}
-	auto hex(const int hex_number_4b)->PrinterToBitmap&{
+	auto p_hex(const int hex_number_4b)->PrinterToBitmap&{
 		draw(table_hex_to_font[hex_number_4b&15]);
 		return*this;
 	}
-	auto hex_8b(unsigned char v)->PrinterToBitmap&{
+	auto p_hex_8b(unsigned char v)->PrinterToBitmap&{
 		const int ch1=v&0xf;
 		const int ch2=(v>>4)&0xf;
-		hex(ch2);
-		hex(ch1);
+		p_hex(ch2);
+		p_hex(ch1);
 		return*this;
 	}
-	auto hex_16b(unsigned short v)->PrinterToBitmap&{
+	auto p_hex_16b(unsigned short v)->PrinterToBitmap&{
 		const int ch1=v&0xf;v>>=4;
 		const int ch2=v&0xf;v>>=4;
 		const int ch3=v&0xf;v>>=4;
 		const int ch4=v&0xf;v>>=4;
-		hex(ch4);
-		hex(ch3);
-		hex(ch2);
-		hex(ch1);
+		p_hex(ch4);
+		p_hex(ch3);
+		p_hex(ch2);
+		p_hex(ch1);
 		return*this;
 	}
-	auto hex_32b(unsigned int v)->PrinterToBitmap&{
+	auto p_hex_32b(unsigned int v)->PrinterToBitmap&{
 		const int ch1=v&0xf;v>>=4;
 		const int ch2=v&0xf;v>>=4;
 		const int ch3=v&0xf;v>>=4;
@@ -357,14 +357,14 @@ public:
 		const int ch6=v&0xf;v>>=4;
 		const int ch7=v&0xf;v>>=4;
 		const int ch8=v&0xf;v>>=4;
-		hex(ch8);
-		hex(ch7);
-		hex(ch6);
-		hex(ch5);
-		hex(ch4);
-		hex(ch3);
-		hex(ch2);
-		hex(ch1);
+		p_hex(ch8);
+		p_hex(ch7);
+		p_hex(ch6);
+		p_hex(ch5);
+		p_hex(ch4);
+		p_hex(ch3);
+		p_hex(ch2);
+		p_hex(ch1);
 		return*this;
 	}
 	auto p(const char ch)->PrinterToBitmap&{

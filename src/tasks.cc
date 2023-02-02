@@ -110,7 +110,7 @@ extern "C" void tsk5(){
 	PrinterToBitmap pb{dbmp};
 	pb.pos(1,30);
 	for(int i=0;i<16;i++){
-		pb.hex(i);
+		pb.p_hex(i);
 	}
 	pb.pos(2,10).fg(5);
 	for(char i='0';i<='9';i++){
@@ -122,7 +122,7 @@ extern "C" void tsk5(){
 	pb.p(' ');
 	pb.fg(6).p("hello world!").nl();
 	pb.p("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
-	pb.fg(7).p(' ').hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
+	pb.fg(7).p(' ').p_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
 	pb.pos(1,10).fg(4).bg(0);
 
@@ -133,9 +133,9 @@ extern "C" void tsk5(){
 //	pb.print_hex_32b(0x01234567);
 
 	while(true){
-		pb.fg(4).hex_8b(osca_key).p(' ');
+		pb.fg(4).p_hex_8b(osca_key).p(' ');
 		char ascii=table_scancode_to_ascii[static_cast<int>(osca_key)];
-		pb.fg(3).hex_8b(static_cast<unsigned char>(ascii)).p(' ');
+		pb.fg(3).p_hex_8b(static_cast<unsigned char>(ascii)).p(' ');
 		pb.fg(2).p(ascii).p(' ');
 		pb.cr();
 
