@@ -122,6 +122,55 @@ static int hexpx[]{
 	static_cast<int>(0b0'11110'10000'11100'10000'10000'00000'0),
 };
 
+
+using Row=Size;
+using Column=Size;
+class BitmapHexPrinter{
+	char*di_;
+	char*dil_;
+	const Bitmap&b_;
+	const SizePx bwi_;
+	const SizePx ch_wi_;
+	const SizePx ch_hi_;
+	const SizePx ln_;
+	char color_fg;
+	char color_bg;
+	char padding1;
+	char padding2;
+public:
+	BitmapHexPrinter(const Bitmap&b):
+		di_{static_cast<char*>(b.data().begin().address())},
+		dil_{di_},
+		b_{b},
+		bwi_{b.dim().width()},
+		ch_wi_{5},
+		ch_hi_{6},
+		ln_{bwi_-ch_wi_},
+		color_fg{2},
+		color_bg{0},
+		padding1{0},
+		padding2{0}
+	{}
+	auto position(Row r,Column c){
+		di_=static_cast<char*>(b_.data().begin().address());
+		di_+=bwi_*r*ch_hi_+c*ch_wi_;
+	}
+	auto next_line(){
+		di_=dil_+bwi_;
+	}
+	auto print_pixels(int fpx){
+		for(int y=0;y<ch_hi_;y++){
+			for(int x=0;x<ch_wi_;x++){
+				fpx<<=1;
+				*di_=fpx<0?color_fg:color_bg;
+				di_++;
+			}
+			di_+=ln_;
+		}
+		di_=di_-bwi_*ch_hi_+ch_wi_;
+	}
+};
+
 class Vga13h{
 	Bitmap b_;
 
@@ -129,6 +178,13 @@ public:
 	inline Vga13h():b_{Address(0xa0000),DimensionPx{320,200}}{}
 	inline auto bmp()const->const Bitmap&{return b_;}
 	auto print(){
+		BitmapHexPrinter p{b_};
+		p.position(1,10);
+		for(int i=0;i<16;i++){
+			p.print_pixels(hexpx[i]);
+		}
+	}
+	auto print2(){
 		const SizePx wi=b_.dim().width();
 		const int chpx_wi=5;
 		const int chpx_hi=6;
