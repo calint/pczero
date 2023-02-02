@@ -104,9 +104,19 @@ extern "C" void tsk5(){
 	CoordPx x=24;
 	CoordPx x_prv=x;
 	Vga13h dsp;
-	dsp.print();
 
 	const Bitmap&dbmp=dsp.bmp();
+
+	BitmapHexPrinter pb{dbmp};
+	pb.set_foreground_color(4);
+	pb.set_backgrouond_color(0);
+	pb.position(1,10);
+	pb.print_hex_8b(0xab);
+	pb.space();
+	pb.print_hex_16b(0xcdef);
+	pb.space();
+	pb.print_hex_32b(0x01234567);
+
 	while(true){
 		bitmaps[0].to(dbmp,CoordsPx{x_prv,44});
 		bitmaps[1].to(dbmp,CoordsPx{x,44});

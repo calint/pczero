@@ -138,7 +138,7 @@ class BitmapHexPrinter{
 	char padding1;
 	char padding2;
 public:
-	BitmapHexPrinter(const Bitmap&b):
+	inline BitmapHexPrinter(const Bitmap&b):
 		di_{static_cast<char*>(b.data().begin().address())},
 		dil_{di_},
 		b_{b},
@@ -151,14 +151,14 @@ public:
 		padding1{0},
 		padding2{0}
 	{}
-	auto position(Row r,Column c){
+	inline auto position(Row r,Column c){
 		di_=static_cast<char*>(b_.data().begin().address());
 		di_+=bwi_*r*ch_hi_+c*ch_wi_;
 		dil_=di_;
 	}
-	auto next_line(){
-		di_=dil_+bwi_*ch_hi_;
-	}
+	inline auto next_line(){di_=dil_+bwi_*ch_hi_;}
+	inline auto set_foreground_color(char c){color_fg=c;}
+	inline auto set_backgrouond_color(char c){color_bg=c;}
 	auto print_pixels(int fpx){
 		for(int y=0;y<ch_hi_;y++){
 			for(int x=0;x<ch_wi_;x++){
@@ -170,8 +170,41 @@ public:
 		}
 		di_=di_-bwi_*ch_hi_+ch_wi_;
 	}
-	auto print_hex(int hex_number_4_bits){
-		print_pixels(hexpx[hex_number_4_bits]);
+	inline auto space(){print_pixels(0b0'00000'00000'00000'00000'00000'00000'0);}
+	inline auto print_hex_char(int hex_number_4_bits){print_pixels(hexpx[hex_number_4_bits]);}
+	auto print_hex_8b(unsigned char v){
+		const int lower=v&0xf;
+		const int higher=(v>>4)&0xf;
+		print_hex_char(higher);
+		print_hex_char(lower);
+	}
+	auto print_hex_16b(unsigned short v){
+		const int ch1=v&0xf;v>>=4;
+		const int ch2=v&0xf;v>>=4;
+		const int ch3=v&0xf;v>>=4;
+		const int ch4=v&0xf;v>>=4;
+		print_hex_char(ch4);
+		print_hex_char(ch3);
+		print_hex_char(ch2);
+		print_hex_char(ch1);
+	}
+	auto print_hex_32b(unsigned int v){
+		const int ch1=v&0xf;v>>=4;
+		const int ch2=v&0xf;v>>=4;
+		const int ch3=v&0xf;v>>=4;
+		const int ch4=v&0xf;v>>=4;
+		const int ch5=v&0xf;v>>=4;
+		const int ch6=v&0xf;v>>=4;
+		const int ch7=v&0xf;v>>=4;
+		const int ch8=v&0xf;v>>=4;
+		print_hex_char(ch8);
+		print_hex_char(ch7);
+		print_hex_char(ch6);
+		print_hex_char(ch5);
+		print_hex_char(ch4);
+		print_hex_char(ch3);
+		print_hex_char(ch2);
+		print_hex_char(ch1);
 	}
 };
 
@@ -181,51 +214,6 @@ class Vga13h{
 public:
 	inline Vga13h():b_{Address(0xa0000),DimensionPx{320,200}}{}
 	inline auto bmp()const->const Bitmap&{return b_;}
-	auto print(){
-		BitmapHexPrinter p{b_};
-		p.position(1,10);
-		for(int i=0;i<16;i++){
-			p.print_hex(i);
-		}
-		p.next_line();
-		for(int i=0;i<16;i++){
-			p.print_hex(i);
-		}
-	}
-	auto print3(){
-		BitmapHexPrinter p{b_};
-		p.position(1,10);
-		for(int i=0;i<16;i++){
-			p.print_pixels(hexpx[i]);
-		}
-		p.next_line();
-		for(int i=0;i<16;i++){
-			p.print_pixels(hexpx[i]);
-		}
-	}
-	auto print2(){
-		const SizePx wi=b_.dim().width();
-		const int chpx_wi=5;
-		const int chpx_hi=6;
-		const SizePx ln=wi-chpx_wi;
-		char*di=static_cast<char*>(b_.data().begin().offset(wi*10+100).address());
-		for(int i=0;i<16;i++){
-			di=print_chpx(di,hexpx[i],4,0,chpx_wi,chpx_hi,ln,wi);
-		}
-	}
-private:
-	auto print_chpx(char*di,int chpx,const char color_fg,const char color_bg,const SizePx ch_width,const SizePx ch_height,const SizePx line_inc,const SizePx scr_wi)->char*{
-		for(int y=0;y<ch_height;y++){
-			for(int x=0;x<ch_width;x++){
-				chpx<<=1;
-				*di=chpx<0?color_fg:color_bg;
-				di++;
-			}
-			di+=line_inc;
-		}
-		di=di-scr_wi*ch_height+ch_width;
-		return di;
-	}
 };
 
 using PositionPx=CoordsPx;
