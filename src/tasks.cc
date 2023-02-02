@@ -121,6 +121,8 @@ extern "C" void tsk5(){
 	}
 	pb.print_char(' ');
 	pb.foreground(6).print_string("hello world");
+	pb.print_char(' ');
+//	pb.print_hex_32b(sizeof(table_ascii_to_font));
 
 	pb.pos(1,10).foreground(4).background(0);
 
