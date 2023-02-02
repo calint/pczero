@@ -103,7 +103,7 @@ public:
 	}
 };
 
-static int hexpx[]{
+static int BitmapHexPrinter_chars[]{
 	static_cast<int>(0b0'01100'10010'10010'10010'01100'00000'0),
 	static_cast<int>(0b0'00100'01100'00100'00100'01110'00000'0),
 	static_cast<int>(0b0'01100'10010'00100'01000'11110'00000'0),
@@ -121,7 +121,6 @@ static int hexpx[]{
 	static_cast<int>(0b0'11110'10000'11100'10000'11110'00000'0),
 	static_cast<int>(0b0'11110'10000'11100'10000'10000'00000'0),
 };
-
 
 using Row=Size;
 using Column=Size;
@@ -172,7 +171,7 @@ public:
 		di_=di_-bwi_*ch_hi_+ch_wi_;
 	}
 	inline auto print_space(){print_pixels(0b0'00000'00000'00000'00000'00000'00000'0);}
-	inline auto print_hex_char(int hex_number_4_bits){print_pixels(hexpx[hex_number_4_bits]);}
+	inline auto print_hex_char(int hex_number_4b){print_pixels(BitmapHexPrinter_chars[hex_number_4b&15]);}
 	auto print_hex_8b(unsigned char v){
 		const int lower=v&0xf;
 		const int higher=(v>>4)&0xf;
