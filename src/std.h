@@ -170,6 +170,9 @@ public:
 		}
 		di_=di_-bwi_*ch_hi_+ch_wi_;
 	}
+	auto print_hex(int hex_number_4_bits){
+		print_pixels(hexpx[hex_number_4_bits]);
+	}
 };
 
 class Vga13h{
@@ -179,6 +182,17 @@ public:
 	inline Vga13h():b_{Address(0xa0000),DimensionPx{320,200}}{}
 	inline auto bmp()const->const Bitmap&{return b_;}
 	auto print(){
+		BitmapHexPrinter p{b_};
+		p.position(1,10);
+		for(int i=0;i<16;i++){
+			p.print_hex(i);
+		}
+		p.next_line();
+		for(int i=0;i<16;i++){
+			p.print_hex(i);
+		}
+	}
+	auto print3(){
 		BitmapHexPrinter p{b_};
 		p.position(1,10);
 		for(int i=0;i<16;i++){
