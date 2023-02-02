@@ -124,6 +124,7 @@ static const int BitmapHexPrinter_chars[]{
 
 using Row=Size;
 using Column=Size;
+using Color8b=char;
 class BitmapHexPrinter{
 	char*di_; // current pixel in bitmap
 	char*dil_; // beginning of current line
@@ -132,8 +133,8 @@ class BitmapHexPrinter{
 	const SizePx font_wi_;
 	const SizePx font_hi_;
 	const SizePx ln_;
-	char color_fg_;
-	char color_bg_;
+	Color8b color_fg_;
+	Color8b color_bg_;
 	bool transparent_; // ? implement
 	char padding2_;
 public:
@@ -150,16 +151,17 @@ public:
 		transparent_{false},
 		padding2_{0}
 	{}
-	inline auto pos(Row r,Column c){
+	inline auto pos(Row r,Column c)->BitmapHexPrinter&{
 		di_=static_cast<char*>(b_.data().begin().address());
 		di_+=bmp_wi_*r*font_hi_+c*font_wi_;
 		dil_=di_;
+		return*this;
 	}
-	inline auto pos_next_line(){di_=dil_+bmp_wi_*font_hi_;}
-	inline auto pos_start_of_line(){di_=dil_;}
-	inline auto set_foreground_color(char c){color_fg_=c;}
-	inline auto set_background_color(char c){color_bg_=c;}
-	auto print_pixels(int fpx){
+	inline auto pos_next_line()->BitmapHexPrinter&{di_=dil_+bmp_wi_*font_hi_;return*this;}
+	inline auto pos_start_of_line()->BitmapHexPrinter&{di_=dil_;return*this;}
+	inline auto foreground(Color8b c)->BitmapHexPrinter&{color_fg_=c;return*this;}
+	inline auto background(Color8b c)->BitmapHexPrinter&{color_bg_=c;return*this;}
+	auto print_pixels(int fpx)->BitmapHexPrinter&{
 		for(int y=0;y<font_hi_;y++){
 			for(int x=0;x<font_wi_;x++){
 				fpx<<=1;
@@ -169,16 +171,18 @@ public:
 			di_+=ln_;
 		}
 		di_=di_-bmp_wi_*font_hi_+font_wi_;
+		return*this;
 	}
-	inline auto print_space(){print_pixels(0b0'00000'00000'00000'00000'00000'00000'0);}
-	inline auto print_hex_char(int hex_number_4b){print_pixels(BitmapHexPrinter_chars[hex_number_4b&15]);}
-	auto print_hex_8b(unsigned char v){
+	inline auto print_space()->BitmapHexPrinter&{print_pixels(0b0'00000'00000'00000'00000'00000'00000'0);return*this;}
+	inline auto print_hex_char(int hex_number_4b)->BitmapHexPrinter&{print_pixels(BitmapHexPrinter_chars[hex_number_4b&15]);return*this;}
+	auto print_hex_8b(unsigned char v)->BitmapHexPrinter&{
 		const int lower=v&0xf;
 		const int higher=(v>>4)&0xf;
 		print_hex_char(higher);
 		print_hex_char(lower);
+		return*this;
 	}
-	auto print_hex_16b(unsigned short v){
+	auto print_hex_16b(unsigned short v)->BitmapHexPrinter&{
 		const int ch1=v&0xf;v>>=4;
 		const int ch2=v&0xf;v>>=4;
 		const int ch3=v&0xf;v>>=4;
@@ -187,8 +191,9 @@ public:
 		print_hex_char(ch3);
 		print_hex_char(ch2);
 		print_hex_char(ch1);
+		return*this;
 	}
-	auto print_hex_32b(unsigned int v){
+	auto print_hex_32b(unsigned int v)->BitmapHexPrinter&{
 		const int ch1=v&0xf;v>>=4;
 		const int ch2=v&0xf;v>>=4;
 		const int ch3=v&0xf;v>>=4;
@@ -205,6 +210,7 @@ public:
 		print_hex_char(ch3);
 		print_hex_char(ch2);
 		print_hex_char(ch1);
+		return*this;
 	}
 };
 

@@ -108,14 +108,12 @@ extern "C" void tsk5(){
 	const Bitmap&dbmp=dsp.bmp();
 
 	BitmapHexPrinter pb{dbmp};
-	pb.pos(1,20);
+	pb.pos(1,30);
 	for(int i=0;i<16;i++){
 		pb.print_hex_char(i);
 	}
 
-	pb.pos(1,10);
-	pb.set_foreground_color(4);
-	pb.set_background_color(0);
+	pb.pos(1,10).foreground(4).background(0);
 //	pb.print_hex_8b(0xab);
 //	pb.space();
 //	pb.print_hex_16b(0xcdef);
