@@ -3,6 +3,6 @@
   tested on QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
   tested on asus zenbook
 
-  note: to build the files have to be linked in the order they appear in the binary
+  note: the files have to be linked in the order they appear in the binary
         eclipse sorts the source files thus filename for boot code must be
-        before the filename for the rest of the code
+        before the filename of the rest of the code
