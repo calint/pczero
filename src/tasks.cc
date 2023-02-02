@@ -115,11 +115,16 @@ extern "C" void tsk5(){
 		if(x>180){
 			x=24;
 		}
+		for(const auto&s:sprites){
+			s.to(dbmp);
+		}
 		for(auto&s:sprites){
 			s.update();
+		}
+		for(auto&s:sprites){
 			if(s.pos().y()>140){
 				Position p{s.pos().x(),140};
-				if(p.x()>static_cast<Coord>(dsp.bmp().dim_px().width())){
+				if(p.x()>static_cast<Coord>(dsp.bmp().dim().width())){
 					p.set_x(0);
 				}
 				s.set_pos(p);
@@ -127,9 +132,6 @@ extern "C" void tsk5(){
 				v.set_y(-5);
 				s.set_velocity(v);
 			}
-		}
-		for(const auto&s:sprites){
-			s.to(dbmp);
 		}
 		osca_yield();
 	}

@@ -1,20 +1,20 @@
 #pragma once
 
 using Address=void*;
-using Size=int;
+using SizeBytes=int;
 
-inline void pz_memcpy(Address from,Address to,Size nbytes){
+inline void pz_memcpy(Address from,Address to,SizeBytes nbytes){
 	asm("movl %0,%%esi;"
 		"movl %1,%%edi;"
 		"movl %2,%%ecx;"
 		"rep movsb;"
 		:
 		:"r"(from),"r"(to),"r"(nbytes)
-		:"%esi","%edi","%ecx"
+		:"%esi","%edi","%ecx" // ? clobbers memory?
 	);
 }
 
-using Offset=int;
+using OffsetBytes=int;
 
 class Pointer{
 	Address a_;
@@ -26,17 +26,17 @@ public:
 	inline auto write_short(const short v){*static_cast<short*>(a_)=v;}
 	inline auto write_int(const int v){*static_cast<int*>(a_)=v;}
 	inline auto write_long(const long v){*static_cast<long*>(a_)=v;}
-	inline auto offset(const Offset nbytes)const->Pointer{return Pointer{static_cast<char*>(a_)+nbytes};}
+	inline auto offset(const OffsetBytes v)const->Pointer{return Pointer{static_cast<char*>(a_)+v};}
 };
 
 class Data{
 	Pointer p_;
-	Size s_;
+	SizeBytes s_;
 public:
-	inline Data(const Address a,const Size bytes):p_{a},s_{bytes}{}
+	inline Data(const Address a,const SizeBytes bytes):p_{a},s_{bytes}{}
 	inline auto to(const Data&d)const{pz_memcpy(p_.address(),d.begin().address(),s_);}
-	inline auto to(const Data&d,const Size bytes)const{pz_memcpy(p_.address(),d.begin().address(),bytes);}
-	inline auto size_B()const->Size{return s_;}
+	inline auto to(const Data&d,const SizeBytes bytes)const{pz_memcpy(p_.address(),d.begin().address(),bytes);}
+	inline auto size()const->SizeBytes{return s_;}
 	inline auto begin()const->Pointer{return p_;}
 	inline auto pointer()const->Pointer{return p_;}
 };
@@ -73,25 +73,25 @@ public:
 	inline auto height()const->const T&{return h_;}
 };
 
-using Pixels=int;
-using DimensionPx=DimensionT<Pixels>;
+using SizePx=int;
+using DimensionPx=DimensionT<SizePx>;
 
 class Bitmap{
 	DimensionPx d_;
 	Data dt_;
 public:
 	inline Bitmap(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()}{}
-	inline auto dim_px()const->const DimensionPx&{return d_;}
+	inline auto dim()const->const DimensionPx&{return d_;}
 	inline auto data()const->const Data&{return dt_;}
 	auto to(const Bitmap&dst,const CoordsPx&c)const{
 		char*si=static_cast<char*>(dt_.begin().address());
 		char*di=static_cast<char*>(dst.dt_.begin().address());
-		di+=c.y()*dst.dim_px().width()+c.x();
-		const Pixels ln=dst.dim_px().width()-d_.width();
-		const Pixels h=d_.height();
-		const Pixels w=d_.width();
-		for(Pixels y=0;y<h;y++){
-			for(Pixels x=0;x<w;x++){
+		di+=c.y()*dst.dim().width()+c.x();
+		const SizePx ln=dst.dim().width()-d_.width();
+		const SizePx h=d_.height();
+		const SizePx w=d_.width();
+		for(SizePx y=0;y<h;y++){
+			for(SizePx x=0;x<w;x++){
 				*di=*si;
 				si++;
 				di++;
@@ -124,12 +124,12 @@ public:
 		const char*si=static_cast<const char*>(b_.data().begin().address());
 		char*di=static_cast<char*>(dst.data().begin().address());
 		PositionPx p{static_cast<CoordPx>(p_.x()),static_cast<CoordPx>(p_.y())};
-		di+=p.y()*dst.dim_px().width()+p.x();
-		const Pixels ln=dst.dim_px().width()-b_.dim_px().width();
-		const Pixels h=b_.dim_px().height();
-		const Pixels w=b_.dim_px().width();
-		for(Pixels y=0;y<h;y++){
-			for(Pixels x=0;x<w;x++){
+		di+=p.y()*dst.dim().width()+p.x();
+		const SizePx ln=dst.dim().width()-b_.dim().width();
+		const SizePx h=b_.dim().height();
+		const SizePx w=b_.dim().width();
+		for(SizePx y=0;y<h;y++){
+			for(SizePx x=0;x<w;x++){
 				const char px=*si;
 				if(px){
 					*di=px;
