@@ -33,11 +33,12 @@ asm(".space 3-(.-_start),0x90");// support 2 or 3 bytes encoded jmp
 asm(".space 59,0x90");// BPB area that may be written to by BIOS
 asm("_main:");
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - setup
-asm("xor %bx,%bx");
+asm("cli");// disable interrupts
+asm("xor %bx,%bx");// clear bx
 asm("mov %bx,%ds");// data segment
 asm("mov %dl,osca_drv_b");// save boot drive
 asm("mov %bx,%ss");// setup stack
-asm("mov $_start,%sp");// 0x7c00
+asm("mov $_start,%sp");// at 0x7c00
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
 // %dl is the unchanged boot drive
 asm("cld");// clear direction (forward)
@@ -112,7 +113,6 @@ asm("xor %ebp,%ebp");
 //asm("movw $0x0404,0xa0110");
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
 //asm("movw $0x0404,0xa0114");
-asm("cli");// disable interrupts
 asm("mov $IDT,%ebx");// idt address
 asm("mov $0x40,%ecx");// interrupt count
 asm("1:");
