@@ -110,21 +110,21 @@ extern "C" void tsk5(){
 	PrinterToBitmap pb{dbmp};
 	pb.pos(1,30);
 	for(int i=0;i<16;i++){
-		pb.print_hex_char(i);
+		pb.hex(i);
 	}
-	pb.pos(2,10).foreground(5);
+	pb.pos(2,10).fg(5);
 	for(char i='0';i<='9';i++){
-		pb.print_char(i);
+		pb.p(i);
 	}
 	for(char i='a';i<='z';i++){
-		pb.print_char(i);
+		pb.p(i);
 	}
-	pb.print_char(' ');
-	pb.foreground(6).print_string("hello world!");
-	pb.pos_next_line().print_string("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
-	pb.foreground(7).print_char(' ').print_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
+	pb.p(' ');
+	pb.fg(6).p("hello world!").nl();
+	pb.p("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
+	pb.fg(7).p(' ').hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
-	pb.pos(1,10).foreground(4).background(0);
+	pb.pos(1,10).fg(4).bg(0);
 
 	//	pb.print_hex_8b(0xab);
 //	pb.space();
@@ -133,11 +133,11 @@ extern "C" void tsk5(){
 //	pb.print_hex_32b(0x01234567);
 
 	while(true){
-		pb.foreground(4).print_hex_8b(osca_key).print_char(' ');
+		pb.fg(4).hex_8b(osca_key).p(' ');
 		char ascii=table_scancode_to_ascii[static_cast<int>(osca_key)];
-		pb.foreground(3).print_hex_8b(static_cast<unsigned char>(ascii)).print_char(' ');
-		pb.foreground(2).print_char(ascii).print_char(' ');
-		pb.pos_start_of_line();
+		pb.fg(3).hex_8b(static_cast<unsigned char>(ascii)).p(' ');
+		pb.fg(2).p(ascii).p(' ');
+		pb.cr();
 
 		bitmaps[0].to(dbmp,CoordsPx{x_prv,44});
 		bitmaps[1].to(dbmp,CoordsPx{x,44});
@@ -175,7 +175,7 @@ extern "C" void tsk6(){
 	while(true){
 		osca_yield();
 //		*(int*)(0xa0000+320-4)=osca_t;
-		dsp.bmp().data().begin().offset(320-4).write_int(osca_t);
+		dsp.bmp().data().begin().offset(320-4).write(osca_t);
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

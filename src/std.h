@@ -22,13 +22,15 @@ class Pointer{
 public:
 	inline Pointer(const Address a):a_{a}{}
 	inline auto address()const->Address{return a_;}
-	inline auto write_byte(const unsigned char v){*static_cast<unsigned char*>(a_)=v;}
-	inline auto write_char(const char v){*static_cast<char*>(a_)=v;}
-	inline auto write_short(const short v){*static_cast<short*>(a_)=v;}
-	inline auto write_int(const int v){*static_cast<int*>(a_)=v;}
-	inline auto write_int(const unsigned v){*static_cast<unsigned*>(a_)=v;}
-	inline auto write_long(const long v){*static_cast<long*>(a_)=v;}
 	inline auto offset(const OffsetBytes ob)const->Pointer{return Pointer{static_cast<char*>(a_)+ob};}
+	inline auto write(const char v){*static_cast<char*>(a_)=v;}
+	inline auto write(const unsigned char v){*static_cast<unsigned char*>(a_)=v;}
+	inline auto write(const short v){*static_cast<short*>(a_)=v;}
+	inline auto write(const unsigned short v){*static_cast<unsigned short*>(a_)=v;}
+	inline auto write(const int v){*static_cast<int*>(a_)=v;}
+	inline auto write(const unsigned v){*static_cast<unsigned*>(a_)=v;}
+	inline auto write(const long v){*static_cast<long*>(a_)=v;}
+	inline auto write(const unsigned long v){*static_cast<unsigned long*>(a_)=v;}
 };
 
 class Data{
@@ -308,15 +310,15 @@ public:
 		dil_=di_;
 		return*this;
 	}
-	inline auto pos_next_line()->PrinterToBitmap&{di_=dil_+bmp_wi_*font_hi_;return*this;}
-	inline auto pos_start_of_line()->PrinterToBitmap&{di_=dil_;return*this;}
-	inline auto foreground(Color8b c)->PrinterToBitmap&{color_fg_=c;return*this;}
-	inline auto background(Color8b c)->PrinterToBitmap&{color_bg_=c;return*this;}
-	auto print_pixels(int fpx)->PrinterToBitmap&{
+	inline auto nl()->PrinterToBitmap&{di_=dil_+bmp_wi_*font_hi_;return*this;}
+	inline auto cr()->PrinterToBitmap&{di_=dil_;return*this;}
+	inline auto fg(const Color8b c)->PrinterToBitmap&{color_fg_=c;return*this;}
+	inline auto bg(const Color8b c)->PrinterToBitmap&{color_bg_=c;return*this;}
+	auto draw(int bmp_5x6)->PrinterToBitmap&{
 		for(int y=0;y<font_hi_;y++){
 			for(int x=0;x<font_wi_;x++){
-				fpx<<=1;
-				*di_=fpx<0?color_fg_:color_bg_;
+				bmp_5x6<<=1;
+				*di_=bmp_5x6<0?color_fg_:color_bg_;
 				di_++;
 			}
 			di_+=ln_;
@@ -324,27 +326,29 @@ public:
 		di_=di_-bmp_wi_*font_hi_+font_wi_;
 		return*this;
 	}
-//	auto print_space()->BitmapHexPrinter&{print_char(' ');return*this;}
-	auto print_hex_char(int hex_number_4b)->PrinterToBitmap&{print_pixels(table_hex_to_font[hex_number_4b&15]);return*this;}
-	auto print_hex_8b(unsigned char v)->PrinterToBitmap&{
-		const int ch1=v&0xf;
-		const int ch2=(v>>4)&0xf;
-		print_hex_char(ch2);
-		print_hex_char(ch1);
+	auto hex(const int hex_number_4b)->PrinterToBitmap&{
+		draw(table_hex_to_font[hex_number_4b&15]);
 		return*this;
 	}
-	auto print_hex_16b(unsigned short v)->PrinterToBitmap&{
+	auto hex_8b(unsigned char v)->PrinterToBitmap&{
+		const int ch1=v&0xf;
+		const int ch2=(v>>4)&0xf;
+		hex(ch2);
+		hex(ch1);
+		return*this;
+	}
+	auto hex_16b(unsigned short v)->PrinterToBitmap&{
 		const int ch1=v&0xf;v>>=4;
 		const int ch2=v&0xf;v>>=4;
 		const int ch3=v&0xf;v>>=4;
 		const int ch4=v&0xf;v>>=4;
-		print_hex_char(ch4);
-		print_hex_char(ch3);
-		print_hex_char(ch2);
-		print_hex_char(ch1);
+		hex(ch4);
+		hex(ch3);
+		hex(ch2);
+		hex(ch1);
 		return*this;
 	}
-	auto print_hex_32b(unsigned int v)->PrinterToBitmap&{
+	auto hex_32b(unsigned int v)->PrinterToBitmap&{
 		const int ch1=v&0xf;v>>=4;
 		const int ch2=v&0xf;v>>=4;
 		const int ch3=v&0xf;v>>=4;
@@ -353,24 +357,23 @@ public:
 		const int ch6=v&0xf;v>>=4;
 		const int ch7=v&0xf;v>>=4;
 		const int ch8=v&0xf;v>>=4;
-		print_hex_char(ch8);
-		print_hex_char(ch7);
-		print_hex_char(ch6);
-		print_hex_char(ch5);
-		print_hex_char(ch4);
-		print_hex_char(ch3);
-		print_hex_char(ch2);
-		print_hex_char(ch1);
+		hex(ch8);
+		hex(ch7);
+		hex(ch6);
+		hex(ch5);
+		hex(ch4);
+		hex(ch3);
+		hex(ch2);
+		hex(ch1);
 		return*this;
 	}
-	auto print_char(char ch)->PrinterToBitmap&{
-		int pixels=table_ascii_to_font[static_cast<unsigned int>(ch)];
-		print_pixels(pixels);
+	auto p(const char ch)->PrinterToBitmap&{
+		draw(table_ascii_to_font[static_cast<unsigned int>(ch)]);
 		return*this;
 	}
-	auto print_string(const char*s)->PrinterToBitmap&{
+	auto p(const char*s)->PrinterToBitmap&{
 		while(*s){
-			print_char(*s);
+			p(*s);
 			s++;
 		}
 		return*this;
