@@ -134,7 +134,7 @@ class BitmapHexPrinter{
 	const SizePx ln_;
 	char color_fg_;
 	char color_bg_;
-	bool transparent_;
+	bool transparent_; // ? implement
 	char padding2_;
 public:
 	inline BitmapHexPrinter(const Bitmap&b):
