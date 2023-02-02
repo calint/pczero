@@ -11,6 +11,15 @@ CW=-Wfatal-errors -Werror -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Wpadde
 CF=-O3 -fanalyzer -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-stack-protector\
  -Wl,--oformat,binary -Wl,-Ttext,0x7c00
 
+#CC=clang++
+#CW=-Wfatal-errors -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Wpadded -Winline\
+# -pedantic -pedantic-errors -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization\
+# -Wmissing-declarations -Wmissing-include-dirs\
+# -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo\
+# -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
+#CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-stack-protector\
+# -Wl,--oformat,binary -Wl,-Ttext,0x7c00
+
 # usb device
 INSTALL_TO=/dev/sda
 
