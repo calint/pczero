@@ -44,9 +44,9 @@ asm("cld");// clear direction (forward)
 asm("mov $(0x0200+LOAD_SECTORS),%ax");// command 2, 0x1f sectors
 asm("mov $0x0002,%cx");// from cylinder 0, sector 2
 asm("xor %dh,%dh");// head 0
-asm("xor %bx,%bx");// to es:bx
-asm("mov %bx,%es");
-asm("mov $0x7e00,%bx");// (0:0x7e00)
+asm("mov $0x07e0,%bx");// to es:bx
+asm("mov %bx,%es");//
+asm("xor %bx,%bx");// es:bx=7e00:0000
 asm("int $0x13");// read disks
 //asm("jnc 1f");// if no error jmp
 //asm("  mov $0xb800,%ax");// console segment
