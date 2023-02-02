@@ -2,14 +2,14 @@
 
 BIN=bin/pczero.img
 SRC=src/boot.cc src/tasks.cc
-CC=g++ -std=c++2a -O3 -fno-rtti -fno-exceptions
-# -Werror
+CC=g++ -std=c++2a
 CW=-Wfatal-errors -Werror -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Wpadded -Winline\
  -pedantic -pedantic-errors -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization\
  -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast\
  -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel\
  -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
-CF=-fanalyzer -nostdlib -m32 -fno-pie -Wl,--oformat,binary -Wl,-Ttext,0x7c00 -fno-stack-protector -fno-threadsafe-statics
+CF= -O3 -fanalyzer -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-stack-protector\
+ -Wl,--oformat,binary -Wl,-Ttext,0x7c00
 
 # usb device
 INSTALL_TO=/dev/sda

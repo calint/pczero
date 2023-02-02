@@ -2,3 +2,7 @@
   built with g++ (Ubuntu 12.2.0-3ubuntu1) 12.2.0
   tested on QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
   tested on asus zenbook
+
+  note: to build in eclipse the files have to be linked in the order
+        they appear in the binary thus filename for boot code must be
+        before the filename for the rest of the code

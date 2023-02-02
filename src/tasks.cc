@@ -54,7 +54,6 @@ asm("  addl $2,0xa0050");
 asm("  hlt");
 asm("  jmp tsk4");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk5(){
 //	static char sprite_clear[]{
 //			0,0,0,0,
 //			0,0,0,0,
@@ -85,6 +84,8 @@ extern "C" void tsk5(){
 		4,4,4,4,
 		0,4,4,0,
 	};
+
+extern "C" void tsk5(){
 //	static Bitmap screens[]{
 //		{Addr(0xa0000),320,200},
 //	};

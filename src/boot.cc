@@ -23,11 +23,11 @@ asm(".global osca_t");// lower ticker value
 asm(".global osca_t1");// high ticker value
 asm(".global _start");// export entry point
 //asm(".text");
-asm(".code16");// boot in 16 bit mode
-asm("_start:");
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - bpb
 // jump over BIOS Parameter Block (BPB) because 
 // that memory may be written to by BIOS when booting from USB
+asm(".code16");// boot in 16 bit mode
+asm("_start:");
 asm("jmp _main");
 asm(".space 3-(.-_start),0x90");// support 2 or 3 bytes encoded jmp
 asm(".space 59,0x90");// BPB area that may be written to by BIOS
@@ -79,7 +79,7 @@ asm("lgdt gdtr");// load global descriptor tables
 asm("mov %cr0,%eax");// enter 32b protected mode
 asm("or $0x1,%al");
 asm("mov %eax,%cr0");
-asm("jmp $8,$pm");// jmp and flush
+asm("jmp $8,$protected_mode");// jmp and flush
 asm(".align 16,0x90");
 asm("gdt:.quad 0x0000000000000000");//0x00:
 asm("    .quad 0x00cf9a000000ffff");//0x08: 32b code 4g pl0 rx
@@ -93,9 +93,9 @@ asm(".align 8,0");
 asm("idtr:.word 0x03ff");
 asm("     .long IDT");// idt address
 asm(".align 8,0x90");
-asm("pm:");// protected mode code
-asm(".code32");
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - protected mode
+asm("protected_mode:");
+asm(".code32");
 asm("mov $0x10,%ax");
 asm("mov %ax,%ss");
 asm("mov %ax,%ds");
