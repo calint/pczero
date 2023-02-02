@@ -335,6 +335,13 @@ public:
 		print_pixels(pixels);
 		return*this;
 	}
+	auto print_string(const char*s)->BitmapHexPrinter&{
+		while(*s){
+			print_char(*s);
+			s++;
+		}
+		return*this;
+	}
 };
 
 // from https://stackoverflow.com/questions/61124564/convert-scancodes-to-ascii

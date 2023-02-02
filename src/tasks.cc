@@ -119,7 +119,8 @@ extern "C" void tsk5(){
 	for(char i='a';i<='z';i++){
 		pb.print_char(i);
 	}
-
+	pb.print_space();
+	pb.foreground(6).print_string("hello world");
 
 	pb.pos(1,10).foreground(4).background(0);
 
