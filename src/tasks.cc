@@ -110,14 +110,17 @@ extern "C" void tsk5(){
 	BitmapHexPrinter pb{dbmp};
 	pb.set_foreground_color(4);
 	pb.set_backgrouond_color(0);
-	pb.position(1,10);
-	pb.print_hex_8b(0xab);
-	pb.space();
-	pb.print_hex_16b(0xcdef);
-	pb.space();
-	pb.print_hex_32b(0x01234567);
+	pb.pos(1,10);
+//	pb.print_hex_8b(0xab);
+//	pb.space();
+//	pb.print_hex_16b(0xcdef);
+//	pb.space();
+//	pb.print_hex_32b(0x01234567);
 
 	while(true){
+		pb.print_hex_32b(static_cast<unsigned>(osca_key));
+		pb.pos_start_of_line();
+
 		bitmaps[0].to(dbmp,CoordsPx{x_prv,44});
 		bitmaps[1].to(dbmp,CoordsPx{x,44});
 		bitmaps[2].to(dbmp,CoordsPx{x,36});

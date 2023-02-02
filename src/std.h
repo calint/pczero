@@ -151,12 +151,13 @@ public:
 		padding1{0},
 		padding2{0}
 	{}
-	inline auto position(Row r,Column c){
+	inline auto pos(Row r,Column c){
 		di_=static_cast<char*>(b_.data().begin().address());
 		di_+=bwi_*r*ch_hi_+c*ch_wi_;
 		dil_=di_;
 	}
-	inline auto next_line(){di_=dil_+bwi_*ch_hi_;}
+	inline auto pos_next_line(){di_=dil_+bwi_*ch_hi_;}
+	inline auto pos_start_of_line(){di_=dil_;}
 	inline auto set_foreground_color(char c){color_fg=c;}
 	inline auto set_backgrouond_color(char c){color_bg=c;}
 	auto print_pixels(int fpx){
@@ -170,7 +171,7 @@ public:
 		}
 		di_=di_-bwi_*ch_hi_+ch_wi_;
 	}
-	inline auto space(){print_pixels(0b0'00000'00000'00000'00000'00000'00000'0);}
+	inline auto print_space(){print_pixels(0b0'00000'00000'00000'00000'00000'00000'0);}
 	inline auto print_hex_char(int hex_number_4_bits){print_pixels(hexpx[hex_number_4_bits]);}
 	auto print_hex_8b(unsigned char v){
 		const int lower=v&0xf;
