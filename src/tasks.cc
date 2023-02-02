@@ -107,7 +107,7 @@ extern "C" void tsk5(){
 
 	const Bitmap&dbmp=dsp.bmp();
 
-	BitmapHexPrinter pb{dbmp};
+	BitmapPrinter pb{dbmp};
 	pb.pos(1,30);
 	for(int i=0;i<16;i++){
 		pb.print_hex_char(i);
