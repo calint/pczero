@@ -372,7 +372,6 @@ static const char table_scancode_to_ascii[]{
 		0,  /* All other keys are undefined */
 };
 
-
 class Vga13h{
 	Bitmap b_;
 
