@@ -112,6 +112,14 @@ extern "C" void tsk5(){
 	for(int i=0;i<16;i++){
 		pb.print_hex_char(i);
 	}
+	pb.pos(2,10).foreground(5);
+	for(char i='0';i<='9';i++){
+		pb.print_char(i);
+	}
+	for(char i='a';i<='z';i++){
+		pb.print_char(i);
+	}
+
 
 	pb.pos(1,10).foreground(4).background(0);
 
@@ -122,8 +130,10 @@ extern "C" void tsk5(){
 //	pb.print_hex_32b(0x01234567);
 
 	while(true){
-		pb.print_hex_8b(static_cast<unsigned char>(osca_key)).print_space()
-				.print_hex_8b(static_cast<unsigned char>(table_scancode_to_ascii[static_cast<int>(osca_key)]));
+		pb.foreground(4).print_hex_8b(static_cast<unsigned char>(osca_key)).print_space();
+		char ascii=table_scancode_to_ascii[static_cast<int>(osca_key)];
+		pb.foreground(3).print_hex_8b(static_cast<unsigned char>(ascii)).print_space();
+		pb.foreground(2).print_char(ascii).print_space();
 		pb.pos_start_of_line();
 
 		bitmaps[0].to(dbmp,CoordsPx{x_prv,44});
