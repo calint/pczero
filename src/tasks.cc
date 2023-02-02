@@ -140,7 +140,7 @@ extern "C" void tsk6(){
 	while(true){
 		osca_yield();
 //		*(int*)(0xa0000+320-4)=osca_t;
-		dsp.bmp().mem().begin().offset(320-4).write_int(osca_t);
+		dsp.bmp().data().begin().offset(320-4).write_int(osca_t);
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -192,10 +192,10 @@ extern "C" void tsk10(){
 	while(true){
 		osca_yield();
 		// copy kernel to screen
-		Memmory src=Memmory(Address(0x07c00),512*3);// kernel binary
+		Data src=Data(Address(0x07c00),512*3);// kernel binary
 //		File dst1=File(Addr(0x100000),512*3);// to odd meg testing a20 enabled line
-		Memmory dst1=Memmory(Address(0x100000),512*3);// to odd meg testing a20 enabled line
-		Memmory dst2=Memmory(Address(0xabb80),512*3);// on screen line 150
+		Data dst1=Data(Address(0x100000),512*3);// to odd meg testing a20 enabled line
+		Data dst2=Data(Address(0xabb80),512*3);// on screen line 150
 		src.to(dst1);
 		osca_yield();
 		dst1.to(dst2);
