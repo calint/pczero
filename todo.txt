@@ -12,7 +12,7 @@
 [ ]     with other sprites
 [o] 5x6 font (30 bits/character)
 [ ]   c code generated from font file
-[x] inline assembler character renderer. written in C++.
+[x] inline assembler character renderer -> written in C++.
 [x] print hex numbers
 [ ] input text
 [x] scan code to ascii
