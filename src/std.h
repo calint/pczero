@@ -87,11 +87,11 @@ public:
 		char*si=static_cast<char*>(dt_.begin().address());
 		char*di=static_cast<char*>(dst.dt_.begin().address());
 		di+=c.y()*dst.dim_px().width()+c.x();
-		const int ln=dst.dim_px().width()-d_.width();
-		const int h=d_.height();
-		const int w=d_.width();
-		for(int y=0;y<h;y++){
-			for(int x=0;x<w;x++){
+		const Pixels ln=dst.dim_px().width()-d_.width();
+		const Pixels h=d_.height();
+		const Pixels w=d_.width();
+		for(Pixels y=0;y<h;y++){
+			for(Pixels x=0;x<w;x++){
 				*di=*si;
 				si++;
 				di++;
@@ -125,11 +125,11 @@ public:
 		char*di=static_cast<char*>(dst.data().begin().address());
 		PositionPx p{static_cast<CoordPx>(p_.x()),static_cast<CoordPx>(p_.y())};
 		di+=p.y()*dst.dim_px().width()+p.x();
-		const int ln=dst.dim_px().width()-b_.dim_px().width();
-		const int h=b_.dim_px().height();
-		const int w=b_.dim_px().width();
-		for(int y=0;y<h;y++){
-			for(int x=0;x<w;x++){
+		const Pixels ln=dst.dim_px().width()-b_.dim_px().width();
+		const Pixels h=b_.dim_px().height();
+		const Pixels w=b_.dim_px().width();
+		for(Pixels y=0;y<h;y++){
+			for(Pixels x=0;x<w;x++){
 				const char px=*si;
 				if(px){
 					*di=px;
