@@ -104,6 +104,8 @@ extern "C" void tsk5(){
 	CoordPx x=24;
 	CoordPx x_prv=x;
 	Vga13h dsp;
+	dsp.print();
+
 	const Bitmap&dbmp=dsp.bmp();
 	while(true){
 		bitmaps[0].to(dbmp,CoordsPx{x_prv,44});
@@ -195,9 +197,9 @@ extern "C" void tsk10(){
 		osca_yield();
 		// copy kernel to screen
 		Data src=Data(Address(0x07c00),512*3);// kernel binary
-//		File dst1=File(Addr(0x100000),512*3);// to odd meg testing a20 enabled line
 		Data dst1=Data(Address(0x100000),512*3);// to odd meg testing a20 enabled line
-		Data dst2=Data(Address(0xabb80),512*3);// on screen line 150
+		Data dst2=Data(Address(0xa0000+320*150),512*3);// on screen line 150
+//		Data dst2=Data(Address(0xabb80),512*3);// on screen line 150
 		src.to(dst1);
 		osca_yield();
 		dst1.to(dst2);

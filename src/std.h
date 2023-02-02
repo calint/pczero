@@ -1,7 +1,8 @@
 #pragma once
 
 using Address=void*;
-using SizeBytes=int;
+using Size=int;
+using SizeBytes=Size;
 
 inline void pz_memcpy(Address from,Address to,SizeBytes nbytes){
 	asm("movl %0,%%esi;"
@@ -25,8 +26,9 @@ public:
 	inline auto write_char(const char v){*static_cast<char*>(a_)=v;}
 	inline auto write_short(const short v){*static_cast<short*>(a_)=v;}
 	inline auto write_int(const int v){*static_cast<int*>(a_)=v;}
+	inline auto write_int(const unsigned v){*static_cast<unsigned*>(a_)=v;}
 	inline auto write_long(const long v){*static_cast<long*>(a_)=v;}
-	inline auto offset(const OffsetBytes sb)const->Pointer{return Pointer{static_cast<char*>(a_)+sb};}
+	inline auto offset(const OffsetBytes ob)const->Pointer{return Pointer{static_cast<char*>(a_)+ob};}
 };
 
 class Data{
@@ -101,11 +103,152 @@ public:
 	}
 };
 
+static int charspx[16]{
+	static_cast<int>(0b0'01100'10010'10010'10010'01100'00000'0)
+};
+
 class Vga13h{
 	Bitmap b_;
+
 public:
 	inline Vga13h():b_{Address(0xa0000),DimensionPx{320,200}}{}
 	inline auto bmp()const->const Bitmap&{return b_;}
+	auto print(){
+		const SizePx wi=b_.dim().width();
+		const int chpx_wi=5;
+		const int chpx_hi=6;
+		const SizePx ln=wi-chpx_wi;
+//		.oo..
+//		o..o.
+//		o..o.
+//		o..o.
+//		.oo..
+//		.....
+		charspx[0]=static_cast<int>(0b0'01100'10010'10010'10010'01100'00000'0);
+//		..o..
+//		.oo..
+//		..o..
+//		..o..
+//		.ooo.
+//		.....
+		charspx[1]=static_cast<int>(0b0'00100'01100'00100'00100'01110'00000'0);
+//		.oo..
+//		o..o.
+//		..o..
+//		.o...
+//		oooo.
+//		.....
+		charspx[2]=static_cast<int>(0b0'01100'10010'00100'01000'11110'00000'0);
+//		ooo..
+//		...o.
+//		ooo..
+//		...o.
+//		ooo..
+//		.....
+		charspx[3]=static_cast<int>(0b0'11100'00010'11100'00010'11100'00000'0);
+//		...o.
+//		..oo.
+//		.o.o.
+//		oooo.
+//		...o.
+//		.....
+		charspx[4]=static_cast<int>(0b0'00010'00110'01010'11110'00010'00000'0);
+//		oooo.
+//		o....
+//		oooo.
+//		...o.
+//		ooo..
+//		.....
+		charspx[5]=static_cast<int>(0b0'111110'10000'11110'00010'11100'00000'0);
+//		.oo..
+//		o....
+//		ooo..
+//		o..o.
+//		.oo..
+//		.....
+		charspx[6]=static_cast<int>(0b0'01100'10000'11100'10010'01100'00000'0);
+//		oooo.
+//		...o.
+//		..o..
+//		.o...
+//		.o...
+//		.....
+		charspx[7]=static_cast<int>(0b0'11110'00010'00100'01000'01000'00000'0);
+//		.oo..
+//		o..o.
+//		.oo..
+//		o..o.
+//		.oo..
+//		.....
+		charspx[8]=static_cast<int>(0b0'01100'10010'01100'10010'01100'00000'0);
+//		.oo..
+//		o..o.
+//		.ooo.
+//		...o.
+//		.oo..
+//		.....
+		charspx[9]=static_cast<int>(0b0'01100'10010'01110'00010'01100'00000'0);
+//		.oo..
+//		o..o.
+//		oooo.
+//		o..o.
+//		o..o.
+//		.....
+		charspx[10]=static_cast<int>(0b0'01100'10010'11110'10010'10010'00000'0);
+//		ooo..
+//		o..o.
+//		ooo..
+//		o..o.
+//		ooo..
+//		.....
+		charspx[11]=static_cast<int>(0b0'11100'10010'11100'10010'11100'00000'0);
+//		.ooo.
+//		o....
+//		o....
+//		o....
+//		.ooo.
+//		.....
+		charspx[12]=static_cast<int>(0b0'01110'10000'10000'10000'01110'00000'0);
+//		ooo..
+//		o..o.
+//		o..o.
+//		o..o.
+//		ooo..
+//		.....
+		charspx[13]=static_cast<int>(0b0'11100'10010'10010'10010'11100'00000'0);
+//		oooo.
+//		o....
+//		ooo..
+//		o....
+//		oooo.
+//		.....
+		charspx[14]=static_cast<int>(0b0'11110'10000'11100'10000'11110'00000'0);
+//		oooo.
+//		o....
+//		ooo..
+//		o....
+//		o....
+//		.....
+		charspx[15]=static_cast<int>(0b0'11110'10000'11100'10000'10000'00000'0);
+
+		char*di=static_cast<char*>(b_.data().begin().offset(wi*10+100).address());
+		for(int i=0;i<16;i++){
+			di=print_chpx(di,charspx[i],4,0,chpx_wi,chpx_hi,ln,wi);
+		}
+	}
+private:
+	auto print_chpx(char*di,int chpx,const char color_fg,const char color_bg,const SizePx ch_width,const SizePx ch_height,const SizePx line_inc,const SizePx scr_wi)->char*{
+		for(int y=0;y<ch_height;y++){
+			for(int x=0;x<ch_width;x++){
+				chpx<<=1;
+				*di=chpx<0?color_fg:color_bg;
+				di++;
+			}
+			di+=line_inc;
+		}
+		di=di-scr_wi*ch_height+ch_width;
+		return di;
+	}
 };
 
 using PositionPx=CoordsPx;
