@@ -15,8 +15,7 @@
 // F0000-FFFFF  BIOS ROM
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - intro
 asm(".set IDT,0x600");// interrupt descriptor table address
-asm(".set LOAD_SECTORS,0x1f");// 15½K
-//asm(".set LOAD_SECTORS,0x3f");// 31½K
+asm(".set LOAD_SECTORS,0x3f");// 31½K (the whole 1st cylinder)
 //asm(".set PROG_SIZE,0x200+LOAD_SECTORS*0x200");
 asm(".global osca_key");// last pressed key
 asm(".global osca_t");// lower ticker value

@@ -103,23 +103,23 @@ public:
 	}
 };
 
-static const int BitmapHexPrinter_chars[]{
-	static_cast<int>(0b0'01100'10010'10010'10010'01100'00000'0), // 0
-	static_cast<int>(0b0'00100'01100'00100'00100'01110'00000'0), // 1
-	static_cast<int>(0b0'01100'10010'00100'01000'11110'00000'0), // 2
-	static_cast<int>(0b0'11100'00010'11100'00010'11100'00000'0), // 3
-	static_cast<int>(0b0'00010'00110'01010'11110'00010'00000'0), // 4
-	static_cast<int>(0b0'11110'10000'11110'00010'11100'00000'0), // 5
-	static_cast<int>(0b0'01100'10000'11100'10010'01100'00000'0), // 6
-	static_cast<int>(0b0'11110'00010'00100'01000'01000'00000'0), // 7
-	static_cast<int>(0b0'01100'10010'01100'10010'01100'00000'0), // 8
-	static_cast<int>(0b0'01100'10010'01110'00010'01100'00000'0), // 9
-	static_cast<int>(0b0'01100'10010'11110'10010'10010'00000'0), // A
-	static_cast<int>(0b0'11100'10010'11100'10010'11100'00000'0), // B
-	static_cast<int>(0b0'01110'10000'10000'10000'01110'00000'0), // C
-	static_cast<int>(0b0'11100'10010'10010'10010'11100'00000'0), // D
-	static_cast<int>(0b0'11110'10000'11100'10000'11110'00000'0), // E
-	static_cast<int>(0b0'11110'10000'11100'10000'10000'00000'0), // F
+static const int BitmapHexPrinter_hex_font[]{
+		static_cast<int>(0b0'01100'10010'10010'10010'01100'00000'0), // 0
+		static_cast<int>(0b0'00100'01100'00100'00100'01110'00000'0), // 1
+		static_cast<int>(0b0'01100'10010'00100'01000'11110'00000'0), // 2
+		static_cast<int>(0b0'11100'00010'11100'00010'11100'00000'0), // 3
+		static_cast<int>(0b0'00010'00110'01010'11110'00010'00000'0), // 4
+		static_cast<int>(0b0'11110'10000'11110'00010'11100'00000'0), // 5
+		static_cast<int>(0b0'01100'10000'11100'10010'01100'00000'0), // 6
+		static_cast<int>(0b0'11110'00010'00100'01000'01000'00000'0), // 7
+		static_cast<int>(0b0'01100'10010'01100'10010'01100'00000'0), // 8
+		static_cast<int>(0b0'01100'10010'01110'00010'01100'00000'0), // 9
+		static_cast<int>(0b0'01100'10010'11110'10010'10010'00000'0), // A
+		static_cast<int>(0b0'11100'10010'11100'10010'11100'00000'0), // B
+		static_cast<int>(0b0'01110'10000'10000'10000'01110'00000'0), // C
+		static_cast<int>(0b0'11100'10010'10010'10010'11100'00000'0), // D
+		static_cast<int>(0b0'11110'10000'11100'10000'11110'00000'0), // E
+		static_cast<int>(0b0'11110'10000'11100'10000'10000'00000'0), // F
 };
 
 using Row=Size;
@@ -173,8 +173,8 @@ public:
 		di_=di_-bmp_wi_*font_hi_+font_wi_;
 		return*this;
 	}
-	inline auto print_space()->BitmapHexPrinter&{print_pixels(0b0'00000'00000'00000'00000'00000'00000'0);return*this;}
-	inline auto print_hex_char(int hex_number_4b)->BitmapHexPrinter&{print_pixels(BitmapHexPrinter_chars[hex_number_4b&15]);return*this;}
+	auto print_space()->BitmapHexPrinter&{print_pixels(0b0'00000'00000'00000'00000'00000'00000'0);return*this;}
+	auto print_hex_char(int hex_number_4b)->BitmapHexPrinter&{print_pixels(BitmapHexPrinter_hex_font[hex_number_4b&15]);return*this;}
 	auto print_hex_8b(unsigned char v)->BitmapHexPrinter&{
 		const int lower=v&0xf;
 		const int higher=(v>>4)&0xf;
@@ -212,6 +212,41 @@ public:
 		print_hex_char(ch1);
 		return*this;
 	}
+};
+
+// from https://stackoverflow.com/questions/61124564/convert-scancodes-to-ascii
+static const char table_scancode_to_ascii[]{
+    0,  27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',
+  '\t', /* <-- Tab */
+  'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',
+    0, /* <-- control key */
+  'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',  0, '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/',   0,
+  '*',
+    0,  /* Alt */
+  ' ',  /* Space bar */
+    0,  /* Caps lock */
+    0,  /* 59 - F1 key ... > */
+    0,   0,   0,   0,   0,   0,   0,   0,
+    0,  /* < ... F10 */
+    0,  /* 69 - Num lock*/
+    0,  /* Scroll Lock */
+    0,  /* Home key */
+    0,  /* Up Arrow */
+    0,  /* Page Up */
+  '-',
+    0,  /* Left Arrow */
+    0,
+    0,  /* Right Arrow */
+  '+',
+    0,  /* 79 - End key*/
+    0,  /* Down Arrow */
+    0,  /* Page Down */
+    0,  /* Insert Key */
+    0,  /* Delete Key */
+    0,   0,   0,
+    0,  /* F11 Key */
+    0,  /* F12 Key */
+    0,  /* All other keys are undefined */
 };
 
 class Vga13h{

@@ -8,7 +8,7 @@ CW=-Wfatal-errors -Werror -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Wpadde
  -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast\
  -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel\
  -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
-CF= -O3 -fanalyzer -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-stack-protector\
+CF=-O3 -fanalyzer -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-stack-protector\
  -Wl,--oformat,binary -Wl,-Ttext,0x7c00
 
 # usb device
@@ -23,7 +23,7 @@ build:
 	
 print:
 	@pwd
-	@du -bh $(BIN) $(SRC)
+	@du -b $(BIN) $(SRC)
 	@echo
 	@echo wc source
 	@wc $(SRC)
