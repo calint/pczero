@@ -26,14 +26,14 @@ public:
 	inline auto write_short(const short v){*static_cast<short*>(a_)=v;}
 	inline auto write_int(const int v){*static_cast<int*>(a_)=v;}
 	inline auto write_long(const long v){*static_cast<long*>(a_)=v;}
-	inline auto offset(const OffsetBytes v)const->Pointer{return Pointer{static_cast<char*>(a_)+v};}
+	inline auto offset(const OffsetBytes sb)const->Pointer{return Pointer{static_cast<char*>(a_)+sb};}
 };
 
 class Data{
 	Pointer p_;
 	SizeBytes s_;
 public:
-	inline Data(const Address a,const SizeBytes bytes):p_{a},s_{bytes}{}
+	inline Data(const Address a,const SizeBytes sb):p_{a},s_{sb}{}
 	inline auto to(const Data&d)const{pz_memcpy(p_.address(),d.begin().address(),s_);}
 	inline auto to(const Data&d,const SizeBytes bytes)const{pz_memcpy(p_.address(),d.begin().address(),bytes);}
 	inline auto size()const->SizeBytes{return s_;}
