@@ -241,7 +241,7 @@ static const int table_ascii_to_font[]{
 using Row=Size;
 using Column=Size;
 using Color8b=char;
-class BitmapPrinter{
+class PrinterToBitmap{
 	char*di_; // current pixel in bitmap
 	char*dil_; // beginning of current line
 	const Bitmap&b_;
@@ -254,7 +254,7 @@ class BitmapPrinter{
 	bool transparent_; // ? implement
 	char padding2_;
 public:
-	inline BitmapPrinter(const Bitmap&b):
+	inline PrinterToBitmap(const Bitmap&b):
 		di_{static_cast<char*>(b.data().begin().address())},
 		dil_{di_},
 		b_{b},
@@ -267,17 +267,17 @@ public:
 		transparent_{false},
 		padding2_{0}
 	{}
-	inline auto pos(Row r,Column c)->BitmapPrinter&{
+	inline auto pos(Row r,Column c)->PrinterToBitmap&{
 		di_=static_cast<char*>(b_.data().begin().address());
 		di_+=bmp_wi_*r*font_hi_+c*font_wi_;
 		dil_=di_;
 		return*this;
 	}
-	inline auto pos_next_line()->BitmapPrinter&{di_=dil_+bmp_wi_*font_hi_;return*this;}
-	inline auto pos_start_of_line()->BitmapPrinter&{di_=dil_;return*this;}
-	inline auto foreground(Color8b c)->BitmapPrinter&{color_fg_=c;return*this;}
-	inline auto background(Color8b c)->BitmapPrinter&{color_bg_=c;return*this;}
-	auto print_pixels(int fpx)->BitmapPrinter&{
+	inline auto pos_next_line()->PrinterToBitmap&{di_=dil_+bmp_wi_*font_hi_;return*this;}
+	inline auto pos_start_of_line()->PrinterToBitmap&{di_=dil_;return*this;}
+	inline auto foreground(Color8b c)->PrinterToBitmap&{color_fg_=c;return*this;}
+	inline auto background(Color8b c)->PrinterToBitmap&{color_bg_=c;return*this;}
+	auto print_pixels(int fpx)->PrinterToBitmap&{
 		for(int y=0;y<font_hi_;y++){
 			for(int x=0;x<font_wi_;x++){
 				fpx<<=1;
@@ -290,15 +290,15 @@ public:
 		return*this;
 	}
 //	auto print_space()->BitmapHexPrinter&{print_char(' ');return*this;}
-	auto print_hex_char(int hex_number_4b)->BitmapPrinter&{print_pixels(table_hex_to_font[hex_number_4b&15]);return*this;}
-	auto print_hex_8b(unsigned char v)->BitmapPrinter&{
+	auto print_hex_char(int hex_number_4b)->PrinterToBitmap&{print_pixels(table_hex_to_font[hex_number_4b&15]);return*this;}
+	auto print_hex_8b(unsigned char v)->PrinterToBitmap&{
 		const int ch1=v&0xf;
 		const int ch2=(v>>4)&0xf;
 		print_hex_char(ch2);
 		print_hex_char(ch1);
 		return*this;
 	}
-	auto print_hex_16b(unsigned short v)->BitmapPrinter&{
+	auto print_hex_16b(unsigned short v)->PrinterToBitmap&{
 		const int ch1=v&0xf;v>>=4;
 		const int ch2=v&0xf;v>>=4;
 		const int ch3=v&0xf;v>>=4;
@@ -309,7 +309,7 @@ public:
 		print_hex_char(ch1);
 		return*this;
 	}
-	auto print_hex_32b(unsigned int v)->BitmapPrinter&{
+	auto print_hex_32b(unsigned int v)->PrinterToBitmap&{
 		const int ch1=v&0xf;v>>=4;
 		const int ch2=v&0xf;v>>=4;
 		const int ch3=v&0xf;v>>=4;
@@ -328,12 +328,12 @@ public:
 		print_hex_char(ch1);
 		return*this;
 	}
-	auto print_char(char ch)->BitmapPrinter&{
+	auto print_char(char ch)->PrinterToBitmap&{
 		int pixels=table_ascii_to_font[static_cast<unsigned int>(ch)];
 		print_pixels(pixels);
 		return*this;
 	}
-	auto print_string(const char*s)->BitmapPrinter&{
+	auto print_string(const char*s)->PrinterToBitmap&{
 		while(*s){
 			print_char(*s);
 			s++;
