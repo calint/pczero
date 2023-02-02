@@ -10,10 +10,10 @@
 [ ]   collision detection
 [ ]     with background
 [ ]     with other sprites
-[ ] 5x6 font (30 bits/character)
+[o] 5x6 font (30 bits/character)
 [ ]   c code generated from font file
-[ ] inline assembler character renderer
-[ ] print hex numbers
+[x] inline assembler character renderer. written in C++.
+[x] print hex numbers
 [ ] input text
 [ ]   scan code to ascii
 
