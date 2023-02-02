@@ -119,7 +119,7 @@ extern "C" void tsk5(){
 	for(char i='a';i<='z';i++){
 		pb.print_char(i);
 	}
-	pb.print_space();
+	pb.print_char(' ');
 	pb.foreground(6).print_string("hello world");
 
 	pb.pos(1,10).foreground(4).background(0);
@@ -131,10 +131,10 @@ extern "C" void tsk5(){
 //	pb.print_hex_32b(0x01234567);
 
 	while(true){
-		pb.foreground(4).print_hex_8b(static_cast<unsigned char>(osca_key)).print_space();
+		pb.foreground(4).print_hex_8b(static_cast<unsigned char>(osca_key)).print_char(' ');
 		char ascii=table_scancode_to_ascii[static_cast<int>(osca_key)];
-		pb.foreground(3).print_hex_8b(static_cast<unsigned char>(ascii)).print_space();
-		pb.foreground(2).print_char(ascii).print_space();
+		pb.foreground(3).print_hex_8b(static_cast<unsigned char>(ascii)).print_char(' ');
+		pb.foreground(2).print_char(ascii).print_char(' ');
 		pb.pos_start_of_line();
 
 		bitmaps[0].to(dbmp,CoordsPx{x_prv,44});

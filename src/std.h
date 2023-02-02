@@ -293,13 +293,13 @@ public:
 		di_=di_-bmp_wi_*font_hi_+font_wi_;
 		return*this;
 	}
-	auto print_space()->BitmapHexPrinter&{print_pixels(0b0'00000'00000'00000'00000'00000'00000'0);return*this;}
+//	auto print_space()->BitmapHexPrinter&{print_char(' ');return*this;}
 	auto print_hex_char(int hex_number_4b)->BitmapHexPrinter&{print_pixels(BitmapHexPrinter_hex_font[hex_number_4b&15]);return*this;}
 	auto print_hex_8b(unsigned char v)->BitmapHexPrinter&{
-		const int lower=v&0xf;
-		const int higher=(v>>4)&0xf;
-		print_hex_char(higher);
-		print_hex_char(lower);
+		const int ch1=v&0xf;
+		const int ch2=(v>>4)&0xf;
+		print_hex_char(ch2);
+		print_hex_char(ch1);
 		return*this;
 	}
 	auto print_hex_16b(unsigned short v)->BitmapHexPrinter&{
