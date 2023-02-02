@@ -148,13 +148,13 @@ asm(".word 0xaa55");// pc boot sector signature
 asm("sector2:");// 0x7e00
 asm("osca_t:.long 0x00000000");// tick lower
 asm("osca_t1:.long 0x00000000");// tick higher
-asm("osca_key:.long 0x00000000");// last key event
 asm("osca_tsk_a:.long tsk");// pointer to task record in task table
 asm("isr_tck_eax:.long 0x00000000");// used in isr_tck
 asm("isr_tck_ebx:.long 0x00000000");// ...
 asm("isr_tck_esp:.long 0x00000000");// ...
 asm("isr_tck_eip:.long 0x00000000");// ...
 asm("isr_tck_eflags:.long 0x00000000");//...
+asm("osca_key:.byte 0x00");// last key event
 //-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ierr
 asm(".align 16,0x90");
 asm("isr_err:");

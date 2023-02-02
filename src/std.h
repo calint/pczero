@@ -103,7 +103,7 @@ public:
 	}
 };
 
-static int BitmapHexPrinter_chars[]{
+static const int BitmapHexPrinter_chars[]{
 	static_cast<int>(0b0'01100'10010'10010'10010'01100'00000'0),
 	static_cast<int>(0b0'00100'01100'00100'00100'01110'00000'0),
 	static_cast<int>(0b0'01100'10010'00100'01000'11110'00000'0),
@@ -125,50 +125,50 @@ static int BitmapHexPrinter_chars[]{
 using Row=Size;
 using Column=Size;
 class BitmapHexPrinter{
-	char*di_;
-	char*dil_;
+	char*di_; // current pixel in bitmap
+	char*dil_; // beginning of current line
 	const Bitmap&b_;
-	const SizePx bwi_;
-	const SizePx ch_wi_;
-	const SizePx ch_hi_;
+	const SizePx bmp_wi_;
+	const SizePx font_wi_;
+	const SizePx font_hi_;
 	const SizePx ln_;
-	char color_fg;
-	char color_bg;
-	char padding1;
-	char padding2;
+	char color_fg_;
+	char color_bg_;
+	bool transparent_;
+	char padding2_;
 public:
 	inline BitmapHexPrinter(const Bitmap&b):
 		di_{static_cast<char*>(b.data().begin().address())},
 		dil_{di_},
 		b_{b},
-		bwi_{b.dim().width()},
-		ch_wi_{5},
-		ch_hi_{6},
-		ln_{bwi_-ch_wi_},
-		color_fg{2},
-		color_bg{0},
-		padding1{0},
-		padding2{0}
+		bmp_wi_{b.dim().width()},
+		font_wi_{5},
+		font_hi_{6},
+		ln_{bmp_wi_-font_wi_},
+		color_fg_{2},
+		color_bg_{0},
+		transparent_{false},
+		padding2_{0}
 	{}
 	inline auto pos(Row r,Column c){
 		di_=static_cast<char*>(b_.data().begin().address());
-		di_+=bwi_*r*ch_hi_+c*ch_wi_;
+		di_+=bmp_wi_*r*font_hi_+c*font_wi_;
 		dil_=di_;
 	}
-	inline auto pos_next_line(){di_=dil_+bwi_*ch_hi_;}
+	inline auto pos_next_line(){di_=dil_+bmp_wi_*font_hi_;}
 	inline auto pos_start_of_line(){di_=dil_;}
-	inline auto set_foreground_color(char c){color_fg=c;}
-	inline auto set_backgrouond_color(char c){color_bg=c;}
+	inline auto set_foreground_color(char c){color_fg_=c;}
+	inline auto set_background_color(char c){color_bg_=c;}
 	auto print_pixels(int fpx){
-		for(int y=0;y<ch_hi_;y++){
-			for(int x=0;x<ch_wi_;x++){
+		for(int y=0;y<font_hi_;y++){
+			for(int x=0;x<font_wi_;x++){
 				fpx<<=1;
-				*di_=fpx<0?color_fg:color_bg;
+				*di_=fpx<0?color_fg_:color_bg_;
 				di_++;
 			}
 			di_+=ln_;
 		}
-		di_=di_-bwi_*ch_hi_+ch_wi_;
+		di_=di_-bmp_wi_*font_hi_+font_wi_;
 	}
 	inline auto print_space(){print_pixels(0b0'00000'00000'00000'00000'00000'00000'0);}
 	inline auto print_hex_char(int hex_number_4b){print_pixels(BitmapHexPrinter_chars[hex_number_4b&15]);}
