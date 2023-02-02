@@ -29,13 +29,13 @@ public:
 	inline auto offset(const Offset nbytes)const->Pointer{return Pointer{static_cast<char*>(a_)+nbytes};}
 };
 
-class Span{
+class Memmory{
 	Pointer p_;
 	Size s_;
 public:
-	inline Span(const Address a,const Size bytes):p_{a},s_{bytes}{}
-	inline auto to(const Span&s)const{pz_memcpy(p_.address(),s.begin().address(),s_);}
-	inline auto to(const Span&s,const Size bytes)const{pz_memcpy(p_.address(),s.begin().address(),bytes);}
+	inline Memmory(const Address a,const Size bytes):p_{a},s_{bytes}{}
+	inline auto to(const Memmory&m)const{pz_memcpy(p_.address(),m.begin().address(),s_);}
+	inline auto to(const Memmory&m,const Size bytes)const{pz_memcpy(p_.address(),m.begin().address(),bytes);}
 	inline auto size_B()const->Size{return s_;}
 	inline auto begin()const->Pointer{return p_;}
 	inline auto pointer()const->Pointer{return p_;}
@@ -77,15 +77,15 @@ using Pixels=int;
 using DimensionPx=DimensionT<Pixels>;
 
 class Bitmap{
-	Span s_;
 	DimensionPx d_;
+	Memmory m_;
 public:
-	inline Bitmap(const Address a,const DimensionPx&px):s_{a,px.width()*px.height()},d_{px}{}
+	inline Bitmap(const Address a,const DimensionPx&px):d_{px},m_{a,px.width()*px.height()}{}
 	inline auto dim_px()const->const DimensionPx&{return d_;}
-	inline auto span()const->const Span&{return s_;}
+	inline auto mem()const->const Memmory&{return m_;}
 	auto to(const Bitmap&dst,const CoordsPx&c)const{
-		char*si=static_cast<char*>(s_.begin().address());
-		char*di=static_cast<char*>(dst.s_.begin().address());
+		char*si=static_cast<char*>(m_.begin().address());
+		char*di=static_cast<char*>(dst.m_.begin().address());
 		di+=c.y()*dst.dim_px().width()+c.x();
 		const int ln=dst.dim_px().width()-d_.width();
 		const int h=d_.height();
@@ -121,8 +121,8 @@ class Sprite{
 public:
 	inline Sprite(const Bitmap&b,const Position&p,const Velocity&v,const Acceleration&a):b_{b},p_{p},v_{v},a_{a}{}
 	auto to(const Bitmap&dst)const{
-		const char*si=static_cast<const char*>(b_.span().begin().address());
-		char*di=static_cast<char*>(dst.span().begin().address());
+		const char*si=static_cast<const char*>(b_.mem().begin().address());
+		char*di=static_cast<char*>(dst.mem().begin().address());
 		PositionPx p{static_cast<CoordPx>(p_.x()),static_cast<CoordPx>(p_.y())};
 		di+=p.y()*dst.dim_px().width()+p.x();
 		const int ln=dst.dim_px().width()-b_.dim_px().width();
