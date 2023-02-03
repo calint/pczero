@@ -186,14 +186,14 @@ extern "C" void tsk5(){
 			}
 		}
 		pb.fg(7).pos(5,10).transparent(true).p("transparent");
-		osca_yield();
+//		osca_yield();
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk6(){
 	const Vga13h dsp;
 	while(true){
-		osca_yield();
+//		osca_yield();
 //		*(int*)(0xa0000+320-4)=osca_t;
 		dsp.bmp().data().begin().offset(8).write(osca_t);
 	}
@@ -201,14 +201,14 @@ extern "C" void tsk6(){
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk7(){
 	while(true){
-		osca_yield();
+//		osca_yield();
 		// copy kernel to screen
 		Data src=Data(Address(0x07c00),512*3);// kernel binary
 		Data dst1=Data(Address(0x100000),512*3);// to odd meg testing a20 enabled line
 		Data dst2=Data(Address(0xa0000+320*150),512*3);// on screen line 150
 //		Data dst2=Data(Address(0xabb80),512*3);// on screen line 150
 		src.to(dst1);
-		osca_yield();
+//		osca_yield();
 		dst1.to(dst2);
 	}
 }
