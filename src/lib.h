@@ -159,6 +159,7 @@ static const char table_scancode_to_ascii[256]{
 		0,  /* All other keys are undefined */
 };
 // 0e - backspace
+// 1c - return
 
 static const int table_ascii_to_font[]{
 		0,0,0,0,0,0,0,0,0,0,
@@ -311,7 +312,7 @@ public:
 		dil_=di_;
 		return*this;
 	}
-	inline auto nl()->PrinterToBitmap&{di_=dil_+bmp_wi_*font_hi_;return*this;}
+	inline auto nl()->PrinterToBitmap&{di_=dil_+bmp_wi_*(font_hi_+2);dil_=di_;return*this;}
 	inline auto cr()->PrinterToBitmap&{di_=dil_;return*this;}
 	inline auto fg(const Color8b c)->PrinterToBitmap&{fg_=c;return*this;}
 	inline auto bg(const Color8b c)->PrinterToBitmap&{bg_=c;return*this;}

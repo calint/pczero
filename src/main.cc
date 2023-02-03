@@ -2,9 +2,9 @@
 #include "lib.h"
 
 extern "C" void tsk0();
-extern "C" void tsk5();
-extern "C" void tsk6();
-extern "C" void tsk7();
+extern "C" void tsk2();
+extern "C" void tsk3();
+extern "C" void tsk4();
 
 class{
 	unsigned char buf[0x10]; // minimum size 2
@@ -23,22 +23,8 @@ public:
 	}
 	// returns keyboard scan code or 0 if no more events.
 	auto get_next_key_code()->unsigned char{
-		// ?! clang++ and g++ breaks with -O2,-O3,-Os,-Osize if no instruction here
-		// works with -O0,-O1,-Og
-//		asm("nop");
-
-		// in g++ a label here is enough to make it work
-//		asm("get_next_key:");
-
-		// .align 0, 1 2 4 8 16 makes it work in g++ and clang++
-//		asm(".align 1,0x90");
-		// probably a bug in pczero since both g++ and clang++ generate the same problem
-		// tried running pczero without task switching, same problem
-
-//		*reinterpret_cast<int*>(0xa0000+100)=osca_key;
 		if(s==e)
 			return 0;
-//		*reinterpret_cast<int*>(0xa0000+110)=osca_key;
 		unsigned char ch=buf[s];
 		s++;
 		s&=sizeof(buf)-1;// roll
@@ -58,15 +44,20 @@ extern "C" void osca_keyb_ev(){
 extern "C" void tsk0(){
 	Vga13h dsp;
 	PrinterToBitmap pb{dsp.bmp()};
-	pb.pos(10,10).p('_');
+	pb.pos(10,5);
+	pb.p('_');
 	while(true){
 		// handle keyboard events
 		while(true){
 			const unsigned char sc=osca_keyb.get_next_key_code();
 			if(!sc)
 				break;
-			if(sc==0xe){
+			if(sc==0xe){ // backspace
 				pb.backspace().backspace().p('_');
+				continue;
+			}
+			if(sc==0x1c){ // return
+				pb.backspace().nl().p('_');
 				continue;
 			}
 			const char ch=table_scancode_to_ascii[sc];
@@ -79,7 +70,7 @@ extern "C" void tsk0(){
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-asm(".global tsk1,tsk2,tsk3,tsk4");
+asm(".global tsk1");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk1:");
@@ -87,23 +78,28 @@ asm("  addl $2,0xa0044");
 asm("  hlt");
 asm("  jmp tsk1");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-asm(".align 16");
-asm("tsk2:");
-asm("  addl $2,0xa0048");
-asm("  hlt");
-asm("  jmp tsk2");
+extern "C" void tsk2(){
+	while(true){
+//		osca_yield();
+		// copy kernel to screen
+		Data src=Data(Address(0x07c00),512*3);// kernel binary
+		Data dst1=Data(Address(0x100000),512*3);// to odd meg testing a20 enabled line
+		Data dst2=Data(Address(0xa0000+320*150),512*3);// on screen line 150
+//		Data dst2=Data(Address(0xabb80),512*3);// on screen line 150
+		src.to(dst1);
+//		osca_yield();
+		dst1.to(dst2);
+	}
+}
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-asm(".align 16");
-asm("tsk3:");
-asm("  addl $2,0xa004c");
-asm("  hlt");
-asm("  jmp tsk3");
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-asm(".align 16");
-asm("tsk4:");
-asm("  addl $2,0xa0050");
-asm("  hlt");
-asm("  jmp tsk4");
+extern "C" void tsk3(){
+	const Vga13h dsp;
+	while(true){
+//		osca_yield();
+//		*(int*)(0xa0000+320-4)=osca_t;
+		dsp.bmp().data().begin().offset(8).write(osca_t);
+	}
+}
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 static char bmp0[]{
 	0,1,1,0,
@@ -129,7 +125,7 @@ static char bmp3[]{
 	4,4,4,4,
 	0,4,4,0,
 };
-extern "C" void tsk5(){
+extern "C" void tsk4(){
 	static Vga13h dsp;
 	static const Bitmap&dbmp=dsp.bmp();
 	static PrinterToBitmap pb{dbmp};
@@ -195,29 +191,6 @@ extern "C" void tsk5(){
 		}
 		pb.fg(7).pos(5,10).transparent(true).p("transparent");
 //		osca_yield();
-	}
-}
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk6(){
-	const Vga13h dsp;
-	while(true){
-//		osca_yield();
-//		*(int*)(0xa0000+320-4)=osca_t;
-		dsp.bmp().data().begin().offset(8).write(osca_t);
-	}
-}
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk7(){
-	while(true){
-//		osca_yield();
-		// copy kernel to screen
-		Data src=Data(Address(0x07c00),512*3);// kernel binary
-		Data dst1=Data(Address(0x100000),512*3);// to odd meg testing a20 enabled line
-		Data dst2=Data(Address(0xa0000+320*150),512*3);// on screen line 150
-//		Data dst2=Data(Address(0xabb80),512*3);// on screen line 150
-		src.to(dst1);
-//		osca_yield();
-		dst1.to(dst2);
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
