@@ -6,10 +6,11 @@ extern "C" void tsk5();
 extern "C" void tsk6();
 extern "C" void tsk7();
 
-static struct {
+class{
 	unsigned char buf[0x10]; // minimum size 2
 	unsigned char s;
 	unsigned char e;
+public:
 	auto on_key(){
 		buf[e]=osca_key;
 		e++;
@@ -19,6 +20,7 @@ static struct {
 			e&=sizeof(buf)-1;
 		}
 	}
+	// return 0 if no more keys
 	auto get_next_key()->unsigned char{
 		// ?! clang++ and g++: breaks if not a nop here when -O2,-O3,-Os,-Osize. works with -O0,-O1,-Og
 //		asm("nop");
@@ -41,8 +43,8 @@ static struct {
 }osca_keyb;
 
 extern "C" void osca_keyb_ev(){
-	osca_keyb.on_key();
 	*(int*)(0xa0000+4)=osca_key;
+	osca_keyb.on_key();
 	static char*p=(char*)0xa4000;
 	*p++=(char)osca_key;
 }
