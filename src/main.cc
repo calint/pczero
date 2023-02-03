@@ -35,7 +35,7 @@ static struct {
 //		asm("get_next_key:");
 
 		// .align 0, 1 2 4 8 16 makes it work in g++ and clang++
-		asm(".align 0,0x90");
+		asm(".align 1,0x90");
 		// probably a bug in pczero because same problem with both g++ and clang++
 		// tried running pczero without task switching, same problem
 
