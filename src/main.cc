@@ -37,6 +37,7 @@ static struct {
 		// .align 0, 1 2 4 8 16 makes it work in g++ and clang++
 		asm(".align 0,0x90");
 		// probably a bug in pczero because same problem with both g++ and clang++
+		// tried running pczero without task switching, same problem
 
 		if(s==e)
 			return 0;
@@ -206,24 +207,6 @@ extern "C" void tsk6(){
 extern "C" void tsk7(){
 	while(true){
 		osca_yield();
-	}
-}
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk8(){
-	while(true){
-		osca_yield();
-	}
-}
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk9(){
-	while(true){
-		osca_yield();
-	}
-}
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk10(){
-	while(true){
-		osca_yield();
 		// copy kernel to screen
 		Data src=Data(Address(0x07c00),512*3);// kernel binary
 		Data dst1=Data(Address(0x100000),512*3);// to odd meg testing a20 enabled line
@@ -235,57 +218,3 @@ extern "C" void tsk10(){
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk11(){
-	while(true){
-		osca_yield();
-	}
-}
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk12(){
-	while(true){
-		osca_yield();
-	}
-}
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk13(){
-	while(true){
-		osca_yield();
-	}
-}
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk14(){
-	while(true){
-		osca_yield();
-	}
-}
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk15(){
-	while(true){
-		osca_yield();
-	}
-}
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-//extern "C" void tsk16(){
-//	while(true){
-//		osca_yield();
-//	}
-//}
-//// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-//extern "C" void tsk17(){
-//	while(true){
-//		osca_yield();
-//	}
-//}
-//// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-//extern "C" void tsk18(){
-//	while(true){
-//		osca_yield();
-//	}
-//}
-//// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-//extern "C" void tsk19(){
-//	while(true){
-//		osca_yield();
-//	}
-//}
-//// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
