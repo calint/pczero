@@ -22,7 +22,8 @@ public:
 	}
 	// return 0 if no more keys
 	auto get_next_key()->unsigned char{
-		// ?! clang++ and g++: breaks if not a nop here when -O2,-O3,-Os,-Osize. works with -O0,-O1,-Og
+		// ?! clang++ and g++: breaks if not an instruction here when -O2,-O3,-Os,-Osize
+		// works with -O0,-O1,-Og
 //		asm("nop");
 
 		// in g++ a label here is enough to make it work
@@ -30,7 +31,7 @@ public:
 
 		// .align 0, 1 2 4 8 16 makes it work in g++ and clang++
 		asm(".align 1,0x90");
-		// probably a bug in pczero because same problem with both g++ and clang++
+		// probably a bug in pczero since both g++ and clang++ have same problem
 		// tried running pczero without task switching, same problem
 
 		if(s==e)
