@@ -32,7 +32,7 @@ public:
 
 		// .align 0, 1 2 4 8 16 makes it work in g++ and clang++
 //		asm(".align 1,0x90");
-		// probably a bug in pczero since both g++ and clang++ have same problem
+		// probably a bug in pczero since both g++ and clang++ generate same problem
 		// tried running pczero without task switching, same problem
 
 		if(s==e)
