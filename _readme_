@@ -1,7 +1,9 @@
 2023-01-31:
   built with g++ (Ubuntu 12.2.0-3ubuntu1) 12.2.0
-  tested on QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
-  tested on asus zenbook
+
+  tested on:
+    QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
+    asus zenbook
 
   note: the files have to be linked in the order they appear in the binary.
         eclipse sorts the source files thus filename for boot code (boot.S)

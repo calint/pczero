@@ -1,5 +1,5 @@
-#include "boot.h"
-#include "std.h"
+#include "osca.h"
+#include "lib.h"
 
 extern "C" void osca_keyb_ev(){
 	*(int*)(0xa0000+320-8)=osca_key;
