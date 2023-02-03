@@ -1,3 +1,4 @@
+[ ] review const correctness regarding const bmp.data.begin.address then write to pointer
 [x] inline assembler for pz_memcpy
 [ ]   clobbers memory?
 [ ]   movsl,movsw,movsb optimization?
