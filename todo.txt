@@ -1,11 +1,16 @@
 [x] inline assembler for pz_memcpy
 [ ]   clobbers memory?
-[ ]   movsl,movsw,movsb optimization
+[ ]   movsl,movsw,movsb optimization?
 [x] test writing to second meg to confirm enabling of a20 line
 [x]   is enabled by default in qemu and on asus zenbook
-[ ] key event to task
-[ ]   ring buffer pointer in task record
-[ ] bitmap
+[ ] kernel events to task
+[ ]   pointer to task record of focused task
+[ ]   in task record - pointer to ring buffer of events
+[ ]   keyboard event
+[ ]     {byte event=key,byte scan_code,byte pad} 2B
+[ ] task event loop
+[ ]   task.next_event()->short* // pointer to next event or 0 if done
+[x] bitmap
 [ ]   optimized for 32b memcpy?
 [o] sprite with transparency
 [ ]   collision detection
@@ -22,3 +27,7 @@
 [x]   strings
 [ ]   integers
 [ ] input text
+[ ] pointing device
+[ ]   events
+[ ]     {byte event=move,byte pad,short x,short y} 6B
+[ ]     {byte event=click,byte btn} 2B
