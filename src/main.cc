@@ -23,7 +23,7 @@ public:
 	}
 	// returns keyboard scan code or 0 if no more events.
 	auto get_next_key_code()->unsigned char{
-		// ?! clang++ and g++: breaks with -O2,-O3,-Os,-Osize if not an instruction here when
+		// ?! clang++ and g++ breaks with -O2,-O3,-Os,-Osize if no instruction here
 		// works with -O0,-O1,-Og
 //		asm("nop");
 
@@ -32,7 +32,7 @@ public:
 
 		// .align 0, 1 2 4 8 16 makes it work in g++ and clang++
 //		asm(".align 1,0x90");
-		// probably a bug in pczero since both g++ and clang++ generate same problem
+		// probably a bug in pczero since both g++ and clang++ generate the same problem
 		// tried running pczero without task switching, same problem
 
 		if(s==e)
