@@ -4,13 +4,13 @@ using Address=void*;
 using Size=int;
 using SizeBytes=Size;
 
-inline void pz_memcpy(Address from,Address to,SizeBytes nbytes){
+inline void pz_memcpy(Address from,Address to,SizeBytes n){
 	asm("movl %0,%%esi;"
 		"movl %1,%%edi;"
 		"movl %2,%%ecx;"
 		"rep movsb;"
 		:
-		:"r"(from),"r"(to),"r"(nbytes)
+		:"r"(from),"r"(to),"r"(n)
 		:"%esi","%edi","%ecx" // ? clobbers memory?
 	);
 }
