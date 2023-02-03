@@ -4,5 +4,5 @@
   tested on asus zenbook
 
   note: the files have to be linked in the order they appear in the binary.
-        eclipse sorts the source files thus filename for boot code (boot.cc)
+        eclipse sorts the source files thus filename for boot code (boot.S)
         must be first
