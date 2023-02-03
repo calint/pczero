@@ -86,9 +86,9 @@ static char bmp3[]{
 };
 
 extern "C" void tsk5(){
-//	static Bitmap screens[]{
-//		{Addr(0xa0000),320,200},
-//	};
+	static Vga13h dsp;
+	static const Bitmap&dbmp=dsp.bmp();
+	static PrinterToBitmap pb{dbmp};
 	static Bitmap bitmaps[]{
 		{Address{bmp0},DimensionPx{4,4}},
 		{Address{bmp1},DimensionPx{4,4}},
@@ -101,12 +101,9 @@ extern "C" void tsk5(){
 		{bitmaps[2],Position{40.0f,25.f},Velocity{5,1.5f},Acceleration{0,0.5f}},
 		{bitmaps[3],Position{50.0f,25.f},Velocity{5,2.0f},Acceleration{0,0.5f}},
 	};
+
 	CoordPx x=24;
 	CoordPx x_prv=x;
-	Vga13h dsp;
-	const Bitmap&dbmp=dsp.bmp();
-
-	PrinterToBitmap pb{dbmp};
 	pb.pos(1,30);
 	for(int i=0;i<16;i++){
 		pb.p_hex(i);
