@@ -286,8 +286,8 @@ class PrinterToBitmap{
 	const SizePx font_wi_;
 	const SizePx font_hi_;
 	const SizePx ln_;
-	Color8b color_fg_;
-	Color8b color_bg_;
+	Color8b fg_;
+	Color8b bg_;
 	bool transparent_; // ? implement
 	char padding2_;
 public:
@@ -299,8 +299,8 @@ public:
 		font_wi_{5},
 		font_hi_{6},
 		ln_{bmp_wi_-font_wi_},
-		color_fg_{2},
-		color_bg_{0},
+		fg_{2},
+		bg_{0},
 		transparent_{false},
 		padding2_{0}
 	{}
@@ -312,13 +312,13 @@ public:
 	}
 	inline auto nl()->PrinterToBitmap&{di_=dil_+bmp_wi_*font_hi_;return*this;}
 	inline auto cr()->PrinterToBitmap&{di_=dil_;return*this;}
-	inline auto fg(const Color8b c)->PrinterToBitmap&{color_fg_=c;return*this;}
-	inline auto bg(const Color8b c)->PrinterToBitmap&{color_bg_=c;return*this;}
+	inline auto fg(const Color8b c)->PrinterToBitmap&{fg_=c;return*this;}
+	inline auto bg(const Color8b c)->PrinterToBitmap&{bg_=c;return*this;}
 	auto draw(int bmp_5x6)->PrinterToBitmap&{
 		for(int y=0;y<font_hi_;y++){
 			for(int x=0;x<font_wi_;x++){
 				bmp_5x6<<=1;
-				*di_=bmp_5x6<0?color_fg_:color_bg_;
+				*di_=bmp_5x6<0?fg_:bg_;
 				di_++;
 			}
 			di_+=ln_;
