@@ -22,8 +22,8 @@ public:
 		}
 	}
 	// returns keyboard scan code or 0 if no more events.
-	auto get_next_key()->unsigned char{
-		// ?! clang++ and g++: breaks if not an instruction here when -O2,-O3,-Os,-Osize
+	auto get_next_key_code()->unsigned char{
+		// ?! clang++ and g++: breaks with -O2,-O3,-Os,-Osize if not an instruction here when
 		// works with -O0,-O1,-Og
 //		asm("nop");
 
@@ -58,9 +58,9 @@ extern "C" void tsk0(){
 	PrinterToBitmap pb{dsp.bmp()};
 	pb.pos(10,10);
 	while(true){
-		// read keyboard
+		// handle keyboard events
 		while(true){
-			const unsigned char sc=osca_keyb.get_next_key();
+			const unsigned char sc=osca_keyb.get_next_key_code();
 			if(!sc)
 				break;
 			const char ch=table_scancode_to_ascii[sc];
