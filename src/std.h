@@ -314,16 +314,13 @@ public:
 	inline auto cr()->PrinterToBitmap&{di_=dil_;return*this;}
 	inline auto fg(const Color8b c)->PrinterToBitmap&{fg_=c;return*this;}
 	inline auto bg(const Color8b c)->PrinterToBitmap&{bg_=c;return*this;}
+	inline auto transparent(const bool b)->PrinterToBitmap&{transparent_=b;return*this;}
 	auto draw(int bmp_5x6)->PrinterToBitmap&{
-		for(int y=0;y<font_hi_;y++){
-			for(int x=0;x<font_wi_;x++){
-				bmp_5x6<<=1;
-				*di_=bmp_5x6<0?fg_:bg_;
-				di_++;
-			}
-			di_+=ln_;
+		if(transparent_){
+			draw_transparent(bmp_5x6);
+		}else{
+			draw_with_bg(bmp_5x6);
 		}
-		di_=di_-bmp_wi_*font_hi_+font_wi_;
 		return*this;
 	}
 	auto p_hex(const int hex_number_4b)->PrinterToBitmap&{
@@ -378,6 +375,34 @@ public:
 		}
 		return*this;
 	}
+private:
+	auto draw_with_bg(int bmp_5x6)->PrinterToBitmap&{
+		for(int y=0;y<font_hi_;y++){
+			for(int x=0;x<font_wi_;x++){
+				bmp_5x6<<=1;
+				*di_=bmp_5x6<0?fg_:bg_;
+				di_++;
+			}
+			di_+=ln_;
+		}
+		di_=di_-bmp_wi_*font_hi_+font_wi_;
+		return*this;
+	}
+	auto draw_transparent(int bmp_5x6)->PrinterToBitmap&{
+		for(int y=0;y<font_hi_;y++){
+			for(int x=0;x<font_wi_;x++){
+				bmp_5x6<<=1;
+				if(bmp_5x6<0){
+					*di_=fg_;
+				}
+				di_++;
+			}
+			di_+=ln_;
+		}
+		di_=di_-bmp_wi_*font_hi_+font_wi_;
+		return*this;
+	}
+
 };
 
 class Vga13h{

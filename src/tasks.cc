@@ -123,8 +123,6 @@ extern "C" void tsk5(){
 	pb.p("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
 	pb.fg(7).p(' ').p_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
-	pb.pos(1,10).fg(4).bg(0);
-
 	//	pb.print_hex_8b(0xab);
 //	pb.space();
 //	pb.print_hex_16b(0xcdef);
@@ -132,6 +130,7 @@ extern "C" void tsk5(){
 //	pb.print_hex_32b(0x01234567);
 
 	while(true){
+		pb.pos(1,10).bg(0);
 		pb.fg(4).p_hex_8b(osca_key).p(' ');
 		char ascii=table_scancode_to_ascii[static_cast<int>(osca_key)];
 		pb.fg(3).p_hex_8b(static_cast<unsigned char>(ascii)).p(' ');
@@ -165,6 +164,7 @@ extern "C" void tsk5(){
 				s.set_velocity(v);
 			}
 		}
+		pb.fg(7).pos(5,10).transparent(true).p("transparent");
 		osca_yield();
 	}
 }

@@ -2,23 +2,19 @@
 
 BIN=bin/pczero.img
 SRC=src/boot.cc src/tasks.cc
-CC=g++ -std=c++2a
-CW=-Wfatal-errors -Werror -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Wpadded -Winline\
- -pedantic -pedantic-errors -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization\
- -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast\
- -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel\
- -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
-CF=-O3 -fanalyzer -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-stack-protector\
- -Wl,--oformat,binary -Wl,-Ttext,0x7c00
 
-#CC=clang++
-#CW=-Wfatal-errors -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Wpadded -Winline\
-# -pedantic -pedantic-errors -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization\
-# -Wmissing-declarations -Wmissing-include-dirs\
-# -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo\
-# -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
+CC=g++ -std=c++2a -Wfatal-errors
+CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal\
+ -Wshadow -Wpadded -Winline
+CF=-O3 -fanalyzer -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-stack-protector\
+ -Wl,--oformat=binary,-Ttext=0x7c00
+
+#CC=clang++ -Wfatal-errors
+#CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wmissing-declarations -Wmissing-include-dirs -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wswitch-default -Wundef -Weffc++ -Wfloat-equal\
+# -Wshadow -Wpadded -Winline\
+# -Wno-unused-private-field
 #CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-stack-protector\
-# -Wl,--oformat,binary -Wl,-Ttext,0x7c00
+# -Wl,--oformat=binary,-Ttext=0x7c00
 
 # usb device
 INSTALL_TO=/dev/sda
