@@ -158,6 +158,7 @@ static const char table_scancode_to_ascii[256]{
 		0,  /* F12 Key */
 		0,  /* All other keys are undefined */
 };
+// 0e - backspace
 
 static const int table_ascii_to_font[]{
 		0,0,0,0,0,0,0,0,0,0,
@@ -375,6 +376,12 @@ public:
 			p(*s);
 			s++;
 		}
+		return*this;
+	}
+	auto backspace()->PrinterToBitmap&{
+		di_-=font_wi_;
+		p(' ');
+		di_-=font_wi_;
 		return*this;
 	}
 private:

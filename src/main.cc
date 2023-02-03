@@ -35,8 +35,10 @@ public:
 		// probably a bug in pczero since both g++ and clang++ generate the same problem
 		// tried running pczero without task switching, same problem
 
+//		*reinterpret_cast<int*>(0xa0000+100)=osca_key;
 		if(s==e)
 			return 0;
+//		*reinterpret_cast<int*>(0xa0000+110)=osca_key;
 		unsigned char ch=buf[s];
 		s++;
 		s&=sizeof(buf)-1;// roll
@@ -56,17 +58,21 @@ extern "C" void osca_keyb_ev(){
 extern "C" void tsk0(){
 	Vga13h dsp;
 	PrinterToBitmap pb{dsp.bmp()};
-	pb.pos(10,10);
+	pb.pos(10,10).p('_');
 	while(true){
 		// handle keyboard events
 		while(true){
 			const unsigned char sc=osca_keyb.get_next_key_code();
 			if(!sc)
 				break;
+			if(sc==0xe){
+				pb.backspace().backspace().p('_');
+				continue;
+			}
 			const char ch=table_scancode_to_ascii[sc];
 			if(!ch) // not an ascii. probably key release
 				continue;
-			pb.p(ch);
+			pb.backspace().p(ch).p('_');
 		}
 //		osca_yield();
 	}
