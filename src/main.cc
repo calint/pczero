@@ -17,8 +17,7 @@ public:
 		if(ne==s)// check overrun
 			return;// write would overwrite. display on status line?
 		buf[e]=ch;
-		e++;
-		e&=sizeof(buf)-1;// roll
+		e=ne;
 	}
 	// returns keyboard scan code or 0 if no more events.
 	auto get_next_key_code()->unsigned char{
