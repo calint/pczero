@@ -13,7 +13,7 @@
 # A0000-BFFFF  Video memory
 # C0000-EFFFF  Optional ROMs (The VGA ROM is usually located at C0000)
 # F0000-FFFFF  BIOS ROM
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - intro
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - intro
 .set IDT,0x600 # interrupt descriptor table address
 .set LOAD_SECTORS,0x3f # 31½K (the whole 1st cylinder)
 #.set PROG_SIZE,0x200+LOAD_SECTORS*0x200
@@ -22,7 +22,7 @@
 .global osca_t1 # high ticker value
 .global _start # export entry point
 #.text
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - bpb
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - bpb
 .code16 # boot in 16 bit mode
 _start:
 # jump over BIOS Parameter Block (BPB) because
@@ -38,7 +38,7 @@ mov %bx,%ds # data segment
 mov %dl,osca_drv_b # save boot drive
 mov %bx,%ss # setup stack
 mov $_start,%sp # at 0x7c00
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
 # %dl is the unchanged boot drive
 cld # clear direction (forward)
 mov $(0x0200+LOAD_SECTORS),%ax # command 2, 0x1f sectors
@@ -56,10 +56,10 @@ int $0x13 # read disks
 #  cli # hang
 #  hlt
 #1:
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - mode 13h
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - mode 13h
 mov $0x13,%ax # vga mode 320x200x8 bmp @ 0xa0000
 int $0x10
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - display
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - display
 #movw $0x0404,%es:0x100
 #mov $0xa000,%ax
 #mov %ax,%es
@@ -67,13 +67,13 @@ int $0x10
 #mov $0x7c00,%si
 #mov $PROG_SIZE>>1,%cx
 #rep movsw
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - a20
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - a20
 # enabled by default on non ancient pc?
 #movw $0x0404,%es:0x104
 #in $0x92,%al # enable a20 line (odd megs)
 #or $2,%al
 #out %al,$0x92
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 32b
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 32b
 #movw $0x0404,%es:0x108
 lgdt gdtr # load global descriptor tables
 mov %cr0,%eax # enter 32b protected mode
@@ -93,7 +93,7 @@ ivtr:.word 0x03ff
 idtr:.word 0x03ff
      .long IDT # idt address
 .align 8,0x90
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - protected mode
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - protected mode
 protected_mode:
 .code32
 mov $0x10,%ax
@@ -110,7 +110,7 @@ xor %edi,%edi
 xor %esi,%esi
 xor %ebp,%ebp
 #movw $0x0404,0xa0110
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
 #movw $0x0404,0xa0114
 mov $IDT,%ebx # idt address
 mov $0x40,%ecx # interrupt count
@@ -126,14 +126,14 @@ loop 1b
 movw $isr_tck,IDT+0x40 # only the lower offset
 movw $isr_kbd,IDT+0x48 #   handlers within 64K
 lidt idtr
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 #movw $0x0404,0xa4000
 mov osca_tsk_a,%ebx # ebx points to active task record
 # potential bug? because eflags not restored and registers in unknown state?)
 mov 4(%ebx),%esp # restore stack pointer
 sti # enable interrupts (racing?)
 jmp *(%ebx) # jmp to first task
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - vars
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - vars
 .align 16,0x90
 osca_drv_b:.byte 0x00 # boot drive
 #-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partition
@@ -144,7 +144,7 @@ osca_drv_b:.byte 0x00 # boot drive
 .space 16,0 # #3
 .space 16,0 # #4
 .word 0xaa55 # pc boot sector signature
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - interrupts
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - interrupts
 sector2: # 0x7e00
 osca_t:.long 0x00000000 # tick lower
 osca_t1:.long 0x00000000 # tick higher
@@ -155,13 +155,13 @@ isr_tck_esp:.long 0x00000000 # ...
 isr_tck_eip:.long 0x00000000 # ...
 isr_tck_eflags:.long 0x00000000 #...
 osca_key:.byte 0x00 # last key event
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ierr
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ierr
 .align 16,0x90
 isr_err:
   cli # pop error code and print it?
   incw 0xa0000
   jmp isr_err
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ikbd
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ikbd
 .align 16,0x90
 isr_kbd:
   cli # is disabling interrupts necessary?
@@ -177,7 +177,7 @@ isr_kbd:
   pop %ax # restore %ax
   sti # enable interrupts
   iret
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - itck
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - itck
 .align 16,0x90
 isr_tck:
   incl 0xa0000+320-4 # on screen, top right corner
@@ -235,9 +235,9 @@ isr_tck:
   pop %ax
   sti # enable interrupts
   jmp *isr_tck_eip # jmp to restored eip. racing?
-#.space sector2+512-.,0X90
+.space sector2+512-.,0X90
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - tasks
-#sector3: #0x8200 tasks state table
+# sector3: #0x8200 tasks state table
 .align 16,0x90
 tsk: # eip,  esp,       eflags,     bits,       edi        esi        ebp        esp0       ebx        edx        ecx        eax
   .long tsk0 ,0x000afa00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
