@@ -8,8 +8,8 @@ extern "C" void tsk4();
 
 class{
 	unsigned char buf[2<<4]; // minimum size 2 and a power of 2
-	unsigned char s;
-	unsigned char e;
+	unsigned char s; // next event index
+	unsigned char e; // last event index +1 & roll
 public:
 	// called by osca_keyb_ev
 	auto on_key(unsigned char ch){
@@ -23,7 +23,7 @@ public:
 	// returns keyboard scan code or 0 if no more events.
 	auto get_next_key_code()->unsigned char{
 		if(s==e)
-			return 0;
+			return 0; // no more events
 		const unsigned char ch=buf[s];
 		s++;
 		s&=sizeof(buf)-1;// roll
