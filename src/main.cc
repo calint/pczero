@@ -49,7 +49,7 @@ static struct {
 
 extern "C" void osca_keyb_ev(){
 	osca_keyb.on_key();
-	*(int*)(0xa0000+320-8)=osca_key;
+	*(int*)(0xa0000+4)=osca_key;
 	static char*p=(char*)0xa4000;
 	*p++=(char)osca_key;
 }
@@ -199,7 +199,7 @@ extern "C" void tsk6(){
 	while(true){
 		osca_yield();
 //		*(int*)(0xa0000+320-4)=osca_t;
-		dsp.bmp().data().begin().offset(320-4).write(osca_t);
+		dsp.bmp().data().begin().offset(8).write(osca_t);
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
