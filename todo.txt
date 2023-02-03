@@ -1,3 +1,6 @@
+[o] input text
+[x]   step 1. one keyboard buffer for the system
+[ ] investigate why any -O other than -O0 breaks osca_keyb.next_scan_code(). see comment in function.
 [ ] review const correctness regarding const bmp.data.begin.address then write to pointer
 [ ]   const Bitmap&dbmp=dsp.bmp(); then mutate data in const dbmp
 [x] extract boot.cc to boot.S
@@ -30,7 +33,6 @@
 [x]   characters
 [x]   strings
 [ ]   integers
-[ ] input text
 [ ] pointing device
 [ ]   events
 [ ]     {byte event=move,byte pad,short x,short y} 6B

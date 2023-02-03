@@ -125,7 +125,7 @@ static const int table_hex_to_font[]{
 };
 
 // from https://stackoverflow.com/questions/61124564/convert-scancodes-to-ascii
-static const char table_scancode_to_ascii[]{
+static const char table_scancode_to_ascii[256]{
 		0,27,'1','2','3','4','5','6','7','8','9','0','-','=','\b',
 		'\t', /* <-- Tab */
 		'q','w','e','r','t','y','u','i','o','p','[',']','\n',

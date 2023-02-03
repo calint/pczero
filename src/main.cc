@@ -1,12 +1,7 @@
 #include "osca.h"
 #include "lib.h"
 
-extern "C" void osca_keyb_ev(){
-	*(int*)(0xa0000+320-8)=osca_key;
-	static char*p=(char*)0xa4000;
-	*p++=(char)osca_key;
-}
-
+extern "C" void tsk0();
 extern "C" void tsk5();
 extern "C" void tsk6();
 extern "C" void tsk7();
@@ -18,17 +13,61 @@ extern "C" void tsk12();
 extern "C" void tsk13();
 extern "C" void tsk14();
 extern "C" void tsk15();
-//extern "C" void tsk16();
-//extern "C" void tsk17();
-//extern "C" void tsk18();
-//extern "C" void tsk19();
 
-asm(".global tsk0,tsk1,tsk2,tsk3,tsk4");
+static struct {
+	unsigned char buf[0x10]; // minimum size 2
+	unsigned char s;
+	unsigned char e;
+	auto put(){
+		buf[e]=osca_key;
+		e++;
+		e&=sizeof(buf)-1;// roll
+		if(e==s){ // check overrun
+			e--;
+			e&=sizeof(buf)-1;
+		}
+	}
+	auto next()->unsigned char{
+//		asm("nop"); // ?! sometimes breaks if not a nop here when -O3. works with -O0
+		if(s==e)
+			return 0;
+		unsigned char ch=buf[s];
+		s++;
+		s&=sizeof(buf)-1;// roll
+		return ch;
+	}
+}osca_keyb;
+
+extern "C" void osca_keyb_ev(){
+	osca_keyb.put();
+	*(int*)(0xa0000+320-8)=osca_key;
+	static char*p=(char*)0xa4000;
+	*p++=(char)osca_key;
+}
+
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-asm(".align 16");
-asm("tsk0:");
-asm("  hlt");
-asm("  jmp tsk0");
+extern "C" void tsk0(){
+	static Vga13h dsp;
+	static const Bitmap&dbmp=dsp.bmp();
+	static PrinterToBitmap pb2{dbmp};
+	pb2.pos(10,10);
+	while(true){
+		// read keyboard
+		while(true){
+			const unsigned char sc=osca_keyb.next();
+			if(!sc)
+				break;
+			const char ch=table_scancode_to_ascii[sc];
+			if(!ch) // key release
+				continue;
+			pb2.p(ch);
+		}
+//		osca_yield();
+	}
+}
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+asm(".global tsk1,tsk2,tsk3,tsk4");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk1:");
@@ -54,12 +93,6 @@ asm("  addl $2,0xa0050");
 asm("  hlt");
 asm("  jmp tsk4");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-//	static char sprite_clear[]{
-//			0,0,0,0,
-//			0,0,0,0,
-//			0,0,0,0,
-//			0,0,0,1,
-//	};
 static char bmp0[]{
 	0,1,1,0,
 	1,1,1,1,
@@ -84,11 +117,11 @@ static char bmp3[]{
 	4,4,4,4,
 	0,4,4,0,
 };
-
 extern "C" void tsk5(){
 	static Vga13h dsp;
 	static const Bitmap&dbmp=dsp.bmp();
 	static PrinterToBitmap pb{dbmp};
+	static PrinterToBitmap pb2{dbmp};
 	static Bitmap bitmaps[]{
 		{Address{bmp0},DimensionPx{4,4}},
 		{Address{bmp1},DimensionPx{4,4}},
@@ -120,20 +153,7 @@ extern "C" void tsk5(){
 	pb.p("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
 	pb.fg(7).p(' ').p_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
-	//	pb.print_hex_8b(0xab);
-//	pb.space();
-//	pb.print_hex_16b(0xcdef);
-//	pb.space();
-//	pb.print_hex_32b(0x01234567);
-
 	while(true){
-		pb.pos(1,10).bg(0);
-		pb.fg(4).p_hex_8b(osca_key).p(' ');
-		char ascii=table_scancode_to_ascii[static_cast<int>(osca_key)];
-		pb.fg(3).p_hex_8b(static_cast<unsigned char>(ascii)).p(' ');
-		pb.fg(2).p(ascii).p(' ');
-		pb.cr();
-
 		bitmaps[0].to(dbmp,CoordsPx{x_prv,44});
 		bitmaps[1].to(dbmp,CoordsPx{x,44});
 		bitmaps[2].to(dbmp,CoordsPx{x,36});
@@ -176,46 +196,20 @@ extern "C" void tsk6(){
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk7(){
-	static char*p=(char*)(0xa0000+320);
-	static char*nl=(char*)(0xa0000+320);
-	static char key_prev=0;
 	while(true){
 		osca_yield();
-		if(key_prev==(char)osca_key){
-			char c=*p;
-			*p=c+1;
-		}else{
-			*p=(char)osca_key;
-			if(osca_key==1){
-				nl+=320;
-				p=nl;
-				/*p+=320;
-				int r=((int)p-0xa0280)%320;
-				p-=r;*/
-			}else{
-				p++;
-				*p=0;
-			}
-			key_prev=(char)osca_key;
-		}
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk8(){
 	while(true){
 		osca_yield();
-//		int*p=(int*)0xa0080;
-//		int c=0x010;
-//		while(c--)
-//			*p++=osca_t;
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk9(){
 	while(true){
 		osca_yield();
-//		for(int n=0;n<8;n++)
-//			*(int*)(0xa0100+n*4)=osca_t;
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
