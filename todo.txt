@@ -1,4 +1,5 @@
 [ ] review const correctness regarding const bmp.data.begin.address then write to pointer
+[ ] extract boot.cc to boot.S and use link.ld to build binary?
 [x] inline assembler for pz_memcpy
 [ ]   clobbers memory?
 [ ]   movsl,movsw,movsb optimization?
