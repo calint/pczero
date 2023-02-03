@@ -75,6 +75,7 @@
 								</inputType>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.747684076" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug">
+								<option id="gnu.both.asm.option.flags.92380271" superClass="gnu.both.asm.option.flags" value="--march=i386 --32" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.479624543" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
