@@ -44,6 +44,7 @@ public:
 	}
 }osca_keyb;
 
+// called by osca from the keyboard interrupt
 extern "C" void osca_keyb_ev(){
 	*(int*)(0xa0000+4)=osca_key;
 	osca_keyb.on_key(osca_key);
