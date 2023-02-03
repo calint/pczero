@@ -7,25 +7,24 @@ extern "C" void tsk3();
 extern "C" void tsk4();
 
 class{
-	unsigned char buf[0x10]; // minimum size 2
+	unsigned char buf[2<<4]; // minimum size 2 and a power of 2
 	unsigned char s;
 	unsigned char e;
 public:
 	// called by osca_keyb_ev
 	auto on_key(unsigned char ch){
+		const unsigned char ne=(e+1)&(sizeof(buf)-1);// next "end" index
+		if(ne==s)// check overrun
+			return;// write would overwrite. display on status line?
 		buf[e]=ch;
 		e++;
 		e&=sizeof(buf)-1;// roll
-		if(e==s){ // check overrun
-			e--;
-			e&=sizeof(buf)-1;
-		}
 	}
 	// returns keyboard scan code or 0 if no more events.
 	auto get_next_key_code()->unsigned char{
 		if(s==e)
 			return 0;
-		unsigned char ch=buf[s];
+		const unsigned char ch=buf[s];
 		s++;
 		s&=sizeof(buf)-1;// roll
 		return ch;
@@ -65,7 +64,7 @@ extern "C" void tsk0(){
 				continue;
 			pb.backspace().p(ch).p('_');
 		}
-//		osca_yield();
+		osca_yield();
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
