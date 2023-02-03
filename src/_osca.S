@@ -129,7 +129,8 @@ lidt idtr
 #-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 #movw $0x0404,0xa4000
 mov osca_tsk_a,%ebx # ebx points to active task record
-mov 4(%ebx),%esp # restore esp (only?)
+# potential bug? because eflags not restored and registers in unknown state?)
+mov 4(%ebx),%esp # restore stack pointer
 sti # enable interrupts (racing?)
 jmp *(%ebx) # jmp to first task
 #-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - vars

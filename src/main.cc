@@ -28,7 +28,7 @@ static struct {
 		}
 	}
 	auto next()->unsigned char{
-//		asm("nop"); // ?! sometimes breaks if not a nop here when -O3. works with -O0
+//		asm("nop"); // ?! sometimes breaks if not a nop here when -O3. works with -O0,-O1
 		if(s==e)
 			return 0;
 		unsigned char ch=buf[s];
