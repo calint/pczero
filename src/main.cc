@@ -18,7 +18,7 @@ static struct {
 	unsigned char buf[0x10]; // minimum size 2
 	unsigned char s;
 	unsigned char e;
-	auto put(){
+	auto on_key(){
 		buf[e]=osca_key;
 		e++;
 		e&=sizeof(buf)-1;// roll
@@ -27,8 +27,9 @@ static struct {
 			e&=sizeof(buf)-1;
 		}
 	}
-	auto next()->unsigned char{
-//		asm("nop"); // ?! sometimes breaks if not a nop here when -O3. works with -O0,-O1
+	auto get_next_key()->unsigned char{
+//		asm("nop"); // ?! sometimes breaks if not a nop here when -O2,-O3,-Os,-Osize. works with -O0,-O1
+					// it breaks in both clang++ and g++. probably a bug in pczero
 		if(s==e)
 			return 0;
 		unsigned char ch=buf[s];
@@ -39,7 +40,7 @@ static struct {
 }osca_keyb;
 
 extern "C" void osca_keyb_ev(){
-	osca_keyb.put();
+	osca_keyb.on_key();
 	*(int*)(0xa0000+320-8)=osca_key;
 	static char*p=(char*)0xa4000;
 	*p++=(char)osca_key;
@@ -47,20 +48,19 @@ extern "C" void osca_keyb_ev(){
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk0(){
-	static Vga13h dsp;
-	static const Bitmap&dbmp=dsp.bmp();
-	static PrinterToBitmap pb2{dbmp};
-	pb2.pos(10,10);
+	Vga13h dsp;
+	PrinterToBitmap pb{dsp.bmp()};
+	pb.pos(10,10);
 	while(true){
 		// read keyboard
 		while(true){
-			const unsigned char sc=osca_keyb.next();
+			const unsigned char sc=osca_keyb.get_next_key();
 			if(!sc)
 				break;
 			const char ch=table_scancode_to_ascii[sc];
-			if(!ch) // key release
+			if(!ch) // not an ascii. probably key release
 				continue;
-			pb2.p(ch);
+			pb.p(ch);
 		}
 //		osca_yield();
 	}
