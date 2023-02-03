@@ -11,6 +11,7 @@ class{
 	unsigned char s;
 	unsigned char e;
 public:
+	// called by osca_keyb_ev
 	auto on_key(unsigned char ch){
 		buf[e]=ch;
 		e++;
@@ -20,7 +21,7 @@ public:
 			e&=sizeof(buf)-1;
 		}
 	}
-	// return 0 if no more keys
+	// returns keyboard scan code or 0 if no more events.
 	auto get_next_key()->unsigned char{
 		// ?! clang++ and g++: breaks if not an instruction here when -O2,-O3,-Os,-Osize
 		// works with -O0,-O1,-Og
