@@ -335,6 +335,7 @@ public:
 		return*this;
 	}
 	auto p_hex_16b(unsigned short v)->PrinterToBitmap&{
+		// ? ugly code. remake
 		const int ch1=v&0xf;v>>=4;
 		const int ch2=v&0xf;v>>=4;
 		const int ch3=v&0xf;v>>=4;
@@ -346,6 +347,7 @@ public:
 		return*this;
 	}
 	auto p_hex_32b(unsigned int v)->PrinterToBitmap&{
+		// ? ugly code. remake
 		const int ch1=v&0xf;v>>=4;
 		const int ch2=v&0xf;v>>=4;
 		const int ch3=v&0xf;v>>=4;

@@ -11,8 +11,8 @@ class{
 	unsigned char s;
 	unsigned char e;
 public:
-	auto on_key(){
-		buf[e]=osca_key;
+	auto on_key(unsigned char ch){
+		buf[e]=ch;
 		e++;
 		e&=sizeof(buf)-1;// roll
 		if(e==s){ // check overrun
@@ -45,7 +45,7 @@ public:
 
 extern "C" void osca_keyb_ev(){
 	*(int*)(0xa0000+4)=osca_key;
-	osca_keyb.on_key();
+	osca_keyb.on_key(osca_key);
 	static char*p=(char*)0xa4000;
 	*p++=(char)osca_key;
 }
