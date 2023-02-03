@@ -30,7 +30,7 @@ public:
 //		asm("get_next_key:");
 
 		// .align 0, 1 2 4 8 16 makes it work in g++ and clang++
-		asm(".align 1,0x90");
+//		asm(".align 1,0x90");
 		// probably a bug in pczero since both g++ and clang++ have same problem
 		// tried running pczero without task switching, same problem
 
