@@ -304,7 +304,7 @@ public:
 		transparent_{false},
 		padding2_{0}
 	{}
-	inline auto pos(Row r,Column c)->PrinterToBitmap&{
+	inline auto pos(const Row r,const Column c)->PrinterToBitmap&{
 		di_=static_cast<char*>(b_.data().begin().address());
 		di_+=bmp_wi_*r*font_hi_+c*font_wi_;
 		dil_=di_;

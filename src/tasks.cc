@@ -104,7 +104,6 @@ extern "C" void tsk5(){
 	CoordPx x=24;
 	CoordPx x_prv=x;
 	Vga13h dsp;
-
 	const Bitmap&dbmp=dsp.bmp();
 
 	PrinterToBitmap pb{dbmp};
