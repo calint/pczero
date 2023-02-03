@@ -5,14 +5,6 @@ extern "C" void tsk0();
 extern "C" void tsk5();
 extern "C" void tsk6();
 extern "C" void tsk7();
-extern "C" void tsk8();
-extern "C" void tsk9();
-extern "C" void tsk10();
-extern "C" void tsk11();
-extern "C" void tsk12();
-extern "C" void tsk13();
-extern "C" void tsk14();
-extern "C" void tsk15();
 
 static struct {
 	unsigned char buf[0x10]; // minimum size 2
