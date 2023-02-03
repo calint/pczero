@@ -4,6 +4,7 @@
 [x] test writing to second meg to confirm enabling of a20 line
 [x]   is enabled by default in qemu and on asus zenbook
 [ ] key event to task
+[ ]   ring buffer pointer in task record
 [ ] bitmap
 [ ]   optimized for 32b memcpy?
 [o] sprite with transparency
