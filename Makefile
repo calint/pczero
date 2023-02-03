@@ -8,7 +8,7 @@ CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -W
  -Wshadow -Wpadded #-Winline
 
 # why not -O3,-O2,-Os,-Ofast,-Oz? see comment "// ?!" in main.cc
-CF=-O1 -fanalyzer -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-stack-protector\
+CF=-O3 -fanalyzer -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-stack-protector\
  -Wl,--oformat=binary,-Ttext=0x7c00
 
 #CC=clang++ -Wfatal-errors
@@ -16,7 +16,7 @@ CF=-O1 -fanalyzer -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions
 # -Wshadow -Wpadded -Winline\
 # -Wno-unused-private-field
 # why not -O3,-O2,-Os,-Ofast,-Oz? see comment "// ?!" in main.cc
-#CF=-O1 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-stack-protector\
+#CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-stack-protector\
 # -Wl,--oformat=binary,-Ttext=0x7c00
 
 # usb device

@@ -28,8 +28,16 @@ static struct {
 		}
 	}
 	auto get_next_key()->unsigned char{
-//		asm("nop"); // ?! sometimes breaks if not a nop here when -O2,-O3,-Os,-Osize. works with -O0,-O1
-					// it breaks in both clang++ and g++. probably a bug in pczero
+		// ?! clang++: breaks if not a nop here when -O2,-O3,-Os,-Osize. works with -O0,-O1,-Og
+//		asm("nop");
+
+		// in g++ a label here is enough to make it work
+//		asm("get_next_key:");
+
+		// .align 1 2 4 8 16 makes it work in g++ and clang++
+		asm(".align 1");
+		// probably a bug in pczero because problem with both g++ and clang++
+
 		if(s==e)
 			return 0;
 		unsigned char ch=buf[s];
