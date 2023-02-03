@@ -23,10 +23,10 @@
 .global _start # export entry point
 #.text
 #-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - bpb
-# jump over BIOS Parameter Block (BPB) because
-# that memory may be written to by BIOS when booting from USB
 .code16 # boot in 16 bit mode
 _start:
+# jump over BIOS Parameter Block (BPB) because
+# that memory may be written to by BIOS when booting from USB
 jmp _main
 .space 3-(.-_start),0x90 # support 2 or 3 bytes encoded jmp
 .space 59,0x90 # BPB area that may be written to by BIOS
