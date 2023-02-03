@@ -7,9 +7,9 @@
 [ ]   pointer to task record of focused task
 [ ]   in task record - pointer to ring buffer of events
 [ ]   keyboard event
-[ ]     {byte event=key,byte scan_code,byte pad} 2B
+[ ]     {byte event=key,byte scan_code} 2B
 [ ] task event loop
-[ ]   task.next_event()->short* // pointer to next event or 0 if done
+[ ]   task.next_event()->byte* // pointer to next event or 0 if done
 [x] bitmap
 [ ]   optimized for 32b memcpy?
 [o] sprite with transparency
@@ -18,7 +18,7 @@
 [ ]     with other sprites
 [o] 5x6 font (30 bits/character)
 [x]   c code generated from font file -> done manually
-[x] inline assembler character renderer -> written in C++.
+[x] inline assembler character renderer -> written in C++
 [x] print hex numbers
 [x] scan code to ascii
 [o] bmp printer
