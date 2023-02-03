@@ -34,8 +34,8 @@ static struct {
 		// in g++ a label here is enough to make it work
 //		asm("get_next_key:");
 
-		// .align 1 2 4 8 16 makes it work in g++ and clang++
-		asm(".align 1");
+		// .align 0, 1 2 4 8 16 makes it work in g++ and clang++
+		asm(".align 0,0x90");
 		// probably a bug in pczero because problem with both g++ and clang++
 
 		if(s==e)
