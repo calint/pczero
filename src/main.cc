@@ -41,10 +41,10 @@ extern "C" void osca_keyb_ev(){
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-static void dot(const Bitmap&bmp,long double x,long double y,unsigned char color){
+static void dot(const Bitmap&bmp,const float x,const float  y,const unsigned char color){
 	const int xi=static_cast<int>(x);
 	const int yi=static_cast<int>(y);
-	bmp.data().pointer().offset(yi*320+xi).write(color);
+	bmp.data().pointer().offset(yi*bmp.dim().width()+xi).write(color);
 }
 extern "C" void tsk0(){
 	Vga13h dsp;
@@ -79,7 +79,7 @@ extern "C" void tsk0(){
 		const float s=10;
 		const float x=s*cos(r);
 		const float y=s*sin(r);
-		dot(dsp.bmp(),100.0+x,100.0+y,4);
+		dot(dsp.bmp(),100.0f+x,100.0f+y,4);
 	}
 
 	float r=0;
@@ -90,7 +90,7 @@ extern "C" void tsk0(){
 			r=0;
 		const float x=s*cos(r);
 		const float y=s*sin(r);
-		dot(dsp.bmp(),100.0+x,100.0+y,colr);
+		dot(dsp.bmp(),100.0f+x,100.0f+y,colr);
 		r+=0.2f;
 		colr++;
 
