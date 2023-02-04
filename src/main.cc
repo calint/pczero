@@ -9,7 +9,7 @@ extern "C" void tsk3();
 extern "C" void tsk4();
 
 class{
-	unsigned char buf[2<<4]; // minimum size 2 and a power of 2
+	unsigned char buf[2<<4]; // minimum size 2 and a power of 2, max size 256
 	unsigned char s; // next event index
 	unsigned char e; // last event index +1 & roll
 public:
