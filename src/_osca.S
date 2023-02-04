@@ -33,6 +33,7 @@ jmp _main
 _main:
 #-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - setup
 cli # disable interrupts
+# disable NMI? outb(0x70,inb(0x70)|0x80);inb(0x71);
 xor %bx,%bx # clear bx
 mov %bx,%ds # data segment
 mov %dl,osca_drv_b # save boot drive
@@ -73,7 +74,6 @@ int $0x10
 #in $0x92,%al # enable a20 line (odd megs)
 #or $2,%al
 #out %al,$0x92
-# ? disable NMI also?
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 32b
 #movw $0x0404,%es:0x108
 lgdt gdtr # load global descriptor tables
