@@ -1,4 +1,5 @@
 #pragma once
+namespace osca{
 
 using Address=void*;
 using Size=int;
@@ -460,3 +461,5 @@ public:
 	inline auto set_velocity(const Velocity&v){v_=v;}
 	inline auto update(){v_.inc_by(a_);p_.inc_by(v_);}
 };
+
+} // end namespace osca

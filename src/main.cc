@@ -1,6 +1,8 @@
 #include "osca.h"
 #include "lib.h"
 
+using namespace osca;
+
 extern "C" void tsk0();
 extern "C" void tsk2();
 extern "C" void tsk3();
