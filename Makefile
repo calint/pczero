@@ -6,15 +6,15 @@ SRC=src/_osca.S src/main.cc
 CC=g++ -std=c++2a -Wfatal-errors
 CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal\
  -Wpadded #-Wstack-protector #-Winline -fno-stack-protector
-CF=-O3 -fanalyzer -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics\
- -Wl,--oformat=binary,-Ttext=0x7c00
+CF=-O3 -fanalyzer -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fconserve-stack
+LF=-Wl,--oformat=binary,-Ttext=0x7c00
 
 #CC=clang++ -Wfatal-errors
 #CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wmissing-declarations -Wmissing-include-dirs -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wswitch-default -Wundef -Weffc++ -Wfloat-equal\
 # -Wpadded\
 # -Wno-unused-private-field #-Winline
-#CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics\
-# -Wl,--oformat=binary,-Ttext=0x7c00
+#CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
+#LF=-Wl,--oformat=binary,-Ttext=0x7c00
 
 # usb device
 INSTALL_TO=/dev/sda
@@ -23,7 +23,7 @@ all:	clean build print display
 
 build:
 	@clear
-	@$(CC) -o $(BIN) $(SRC) $(CF) $(CW)
+	@$(CC) -o $(BIN) $(SRC) $(CF) $(LF) $(CW)
 	@chmod -x $(BIN)
 	
 print:
