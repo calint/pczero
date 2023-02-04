@@ -347,7 +347,7 @@ public:
 		p_hex(ch1);
 		return*this;
 	}
-	auto p_hex_32b(unsigned int v)->PrinterToBitmap&{
+	auto p_hex_32b(unsigned v)->PrinterToBitmap&{
 		// ? ugly code. remake
 		const int ch1=v&0xf;v>>=4;
 		const int ch2=v&0xf;v>>=4;
@@ -368,7 +368,7 @@ public:
 		return*this;
 	}
 	auto p(const char ch)->PrinterToBitmap&{
-		draw(table_ascii_to_font[static_cast<unsigned int>(ch)]);
+		draw(table_ascii_to_font[static_cast<unsigned>(ch)]);
 		return*this;
 	}
 	auto p(const char*s)->PrinterToBitmap&{
