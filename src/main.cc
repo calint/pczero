@@ -86,7 +86,7 @@ extern "C" void tsk0(){
 			if(!ch) // not an ascii. probably key release
 				continue;
 			if(ch>='a'&&ch<='z')
-				ch&=~32;
+				ch&=~0x20;
 			pb.backspace().p(ch).p('_');
 		}
 		osca_yield();
