@@ -9,7 +9,8 @@ CW+=-Wpadded
 #CW+=-Winline
 CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
 CF+=-fconserve-stack # try to inhibit optimizer excessive use of stack
-CF+=-fanalyzer #-fno-stack-protector
+CF+=-fanalyzer
+#CF+=-fno-stack-protector
 LF=-Wl,--oformat=binary,-Ttext=0x7c00
 
 #CC=clang++ -Wfatal-errors
