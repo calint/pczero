@@ -31,7 +31,7 @@ jmp _main
 .space 3-(.-_start),0x90 # support 2 or 3 bytes encoded jmp
 .space 59,0x90 # BPB area that may be written to by BIOS
 _main:
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - setup
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - setup
 cli # disable interrupts
 # disable NMI? outb(0x70,inb(0x70)|0x80);inb(0x71);
 xor %bx,%bx # clear bx
