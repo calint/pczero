@@ -468,7 +468,7 @@ public:
 	inline auto update(){v_.inc_by(a_);p_.inc_by(v_);}
 };
 
-inline float cos(const float radians){
+inline auto cos(const float radians)->float{
 	float v;
 	asm("fcos"
 		:"=t"(v) // "t": first (top of stack) floating point register
@@ -477,7 +477,7 @@ inline float cos(const float radians){
 	return v;
 }
 
-inline float sin(const float radians){
+inline auto sin(const float radians)->float{
 	float v;
 	asm("fsin"
 		:"=t"(v) // "t": first (top of stack) floating point register
@@ -486,6 +486,10 @@ inline float sin(const float radians){
 	return v;
 }
 
-const float PI=3.141592653589793f;
+constexpr float PI=3.141592653589793f;
+constexpr auto deg_to_rad(const float deg)->float{
+	constexpr float deg_to_rad=PI/180.f;
+	return deg*deg_to_rad;
+}
 
 } // end namespace osca

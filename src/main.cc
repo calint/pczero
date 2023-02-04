@@ -82,16 +82,17 @@ extern "C" void tsk0(){
 		dot(dsp.bmp(),100.0f+x,100.0f+y,4);
 	}
 
-	float r=0;
-	const float s=10;
+	float deg=0;
+	const float radius=10;
 	unsigned char colr=1;
 	while(true){
-		if(r>2*PI)
-			r=0;
-		const float x=s*cos(r);
-		const float y=s*sin(r);
+		if(deg>360)
+			deg=0;
+		const float rad=deg_to_rad(deg);
+		const float x=radius*cos(rad);
+		const float y=radius*sin(rad);
 		dot(dsp.bmp(),100.0f+x,100.0f+y,colr);
-		r+=0.2f;
+		deg+=10.0f;
 		colr++;
 
 		// handle keyboard events
