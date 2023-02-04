@@ -137,7 +137,7 @@ jmp *(%ebx) # jmp to first task
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - vars
 .align 16,0x90
 osca_drv_b:.byte 0x00 # boot drive
-#-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partition
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partition
 .space _start+436-.,0X90 # reserved
 .space 10,0 # partition table
 .space 16,0 # #1
