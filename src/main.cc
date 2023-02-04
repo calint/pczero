@@ -48,15 +48,6 @@ static void dot(const Bitmap&bmp,long double x,long double y,unsigned char color
 }
 extern "C" void tsk0(){
 	Vga13h dsp;
-
-	dot(dsp.bmp(),100.0,100.0,3);
-	for(double r=0;r<2*3.1415;r+=0.2){
-		double s=10;
-		double x=s*cos(r);
-		double y=s*sin(r);
-		dot(dsp.bmp(),100.0+x,100.0+y,4);
-	}
-
 	PrinterToBitmap pb{dsp.bmp()};
 
 	pb.pos(1,30);
@@ -82,7 +73,27 @@ extern "C" void tsk0(){
 	pb.fg(7).p(' ').p_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
 	pb.pos(10,5).fg(2).p('_');
+
+	dot(dsp.bmp(),100.0,100.0,3);
+	for(float r=0;r<2*PI;r+=0.2f){
+		const float s=10;
+		const float x=s*cos(r);
+		const float y=s*sin(r);
+		dot(dsp.bmp(),100.0+x,100.0+y,4);
+	}
+
+	float r=0;
+	const float s=10;
+	unsigned char colr=1;
 	while(true){
+		if(r>2*PI)
+			r=0;
+		const float x=s*cos(r);
+		const float y=s*sin(r);
+		dot(dsp.bmp(),100.0+x,100.0+y,colr);
+		r+=0.2f;
+		colr++;
+
 		// handle keyboard events
 		while(true){
 			const unsigned char sc=osca_keyb.get_next_scan_code();

@@ -468,22 +468,24 @@ public:
 	inline auto update(){v_.inc_by(a_);p_.inc_by(v_);}
 };
 
-inline double cos(const double r){
-	double v;
+inline float cos(const float radians){
+	float v;
 	asm("fcos"
-		:"=t"(v)
-		:"0"(r)
+		:"=t"(v) // "t": first (top of stack) floating point register
+		:"0"(radians)
 	);
 	return v;
 }
 
-inline double sin(const double r){
-	double v;
+inline float sin(const float radians){
+	float v;
 	asm("fsin"
-		:"=t"(v)
-		:"0"(r)
+		:"=t"(v) // "t": first (top of stack) floating point register
+		:"0"(radians)
 	);
 	return v;
 }
+
+const float PI=3.141592653589793f;
 
 } // end namespace osca
