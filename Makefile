@@ -18,7 +18,6 @@ LF=-Wl,--oformat=binary,-Ttext=0x7c00
 #CW+=-Wpadded
 #CW+=-Winline
 #CW+=-Wno-unused-private-field # disable warning regarding padding
-#CW+=-Winline
 #CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
 #LF=-Wl,--oformat=binary,-Ttext=0x7c00
 
