@@ -37,7 +37,7 @@ class Data{
 	Pointer p_;
 	SizeBytes s_;
 public:
-	inline Data(const Address a,const SizeBytes sb):p_{a},s_{sb}{}
+	inline Data(const Address a,const SizeBytes n):p_{a},s_{n}{}
 	inline auto to(const Data&d)const{pz_memcpy(p_.address(),d.begin().address(),s_);}
 	inline auto to(const Data&d,const SizeBytes sb)const{pz_memcpy(p_.address(),d.begin().address(),sb);}
 	inline auto size()const->SizeBytes{return s_;}
