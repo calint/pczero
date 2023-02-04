@@ -1,2 +1,7 @@
 objdump -b binary -m i8086 -D Debug/pczero.img | less
+
+objdump -b binary -m i8086 -D Debug/pczero.img | grep call
+
 objdump -d Debug/src/main.o | less
+
+objdump -b binary -m i8086 -D Debug/pczero.img | grep call

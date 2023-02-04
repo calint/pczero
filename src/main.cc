@@ -100,25 +100,25 @@ extern "C" void tsk3(){
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-static char bmp0[]{
+static unsigned char bmp0[]{
 	0,1,1,0,
 	1,1,1,1,
 	1,1,1,1,
 	0,1,1,0,
 };
-static char bmp1[]{
+static unsigned char bmp1[]{
 	0,2,2,0,
 	2,2,2,2,
 	2,2,2,2,
 	0,2,2,0,
 };
-static char bmp2[]{
+static unsigned char bmp2[]{
 	0,3,3,0,
 	3,3,3,3,
 	3,3,3,3,
 	0,3,3,0,
 };
-static char bmp3[]{
+static unsigned char bmp3[]{
 	0,4,4,0,
 	4,4,4,4,
 	4,4,4,4,
@@ -184,7 +184,7 @@ extern "C" void tsk4(){
 				}
 				s.set_pos(p);
 				Velocity v{s.velocity()};
-				v.set_y(-5);
+				v.set_y(-8);
 				s.set_velocity(v);
 			}
 		}
