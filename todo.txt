@@ -5,6 +5,8 @@
 [ ] investigate why any -O other than -O0,-O1,-Og breaks osca_keyb.next_scan_code(). see comment in function.
 [ ] review const correctness regarding const bmp.data.begin.address then write to pointer
 [ ]   const Bitmap&dbmp=dsp.bmp(); then mutate data in const dbmp
+[ ] lib: PrinterToBitmap pos in pixels
+[ ] lib: Console pos in characters
 [x] extract boot.cc to boot.S
 [ ] use link.ld to build binary?
 [x] inline assembler for pz_memcpy

@@ -1,0 +1,46 @@
+---
+MainSourceFile:  '/home/c/w/pczero/src/main.cc'
+Diagnostics:
+  - DiagnosticName:  clang-analyzer-deadcode.DeadStores
+    DiagnosticMessage:
+      Message:         'Value stored to ''v'' is never read'
+      FilePath:        '/home/c/w/pczero/src/lib.h'
+      FileOffset:      12198
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/c/w/pczero/src/lib.h'
+          FileOffset:      12202
+          Length:          1
+    Notes:
+      - Message:         'Value stored to ''v'' is never read'
+        FilePath:        '/home/c/w/pczero/src/lib.h'
+        FileOffset:      12198
+        Replacements:    []
+        Ranges:
+          - FilePath:        '/home/c/w/pczero/src/lib.h'
+            FileOffset:      12202
+            Length:          1
+    Level:           Warning
+    BuildDirectory:  '/home/c/w/pczero/src'
+  - DiagnosticName:  clang-analyzer-deadcode.DeadStores
+    DiagnosticMessage:
+      Message:         'Value stored to ''v'' is never read'
+      FilePath:        '/home/c/w/pczero/src/lib.h'
+      FileOffset:      12576
+      Replacements:    []
+      Ranges:
+        - FilePath:        '/home/c/w/pczero/src/lib.h'
+          FileOffset:      12580
+          Length:          1
+    Notes:
+      - Message:         'Value stored to ''v'' is never read'
+        FilePath:        '/home/c/w/pczero/src/lib.h'
+        FileOffset:      12576
+        Replacements:    []
+        Ranges:
+          - FilePath:        '/home/c/w/pczero/src/lib.h'
+            FileOffset:      12580
+            Length:          1
+    Level:           Warning
+    BuildDirectory:  '/home/c/w/pczero/src'
+...
