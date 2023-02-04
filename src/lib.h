@@ -468,4 +468,22 @@ public:
 	inline auto update(){v_.inc_by(a_);p_.inc_by(v_);}
 };
 
+inline double cos(const double r){
+	double v;
+	asm("fcos"
+		:"=t"(v)
+		:"0"(r)
+	);
+	return v;
+}
+
+inline double sin(const double r){
+	double v;
+	asm("fsin"
+		:"=t"(v)
+		:"0"(r)
+	);
+	return v;
+}
+
 } // end namespace osca

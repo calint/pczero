@@ -41,8 +41,22 @@ extern "C" void osca_keyb_ev(){
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+static void dot(const Bitmap&bmp,long double x,long double y,unsigned char color){
+	const int xi=static_cast<int>(x);
+	const int yi=static_cast<int>(y);
+	bmp.data().pointer().offset(yi*320+xi).write(color);
+}
 extern "C" void tsk0(){
 	Vga13h dsp;
+
+	dot(dsp.bmp(),100.0,100.0,3);
+	for(double r=0;r<2*3.1415;r+=0.2){
+		double s=10;
+		double x=s*cos(r);
+		double y=s*sin(r);
+		dot(dsp.bmp(),100.0+x,100.0+y,4);
+	}
+
 	PrinterToBitmap pb{dsp.bmp()};
 
 	pb.pos(1,30);
