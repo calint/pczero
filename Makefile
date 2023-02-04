@@ -5,15 +5,15 @@ SRC=src/_osca.S src/main.cc
 
 CC=g++ -std=c++2a -Wfatal-errors
 CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal\
- -Wshadow -Wpadded #-Winline
-CF=-O3 -fanalyzer -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-stack-protector\
+ -Wpadded -Wstack-protector #-Winline -fno-stack-protector
+CF=-O3 -fanalyzer -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fstack-protector -fstack-protector-strong\
  -Wl,--oformat=binary,-Ttext=0x7c00
 
 #CC=clang++ -Wfatal-errors
 #CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wmissing-declarations -Wmissing-include-dirs -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wswitch-default -Wundef -Weffc++ -Wfloat-equal\
-# -Wshadow -Wpadded -Winline\
-# -Wno-unused-private-field
-#CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-stack-protector\
+# -Wpadded -Wstack-protector\
+# -Wno-unused-private-field #-Winline
+#CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics\
 # -Wl,--oformat=binary,-Ttext=0x7c00
 
 # usb device
