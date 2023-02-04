@@ -5,9 +5,9 @@ using Size=int;
 using SizeBytes=Size;
 
 inline void pz_memcpy(Address from,Address to,SizeBytes n){
-	asm("movl %0,%%esi;"
-		"movl %1,%%edi;"
-		"movl %2,%%ecx;"
+	asm("mov %0,%%esi;"
+		"mov %1,%%edi;"
+		"mov %2,%%ecx;"
 		"rep movsb;"
 		:
 		:"r"(from),"r"(to),"r"(n)
@@ -291,7 +291,7 @@ class PrinterToBitmap{
 	Color8b fg_;
 	Color8b bg_;
 	bool transparent_; // ? implement
-	char padding2_;
+	char padding1=0;
 public:
 	inline PrinterToBitmap(const Bitmap&b):
 		di_{static_cast<char*>(b.data().begin().address())},
@@ -303,8 +303,7 @@ public:
 		ln_{bmp_wi_-font_wi_},
 		fg_{2},
 		bg_{0},
-		transparent_{false},
-		padding2_{0}
+		transparent_{false}
 	{}
 	inline auto pos(const Row r,const Column c)->PrinterToBitmap&{
 		di_=static_cast<char*>(b_.data().begin().address());
