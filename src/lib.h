@@ -438,7 +438,9 @@ class Sprite{
 	Velocity v_;
 	Acceleration a_;
 public:
-	inline Sprite(const Bitmap&b,const Position&p,const Velocity&v,const Acceleration&a):b_{b},p_{p},v_{v},a_{a}{}
+	inline Sprite(const Bitmap&b,const Position&p,const Velocity&v,const Acceleration&a):
+		b_{b},p_{p},v_{v},a_{a}
+	{}
 	auto to(const Bitmap&dst)const{
 		const char*si=static_cast<const char*>(b_.data().begin().address());
 		char*di=static_cast<char*>(dst.data().begin().address());
