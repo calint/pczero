@@ -22,7 +22,7 @@ public:
 		e=ne;
 	}
 	// returns keyboard scan code or 0 if no more events.
-	auto get_next_key_code()->unsigned char{
+	auto get_next_scan_code()->unsigned char{
 		if(s==e)
 			return 0; // no more events
 		const unsigned char ch=buf[s];
@@ -49,7 +49,7 @@ extern "C" void tsk0(){
 	while(true){
 		// handle keyboard events
 		while(true){
-			const unsigned char sc=osca_keyb.get_next_key_code();
+			const unsigned char sc=osca_keyb.get_next_scan_code();
 			if(!sc)
 				break;
 			if(sc==0xe){ // backspace
