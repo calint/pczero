@@ -19,7 +19,7 @@
 #.set PROG_SIZE,0x200+LOAD_SECTORS*0x200
 .global osca_key # last pressed key
 .global osca_t # lower ticker value
-.global osca_t1 # high ticker value
+.global osca_th # high ticker value
 .global _start # export entry point
 #.text
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - bpb
@@ -147,7 +147,7 @@ osca_drv_b:.byte 0x00 # boot drive
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - interrupts
 sector2: # 0x7e00
 osca_t:.long 0x00000000 # tick lower
-osca_t1:.long 0x00000000 # tick higher
+osca_th:.long 0x00000000 # tick higher
 osca_tsk_a:.long tsk # pointer to first task record (tsk0)
 isr_tck_eax:.long 0x00000000 # used in isr_tck
 isr_tck_ebx:.long 0x00000000 # ...
@@ -192,7 +192,7 @@ isr_tck:
   mov %eax,isr_tck_eax # save eax,ebx
   mov %ebx,isr_tck_ebx # eax,ebx will be used as scratch
   incl osca_t # increase 64b ticker
-  adcl $0,osca_t1
+  adcl $0,osca_th # add carry to upper 32 bits
 #  mov osca_t,%eax # on screen
 #  mov %eax,0xa0130
   mov osca_tsk_a,%ebx # point ebx to active task

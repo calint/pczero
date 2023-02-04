@@ -6,7 +6,7 @@ extern "C" void osca_keyb_ev();// called from keyboard interrupt when new keycod
 // symbols exported from _osca.S
 extern "C" volatile const unsigned char osca_key;// last received keycode
 extern "C" volatile const unsigned int osca_t;// time lower 32b
-extern "C" volatile const unsigned int osca_t1;// time higher 32b
+extern "C" volatile const unsigned int osca_th;// time higher 32b
 
 // functions
 extern "C" inline void osca_yield(){asm("hlt");}// ? do task switch
