@@ -16,6 +16,17 @@ inline void pz_memcpy(Address from,Address to,SizeBytes n){
 	);
 }
 
+inline void pz_memset(Address to,unsigned char v,SizeBytes n){
+	asm("mov %0,%%edi;"
+		"mov %1,%%al;"
+		"mov %2,%%ecx;"
+		"rep stosb;"
+		:
+		:"r"(to),"r"(v),"r"(n)
+		:"%edi","%al","%ecx" // ? clobbers memory?
+	);
+}
+
 using OffsetBytes=int;
 
 class Pointer{

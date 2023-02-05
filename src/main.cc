@@ -68,7 +68,7 @@ extern "C" void tsk0(){
 	pb.fg(6).p("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
 	pb.fg(7).p(' ').p_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
-	pb.pos(10,5).fg(2).p('_');
+	pb.pos(7,5).fg(2).p('_');
 
 	while(true){
 		// handle keyboard events
@@ -128,10 +128,10 @@ extern "C" void tsk3(){
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 static Vector2D dots_src[]{
 	{ 0, 0},
-	{-1,-1},
-	{ 1,-1},
-	{ 1, 1},
-	{-1, 1},
+	{-2,-1},
+	{ 2,-1},
+	{ 2, 1},
+	{-2, 1},
 };
 
 //static Vector2D vectors_axis[]{
@@ -154,16 +154,13 @@ extern "C" void tsk4(){
 	unsigned char colr=1;
 	Matrix2D R;
 	Vector2D translation={100,100};
-	Vector2D scale={10,10};
-//	const Address clear_start=db.data().begin()*320+80;
-//	const SizeBytes clear_n=320*100;
+	Scale scale{10};
+	const Address clear_start=db.data().pointer().offset(50*320).address();
+	const SizeBytes clear_n=320*100;
 	while(true){
+		pz_memset(clear_start,0x11,clear_n);
 		if(deg>360)
 			deg=0;
-		for(const auto&d:dots_dst){
-			dot(dsp.bmp(),d.x,d.y,0);
-		}
-
 		const float rotation=deg_to_rad(deg);
 		R.set_transform(scale,rotation,translation);
 		R.transform(dots_src,dots_dst,sizeof(dots_src)/sizeof(Vector2D));
@@ -178,7 +175,7 @@ extern "C" void tsk4(){
 		const Vector2D yaxis=R.axis_y();
 		dot(dsp.bmp(),yaxis.x+140,yaxis.y+100,5);
 
-		deg+=10.0f;
+		deg+=10;
 		colr++;
 		osca_yield();
 	}

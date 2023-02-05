@@ -31,11 +31,11 @@ class Vector2D{
 public:
 	float x=0,y=0;
 };
-
+using Scale=float;
 class Matrix2D{
 	float	xx=1,xy=0,xt=0,
 			yx=0,yy=1,yt=0,
-			ux=0,uy=0, i=1;
+			ux=0,uy=0,id=1;
 public:
 //	inline auto set_identity(){
 //		xx=1;yx=0;tx=0;
@@ -54,15 +54,15 @@ public:
 //		ty=v.y;
 //	}
 
-	inline auto set_transform(const Vector2D&scale,const Radians rotation,const Vector2D&translation){
-		const float cs=scale.x*cos(rotation);
-		const float sn=scale.y*sin(rotation);
+	inline auto set_transform(const Scale scale,const Radians rotation,const Vector2D&translation){
+		const float cs=scale*cos(rotation);
+		const float sn=scale*sin(rotation);
 		xx=cs;xy=-sn;xt=translation.x;
 		yx=sn,yy= cs,yt=translation.y;
-		ux= 0,uy=  0,i=1;
+		ux= 0,uy=  0,id=1;
 	}
 	auto transform(const Vector2D src[],Vector2D dst[],const int n)const{
-		for(int j=0;j<n;j++){
+		for(int i=0;i<n;i++){
 			dst->x=xx*src->x+xy*src->y+xt;
 			dst->y=yx*src->x+yy*src->y+yt;
 			src++;
