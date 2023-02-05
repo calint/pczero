@@ -39,11 +39,11 @@ class Data{
 	SizeBytes s_;
 public:
 	inline Data(const Address a,const SizeBytes n):a_{a},s_{n}{}
+	inline auto address()const->Address{return a_;}
+	inline auto size()const->SizeBytes{return s_;}
+	inline auto pointer()const->Pointer{return{a_};}
 	inline auto to(const Data&d)const{pz_memcpy(a_,d.address(),s_);}
 	inline auto to(const Data&d,const SizeBytes sb)const{pz_memcpy(a_,d.address(),sb);}
-	inline auto size()const->SizeBytes{return s_;}
-	inline auto address()const->Address{return a_;}
-	inline auto pointer()const->Pointer{return{a_};}
 };
 
 template<typename T>
