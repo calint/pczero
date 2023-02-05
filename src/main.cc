@@ -146,7 +146,7 @@ static Vector2D dots_src[]{
 
 static Vector2D dots_dst[sizeof(dots_src)/sizeof(Vector2D)];
 
-static void dot(const Bitmap&bmp,const float x,const float  y,const unsigned char color){
+static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char color){
 	const int xi=static_cast<int>(x);
 	const int yi=static_cast<int>(y);
 	bmp.data().pointer().offset(yi*bmp.dim().width()+xi).write(color);
