@@ -39,10 +39,10 @@ class Data{
 	SizeBytes s_;
 public:
 	inline Data(const Address a,const SizeBytes n):p_{a},s_{n}{}
-	inline auto to(const Data&d)const{pz_memcpy(p_.address(),d.begin().address(),s_);}
-	inline auto to(const Data&d,const SizeBytes sb)const{pz_memcpy(p_.address(),d.begin().address(),sb);}
+	inline auto to(const Data&d)const{pz_memcpy(p_.address(),d.address(),s_);}
+	inline auto to(const Data&d,const SizeBytes sb)const{pz_memcpy(p_.address(),d.address(),sb);}
 	inline auto size()const->SizeBytes{return s_;}
-	inline auto begin()const->Pointer{return p_;}
+	inline auto address()const->Address{return p_.address();}
 	inline auto pointer()const->Pointer{return p_;}
 };
 
@@ -89,8 +89,8 @@ public:
 	inline auto dim()const->const DimensionPx&{return d_;}
 	inline auto data()const->const Data&{return dt_;}
 	auto to(const Bitmap&dst,const CoordsPx&c)const{
-		char*si=static_cast<char*>(dt_.begin().address());
-		char*di=static_cast<char*>(dst.dt_.begin().address());
+		char*si=static_cast<char*>(dt_.address());
+		char*di=static_cast<char*>(dst.dt_.address());
 		di+=c.y()*dst.dim().width()+c.x();
 		const SizePx ln=dst.dim().width()-d_.width();
 		const SizePx h=d_.height();
@@ -295,7 +295,7 @@ class PrinterToBitmap{
 	char padding1=0;
 public:
 	inline PrinterToBitmap(const Bitmap&b):
-		di_{static_cast<char*>(b.data().begin().address())},
+		di_{static_cast<char*>(b.data().address())},
 		dil_{di_},
 		b_{b},
 		bmp_wi_{b.dim().width()},
@@ -307,7 +307,7 @@ public:
 		transparent_{false}
 	{}
 	inline auto pos(const Row r,const Column c)->PrinterToBitmap&{
-		di_=static_cast<char*>(b_.data().begin().address());
+		di_=static_cast<char*>(b_.data().address());
 		di_+=bmp_wi_*r*font_hi_+c*font_wi_;
 		dil_=di_;
 		return*this;
@@ -442,8 +442,8 @@ public:
 		b_{b},p_{p},v_{v},a_{a}
 	{}
 	auto to(const Bitmap&dst)const{
-		const char*si=static_cast<const char*>(b_.data().begin().address());
-		char*di=static_cast<char*>(dst.data().begin().address());
+		const char*si=static_cast<const char*>(b_.data().address());
+		char*di=static_cast<char*>(dst.data().address());
 		PositionPx p{static_cast<CoordPx>(p_.x()),static_cast<CoordPx>(p_.y())};
 		di+=p.y()*dst.dim().width()+p.x();
 		const SizePx ln=dst.dim().width()-b_.dim().width();

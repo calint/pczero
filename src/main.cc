@@ -122,7 +122,7 @@ extern "C" void tsk3(){
 	while(true){
 //		osca_yield();
 //		*(int*)(0xa0000+320-4)=osca_t;
-		dsp.bmp().data().begin().offset(8).write(osca_t);
+		dsp.bmp().data().pointer().offset(8).write(osca_t);
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
