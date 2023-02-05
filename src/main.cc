@@ -41,20 +41,6 @@ extern "C" void osca_keyb_ev(){
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-static Vector2D dots_src[]{
-	{-10.0f,-10.0f},
-	{ 10.0f,-10.0f},
-	{ 10.0f, 10.0f},
-	{-10.0f, 10.0f},
-//	{    0,10.0f},
-};
-static Vector2D dots_dst[sizeof(dots_src)/sizeof(Vector2D)];
-
-static void dot(const Bitmap&bmp,const float x,const float  y,const unsigned char color){
-	const int xi=static_cast<int>(x);
-	const int yi=static_cast<int>(y);
-	bmp.data().pointer().offset(yi*bmp.dim().width()+xi).write(color);
-}
 extern "C" void tsk0(){
 	Vga13h dsp;
 	PrinterToBitmap pb{dsp.bmp()};
@@ -139,6 +125,20 @@ extern "C" void tsk3(){
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+static Vector2D dots_src[]{
+	{-10.0f,-10.0f},
+	{ 10.0f,-10.0f},
+	{ 10.0f, 10.0f},
+	{-10.0f, 10.0f},
+//	{    0,10.0f},
+};
+static Vector2D dots_dst[sizeof(dots_src)/sizeof(Vector2D)];
+
+static void dot(const Bitmap&bmp,const float x,const float  y,const unsigned char color){
+	const int xi=static_cast<int>(x);
+	const int yi=static_cast<int>(y);
+	bmp.data().pointer().offset(yi*bmp.dim().width()+xi).write(color);
+}
 extern "C" void tsk4(){
 	Vga13h dsp;
 	PrinterToBitmap pb{dsp.bmp()};
