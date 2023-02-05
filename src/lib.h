@@ -524,7 +524,7 @@ public:
 		set_rotation(r);
 		set_translation(t);
 	}
-	auto transform(const Vector2D*src,Vector2D*dst,const int n)const{
+	auto transform(const Vector2D src[],Vector2D dst[],const int n)const{
 		for(int j=0;j<n;j++){
 			dst->x=xx*src->x+yx*src->y+tx;
 			dst->y=xy*src->x+yy*src->y+ty;
