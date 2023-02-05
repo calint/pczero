@@ -20,9 +20,11 @@ LF=-Wl,--oformat=binary,-Ttext=0x7c00
 #CC=clang++ -Wfatal-errors
 #CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wmissing-declarations -Wmissing-include-dirs -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
 #CW+=-Wpadded
-#CW+=-Winline
+##CW+=-Winline
 #CW+=-Wno-unused-private-field # disable warning regarding padding
 #CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
+#CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
+#CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 #LF=-Wl,--oformat=binary,-Ttext=0x7c00
 
 # usb device
