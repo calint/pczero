@@ -133,7 +133,12 @@ static Vector2D dots_src[]{
 	{ 2, 1},
 	{-2, 1},
 };
-
+//static Vector2D dots_src[]{
+//	{ 0, 0},
+//	{ 0,-1},
+//	{-1,.5f},
+//	{ 1,.5f},
+//};
 //static Vector2D vectors_axis[]{
 //	{1,0},
 //	{0,1},
@@ -160,7 +165,7 @@ extern "C" void tsk4(){
 	while(true){
 		pz_memset(clear_start,0x11,clear_n);
 		if(deg>360)
-			deg=0;
+			deg-=360;
 		const float rotation=deg_to_rad(deg);
 		R.set_transform(scale,rotation,translation);
 		R.transform(dots_src,dots_dst,sizeof(dots_src)/sizeof(Vector2D));
