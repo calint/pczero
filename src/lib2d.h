@@ -1,4 +1,5 @@
 #pragma once
+
 namespace osca{
 
 using Radians=float;
@@ -22,6 +23,13 @@ inline auto cos(const Radians radians)->float{
 	return v;
 }
 
+inline auto sin_and_cos(const Radians radians,float&fsin,float&fcos){
+	asm("fsincos"
+		:"=t"(fcos),"=u"(fsin)
+		:"0"(radians)
+	);
+}
+
 inline auto sqrt(const float s)->float{
 	float v;
 	asm("fsqrt"
@@ -37,6 +45,8 @@ constexpr auto deg_to_rad(const Degrees deg)->Radians{
 	constexpr float deg_to_rad=PI/180.f;
 	return deg*deg_to_rad;
 }
+
+const float float_dif=0.000001f;
 
 class Vector2D{
 public:
@@ -56,6 +66,12 @@ public:
 		y*=s;
 		return*this;
 	}
+	inline auto inc_by(const Vector2D&v){
+		x+=v.x;
+		y+=v.y;
+	}
+//	auto operator<=>(const Vector2D&)const=default;
+	auto operator==(const Vector2D&)const->bool=default;
 };
 
 using Scale=float;
@@ -84,8 +100,13 @@ public:
 //	}
 
 	inline auto set_transform(const Scale scale,const Radians rotation,const Vector2D&translation){
-		const float cs=scale*cos(rotation);
-		const float sn=scale*sin(rotation);
+		// ! implement fsincos
+		float fcos,fsin;
+		sin_and_cos(rotation,fsin,fcos);
+//		const float cs=scale*cos(rotation);
+//		const float sn=scale*sin(rotation);
+		const float cs=scale*fcos;
+		const float sn=scale*fsin;
 		xx=cs;xy=-sn;xt=translation.x;
 		yx=sn,yy= cs,yt=translation.y;
 		ux= 0,uy=  0,id=1;

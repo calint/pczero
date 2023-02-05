@@ -15,12 +15,13 @@ class ObjectDefRectangle:public ObjectDef{
 public:
 	ObjectDefRectangle(){
 		pts_count=5;
-		pts=new Point2D[pts_count];
-		pts[0]={ 0, 0};
-		pts[1]={-2,-1};
-		pts[2]={ 2,-1};
-		pts[3]={ 2, 1};
-		pts[4]={-2, 1};
+		pts=new Point2D[pts_count]{
+			{ 0, 0},
+			{-2,-1},
+			{ 2,-1},
+			{ 2, 1},
+			{-2, 1},
+		};
 	}
 }default_object_def_rectangöe;
 
@@ -28,11 +29,12 @@ class ObjectDefShip:public ObjectDef{
 public:
 	ObjectDefShip(){
 		pts_count=4;
-		pts=new Point2D[pts_count];
-		pts[0]={ 0, 0};
-		pts[1]={ 0,-1};
-		pts[2]={-1,.5};
-		pts[3]={ 1,.5};
+		pts=new Point2D[pts_count]{
+			{ 0, 0},
+			{ 0,-1},
+			{-1,.5},
+			{ 1,.5},
+		};
 	}
 }default_object_def_ship;
 
@@ -44,56 +46,67 @@ static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char
 
 class Object{
 protected:
-	Point2D pos_;
+	Point2D pos_; // ? pos,rot,dpos,drot not cache friendly
+	Point2D dpos_;
 	Radians rot_;
+	Radians drot_;
 	Scale scl_;
+	Point2D Mmw_pos_; // pos in transform matrix
+	Radians Mmw_rot_;
+	Scale Mmw_scl_;
 	const ObjectDef&def_;
-	Point2D*cached_pts;
+	Point2D*pts_wld; // transformed model to world points cache
 	Matrix2D Mmw; // model to world transform
-	bool Mmw_valid=false;// if true Mmw and cached_pts don't need update
 	unsigned char color_;
 	unsigned char padding1=0;
 	unsigned char padding2=0;
+	unsigned char padding3=0;
 public:
-//	Object():
-//		pos_{0,0},
-//		rot_{0},
-//		def_{default_object_def},
-//		scl_{0},
-//		cached_pts{nullptr},
-//		color_{0}
-//	{}
-	Object()=delete;
+//	Object()=delete;
 	Object(const Object&)=delete; // copy ctor
 	Object(Object&&)=delete; // move ctor
 	Object&operator=(const Object&)=delete; // copy assignment
 //	Object&operator=(Object&&)=delete; // move assignment
 	Object(const ObjectDef&def,const Scale scl,const Point2D&pos,const Radians rot,const unsigned char color):
 		pos_{pos},
+		dpos_{0},
 		rot_{rot},
+		drot_{0},
 		scl_{scl},
+		Mmw_pos_{0,0},
+		Mmw_rot_{0},
+		Mmw_scl_{0},
 		def_{def},
-		cached_pts{new Point2D[def.pts_count]},
+		pts_wld{new Point2D[def.pts_count]},
 		Mmw{},
 		color_{color}
 	{}
 	virtual~Object(){
-		delete[]cached_pts;
+		delete[]pts_wld;
 	}
 	inline auto def()->const ObjectDef&{return def_;}
+	inline auto set_position(const Point2D&p){pos_=p;}
+	inline auto set_dposition(const Point2D&p){dpos_=p;}
+	inline auto set_rotation(const Radians r){rot_=r;}
+	inline auto set_drotation(const Radians r){drot_=r;}
+
 	virtual auto update()->void{
 		// used to print errors at row 1 column 1
 //		err.p("uo ");
-		rot_+=deg_to_rad(5);
-		Mmw_valid=false;
+		pos_.inc_by(dpos_);
+		rot_+=drot_;
 	}
 	virtual auto render(Bitmap&dsp)->void{
-		if(!Mmw_valid){
+		// check if model to world matrix needs update
+		if(rot_!=Mmw_rot_||pos_!=Mmw_pos_||scl_!=Mmw_scl_){
+//			err.printer().p("um:").p_hex_32b(reinterpret_cast<unsigned>(this)).p(' ');
 			Mmw.set_transform(scl_,rot_,pos_);
-			Mmw_valid=true;
-			Mmw.transform(def_.pts,cached_pts,def_.pts_count);
+			Mmw_rot_=rot_;
+			Mmw_pos_=pos_;
+			Mmw_scl_=scl_;
+			Mmw.transform(def_.pts,pts_wld,def_.pts_count);
 		}
-		Point2D*ptr=cached_pts;
+		Point2D*ptr=pts_wld;
 		for(unsigned i=0;i<def_.pts_count;i++){
 			dot(dsp,ptr->x,ptr->y,color_);
 			ptr++;
@@ -107,8 +120,11 @@ public:
 		Object{default_object_def_ship,5,{120,100},0,2}
 	{}
 	virtual auto update()->void override{
-//		err.p("us ");
-		rot_-=deg_to_rad(5);
-		Mmw_valid=false;
+		Object::update();
+		if(pos_.x>180){
+			set_dposition({-dpos_.x,dpos_.y});
+		}else if(pos_.x<50){
+			set_dposition({-dpos_.x,dpos_.y});
+		}
 	}
 };

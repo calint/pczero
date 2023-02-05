@@ -5,17 +5,15 @@
 
 using namespace osca;
 //char*freemem=reinterpret_cast<char*>(0x100000);
-static char*freemem_ptr=reinterpret_cast<char*>(0xa0000+320);
+static char*freemem_ptr=reinterpret_cast<char*>(0xa0000+320); // put heap on screen
 
-// called by C++ to allocate memory
+// called by C++ to allocate and free memory
 void*operator new[](unsigned count){
 	char*p=freemem_ptr;
 //	err.printer().p_hex_32b(count).p(':').p_hex_32b(reinterpret_cast<unsigned int>(p)).p(' ');
 	freemem_ptr+=count;
 	return reinterpret_cast<void*>(p);
 }
-
-// called by C++ to allocate memory
 void*operator new(unsigned count){
 	char*p=freemem_ptr;
 //	err.printer().p_hex_32b(count).p(':').p_hex_32b(reinterpret_cast<unsigned int>(p)).p(' ');
@@ -171,9 +169,23 @@ extern "C" void tsk4(){
 	default_object_def_ship=ObjectDefShip();
 
 	// create sample objects
-	Object obj1{default_object_def_rectangöe,10,{100,100},0,4};
+//	Object obj1{default_object_def_rectangöe,10,{100,100},0,4};
+//	obj1.set_drotation(deg_to_rad(5));
 //	Object obj2{default_object_def};
-	Object*obj3=new Ship();
+	static Object*objects[]{
+		new Object{default_object_def_rectangöe,10,{100,100},0,4},
+		new Ship(),
+		new Ship(),
+	};
+	objects[0]->set_drotation(deg_to_rad(5));
+	objects[1]->set_drotation(deg_to_rad(-5));
+	objects[1]->set_dposition({1,0});
+	objects[2]->set_drotation(deg_to_rad(7));
+	objects[2]->set_dposition({-1,0});
+
+//	Object*obj3=new Ship();
+//	obj3->set_drotation(deg_to_rad(-5));
+//	obj3->set_dposition({1,0});
 //	delete obj3;
 	Vga13h dsp;
 	Bitmap&db=dsp.bmp();
@@ -184,10 +196,17 @@ extern "C" void tsk4(){
 	const SizeBytes clear_n=320*100;
 	while(true){
 		pz_memset(clear_start,0x11,clear_n);
-		obj1.update();
-		obj3->update();
-		obj1.render(db);
-		obj3->render(db);
+//		obj1.update();
+//		obj3->update();
+//		obj1.render(db);
+//		obj3->render(db);
+
+		for(Object*o:objects){
+			o->update();
+		}
+		for(Object*o:objects){
+			o->render(db);
+		}
 
 		if(deg>360)
 			deg-=360;
