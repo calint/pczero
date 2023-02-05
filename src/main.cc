@@ -197,10 +197,15 @@ static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char
 class Object{
 	const ObjectDef&def_;
 	Point2D*cached_pts;
+	unsigned char color_;
+	unsigned char padding1=0;
+	unsigned char padding2=0;
+	unsigned char padding3=0;
 public:
-	Object(const ObjectDef&def):
+	Object(const ObjectDef&def,unsigned char color):
 		def_{def},
-		cached_pts{new Point2D[sizeof(def.pts)/sizeof(Point2D)]}
+		cached_pts{new Point2D[sizeof(def.pts)/sizeof(Point2D)]},
+		color_{color}
 	{}
 	inline auto def()->const ObjectDef&{return def_;}
 	auto transform(const Matrix2D&m){
@@ -209,40 +214,20 @@ public:
 	auto render(Bitmap&dsp){
 		Point2D*ptr=cached_pts;
 		for(unsigned i=0;i<sizeof(def_.pts)/sizeof(Point2D);i++){
-			dot(dsp,ptr->x,ptr->y,4);
+			dot(dsp,ptr->x,ptr->y,color_);
 			ptr++;
 		}
 	}
 };
-
-//static Vector2D dots_src[]{
-//	{ 0, 0},
-//	{-2,-1},
-//	{ 2,-1},
-//	{ 2, 1},
-//	{-2, 1},
-//};
-//static Vector2D dots_src[]{
-//	{ 0, 0},
-//	{ 0,-1},
-//	{-1,.5f},
-//	{ 1,.5f},
-//};
-//static Vector2D vectors_axis[]{
-//	{1,0},
-//	{0,1},
-//};
-
-//static Vector2D dots_dst[sizeof(default_object_def.pts)/sizeof(Vector2D)];
 
 extern "C" void tsk4(){
 	// init statics
 	default_object_def=ObjectDef();
 
 	// create sample objects
-	Object obj1{default_object_def};
+	Object obj1{default_object_def,4};
 //	Object obj2{default_object_def};
-	Object*obj3=new Object(default_object_def);
+	Object*obj3=new Object(default_object_def,3);
 
 	Vga13h dsp;
 	Bitmap&db=dsp.bmp();
