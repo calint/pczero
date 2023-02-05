@@ -126,13 +126,33 @@ extern "C" void tsk3(){
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-static Vector2D dots_src[]{
-	{ 0, 0},
-	{-2,-1},
-	{ 2,-1},
-	{ 2, 1},
-	{-2, 1},
-};
+class ObjectDef{
+public:
+	Vector2D pts[5];
+//	{
+//		{ 0, 0},
+//		{-2,-1},
+//		{ 2,-1},
+//		{ 2, 1},
+//		{-2, 1},
+//	};
+	ObjectDef():
+		pts{
+			{ 0, 0},
+			{-2,-1},
+			{ 2,-1},
+			{ 2, 1},
+			{-2, 1},
+		}
+	{}
+}default_object_def;
+//static Vector2D dots_src[]{
+//	{ 0, 0},
+//	{-2,-1},
+//	{ 2,-1},
+//	{ 2, 1},
+//	{-2, 1},
+//};
 //static Vector2D dots_src[]{
 //	{ 0, 0},
 //	{ 0,-1},
@@ -144,7 +164,7 @@ static Vector2D dots_src[]{
 //	{0,1},
 //};
 
-static Vector2D dots_dst[sizeof(dots_src)/sizeof(Vector2D)];
+static Vector2D dots_dst[sizeof(default_object_def.pts)/sizeof(Vector2D)];
 
 static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char color){
 	const int xi=static_cast<int>(x);
@@ -152,6 +172,9 @@ static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char
 	bmp.pointer_offset({xi,yi}).write(color);
 }
 extern "C" void tsk4(){
+	// init static
+	default_object_def=ObjectDef();
+
 	Vga13h dsp;
 	const Bitmap&db=dsp.bmp();
 	PrinterToBitmap pb{db};
@@ -168,7 +191,7 @@ extern "C" void tsk4(){
 			deg-=360;
 		const float rotation=deg_to_rad(deg);
 		R.set_transform(scale,rotation,translation);
-		R.transform(dots_src,dots_dst,sizeof(dots_src)/sizeof(Vector2D));
+		R.transform(default_object_def.pts,dots_dst,sizeof(default_object_def.pts)/sizeof(Vector2D));
 		for(const auto&d:dots_dst){
 			dot(dsp.bmp(),d.x,d.y,colr);
 		}
