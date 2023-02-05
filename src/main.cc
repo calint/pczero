@@ -195,7 +195,7 @@ static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char
 }
 
 class Object{
-	const ObjectDef def_;
+	const ObjectDef&def_;
 	Point2D*cached_pts;
 public:
 	Object(const ObjectDef&def):
@@ -241,7 +241,7 @@ extern "C" void tsk4(){
 
 	// create sample objects
 	Object obj1{default_object_def};
-	Object obj2{default_object_def};
+//	Object obj2{default_object_def};
 	Object*obj3=new Object(default_object_def);
 
 	Vga13h dsp;
@@ -263,9 +263,9 @@ extern "C" void tsk4(){
 		obj1.transform(R);
 		obj1.render(db);
 
-		R.set_transform(5,-rotation,{120,100});
-		obj2.transform(R);
-		obj2.render(db);
+//		R.set_transform(5,-rotation,{120,100});
+//		obj2.transform(R);
+//		obj2.render(db);
 
 		R.set_transform(5,-rotation,{140,100});
 		obj3->transform(R);
