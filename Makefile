@@ -12,7 +12,7 @@ CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -W
 CW+=-Wpadded
 #CW+=-Winline
 CF=-O3 -m32 -fno-builtin -nostdlib -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
-CF+=-fconserve-stack # try to inhibit optimizer excessive use of stack
+CF+=-fconserve-stack # try to inhibit excessive use of stack by optimizer
 CF+=-fanalyzer
 CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 LF=-Wl,--oformat=binary,-Ttext=0x7c00
