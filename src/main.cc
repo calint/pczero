@@ -2,37 +2,40 @@
 #include "lib.h"
 #include "lib2d.h"
 
-//char*freemem=reinterpret_cast<char*>(0x100000);
-//char*freemem=reinterpret_cast<char*>(0xa0000+320);
-//
-//void*operator new[](unsigned int count){
-//	char*p=freemem;
-//	p+=count;
-//	return reinterpret_cast<void*>(p);
-//}
-
 using namespace osca;
 
 // used to print errors at row 1 column 1
 PrinterToVga err;
 
 //char*freemem=reinterpret_cast<char*>(0x100000);
-char*freemem=reinterpret_cast<char*>(0xa0000+320);
+static char*freemem_ptr=reinterpret_cast<char*>(0xa0000+320);
 
 // called by C++ to allocate memory
 void*operator new[](unsigned count){
-	char*p=freemem;
-	err.printer().p_hex_32b(count).p(':').p_hex_32b(reinterpret_cast<unsigned int>(p)).p(' ');
-	freemem+=count;
+	char*p=freemem_ptr;
+//	err.printer().p_hex_32b(count).p(':').p_hex_32b(reinterpret_cast<unsigned int>(p)).p(' ');
+	freemem_ptr+=count;
 	return reinterpret_cast<void*>(p);
 }
 
 // called by C++ to allocate memory
-void* operator new(unsigned count){
-	char*p=freemem;
-	err.printer().p_hex_32b(count).p(':').p_hex_32b(reinterpret_cast<unsigned int>(p)).p(' ');
-	freemem+=count;
+void*operator new(unsigned count){
+	char*p=freemem_ptr;
+//	err.printer().p_hex_32b(count).p(':').p_hex_32b(reinterpret_cast<unsigned int>(p)).p(' ');
+	freemem_ptr+=count;
 	return reinterpret_cast<void*>(p);
+}
+void operator delete(void*ptr)noexcept{
+	err.printer().p("D:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+}
+void operator delete(void*ptr,unsigned size)noexcept{
+	err.printer().p("DS:").p_hex_32b(size).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+}
+void operator delete[](void*ptr)noexcept{
+	err.printer().p("DA:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+}
+void operator delete[](void*ptr,unsigned size)noexcept{
+	err.printer().p("DSA:").p_hex_32b(size).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
 }
 
 // called by osca from the keyboard interrupt
@@ -195,23 +198,51 @@ static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char
 }
 
 class Object{
+	Point2D pos_;
+	Radians rot_;
 	const ObjectDef&def_;
+	Scale scl_;
 	Point2D*cached_pts;
 	unsigned char color_;
 	unsigned char padding1=0;
 	unsigned char padding2=0;
 	unsigned char padding3=0;
 public:
-	Object(const ObjectDef&def,unsigned char color):
+//	Object():
+//		pos_{0,0},
+//		rot_{0},
+//		def_{default_object_def},
+//		scl_{0},
+//		cached_pts{nullptr},
+//		color_{0}
+//	{}
+	Object()=delete;
+	Object(const Object&)=delete; // copy ctor
+	Object(Object&&)=delete; // move ctor
+	Object&operator=(const Object&)=delete; // copy assignment
+	Object&operator=(Object&&)=delete; // move assignment
+	Object(const ObjectDef&def,const Scale scl,const Point2D&pos,const Radians rot,const unsigned char color):
+		pos_{pos},
+		rot_{rot},
 		def_{def},
+		scl_{scl},
 		cached_pts{new Point2D[sizeof(def.pts)/sizeof(Point2D)]},
 		color_{color}
 	{}
-	inline auto def()->const ObjectDef&{return def_;}
-	auto transform(const Matrix2D&m){
-		m.transform(def_.pts,cached_pts,sizeof(def_.pts)/sizeof(Point2D));
+	virtual~Object(){
+		delete[]cached_pts;
 	}
-	auto render(Bitmap&dsp){
+	inline auto def()->const ObjectDef&{return def_;}
+//	auto transform(const Matrix2D&m){
+//		m.transform(def_.pts,cached_pts,sizeof(def_.pts)/sizeof(Point2D));
+//	}
+	virtual auto update()->void{
+		rot_+=deg_to_rad(5);
+	}
+	virtual auto render(Bitmap&dsp)->void{
+		Matrix2D M;
+		M.set_transform(scl_,rot_,pos_);
+		M.transform(def_.pts,cached_pts,sizeof(def_.pts)/sizeof(Point2D));
 		Point2D*ptr=cached_pts;
 		for(unsigned i=0;i<sizeof(def_.pts)/sizeof(Point2D);i++){
 			dot(dsp,ptr->x,ptr->y,color_);
@@ -225,46 +256,36 @@ extern "C" void tsk4(){
 	default_object_def=ObjectDef();
 
 	// create sample objects
-	Object obj1{default_object_def,4};
+	Object obj1{default_object_def,10,{100,100},0,4};
 //	Object obj2{default_object_def};
-	Object*obj3=new Object(default_object_def,3);
-
+	Object*obj3=new Object(default_object_def,5,{120,100},0,2);
+	delete obj3;
 	Vga13h dsp;
 	Bitmap&db=dsp.bmp();
 	PrinterToBitmap pb{db};
 	Degrees deg=0;
-	unsigned char colr=1;
 	Matrix2D R;
-	Vector2D translation={100,100};
-	Scale scale{10};
 	const Address clear_start=db.data().pointer().offset(50*320).address();
 	const SizeBytes clear_n=320*100;
 	while(true){
 		pz_memset(clear_start,0x11,clear_n);
-		if(deg>360)
-			deg-=360;
-		const float rotation=deg_to_rad(deg);
-		R.set_transform(scale,rotation,translation);
-		obj1.transform(R);
+		obj1.update();
+		obj3->update();
 		obj1.render(db);
-
-//		R.set_transform(5,-rotation,{120,100});
-//		obj2.transform(R);
-//		obj2.render(db);
-
-		R.set_transform(5,-rotation,{140,100});
-		obj3->transform(R);
 		obj3->render(db);
 
-		// dot axis
-		dot(db,140,100,1);
-		const Vector2D xaxis=R.axis_x().normalize().scale(15);
-		dot(db,xaxis.x+140,xaxis.y+100,4);
-		const Vector2D yaxis=R.axis_y().normalize().scale(15);
-		dot(db,yaxis.x+140,yaxis.y+100,5);
-
+		if(deg>360)
+			deg-=360;
 		deg+=5;
-		colr++;
+		const float rotation=deg_to_rad(deg);
+		R.set_transform(5,rotation,{140,100});
+		// dot axis
+		dot(db,140,100,0xf);
+		const Vector2D xaxis=R.axis_x().normalize().scale(15);
+		dot(db,xaxis.x+140,xaxis.y+100,2);
+		const Vector2D yaxis=R.axis_y().normalize().scale(15);
+		dot(db,yaxis.x+140,yaxis.y+100,4);
+
 		osca_yield();
 	}
 }
