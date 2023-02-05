@@ -70,7 +70,7 @@ public:
 		x+=v.x;
 		y+=v.y;
 	}
-//	auto operator<=>(const Vector2D&)const=default;
+//	auto operator<=>(const Vector2D&)const=default; // ? does not compile in clang++ without includes from std
 	auto operator==(const Vector2D&)const->bool=default;
 };
 
