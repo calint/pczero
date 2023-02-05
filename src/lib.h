@@ -99,6 +99,7 @@ public:
 	inline Bitmap(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()}{}
 	inline auto dim()const->const DimensionPx&{return d_;}
 	inline auto data()const->const Data&{return dt_;}
+	inline auto pointer_offset(const CoordsPx p)const->Pointer{return dt_.pointer().offset(p.y()*d_.width()+p.x());}
 	auto to(const Bitmap&dst,const CoordsPx&c)const{
 		char*si=static_cast<char*>(dt_.address());
 		char*di=static_cast<char*>(dst.dt_.address());
