@@ -174,13 +174,13 @@ extern "C" void tsk4(){
 		}
 
 		// dot axis
-		dot(dsp.bmp(),140,100,1);
+		dot(db,140,100,1);
 		const Vector2D xaxis=R.axis_x();
-		dot(dsp.bmp(),xaxis.x+140,xaxis.y+100,4);
+		dot(db,xaxis.x+140,xaxis.y+100,4);
 		const Vector2D yaxis=R.axis_y();
-		dot(dsp.bmp(),yaxis.x+140,yaxis.y+100,5);
+		dot(db,yaxis.x+140,yaxis.y+100,5);
 
-		deg+=10;
+		deg+=5;
 		colr++;
 		osca_yield();
 	}

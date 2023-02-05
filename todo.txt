@@ -6,7 +6,8 @@
 [ ] review const correctness regarding const bmp.data.begin.address then write to pointer
 [ ]   const Bitmap&dbmp=dsp.bmp(); then mutate data in const dbmp
 [ ] lib: PrinterToBitmap pos in pixels
-[ ] lib: Console pos in characters
+[ ] lib: PrinterToConsole pos in characters
+[ ] osca: time_ms
 [x] extract boot.cc to boot.S
 [ ] use link.ld to build binary?
 [x] inline assembler for pz_memcpy
