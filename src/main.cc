@@ -196,8 +196,8 @@ public:
 		pts=new Point2D[pts_count];
 		pts[0]={ 0, 0};
 		pts[1]={ 0,-1};
-		pts[2]={-1, 1};
-		pts[3]={ 1, 1};
+		pts[2]={-1,.5};
+		pts[3]={ 1,.5};
 	}
 }default_ship_def;
 
