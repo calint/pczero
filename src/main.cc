@@ -2,7 +2,37 @@
 #include "lib.h"
 #include "lib2d.h"
 
+//char*freemem=reinterpret_cast<char*>(0x100000);
+//char*freemem=reinterpret_cast<char*>(0xa0000+320);
+//
+//void*operator new[](unsigned int count){
+//	char*p=freemem;
+//	p+=count;
+//	return reinterpret_cast<void*>(p);
+//}
+
 using namespace osca;
+
+// used to print errors at row 1 column 1
+PrinterToVga err;
+
+//char*freemem=reinterpret_cast<char*>(0x100000);
+char*freemem=reinterpret_cast<char*>(0xa0000+320);
+
+void*operator new[](unsigned int count){
+	char*p=freemem;
+	err.printer().p_hex_32b(count).p(':').p_hex_32b(reinterpret_cast<unsigned int>(p)).p(' ');
+	freemem+=count;
+	return reinterpret_cast<void*>(p);
+}
+
+// called by osca from the keyboard interrupt
+extern "C" void osca_init(){
+	*(int*)(0xa0000)=0x02;
+	// initiate statics
+	err=PrinterToVga();
+}
+
 
 extern "C" void tsk0();
 extern "C" void tsk2();
@@ -118,17 +148,19 @@ extern "C" void tsk2(){
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk3(){
-	const Vga13h dsp;
+	Vga13h dsp;
 	while(true){
 //		osca_yield();
 //		*(int*)(0xa0000+320-4)=osca_t;
 		dsp.bmp().data().pointer().offset(8).write(osca_t);
 	}
 }
+
+using Point2D=Vector2D;
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 class ObjectDef{
 public:
-	Vector2D pts[5];
+	Point2D pts[5];
 //	{
 //		{ 0, 0},
 //		{-2,-1},
@@ -146,6 +178,34 @@ public:
 		}
 	{}
 }default_object_def;
+
+static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char color){
+	const int xi=static_cast<int>(x);
+	const int yi=static_cast<int>(y);
+	bmp.pointer_offset({xi,yi}).write(color);
+}
+
+class Object{
+	const ObjectDef def_;
+public:
+	Point2D*cached_pts;
+	Object(const ObjectDef&def):
+		def_{def},
+		cached_pts{new Point2D[sizeof(def.pts)/sizeof(Point2D)]}
+	{}
+	inline auto def()->const ObjectDef&{return def_;}
+	auto transform(const Matrix2D&m){
+		m.transform(def_.pts,cached_pts,sizeof(def_.pts)/sizeof(Point2D));
+	}
+	auto render(Bitmap&dsp){
+		Point2D*ptr=cached_pts;
+		for(unsigned i=0;i<sizeof(def_.pts)/sizeof(Point2D);i++){
+			dot(dsp,ptr->x,ptr->y,4);
+			ptr++;
+		}
+	}
+};
+
 //static Vector2D dots_src[]{
 //	{ 0, 0},
 //	{-2,-1},
@@ -164,19 +224,23 @@ public:
 //	{0,1},
 //};
 
-static Vector2D dots_dst[sizeof(default_object_def.pts)/sizeof(Vector2D)];
+//static Vector2D dots_dst[sizeof(default_object_def.pts)/sizeof(Vector2D)];
 
-static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char color){
-	const int xi=static_cast<int>(x);
-	const int yi=static_cast<int>(y);
-	bmp.pointer_offset({xi,yi}).write(color);
-}
 extern "C" void tsk4(){
-	// init static
+	// init statics
 	default_object_def=ObjectDef();
 
+	// create a sample object
+	Object obj1{default_object_def};
+	Object obj2{default_object_def};
+//	obj2.cached_pts[0]={3,3};
+//	obj2.cached_pts[1]={3,3};
+//	obj2.cached_pts[2]={3,3};
+//	obj2.cached_pts[3]={3,3};
+//	obj2.cached_pts[4]={3,3};
+
 	Vga13h dsp;
-	const Bitmap&db=dsp.bmp();
+	Bitmap&db=dsp.bmp();
 	PrinterToBitmap pb{db};
 	Degrees deg=0;
 	unsigned char colr=1;
@@ -191,10 +255,12 @@ extern "C" void tsk4(){
 			deg-=360;
 		const float rotation=deg_to_rad(deg);
 		R.set_transform(scale,rotation,translation);
-		R.transform(default_object_def.pts,dots_dst,sizeof(default_object_def.pts)/sizeof(Vector2D));
-		for(const auto&d:dots_dst){
-			dot(dsp.bmp(),d.x,d.y,colr);
-		}
+		obj1.transform(R);
+		obj1.render(db);
+
+		R.set_transform(5,-rotation,{120,100});
+		obj2.transform(R);
+		obj2.render(db);
 
 		// dot axis
 		dot(db,140,100,1);
@@ -302,3 +368,4 @@ extern "C" void tsk4(){
 //	}
 //}
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+

@@ -50,7 +50,6 @@ build:
 	@echo
 	$(CC) -c src/main.cc -o bin/src/main.o $(CF) $(CW)
 	@echo
-	@echo
 	cd bin && ld -o $(IMAGE) $(LF) && chmod -x $(IMAGE)
 	@echo
 	

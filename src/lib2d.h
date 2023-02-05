@@ -41,6 +41,8 @@ constexpr auto deg_to_rad(const Degrees deg)->Radians{
 class Vector2D{
 public:
 	float x=0,y=0;
+//	Vector2D(){}
+//	Vector2D(const float x_,const float y_):x{x_},y{y_}{}
 	// normalizes this vector
 	inline auto normalize()->Vector2D&{
 		const float len=sqrt(x*x+y*y);

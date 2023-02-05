@@ -296,17 +296,17 @@ using Color8b=char;
 class PrinterToBitmap{
 	char*di_; // current pixel in bitmap
 	char*dil_; // beginning of current line
-	const Bitmap&b_;
-	const SizePx bmp_wi_;
-	const SizePx font_wi_;
-	const SizePx font_hi_;
-	const SizePx ln_;
+	Bitmap&b_;
+	SizePx bmp_wi_;
+	SizePx font_wi_;
+	SizePx font_hi_;
+	SizePx ln_;
 	Color8b fg_;
 	Color8b bg_;
 	bool transparent_; // ? implement
 	char padding1=0;
 public:
-	inline PrinterToBitmap(const Bitmap&b):
+	inline PrinterToBitmap(Bitmap&b):
 		di_{static_cast<char*>(b.data().address())},
 		dil_{di_},
 		b_{b},
@@ -318,6 +318,7 @@ public:
 		bg_{0},
 		transparent_{false}
 	{}
+
 	inline auto pos(const Row r,const Column c)->PrinterToBitmap&{
 		di_=static_cast<char*>(b_.data().address());
 		di_+=bmp_wi_*r*font_hi_+c*font_wi_;
@@ -397,6 +398,20 @@ public:
 		di_-=font_wi_;
 		return*this;
 	}
+	PrinterToBitmap&operator=(const PrinterToBitmap&o){
+		di_=o.di_;
+		dil_=o.dil_;
+		b_=o.b_;
+		bmp_wi_=o.bmp_wi_;
+		font_wi_=o.font_wi_;
+		font_hi_=o.font_hi_;
+		ln_=o.ln_;
+		fg_=o.fg_;
+		bg_=o.bg_;
+		transparent_=o.transparent_;
+		padding1=o.padding1;
+		return*this;
+	}
 private:
 	auto draw_with_bg(unsigned int bmp_5x6)->PrinterToBitmap&{ // make inline assembler?
 		const unsigned int mask=1u<<31;
@@ -436,7 +451,25 @@ class Vga13h{
 
 public:
 	inline Vga13h():b_{Address(0xa0000),DimensionPx{320,200}}{}
-	inline auto bmp()const->const Bitmap&{return b_;}
+	inline auto bmp()->Bitmap&{return b_;}
+};
+
+class PrinterToVga{
+	Vga13h dsp;
+	PrinterToBitmap ptb;
+public:
+	PrinterToVga():
+		dsp{},ptb{dsp.bmp()}
+	{
+		ptb.pos(1,1).fg(4);
+	}
+	inline auto p(const char*s){ptb.p(s);}
+	inline auto printer()->PrinterToBitmap&{return ptb;}
+	PrinterToVga&operator=(PrinterToVga&&o){
+		dsp=o.dsp;
+		ptb=o.ptb;
+		return*this;
+	}
 };
 
 using PositionPx=CoordsPx;
