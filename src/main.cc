@@ -1,5 +1,6 @@
 #include "osca.h"
 #include "lib.h"
+#include "lib2d.h"
 
 using namespace osca;
 
@@ -126,12 +127,18 @@ extern "C" void tsk3(){
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 static Vector2D dots_src[]{
-	{-10.0f,-10.0f},
-	{ 10.0f,-10.0f},
-	{ 10.0f, 10.0f},
-	{-10.0f, 10.0f},
-//	{    0,10.0f},
+	{ 0, 0},
+	{-1,-1},
+	{ 1,-1},
+	{ 1, 1},
+	{-1, 1},
 };
+
+//static Vector2D vectors_axis[]{
+//	{1,0},
+//	{0,1},
+//};
+
 static Vector2D dots_dst[sizeof(dots_src)/sizeof(Vector2D)];
 
 static void dot(const Bitmap&bmp,const float x,const float  y,const unsigned char color){
@@ -154,11 +161,19 @@ extern "C" void tsk4(){
 		}
 
 		const float rad=deg_to_rad(deg);
-		R.set_transform(rad,origo);
+		R.set_transform(rad,origo,{10,10});
 		R.transform(dots_src,dots_dst,sizeof(dots_src)/sizeof(Vector2D));
 		for(const auto&d:dots_dst){
 			dot(dsp.bmp(),d.x,d.y,colr);
 		}
+
+		// dot axis
+		dot(dsp.bmp(),140,100,1);
+		const Vector2D xaxis=R.axis_x();
+		dot(dsp.bmp(),xaxis.x+140,xaxis.y+100,4);
+		const Vector2D yaxis=R.axis_y();
+		dot(dsp.bmp(),yaxis.x+140,yaxis.y+100,5);
+
 		deg+=10.0f;
 		colr++;
 		osca_yield();
