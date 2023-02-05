@@ -8,7 +8,7 @@ IMAGE=pczero.img
 SRC=src/osca.S src/main.cc
 # all files with source, used in 'print'
 FILES=$(SRC)
-FILES+=src/lib.h src/lib2d.h
+FILES+=src/lib.h src/lib2d.h src/libge.h
 
 # GNU assembler (GNU Binutils for Ubuntu) 2.39
 AF=--march=i386 --32
