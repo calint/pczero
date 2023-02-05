@@ -3,18 +3,19 @@ namespace osca{
 
 using Radians=float;
 using Degrees=float;
-inline auto cos(const Radians radians)->float{
+
+inline auto sin(const Radians radians)->float{
 	float v;
-	asm("fcos"
+	asm("fsin"
 		:"=t"(v) // "t": first (top of stack) floating point register
 		:"0"(radians)
 	);
 	return v;
 }
 
-inline auto sin(const Radians radians)->float{
+inline auto cos(const Radians radians)->float{
 	float v;
-	asm("fsin"
+	asm("fcos"
 		:"=t"(v) // "t": first (top of stack) floating point register
 		:"0"(radians)
 	);
@@ -31,6 +32,7 @@ inline auto sqrt(const float s)->float{
 }
 
 constexpr float PI=3.141592653589793f;
+
 constexpr auto deg_to_rad(const Degrees deg)->Radians{
 	constexpr float deg_to_rad=PI/180.f;
 	return deg*deg_to_rad;
@@ -53,7 +55,10 @@ public:
 		return*this;
 	}
 };
+
 using Scale=float;
+using Count=int;
+
 class Matrix2D{
 	float	xx=1,xy=0,xt=0,
 			yx=0,yy=1,yt=0,
@@ -83,7 +88,7 @@ public:
 		yx=sn,yy= cs,yt=translation.y;
 		ux= 0,uy=  0,id=1;
 	}
-	auto transform(const Vector2D src[],Vector2D dst[],const int n)const{
+	auto transform(const Vector2D src[],Vector2D dst[],const Count n)const{
 		for(int i=0;i<n;i++){
 			dst->x=xx*src->x+xy*src->y+xt;
 			dst->y=yx*src->x+yy*src->y+yt;

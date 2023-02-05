@@ -11,7 +11,7 @@ CC=g++ -std=c++2a -Wfatal-errors
 CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
 CW+=-Wpadded
 #CW+=-Winline
-CF=-O0 -m32 -fno-builtin -nostdlib -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
+CF=-O3 -m32 -fno-builtin -nostdlib -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
 CF+=-fconserve-stack # try to inhibit optimizer excessive use of stack
 CF+=-fanalyzer
 CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
