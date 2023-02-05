@@ -339,7 +339,7 @@ public:
 		return*this;
 	}
 	auto p_hex(const int hex_number_4b)->PrinterToBitmap&{
-		draw(table_hex_to_font[hex_number_4b&15]);
+		draw(table_hex_to_font[hex_number_4b&0xf]);
 		return*this;
 	}
 	auto p_hex_8b(unsigned char v)->PrinterToBitmap&{
@@ -399,6 +399,7 @@ public:
 		di_-=font_wi_;
 		return*this;
 	}
+	auto spc()->PrinterToBitmap&{p(' ');return*this;}
 	PrinterToBitmap&operator=(const PrinterToBitmap&o){
 		di_=o.di_;
 		dil_=o.dil_;

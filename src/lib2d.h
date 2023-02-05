@@ -2,10 +2,10 @@
 
 namespace osca{
 
-using Radians=float;
+using Angle=float;
 using Degrees=float;
 
-inline auto sin(const Radians radians)->float{
+inline auto sin(const Angle radians)->float{
 	float v;
 	asm("fsin"
 		:"=t"(v) // "t": first (top of stack) floating point register
@@ -14,7 +14,7 @@ inline auto sin(const Radians radians)->float{
 	return v;
 }
 
-inline auto cos(const Radians radians)->float{
+inline auto cos(const Angle radians)->float{
 	float v;
 	asm("fcos"
 		:"=t"(v) // "t": first (top of stack) floating point register
@@ -24,7 +24,7 @@ inline auto cos(const Radians radians)->float{
 }
 
 // puts sin and cos value of 'radians' in 'fsin' and 'fcos'
-inline auto sin_and_cos(const Radians radians,float&fsin,float&fcos){
+inline auto sin_and_cos(const Angle radians,float&fsin,float&fcos){
 	asm("fsincos"
 		:"=t"(fcos),"=u"(fsin) // "u" : Second floating point register
 		:"0"(radians)
@@ -42,7 +42,7 @@ inline auto sqrt(const float s)->float{
 
 constexpr float PI=3.141592653589793f;
 
-constexpr auto deg_to_rad(const Degrees deg)->Radians{
+constexpr auto deg_to_rad(const Degrees deg)->Angle{
 	constexpr float deg_to_rad=PI/180.f;
 	return deg*deg_to_rad;
 }
@@ -100,7 +100,7 @@ public:
 //		ty=v.y;
 //	}
 
-	inline auto set_transform(const Scale scale,const Radians rotation,const Vector2D&translation){
+	inline auto set_transform(const Scale scale,const Angle rotation,const Vector2D&translation){
 		// ! implement fsincos
 		float fcos,fsin;
 		sin_and_cos(rotation,fsin,fcos);

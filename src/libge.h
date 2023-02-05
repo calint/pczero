@@ -44,77 +44,124 @@ static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char
 	bmp.pointer_offset({xi,yi}).write(color);
 }
 
+class Object;
+static Object*objects[16];
+static unsigned short objects_free_indexes[16];
+static unsigned short objects_free_indexes_pos=15;
+//static auto slot_object(Object*o)->void;
+//static auto unslot_object(Object*o)->void;
 class Object{
 protected:
 	Point2D pos_; // ? pos,rot,dpos,drot not cache friendly
 	Point2D dpos_;
-	Radians rot_;
-	Radians drot_;
+	Angle agl_;
+	Angle dagl_;
 	Scale scl_;
-	Point2D Mmw_pos_; // pos in transform matrix
-	Radians Mmw_rot_;
-	Scale Mmw_scl_;
 	const ObjectDef&def_;
-	Point2D*pts_wld; // transformed model to world points cache
-	Matrix2D Mmw; // model to world transform
+	Point2D*pts_wld_; // transformed model to world cache
+	Matrix2D Mmw_; // model to world transform
+	Point2D Mmw_pos_; // pos in transform matrix
+	Angle Mmw_agl_;
+	Scale Mmw_scl_;
 	unsigned char color_;
 	unsigned char padding1=0;
-	unsigned char padding2=0;
-	unsigned char padding3=0;
 public:
+	unsigned short slot=0;
 //	Object()=delete;
 	Object(const Object&)=delete; // copy ctor
 	Object(Object&&)=delete; // move ctor
 	Object&operator=(const Object&)=delete; // copy assignment
 //	Object&operator=(Object&&)=delete; // move assignment
-	Object(const ObjectDef&def,const Scale scl,const Point2D&pos,const Radians rot,const unsigned char color):
+	Object(const ObjectDef&def,const Scale scl,const Point2D&pos,const Angle rad,const unsigned char color):
 		pos_{pos},
 		dpos_{0},
-		rot_{rot},
-		drot_{0},
+		agl_{rad},
+		dagl_{0},
 		scl_{scl},
-		Mmw_pos_{0,0},
-		Mmw_rot_{0},
-		Mmw_scl_{0},
 		def_{def},
-		pts_wld{new Point2D[def.pts_count]},
-		Mmw{},
+		pts_wld_{new Point2D[def.pts_count]},
+		Mmw_{},
+		Mmw_pos_{0,0},
+		Mmw_agl_{0},
+		Mmw_scl_{0},
 		color_{color}
-	{}
-	virtual~Object(){
-		delete[]pts_wld;
+	{
+//		slot_object(this);
 	}
-	inline auto def()->const ObjectDef&{return def_;}
-	inline auto pos()->const Point2D&{return pos_;}
-	inline auto dpos()->const Point2D&{return dpos_;}
-	inline auto set_position(const Point2D&p){pos_=p;}
-	inline auto set_dposition(const Point2D&p){dpos_=p;}
-	inline auto set_rotation(const Radians r){rot_=r;}
-	inline auto set_drotation(const Radians r){drot_=r;}
-
+	virtual~Object(){
+//		out.printer().p(" d ").p_hex_16b(slot);
+//		unslot_object(this);
+		objects[slot]=nullptr;
+		delete[]pts_wld_;
+	}
+	inline auto def()const->const ObjectDef&{return def_;}
+	inline auto pos()const->const Point2D&{return pos_;}
+	inline auto dpos()const->const Point2D&{return dpos_;}
+	inline auto angle()const->Angle{return agl_;}
+	inline auto scale()const->Scale{return scl_;}
+	inline auto set_pos(const Point2D&p){pos_=p;}
+	inline auto set_dpos(const Point2D&p){dpos_=p;}
+	inline auto set_angle(const Angle rad){agl_=rad;}
+	inline auto set_dangle(const Angle rad){dagl_=rad;}
+	auto forward_vector()->Vector2D{
+		refresh_Mmw_if_invalid();
+		return Mmw_.axis_y();
+	}
+	virtual auto die()->void{
+//		unslot_object(this);
+//		delete this;
+	}
 	virtual auto update()->void{
-		// used to print errors at row 1 column 1
-//		err.p("uo ");
 		pos_.inc_by(dpos_);
-		rot_+=drot_;
+		agl_+=dagl_;
 	}
 	virtual auto render(Bitmap&dsp)->void{
-		// check if model to world matrix needs update
-		if(rot_!=Mmw_rot_||pos_!=Mmw_pos_||scl_!=Mmw_scl_){
-//			err.printer().p("um:").p_hex_32b(reinterpret_cast<unsigned>(this)).p(' ');
-			Mmw.set_transform(scl_,rot_,pos_);
-			Mmw_rot_=rot_;
-			Mmw_pos_=pos_;
-			Mmw_scl_=scl_;
-			Mmw.transform(def_.pts,pts_wld,def_.pts_count);
+		if(refresh_Mmw_if_invalid()){
+			// matrix is refreshed
+			Mmw_.transform(def_.pts,pts_wld_,def_.pts_count);
 		}
-		Point2D*ptr=pts_wld;
+		// check if model to world matrix needs update
+		Point2D*ptr=pts_wld_;
 		for(unsigned i=0;i<def_.pts_count;i++){
 			dot(dsp,ptr->x,ptr->y,color_);
 			ptr++;
 		}
 	}
+	auto fire(){
+
+	}
+private:
+	auto refresh_Mmw_if_invalid()->bool{
+		if(agl_==Mmw_agl_&&pos_==Mmw_pos_&&scl_==Mmw_scl_)
+			return false;
+//			err.printer().p("um:").p_hex_32b(reinterpret_cast<unsigned>(this)).p(' ');
+		Mmw_.set_transform(scl_,agl_,pos_);
+		Mmw_agl_=agl_;
+		Mmw_pos_=pos_;
+		Mmw_scl_=scl_;
+		return true;
+	}
 };
+
+//static auto slot_object(Object*o)->void{
+////	o->slot=0;
+////	return;
+////	if(objects_free_indexes_pos==0){
+////		out.printer().p("oos");
+////		return;
+////	}
+//	unsigned short slot=objects_free_indexes[objects_free_indexes_pos];
+//	o->slot=slot;
+//	out.printer().p("a:").p_hex_16b(slot).p(' ');
+//	objects_free_indexes_pos--;
+//}
+//
+//static auto unslot_object(Object*o)->void{
+//	objects_free_indexes_pos++;
+//	objects_free_indexes[objects_free_indexes_pos]=o->slot;
+//	out.printer().p("u ").p_hex_16b(o->slot).p(' ');
+//	o->slot=0;
+//}
 
 class Ship:public Object{
 public:
@@ -124,14 +171,34 @@ public:
 	virtual auto update()->void override{
 		Object::update();
 		if(pos_.x>300){
-			set_dposition({-dpos_.x,dpos_.y});
+			set_dpos({-dpos_.x,dpos_.y});
 		}else if(pos_.x<20){
-			set_dposition({-dpos_.x,dpos_.y});
+			set_dpos({-dpos_.x,dpos_.y});
 		}
 		if(pos_.y>130){
-			set_dposition({dpos_.x,-dpos_.y});
+			set_dpos({dpos_.x,-dpos_.y});
 		}else if(pos_.y<70){
-			set_dposition({dpos_.x,-dpos_.y});
+			set_dpos({dpos_.x,-dpos_.y});
 		}
 	}
 };
+
+//class Bullet:public Object{
+//public:
+//	Bullet():
+//		Object{default_object_def_ship,3,{0,0},0,4}
+//	{}
+//	virtual auto update()->void override{
+//		Object::update();
+//		if(pos_.x>300){
+//			die();
+//		}else if(pos_.x<20){
+//			die();
+//		}
+//		if(pos_.y>130){
+//			die();
+//		}else if(pos_.y<70){
+//			die();
+//		}
+//	}
+//};

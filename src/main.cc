@@ -161,24 +161,33 @@ extern "C" void tsk3(){
 		dsp.bmp().data().pointer().offset(8).write(osca_t);
 	}
 }
-static Object*objects[16];
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk4(){
 	// init statics
 	default_object_def_rectangöe=ObjectDefRectangle();
 	default_object_def_ship=ObjectDefShip();
+	unsigned n=sizeof(objects_free_indexes)/sizeof(unsigned short);
+	out.printer().p_hex_32b(n).spc().p_hex_16b(objects_free_indexes_pos).spc();
+	for(unsigned short i=0;i<n;i++){
+		objects_free_indexes[i]=i;
+	}
+
+//	static Object*objects[16];
 
 	Ship*shp=new Ship();
-	objects[0]=new Object{default_object_def_rectangöe,10,{100,100},0,4};
-	objects[1]=shp;
-	objects[2]=new Ship();
+	objects[1]=new Object{default_object_def_rectangöe,10,{100,100},0,4};
+	objects[2]=shp;
+	objects[3]=new Ship();
 
 //	Ship*shp=static_cast<Ship*>(objects[1]); // dynamic_cast not available du to '-no-rtti'
-	objects[0]->set_drotation(deg_to_rad(5));
-	objects[1]->set_drotation(deg_to_rad(-5));
-	objects[1]->set_dposition({1,1});
-	objects[2]->set_drotation(deg_to_rad(7));
-	objects[2]->set_dposition({-1,0});
+	objects[1]->slot=1;
+	objects[1]->set_dangle(deg_to_rad(5));
+	objects[2]->slot=2;
+	objects[2]->set_dangle(deg_to_rad(-5));
+	objects[2]->set_dpos({1,1});
+	objects[3]->slot=3;
+	objects[3]->set_dangle(deg_to_rad(7));
+	objects[3]->set_dpos({-1,0});
 
 	// init stack
 	Vga13h dsp;
@@ -221,16 +230,22 @@ extern "C" void tsk4(){
 			const Point2D&dp=objects[1]->dpos();
 			switch(ch){
 			case'w':
-				shp->set_dposition({dp.x,-1});
+				shp->set_dpos({dp.x,-1});
 				break;
 			case'a':
-				shp->set_dposition({-1,dp.y});
+				shp->set_dpos({-1,dp.y});
 				break;
 			case's':
-				shp->set_dposition({dp.x,1});
+				shp->set_dpos({dp.x,1});
 				break;
 			case'd':
-				shp->set_dposition({1,dp.y});
+				shp->set_dpos({1,dp.y});
+				break;
+			case' ':
+				if(shp){
+					delete shp;
+					shp=nullptr;
+				}
 				break;
 			default:
 				break;
