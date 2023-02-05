@@ -37,11 +37,11 @@ class Matrix2D{
 			xy=0,yy=1,ty=0,
 			xu=0,yu=0, i=1;
 public:
-	inline auto set_identity(){
-		xx=1;yx=0;tx=0;
-		xy=0,yy=1,ty=0;
-		xu=0,yu=0, i=1;
-	}
+//	inline auto set_identity(){
+//		xx=1;yx=0;tx=0;
+//		xy=0,yy=1,ty=0;
+//		xu=0,yu=0, i=1;
+//	}
 //	inline auto set_rotation(const Radians r){
 //		const float cs=cos(r);
 //		const float sn=sin(r);
@@ -53,11 +53,12 @@ public:
 //		tx=v.x;
 //		ty=v.y;
 //	}
-	inline auto set_transform(const Radians r,const Vector2D&t,const Vector2D&s){
-		const float cs=s.x*cos(r);
-		const float sn=s.y*sin(r);
-		xx=cs;yx=-sn;tx=t.x;
-		xy=sn,yy= cs,ty=t.y;
+
+	inline auto set_transform(const Radians rotation,const Vector2D&translation,const Vector2D&scale){
+		const float cs=scale.x*cos(rotation);
+		const float sn=scale.y*sin(rotation);
+		xx=cs;yx=-sn;tx=translation.x;
+		xy=sn,yy= cs,ty=translation.y;
 		xu= 0,yu=  0,i=1;
 	}
 	auto transform(const Vector2D src[],Vector2D dst[],const int n)const{

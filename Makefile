@@ -1,7 +1,11 @@
 # built with g++ (Ubuntu 12.2.0-3ubuntu1) 12.2.0
 
 BIN=bin/pczero.img
+# source files to be compiled
 SRC=src/_osca.S src/main.cc
+# all files with source, used in 'print'
+FILES=$(SRC)
+FILES+=src/lib.h src/lib2d.h
 
 CC=g++ -std=c++2a -Wfatal-errors
 CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
@@ -36,10 +40,10 @@ print:
 	@du -b $(BIN) $(SRC)
 	@echo
 	@echo wc source
-	@wc $(SRC)
+	@wc $(FILES)
 	@echo
 	@echo "wc source | gzip"
-	@cat $(SRC)|gzip|wc
+	@cat $(FILES)|gzip|wc
 	@echo
 	
 clean:

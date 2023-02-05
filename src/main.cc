@@ -148,12 +148,15 @@ static void dot(const Bitmap&bmp,const float x,const float  y,const unsigned cha
 }
 extern "C" void tsk4(){
 	Vga13h dsp;
-	PrinterToBitmap pb{dsp.bmp()};
+	const Bitmap&db=dsp.bmp();
+	PrinterToBitmap pb{db};
 	Degrees deg=0;
 	unsigned char colr=1;
 	Matrix2D R;
 	Vector2D origo={100,100};
 	Vector2D scale={10,10};
+//	const Address clear_start=db.data().begin()*320+80;
+//	const SizeBytes clear_n=320*100;
 	while(true){
 		if(deg>360)
 			deg=0;
