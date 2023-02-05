@@ -21,23 +21,23 @@ void*operator new(unsigned count){
 	return reinterpret_cast<void*>(p);
 }
 void operator delete(void*ptr)noexcept{
-	err.printer().p("D:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+	out.printer().p("D:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
 }
 void operator delete(void*ptr,unsigned size)noexcept{
-	err.printer().p("DS:").p_hex_32b(size).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+	out.printer().p("DS:").p_hex_32b(size).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
 }
 void operator delete[](void*ptr)noexcept{
-	err.printer().p("DA:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+	out.printer().p("DA:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
 }
 void operator delete[](void*ptr,unsigned size)noexcept{
-	err.printer().p("DSA:").p_hex_32b(size).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+	out.printer().p("DSA:").p_hex_32b(size).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
 }
 
 // called by osca from the keyboard interrupt
 extern "C" void osca_init(){
 	*(int*)(0xa0000)=0x02;
 	// initiate statics
-	err=PrinterToVga();
+	out=PrinterToVga();
 }
 
 

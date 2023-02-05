@@ -463,7 +463,7 @@ public:
 	{
 		ptb.pos(1,1).fg(4);
 	}
-	inline auto p(const char*s){ptb.p(s);}
+//	inline auto p(const char*s){ptb.p(s);}
 	inline auto printer()->PrinterToBitmap&{return ptb;}
 	PrinterToVga&operator=(PrinterToVga&&o){
 		dsp=o.dsp;
@@ -471,6 +471,9 @@ public:
 		return*this;
 	}
 };
+
+// used to print at row 1 column 1. initiated in main.cc::osca_init()
+PrinterToVga out;
 
 using PositionPx=CoordsPx;
 using Position=Coords;
@@ -512,8 +515,5 @@ public:
 	inline auto set_velocity(const Velocity&v){v_=v;}
 	inline auto update(){v_.inc_by(a_);p_.inc_by(v_);}
 };
-
-// used to print errors at row 1 column 1
-PrinterToVga err;
 
 } // end namespace osca
