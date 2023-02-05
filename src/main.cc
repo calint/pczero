@@ -259,7 +259,7 @@ extern "C" void tsk4(){
 	Object obj1{default_object_def,10,{100,100},0,4};
 //	Object obj2{default_object_def};
 	Object*obj3=new Object(default_object_def,5,{120,100},0,2);
-	delete obj3;
+//	delete obj3;
 	Vga13h dsp;
 	Bitmap&db=dsp.bmp();
 	PrinterToBitmap pb{db};
