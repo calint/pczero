@@ -172,24 +172,34 @@ using Point2D=Vector2D;
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 class ObjectDef{
 public:
-	Point2D pts[5];
-//	{
-//		{ 0, 0},
-//		{-2,-1},
-//		{ 2,-1},
-//		{ 2, 1},
-//		{-2, 1},
-//	};
-	ObjectDef():
-		pts{
-			{ 0, 0},
-			{-2,-1},
-			{ 2,-1},
-			{ 2, 1},
-			{-2, 1},
-		}
-	{}
-}default_object_def;
+	Point2D*pts=nullptr;
+	Size pts_count=0;
+};
+
+class Rectangle:public ObjectDef{
+public:
+	Rectangle(){
+		pts_count=5;
+		pts=new Point2D[pts_count];
+		pts[0]={ 0, 0};
+		pts[1]={-2,-1};
+		pts[2]={ 2,-1};
+		pts[3]={ 2, 1};
+		pts[4]={-2, 1};
+	}
+}default_rectangle_def;
+
+class ShipDef:public ObjectDef{
+public:
+	ShipDef(){
+		pts_count=4;
+		pts=new Point2D[pts_count];
+		pts[0]={ 0, 0};
+		pts[1]={ 0,-1};
+		pts[2]={-1, 1};
+		pts[3]={ 1, 1};
+	}
+}default_ship_def;
 
 static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char color){
 	const int xi=static_cast<int>(x);
@@ -198,6 +208,7 @@ static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char
 }
 
 class Object{
+protected:
 	Point2D pos_;
 	Radians rot_;
 	const ObjectDef&def_;
@@ -220,13 +231,13 @@ public:
 	Object(const Object&)=delete; // copy ctor
 	Object(Object&&)=delete; // move ctor
 	Object&operator=(const Object&)=delete; // copy assignment
-	Object&operator=(Object&&)=delete; // move assignment
+//	Object&operator=(Object&&)=delete; // move assignment
 	Object(const ObjectDef&def,const Scale scl,const Point2D&pos,const Radians rot,const unsigned char color):
 		pos_{pos},
 		rot_{rot},
 		def_{def},
 		scl_{scl},
-		cached_pts{new Point2D[sizeof(def.pts)/sizeof(Point2D)]},
+		cached_pts{new Point2D[def.pts_count]},
 		color_{color}
 	{}
 	virtual~Object(){
@@ -242,23 +253,33 @@ public:
 	virtual auto render(Bitmap&dsp)->void{
 		Matrix2D M;
 		M.set_transform(scl_,rot_,pos_);
-		M.transform(def_.pts,cached_pts,sizeof(def_.pts)/sizeof(Point2D));
+		M.transform(def_.pts,cached_pts,def_.pts_count);
 		Point2D*ptr=cached_pts;
-		for(unsigned i=0;i<sizeof(def_.pts)/sizeof(Point2D);i++){
+		for(int i=0;i<def_.pts_count;i++){
 			dot(dsp,ptr->x,ptr->y,color_);
 			ptr++;
 		}
 	}
 };
 
+class Ship:public Object{
+public:
+	Ship():
+		Object{default_ship_def,5,{120,100},0,2}
+	{}
+	virtual auto update()->void override{
+		rot_-=deg_to_rad(5);
+	}
+};
 extern "C" void tsk4(){
 	// init statics
-	default_object_def=ObjectDef();
+	default_rectangle_def=Rectangle();
+	default_ship_def=ShipDef();
 
 	// create sample objects
-	Object obj1{default_object_def,10,{100,100},0,4};
+	Object obj1{default_rectangle_def,10,{100,100},0,4};
 //	Object obj2{default_object_def};
-	Object*obj3=new Object(default_object_def,5,{120,100},0,2);
+	Object*obj3=new Ship();
 //	delete obj3;
 	Vga13h dsp;
 	Bitmap&db=dsp.bmp();
