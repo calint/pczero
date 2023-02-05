@@ -35,15 +35,15 @@ public:
 };
 
 class Data{
-	Pointer p_;
+	Address a_;
 	SizeBytes s_;
 public:
-	inline Data(const Address a,const SizeBytes n):p_{a},s_{n}{}
-	inline auto to(const Data&d)const{pz_memcpy(p_.address(),d.address(),s_);}
-	inline auto to(const Data&d,const SizeBytes sb)const{pz_memcpy(p_.address(),d.address(),sb);}
+	inline Data(const Address a,const SizeBytes n):a_{a},s_{n}{}
+	inline auto to(const Data&d)const{pz_memcpy(a_,d.address(),s_);}
+	inline auto to(const Data&d,const SizeBytes sb)const{pz_memcpy(a_,d.address(),sb);}
 	inline auto size()const->SizeBytes{return s_;}
-	inline auto address()const->Address{return p_.address();}
-	inline auto pointer()const->Pointer{return p_;}
+	inline auto address()const->Address{return a_;}
+	inline auto pointer()const->Pointer{return{a_};}
 };
 
 template<typename T>
