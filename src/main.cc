@@ -4,8 +4,9 @@
 #include "libge.h"
 
 using namespace osca;
-//char*freemem=reinterpret_cast<char*>(0x100000);
-static char*freemem_ptr=reinterpret_cast<char*>(0xa0000+320); // put heap on screen
+static char*freemem_ptr=reinterpret_cast<char*>(0x10'0000);
+static char*freemem_start=reinterpret_cast<char*>(0x10'0000);;
+//static char*freemem_ptr=reinterpret_cast<char*>(0xa0000+320); // put heap on screen
 
 // called by C++ to allocate and free memory
 void*operator new[](unsigned count){
@@ -87,7 +88,7 @@ extern "C" void tsk0(){
 	for(int i=0;i<16;i++){
 		pb.p_hex(i);
 	}
-	pb.fg(5).pos(2,10);
+	pb.fg(5).pos(2,13);
 	for(char i='0';i<='9';i++){
 		pb.p(i);
 	}
@@ -95,13 +96,12 @@ extern "C" void tsk0(){
 	for(char i='a';i<='z';i++){
 		pb.p(i);
 	}
-	pb.fg(7).pos(3,10+10);
+	pb.fg(7).pos(3,13+10);
 	for(char i='A';i<='Z';i++){
 		pb.p(i);
 	}
 
-	pb.fg(2).pos(4,15);
-	pb.p("hello world!").nl();
+	pb.fg(2).pos(4,15).p("hello world!").nl();
 	pb.fg(6).p("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
 	pb.fg(7).p(' ').p_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
@@ -133,7 +133,6 @@ extern "C" void tsk0(){
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".global tsk1");
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".align 16");
 asm("tsk1:");
 asm("  incl 0xa0044");
@@ -145,8 +144,8 @@ extern "C" void tsk2(){
 //		osca_yield();
 		// copy kernel to screen
 		Data src=Data(Address(0x07c00),512*3);// kernel binary
-		Data dst1=Data(Address(0x100000),512*3);// to odd meg testing a20 enabled line
-		Data dst2=Data(Address(0xa0000+320*150),512*3);// on screen line 150
+		Data dst1=Data(Address(0x11'0000),512*3);// to odd meg testing a20 enabled line
+		Data dst2=Data(Address(0xa'0000+320*150),512*3);// on screen line 150
 //		Data dst2=Data(Address(0xabb80),512*3);// on screen line 150
 		src.to(dst1);
 //		osca_yield();
@@ -162,31 +161,24 @@ extern "C" void tsk3(){
 		dsp.bmp().data().pointer().offset(8).write(osca_t);
 	}
 }
+static Object*objects[16];
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk4(){
 	// init statics
 	default_object_def_rectangöe=ObjectDefRectangle();
 	default_object_def_ship=ObjectDefShip();
 
-	// create sample objects
-//	Object obj1{default_object_def_rectangöe,10,{100,100},0,4};
-//	obj1.set_drotation(deg_to_rad(5));
-//	Object obj2{default_object_def};
-	static Object*objects[]{
-		new Object{default_object_def_rectangöe,10,{100,100},0,4},
-		new Ship(),
-		new Ship(),
-	};
+	objects[0]=new Object{default_object_def_rectangöe,10,{100,100},0,4};
+	objects[1]=new Ship();
+	objects[2]=new Ship();
+
 	objects[0]->set_drotation(deg_to_rad(5));
 	objects[1]->set_drotation(deg_to_rad(-5));
 	objects[1]->set_dposition({1,0});
 	objects[2]->set_drotation(deg_to_rad(7));
 	objects[2]->set_dposition({-1,0});
 
-//	Object*obj3=new Ship();
-//	obj3->set_drotation(deg_to_rad(-5));
-//	obj3->set_dposition({1,0});
-//	delete obj3;
+	// init stack
 	Vga13h dsp;
 	Bitmap&db=dsp.bmp();
 	PrinterToBitmap pb{db};
@@ -194,31 +186,63 @@ extern "C" void tsk4(){
 	Matrix2D R;
 	const Address clear_start=db.data().pointer().offset(50*320).address();
 	const SizeBytes clear_n=320*100;
+	const Address heap_address=Address(freemem_start);
+
+	// start task
 	while(true){
-		pz_memset(clear_start,0x11,clear_n);
+//		pz_memset(clear_start,0x11,clear_n);
+		pz_memcpy(heap_address,clear_start,clear_n);
 //		obj1.update();
 //		obj3->update();
 //		obj1.render(db);
 //		obj3->render(db);
+		pb.pos(2,1).fg(2).p("t=").p_hex_32b(osca_t);
+//		pb.pos(2,1).fg(2).p("t=").p_hex_32b(reinterpret_cast<unsigned>(freemem_start));
 
 		for(Object*o:objects){
+			if(!o)
+				continue;
 			o->update();
 		}
 		for(Object*o:objects){
+			if(!o)
+				continue;
 			o->render(db);
 		}
 
 		if(deg>360)
 			deg-=360;
 		deg+=5;
+
+		const char ch=table_scancode_to_ascii[osca_key];
+		if(ch){
+			const Point2D&dp=objects[1]->dpos();
+			switch(ch){
+			case'w':
+				objects[1]->set_dposition({dp.x,-1});
+				break;
+			case'a':
+				objects[1]->set_dposition({-1,dp.y});
+				break;
+			case's':
+				objects[1]->set_dposition({dp.x,1});
+				break;
+			case'd':
+				objects[1]->set_dposition({1,dp.y});
+				break;
+			default:
+				break;
+			}
+		}
+
 		const float rotation=deg_to_rad(deg);
-		R.set_transform(5,rotation,{140,100});
+		R.set_transform(5,rotation,{160,100});
 		// dot axis
-		dot(db,140,100,0xf);
-		const Vector2D xaxis=R.axis_x().normalize().scale(15);
-		dot(db,xaxis.x+140,xaxis.y+100,2);
-		const Vector2D yaxis=R.axis_y().normalize().scale(15);
-		dot(db,yaxis.x+140,yaxis.y+100,4);
+		dot(db,160,100,0xf);
+		const Vector2D xaxis=R.axis_x().normalize().scale(7);
+		dot(db,xaxis.x+160,xaxis.y+100,2);
+		const Vector2D yaxis=R.axis_y().normalize().scale(7);
+		dot(db,yaxis.x+160,yaxis.y+100,4);
 
 		osca_yield();
 	}

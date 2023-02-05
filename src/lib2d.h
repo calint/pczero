@@ -23,6 +23,7 @@ inline auto cos(const Radians radians)->float{
 	return v;
 }
 
+// puts sin and cos value of 'radians' in 'fsin' and 'fcos'
 inline auto sin_and_cos(const Radians radians,float&fsin,float&fcos){
 	asm("fsincos"
 		:"=t"(fcos),"=u"(fsin)

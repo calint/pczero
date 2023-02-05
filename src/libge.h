@@ -85,6 +85,8 @@ public:
 		delete[]pts_wld;
 	}
 	inline auto def()->const ObjectDef&{return def_;}
+	inline auto pos()->const Point2D&{return pos_;}
+	inline auto dpos()->const Point2D&{return dpos_;}
 	inline auto set_position(const Point2D&p){pos_=p;}
 	inline auto set_dposition(const Point2D&p){dpos_=p;}
 	inline auto set_rotation(const Radians r){rot_=r;}
@@ -125,6 +127,11 @@ public:
 			set_dposition({-dpos_.x,dpos_.y});
 		}else if(pos_.x<50){
 			set_dposition({-dpos_.x,dpos_.y});
+		}
+		if(pos_.y>130){
+			set_dposition({dpos_.x,-dpos_.y});
+		}else if(pos_.y<70){
+			set_dposition({dpos_.x,-dpos_.y});
 		}
 	}
 };
