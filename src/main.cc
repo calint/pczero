@@ -4,10 +4,6 @@
 #include "libge.h"
 
 using namespace osca;
-
-// used to print errors at row 1 column 1
-PrinterToVga err;
-
 //char*freemem=reinterpret_cast<char*>(0x100000);
 static char*freemem_ptr=reinterpret_cast<char*>(0xa0000+320);
 
@@ -178,7 +174,7 @@ extern "C" void tsk4(){
 	Object obj1{default_object_def_rectangöe,10,{100,100},0,4};
 //	Object obj2{default_object_def};
 	Object*obj3=new Ship();
-	delete obj3;
+//	delete obj3;
 	Vga13h dsp;
 	Bitmap&db=dsp.bmp();
 	PrinterToBitmap pb{db};

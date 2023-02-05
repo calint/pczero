@@ -513,4 +513,7 @@ public:
 	inline auto update(){v_.inc_by(a_);p_.inc_by(v_);}
 };
 
+// used to print errors at row 1 column 1
+PrinterToVga err;
+
 } // end namespace osca

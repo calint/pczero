@@ -1,5 +1,4 @@
 #pragma once
-#include "lib.h"
 #include "lib2d.h"
 
 using namespace osca;
@@ -9,7 +8,7 @@ using Point2D=Vector2D;
 class ObjectDef{
 public:
 	Point2D*pts=nullptr;
-	Size pts_count=0;
+	unsigned pts_count=0;
 };
 
 class ObjectDefRectangle:public ObjectDef{
@@ -47,13 +46,14 @@ class Object{
 protected:
 	Point2D pos_;
 	Radians rot_;
-	const ObjectDef&def_;
 	Scale scl_;
+	const ObjectDef&def_;
 	Point2D*cached_pts;
+	Matrix2D Mmw; // model to world transform
+	bool Mmw_valid=false;// if true Mmw and cached_pts don't need update
 	unsigned char color_;
 	unsigned char padding1=0;
 	unsigned char padding2=0;
-	unsigned char padding3=0;
 public:
 //	Object():
 //		pos_{0,0},
@@ -71,27 +71,30 @@ public:
 	Object(const ObjectDef&def,const Scale scl,const Point2D&pos,const Radians rot,const unsigned char color):
 		pos_{pos},
 		rot_{rot},
-		def_{def},
 		scl_{scl},
+		def_{def},
 		cached_pts{new Point2D[def.pts_count]},
+		Mmw{},
 		color_{color}
 	{}
 	virtual~Object(){
 		delete[]cached_pts;
 	}
 	inline auto def()->const ObjectDef&{return def_;}
-//	auto transform(const Matrix2D&m){
-//		m.transform(def_.pts,cached_pts,sizeof(def_.pts)/sizeof(Point2D));
-//	}
 	virtual auto update()->void{
+		// used to print errors at row 1 column 1
+//		err.p("uo ");
 		rot_+=deg_to_rad(5);
+		Mmw_valid=false;
 	}
 	virtual auto render(Bitmap&dsp)->void{
-		Matrix2D M;
-		M.set_transform(scl_,rot_,pos_);
-		M.transform(def_.pts,cached_pts,def_.pts_count);
+		if(!Mmw_valid){
+			Mmw.set_transform(scl_,rot_,pos_);
+			Mmw_valid=true;
+			Mmw.transform(def_.pts,cached_pts,def_.pts_count);
+		}
 		Point2D*ptr=cached_pts;
-		for(int i=0;i<def_.pts_count;i++){
+		for(unsigned i=0;i<def_.pts_count;i++){
 			dot(dsp,ptr->x,ptr->y,color_);
 			ptr++;
 		}
@@ -104,6 +107,8 @@ public:
 		Object{default_object_def_ship,5,{120,100},0,2}
 	{}
 	virtual auto update()->void override{
+//		err.p("us ");
 		rot_-=deg_to_rad(5);
+		Mmw_valid=false;
 	}
 };

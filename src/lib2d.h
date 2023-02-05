@@ -90,8 +90,8 @@ public:
 		yx=sn,yy= cs,yt=translation.y;
 		ux= 0,uy=  0,id=1;
 	}
-	auto transform(const Vector2D src[],Vector2D dst[],const Count n)const{
-		for(int i=0;i<n;i++){
+	auto transform(const Vector2D src[],Vector2D dst[],const unsigned n)const{
+		for(unsigned i=0;i<n;i++){
 			dst->x=xx*src->x+xy*src->y+xt;
 			dst->y=yx*src->x+yy*src->y+yt;
 			src++;
