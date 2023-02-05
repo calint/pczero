@@ -175,9 +175,9 @@ extern "C" void tsk4(){
 
 		// dot axis
 		dot(db,140,100,1);
-		const Vector2D xaxis=R.axis_x();
+		const Vector2D xaxis=R.axis_x().normalize().scale(15);
 		dot(db,xaxis.x+140,xaxis.y+100,4);
-		const Vector2D yaxis=R.axis_y();
+		const Vector2D yaxis=R.axis_y().normalize().scale(15);
 		dot(db,yaxis.x+140,yaxis.y+100,5);
 
 		deg+=5;

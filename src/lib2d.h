@@ -21,6 +21,15 @@ inline auto sin(const Radians radians)->float{
 	return v;
 }
 
+inline auto sqrt(const float s)->float{
+	float v;
+	asm("fsqrt"
+		:"=t"(v) // "t": first (top of stack) floating point register
+		:"0"(s)
+	);
+	return v;
+}
+
 constexpr float PI=3.141592653589793f;
 constexpr auto deg_to_rad(const Degrees deg)->Radians{
 	constexpr float deg_to_rad=PI/180.f;
@@ -30,6 +39,19 @@ constexpr auto deg_to_rad(const Degrees deg)->Radians{
 class Vector2D{
 public:
 	float x=0,y=0;
+	// normalizes this vector
+	inline auto normalize()->Vector2D&{
+		const float len=sqrt(x*x+y*y);
+		x/=len;
+		y/=len;
+		return*this;
+	}
+	// scales this vector
+	inline auto scale(float s)->Vector2D&{
+		x*=s;
+		y*=s;
+		return*this;
+	}
 };
 using Scale=float;
 class Matrix2D{
