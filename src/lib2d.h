@@ -33,9 +33,9 @@ public:
 };
 
 class Matrix2D{
-	float	xx=1,yx=0,tx=0,
-			xy=0,yy=1,ty=0,
-			xu=0,yu=0, i=1;
+	float	xx=1,xy=0,xt=0,
+			yx=0,yy=1,yt=0,
+			ux=0,uy=0, i=1;
 public:
 //	inline auto set_identity(){
 //		xx=1;yx=0;tx=0;
@@ -57,23 +57,23 @@ public:
 	inline auto set_transform(const Vector2D&scale,const Radians rotation,const Vector2D&translation){
 		const float cs=scale.x*cos(rotation);
 		const float sn=scale.y*sin(rotation);
-		xx=cs;yx=-sn;tx=translation.x;
-		xy=sn,yy= cs,ty=translation.y;
-		xu= 0,yu=  0,i=1;
+		xx=cs;xy=-sn;xt=translation.x;
+		yx=sn,yy= cs,yt=translation.y;
+		ux= 0,uy=  0,i=1;
 	}
 	auto transform(const Vector2D src[],Vector2D dst[],const int n)const{
 		for(int j=0;j<n;j++){
-			dst->x=xx*src->x+yx*src->y+tx;
-			dst->y=xy*src->x+yy*src->y+ty;
+			dst->x=xx*src->x+xy*src->y+xt;
+			dst->y=yx*src->x+yy*src->y+yt;
 			src++;
 			dst++;
 		}
 	}
 	inline auto axis_x()const->Vector2D{
-		return{xx,yx};
+		return{xx,xy};
 	}
 	inline auto axis_y()const->Vector2D{
-		return{xy,yy};
+		return{yx,yy};
 	}
 };
 
