@@ -72,7 +72,8 @@ clean:
 
 display:
 	qemu-system-i386 -m 2M -drive file=bin/$(IMAGE),format=raw
-	 
+	@echo
+
 install:
 	sudo dd if=/dev/zero of=$(INSTALL_TO) count=1000&&sync
 	sudo dd if=bin/$(IMAGE) of=$(INSTALL_TO)&&sync

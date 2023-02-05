@@ -168,13 +168,15 @@ extern "C" void tsk4(){
 	default_object_def_rectangöe=ObjectDefRectangle();
 	default_object_def_ship=ObjectDefShip();
 
+	Ship*shp=new Ship();
 	objects[0]=new Object{default_object_def_rectangöe,10,{100,100},0,4};
-	objects[1]=new Ship();
+	objects[1]=shp;
 	objects[2]=new Ship();
 
+//	Ship*shp=static_cast<Ship*>(objects[1]); // dynamic_cast not available du to '-no-rtti'
 	objects[0]->set_drotation(deg_to_rad(5));
 	objects[1]->set_drotation(deg_to_rad(-5));
-	objects[1]->set_dposition({1,0});
+	objects[1]->set_dposition({1,1});
 	objects[2]->set_drotation(deg_to_rad(7));
 	objects[2]->set_dposition({-1,0});
 
@@ -219,16 +221,16 @@ extern "C" void tsk4(){
 			const Point2D&dp=objects[1]->dpos();
 			switch(ch){
 			case'w':
-				objects[1]->set_dposition({dp.x,-1});
+				shp->set_dposition({dp.x,-1});
 				break;
 			case'a':
-				objects[1]->set_dposition({-1,dp.y});
+				shp->set_dposition({-1,dp.y});
 				break;
 			case's':
-				objects[1]->set_dposition({dp.x,1});
+				shp->set_dposition({dp.x,1});
 				break;
 			case'd':
-				objects[1]->set_dposition({1,dp.y});
+				shp->set_dposition({1,dp.y});
 				break;
 			default:
 				break;

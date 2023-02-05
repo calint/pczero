@@ -123,9 +123,9 @@ public:
 	{}
 	virtual auto update()->void override{
 		Object::update();
-		if(pos_.x>180){
+		if(pos_.x>300){
 			set_dposition({-dpos_.x,dpos_.y});
-		}else if(pos_.x<50){
+		}else if(pos_.x<20){
 			set_dposition({-dpos_.x,dpos_.y});
 		}
 		if(pos_.y>130){
