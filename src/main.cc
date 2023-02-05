@@ -19,7 +19,16 @@ PrinterToVga err;
 //char*freemem=reinterpret_cast<char*>(0x100000);
 char*freemem=reinterpret_cast<char*>(0xa0000+320);
 
-void*operator new[](unsigned int count){
+// called by C++ to allocate memory
+void*operator new[](unsigned count){
+	char*p=freemem;
+	err.printer().p_hex_32b(count).p(':').p_hex_32b(reinterpret_cast<unsigned int>(p)).p(' ');
+	freemem+=count;
+	return reinterpret_cast<void*>(p);
+}
+
+// called by C++ to allocate memory
+void* operator new(unsigned count){
 	char*p=freemem;
 	err.printer().p_hex_32b(count).p(':').p_hex_32b(reinterpret_cast<unsigned int>(p)).p(' ');
 	freemem+=count;
@@ -187,8 +196,8 @@ static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char
 
 class Object{
 	const ObjectDef def_;
-public:
 	Point2D*cached_pts;
+public:
 	Object(const ObjectDef&def):
 		def_{def},
 		cached_pts{new Point2D[sizeof(def.pts)/sizeof(Point2D)]}
@@ -230,14 +239,10 @@ extern "C" void tsk4(){
 	// init statics
 	default_object_def=ObjectDef();
 
-	// create a sample object
+	// create sample objects
 	Object obj1{default_object_def};
 	Object obj2{default_object_def};
-//	obj2.cached_pts[0]={3,3};
-//	obj2.cached_pts[1]={3,3};
-//	obj2.cached_pts[2]={3,3};
-//	obj2.cached_pts[3]={3,3};
-//	obj2.cached_pts[4]={3,3};
+	Object*obj3=new Object(default_object_def);
 
 	Vga13h dsp;
 	Bitmap&db=dsp.bmp();
@@ -261,6 +266,10 @@ extern "C" void tsk4(){
 		R.set_transform(5,-rotation,{120,100});
 		obj2.transform(R);
 		obj2.render(db);
+
+		R.set_transform(5,-rotation,{140,100});
+		obj3->transform(R);
+		obj3->render(db);
 
 		// dot axis
 		dot(db,140,100,1);
