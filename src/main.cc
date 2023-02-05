@@ -37,7 +37,7 @@ public:
 extern "C" void osca_keyb_ev(){
 	*(int*)(0xa0000+4)=osca_key;
 	osca_keyb.on_key(osca_key);
-	static char*p=(char*)0xa4000;
+	static char*p=(char*)(0xa0000+320*49+100);
 	*p++=(char)osca_key;
 }
 
