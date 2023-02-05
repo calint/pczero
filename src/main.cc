@@ -41,6 +41,15 @@ extern "C" void osca_keyb_ev(){
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+static Vector2D dots_src[]{
+	{-10.0f,-10.0f},
+	{ 10.0f,-10.0f},
+	{ 10.0f, 10.0f},
+	{-10.0f, 10.0f},
+//	{    0,10.0f},
+};
+static Vector2D dots_dst[sizeof(dots_src)/sizeof(Vector2D)];
+
 static void dot(const Bitmap&bmp,const float x,const float  y,const unsigned char color){
 	const int xi=static_cast<int>(x);
 	const int yi=static_cast<int>(y);
@@ -74,27 +83,7 @@ extern "C" void tsk0(){
 
 	pb.pos(10,5).fg(2).p('_');
 
-	dot(dsp.bmp(),100.0,100.0,3);
-	for(float r=0;r<2*PI;r+=0.2f){
-		const float s=10;
-		const float x=s*cos(r);
-		const float y=s*sin(r);
-		dot(dsp.bmp(),100.0f+x,100.0f+y,4);
-	}
-
-	float deg=0;
-	const float radius=10;
-	unsigned char colr=1;
 	while(true){
-		if(deg>360)
-			deg=0;
-		const float rad=deg_to_rad(deg);
-		const float x=radius*cos(rad);
-		const float y=radius*sin(rad);
-		dot(dsp.bmp(),100.0f+x,100.0f+y,colr);
-		deg+=10.0f;
-		colr++;
-
 		// handle keyboard events
 		while(true){
 			const unsigned char sc=osca_keyb.get_next_scan_code();
@@ -151,8 +140,29 @@ extern "C" void tsk3(){
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" void tsk4(){
-	while(true)
+	Vga13h dsp;
+	PrinterToBitmap pb{dsp.bmp()};
+	Degrees deg=0;
+	unsigned char colr=1;
+	Matrix2D R;
+	Vector2D origo={100,100};
+	while(true){
+		if(deg>360)
+			deg=0;
+		for(const auto&d:dots_dst){
+			dot(dsp.bmp(),d.x,d.y,0);
+		}
+
+		const float rad=deg_to_rad(deg);
+		R.set_transform(rad,origo);
+		R.transform(dots_src,dots_dst,sizeof(dots_src)/sizeof(Vector2D));
+		for(const auto&d:dots_dst){
+			dot(dsp.bmp(),d.x,d.y,colr);
+		}
+		deg+=10.0f;
+		colr++;
 		osca_yield();
+	}
 }
 //
 //static unsigned char bmp0[]{
