@@ -153,6 +153,7 @@ extern "C" void tsk4(){
 	unsigned char colr=1;
 	Matrix2D R;
 	Vector2D origo={100,100};
+	Vector2D scale={10,10};
 	while(true){
 		if(deg>360)
 			deg=0;
@@ -161,7 +162,7 @@ extern "C" void tsk4(){
 		}
 
 		const float rad=deg_to_rad(deg);
-		R.set_transform(rad,origo,{10,10});
+		R.set_transform(rad,origo,scale);
 		R.transform(dots_src,dots_dst,sizeof(dots_src)/sizeof(Vector2D));
 		for(const auto&d:dots_dst){
 			dot(dsp.bmp(),d.x,d.y,colr);
