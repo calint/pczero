@@ -162,6 +162,78 @@ extern "C" void tsk3(){
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+class ObjectDefRectangle:public ObjectDef{
+public:
+	ObjectDefRectangle(){
+		pts_count=5;
+		pts=new Point2D[pts_count]{
+			{ 0, 0},
+			{-2,-1},
+			{ 2,-1},
+			{ 2, 1},
+			{-2, 1},
+		};
+	}
+}default_object_def_rectangöe;
+
+class ObjectDefShip:public ObjectDef{
+public:
+	ObjectDefShip(){
+		pts_count=4;
+		pts=new Point2D[pts_count]{
+			{ 0, 0},
+			{ 0,-1},
+			{-1,.5},
+			{ 1,.5},
+		};
+	}
+}default_object_def_ship;
+
+class Ship:public Object{
+public:
+	Ship():
+		Object{default_object_def_ship,5,{120,100},0,2}
+	{}
+//	virtual~Ship(){
+//		Object::~Object();
+////		Object::
+//	}
+
+	virtual auto update()->void override{
+		Object::update();
+		if(pos_.x>300){
+			set_dpos({-dpos_.x,dpos_.y});
+		}else if(pos_.x<20){
+			set_dpos({-dpos_.x,dpos_.y});
+		}
+		if(pos_.y>130){
+			set_dpos({dpos_.x,-dpos_.y});
+		}else if(pos_.y<70){
+			set_dpos({dpos_.x,-dpos_.y});
+		}
+	}
+};
+
+//class Bullet:public Object{
+//public:
+//	Bullet():
+//		Object{default_object_def_ship,3,{0,0},0,4}
+//	{}
+//	virtual auto update()->void override{
+//		Object::update();
+//		if(pos_.x>300){
+//			die();
+//		}else if(pos_.x<20){
+//			die();
+//		}
+//		if(pos_.y>130){
+//			die();
+//		}else if(pos_.y<70){
+//			die();
+//		}
+//	}
+//};
+
 extern "C" void tsk4(){
 	// init statics
 	default_object_def_rectangöe=ObjectDefRectangle();
@@ -174,20 +246,19 @@ extern "C" void tsk4(){
 
 //	static Object*objects[16];
 
-	Ship*shp=new Ship();
-	objects[1]=new Object{default_object_def_rectangöe,10,{100,100},0,4};
-	objects[2]=shp;
-	objects[3]=new Ship();
+	Ship*shp=new Ship;
+	Ship*shp2=new Ship;
+	Object*wall=new Object{default_object_def_rectangöe,10,{100,100},0,4};
 
-//	Ship*shp=static_cast<Ship*>(objects[1]); // dynamic_cast not available du to '-no-rtti'
-	objects[1]->slot=1;
-	objects[1]->set_dangle(deg_to_rad(5));
-	objects[2]->slot=2;
-	objects[2]->set_dangle(deg_to_rad(-5));
-	objects[2]->set_dpos({1,1});
-	objects[3]->slot=3;
-	objects[3]->set_dangle(deg_to_rad(7));
-	objects[3]->set_dpos({-1,0});
+	wall->set_dangle(deg_to_rad(5));
+	shp->set_dangle(deg_to_rad(-5));
+	shp->set_dpos({1,1});
+	shp2->set_dangle(deg_to_rad(7));
+	shp2->set_dpos({-1,0});
+
+//	objects[15]=wall;
+//	objects[14]=shp;
+//	objects[13]=shp2;
 
 	// init stack
 	Vga13h dsp;
@@ -227,7 +298,7 @@ extern "C" void tsk4(){
 
 		const char ch=table_scancode_to_ascii[osca_key];
 		if(ch){
-			const Point2D&dp=objects[1]->dpos();
+			const Point2D&dp=shp->dpos();
 			switch(ch){
 			case'w':
 				shp->set_dpos({dp.x,-1});
@@ -240,6 +311,13 @@ extern "C" void tsk4(){
 				break;
 			case'd':
 				shp->set_dpos({1,dp.y});
+				break;
+			case'x':
+				if(objects_can_alloc()){
+					shp=new Ship;
+					shp->set_dangle(deg_to_rad(-5));
+					shp->set_dpos({1,1});
+				}
 				break;
 			case' ':
 				if(shp){
