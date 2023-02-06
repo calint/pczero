@@ -32,27 +32,27 @@ using OffsetBytes=int;
 class Pointer{
 	Address a_;
 public:
-	inline Pointer(const Address a):a_{a}{}
-	inline auto address()const->Address{return a_;}
-	inline auto offset(const OffsetBytes ob)const->Pointer{return Pointer{static_cast<char*>(a_)+ob};}
-	inline auto write(const char v){*static_cast<char*>(a_)=v;}
-	inline auto write(const unsigned char v){*static_cast<unsigned char*>(a_)=v;}
-	inline auto write(const short v){*static_cast<short*>(a_)=v;}
-	inline auto write(const unsigned short v){*static_cast<unsigned short*>(a_)=v;}
-	inline auto write(const int v){*static_cast<int*>(a_)=v;}
-	inline auto write(const unsigned v){*static_cast<unsigned*>(a_)=v;}
-	inline auto write(const long v){*static_cast<long*>(a_)=v;}
-	inline auto write(const unsigned long v){*static_cast<unsigned long*>(a_)=v;}
+	inline constexpr Pointer(const Address a):a_{a}{}
+	inline constexpr auto address()const->Address{return a_;}
+	inline constexpr auto offset(const OffsetBytes ob)const->Pointer{return Pointer{static_cast<char*>(a_)+ob};}
+	inline constexpr auto write(const char v){*static_cast<char*>(a_)=v;}
+	inline constexpr auto write(const unsigned char v){*static_cast<unsigned char*>(a_)=v;}
+	inline constexpr auto write(const short v){*static_cast<short*>(a_)=v;}
+	inline constexpr auto write(const unsigned short v){*static_cast<unsigned short*>(a_)=v;}
+	inline constexpr auto write(const int v){*static_cast<int*>(a_)=v;}
+	inline constexpr auto write(const unsigned v){*static_cast<unsigned*>(a_)=v;}
+	inline constexpr auto write(const long v){*static_cast<long*>(a_)=v;}
+	inline constexpr auto write(const unsigned long v){*static_cast<unsigned long*>(a_)=v;}
 };
 
 class Data{
 	Address a_;
 	SizeBytes s_;
 public:
-	inline Data(const Address a,const SizeBytes n):a_{a},s_{n}{}
-	inline auto address()const->Address{return a_;}
-	inline auto size()const->SizeBytes{return s_;}
-	inline auto pointer()const->Pointer{return{a_};}
+	inline constexpr Data(const Address a,const SizeBytes n):a_{a},s_{n}{}
+	inline constexpr auto address()const->Address{return a_;}
+	inline constexpr auto size()const->SizeBytes{return s_;}
+	inline constexpr auto pointer()const->Pointer{return{a_};}
 	inline auto to(const Data&d)const{pz_memcpy(a_,d.address(),s_);}
 	inline auto to(const Data&d,const SizeBytes sb)const{pz_memcpy(a_,d.address(),sb);}
 };
@@ -62,15 +62,15 @@ class CoordsT{
 	T x_;
 	T y_;
 public:
-	inline CoordsT(const T&x,const T&y):x_{x},y_{y}{}
-	inline auto x()const->const T&{return x_;}
-	inline auto y()const->const T&{return y_;}
-	inline auto set_x(const T&x){x_=x;}
-	inline auto set_y(const T&y){y_=y;}
-	inline auto set(const T&x,const T&y){set_x(x);set_y(y);}
-	inline auto inc_x(const T&dx){x_+=dx;}
-	inline auto inc_y(const T&dy){y_+=dy;}
-	inline auto inc_by(const CoordsT<T>&delta){x_+=delta.x_;y_+=delta.y_;}
+	inline constexpr CoordsT(const T&x,const T&y):x_{x},y_{y}{}
+	inline constexpr auto x()const->const T&{return x_;}
+	inline constexpr auto y()const->const T&{return y_;}
+	inline constexpr auto set_x(const T&x){x_=x;}
+	inline constexpr auto set_y(const T&y){y_=y;}
+	inline constexpr auto set(const T&x,const T&y){set_x(x);set_y(y);}
+	inline constexpr auto inc_x(const T&dx){x_+=dx;}
+	inline constexpr auto inc_y(const T&dy){y_+=dy;}
+	inline constexpr auto inc_by(const CoordsT<T>&delta){x_+=delta.x_;y_+=delta.y_;}
 };
 
 using CoordPx=int;
@@ -84,9 +84,9 @@ class DimensionT{
 	T w_;
 	T h_;
 public:
-	inline DimensionT(const T&width,const T&height):w_{width},h_{height}{}
-	inline auto width()const->const T&{return w_;}
-	inline auto height()const->const T&{return h_;}
+	inline constexpr DimensionT(const T&width,const T&height):w_{width},h_{height}{}
+	inline constexpr auto width()const->const T&{return w_;}
+	inline constexpr auto height()const->const T&{return h_;}
 };
 
 using SizePx=int;
@@ -96,11 +96,11 @@ class Bitmap{
 	DimensionPx d_;
 	Data dt_;
 public:
-	inline Bitmap(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()}{}
-	inline auto dim()const->const DimensionPx&{return d_;}
-	inline auto data()const->const Data&{return dt_;}
-	inline auto pointer_offset(const CoordsPx p)const->Pointer{return dt_.pointer().offset(p.y()*d_.width()+p.x());}
-	auto to(const Bitmap&dst,const CoordsPx&c)const{
+	inline constexpr Bitmap(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()}{}
+	inline constexpr auto dim()const->const DimensionPx&{return d_;}
+	inline constexpr auto data()const->const Data&{return dt_;}
+	inline constexpr auto pointer_offset(const CoordsPx p)const->Pointer{return dt_.pointer().offset(p.y()*d_.width()+p.x());}
+	constexpr auto to(const Bitmap&dst,const CoordsPx&c)const{
 		char*si=static_cast<char*>(dt_.address());
 		char*di=static_cast<char*>(dst.dt_.address());
 		di+=c.y()*dst.dim().width()+c.x();
@@ -306,7 +306,7 @@ class PrinterToBitmap{
 	bool transparent_; // ? implement
 	char padding1=0;
 public:
-	inline PrinterToBitmap(Bitmap&b):
+	inline constexpr PrinterToBitmap(Bitmap&b):
 		di_{static_cast<char*>(b.data().address())},
 		dil_{di_},
 		b_{b},
@@ -319,17 +319,17 @@ public:
 		transparent_{false}
 	{}
 
-	inline auto pos(const Row r,const Column c)->PrinterToBitmap&{
+	inline constexpr auto pos(const Row r,const Column c)->PrinterToBitmap&{
 		di_=static_cast<char*>(b_.data().address());
 		di_+=bmp_wi_*r*font_hi_+c*font_wi_;
 		dil_=di_;
 		return*this;
 	}
-	inline auto nl()->PrinterToBitmap&{di_=dil_+bmp_wi_*(font_hi_+2);dil_=di_;return*this;}
-	inline auto cr()->PrinterToBitmap&{di_=dil_;return*this;}
-	inline auto fg(const Color8b c)->PrinterToBitmap&{fg_=c;return*this;}
-	inline auto bg(const Color8b c)->PrinterToBitmap&{bg_=c;return*this;}
-	inline auto transparent(const bool b)->PrinterToBitmap&{transparent_=b;return*this;}
+	inline constexpr auto nl()->PrinterToBitmap&{di_=dil_+bmp_wi_*(font_hi_+2);dil_=di_;return*this;}
+	inline constexpr auto cr()->PrinterToBitmap&{di_=dil_;return*this;}
+	inline constexpr auto fg(const Color8b c)->PrinterToBitmap&{fg_=c;return*this;}
+	inline constexpr auto bg(const Color8b c)->PrinterToBitmap&{bg_=c;return*this;}
+	inline constexpr auto transparent(const bool b)->PrinterToBitmap&{transparent_=b;return*this;}
 	auto draw(unsigned int bmp_5x6)->PrinterToBitmap&{
 		if(transparent_){
 			draw_transparent(bmp_5x6);
@@ -386,7 +386,7 @@ public:
 		draw(table_ascii_to_font[static_cast<int>(ch)]);
 		return*this;
 	}
-	auto p(const char*s)->PrinterToBitmap&{
+	constexpr auto p(const char*s)->PrinterToBitmap&{
 		while(*s){
 			p(*s);
 			s++;
@@ -400,7 +400,7 @@ public:
 		return*this;
 	}
 	auto spc()->PrinterToBitmap&{p(' ');return*this;}
-	PrinterToBitmap&operator=(const PrinterToBitmap&o){
+	constexpr PrinterToBitmap&operator=(const PrinterToBitmap&o){
 		di_=o.di_;
 		dil_=o.dil_;
 		b_=o.b_;
@@ -415,7 +415,7 @@ public:
 		return*this;
 	}
 private:
-	auto draw_with_bg(unsigned int bmp_5x6)->PrinterToBitmap&{ // make inline assembler?
+	constexpr auto draw_with_bg(unsigned int bmp_5x6)->PrinterToBitmap&{ // make inline assembler?
 		const unsigned int mask=1u<<31;
 		for(int y=0;y<font_hi_;y++){
 			for(int x=0;x<font_wi_;x++){
@@ -429,7 +429,7 @@ private:
 		di_=di_-bmp_wi_*font_hi_+font_wi_;
 		return*this;
 	}
-	auto draw_transparent(unsigned int bmp_5x6)->PrinterToBitmap&{ // make inline assembler?
+	constexpr auto draw_transparent(unsigned int bmp_5x6)->PrinterToBitmap&{ // make inline assembler?
 		const unsigned int mask=1u<<31;
 		for(int y=0;y<font_hi_;y++){
 			for(int x=0;x<font_wi_;x++){
@@ -453,7 +453,7 @@ class Vga13h{
 
 public:
 	inline Vga13h():b_{Address(0xa0000),DimensionPx{320,200}}{}
-	inline auto bmp()->Bitmap&{return b_;}
+	inline constexpr auto bmp()->Bitmap&{return b_;}
 };
 
 class PrinterToVga{
@@ -466,8 +466,8 @@ public:
 		ptb.pos(1,1).fg(4);
 	}
 //	inline auto p(const char*s){ptb.p(s);}
-	inline auto printer()->PrinterToBitmap&{return ptb;}
-	PrinterToVga&operator=(PrinterToVga&&o){
+	inline constexpr auto printer()->PrinterToBitmap&{return ptb;}
+	constexpr PrinterToVga&operator=(PrinterToVga&&o){
 		dsp=o.dsp;
 		ptb=o.ptb;
 		return*this;
@@ -489,10 +489,10 @@ class Sprite{
 	Velocity v_;
 	Acceleration a_;
 public:
-	inline Sprite(const Bitmap&b,const Position&p,const Velocity&v,const Acceleration&a):
+	inline constexpr Sprite(const Bitmap&b,const Position&p,const Velocity&v,const Acceleration&a):
 		b_{b},p_{p},v_{v},a_{a}
 	{}
-	auto to(const Bitmap&dst)const{
+	constexpr auto to(const Bitmap&dst)const{
 		const char*si=static_cast<const char*>(b_.data().address());
 		char*di=static_cast<char*>(dst.data().address());
 		PositionPx p{static_cast<CoordPx>(p_.x()),static_cast<CoordPx>(p_.y())};
@@ -512,11 +512,11 @@ public:
 			di+=ln;
 		}
 	}
-	inline auto pos()const->const Position&{return p_;}
-	inline auto set_pos(const Position&p){p_=p;}
-	inline auto velocity()const->const Velocity&{return v_;}
-	inline auto set_velocity(const Velocity&v){v_=v;}
-	inline auto update(){v_.inc_by(a_);p_.inc_by(v_);}
+	inline constexpr auto pos()const->const Position&{return p_;}
+	inline constexpr auto set_pos(const Position&p){p_=p;}
+	inline constexpr auto velocity()const->const Velocity&{return v_;}
+	inline constexpr auto set_velocity(const Velocity&v){v_=v;}
+	inline constexpr auto update(){v_.inc_by(a_);p_.inc_by(v_);}
 };
 
 } // end namespace osca

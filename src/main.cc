@@ -60,7 +60,7 @@ class{
 	unsigned char e; // last event index +1 & roll
 public:
 	// called by osca_keyb_ev
-	auto on_key(unsigned char ch){
+	constexpr auto on_key(unsigned char ch){
 		const unsigned char ne=(e+1)&(sizeof(buf)-1);// next "end" index
 		if(ne==s)// check overrun
 			return;// write would overwrite. display on status line?
@@ -68,7 +68,7 @@ public:
 		e=ne;
 	}
 	// returns keyboard scan code or 0 if no more events.
-	auto get_next_scan_code()->unsigned char{
+	constexpr auto get_next_scan_code()->unsigned char{
 		if(s==e)
 			return 0; // no more events
 		const unsigned char ch=buf[s];
@@ -171,7 +171,7 @@ extern "C" [[noreturn]] void tsk3(){
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 static class ObjectDefRectangle:public ObjectDef{
 public:
-	ObjectDefRectangle(){
+	constexpr ObjectDefRectangle(){
 		npts_=5;
 		pts_=new Point2D[npts_]{
 			{ 0, 0},
@@ -185,7 +185,7 @@ public:
 
 static class ObjectDefShip:public ObjectDef{
 public:
-	ObjectDefShip(){
+	constexpr ObjectDefShip(){
 		npts_=4;
 		pts_=new Point2D[npts_]{
 			{ 0, 0},
@@ -206,7 +206,7 @@ public:
 ////		Object::
 //	}
 
-	virtual auto update()->void override{
+	constexpr virtual auto update()->void override{
 		Object::update();
 		if(pos_.x>300){
 			set_dpos({-dpos_.x,dpos_.y});

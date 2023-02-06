@@ -11,7 +11,7 @@ public:
 	unsigned npts_=0; // number of points
 };
 
-static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char color){
+static constexpr void dot(const Bitmap&bmp,const float x,const float y,const unsigned char color){
 	const int xi=static_cast<int>(x);
 	const int yi=static_cast<int>(y);
 	bmp.pointer_offset({xi,yi}).write(color);
@@ -43,10 +43,10 @@ protected:
 	unsigned char padding1=0;
 	unsigned short slot_=0; // index in objects pointer array
 public:
-	Object()=delete;
-	Object(const Object&)=delete; // copy ctor
-	Object(Object&&)=delete; // move ctor
-	Object&operator=(const Object&)=delete; // copy assignment
+	constexpr Object()=delete;
+	constexpr Object(const Object&)=delete; // copy ctor
+	constexpr Object(Object&&)=delete; // move ctor
+	constexpr Object&operator=(const Object&)=delete; // copy assignment
 //	Object&operator=(Object&&)=delete; // move assignment
 	Object(const ObjectDef&def,const Scale scl,const Point2D&pos,const Angle rad,const unsigned char color):
 		pos_{pos},
@@ -79,28 +79,28 @@ public:
 		objects_free_indexes[objects_free_indexes_pos]=slot_;
 		delete[]pts_wld_;
 	}
-	inline auto def()const->const ObjectDef&{return def_;}
-	inline auto pos()const->const Point2D&{return pos_;}
-	inline auto dpos()const->const Point2D&{return dpos_;}
-	inline auto angle()const->Angle{return agl_;}
-	inline auto scale()const->Scale{return scl_;}
-	inline auto set_pos(const Point2D&p){pos_=p;}
-	inline auto set_dpos(const Point2D&p){dpos_=p;}
-	inline auto set_angle(const Angle rad){agl_=rad;}
-	inline auto set_dangle(const Angle rad){dagl_=rad;}
-	auto forward_vector()->Vector2D{
+	inline constexpr auto def()const->const ObjectDef&{return def_;}
+	inline constexpr auto pos()const->const Point2D&{return pos_;}
+	inline constexpr auto dpos()const->const Point2D&{return dpos_;}
+	inline constexpr auto angle()const->Angle{return agl_;}
+	inline constexpr auto scale()const->Scale{return scl_;}
+	inline constexpr auto set_pos(const Point2D&p){pos_=p;}
+	inline constexpr auto set_dpos(const Point2D&p){dpos_=p;}
+	inline constexpr auto set_angle(const Angle rad){agl_=rad;}
+	inline constexpr auto set_dangle(const Angle rad){dagl_=rad;}
+	constexpr auto forward_vector()->Vector2D{
 		refresh_Mmw_if_invalid();
 		return Mmw_.axis_y();
 	}
-	virtual auto die()->void{
+	constexpr virtual auto die()->void{
 //		unslot_object(this);
 //		delete this;
 	}
-	virtual auto update()->void{
+	constexpr virtual auto update()->void{
 		pos_.inc_by(dpos_);
 		agl_+=dagl_;
 	}
-	virtual auto render(Bitmap&dsp)->void{
+	constexpr virtual auto render(Bitmap&dsp)->void{
 		if(refresh_Mmw_if_invalid()){
 			// matrix is refreshed
 			Mmw_.transform(def_.pts_,pts_wld_,def_.npts_);
@@ -116,7 +116,7 @@ public:
 
 	}
 private:
-	auto refresh_Mmw_if_invalid()->bool{
+	constexpr auto refresh_Mmw_if_invalid()->bool{
 		if(agl_==Mmw_agl_&&pos_==Mmw_pos_&&scl_==Mmw_scl_)
 			return false;
 //			err.printer().p("um:").p_hex_32b(reinterpret_cast<unsigned>(this)).p(' ');

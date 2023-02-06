@@ -60,17 +60,17 @@ public:
 		return*this;
 	}
 	// scales this vector
-	inline auto scale(float s)->Vector2D&{
+	inline constexpr auto scale(float s)->Vector2D&{
 		x*=s;
 		y*=s;
 		return*this;
 	}
-	inline auto inc_by(const Vector2D&v){
+	inline constexpr auto inc_by(const Vector2D&v){
 		x+=v.x;
 		y+=v.y;
 	}
 //	auto operator<=>(const Vector2D&)const=default; // ? does not compile in clang++ without includes from std
-	auto operator==(const Vector2D&)const->bool=default;
+	constexpr auto operator==(const Vector2D&)const->bool=default;
 };
 
 using Scale=float;
@@ -110,7 +110,7 @@ public:
 		yx=sn;yy= cs;yt=translation.y;
 		ux= 0;uy=  0;id=1;
 	}
-	auto transform(const Vector2D src[],Vector2D dst[],const unsigned n)const{
+	constexpr auto transform(const Vector2D src[],Vector2D dst[],const unsigned n)const{
 		for(unsigned i=0;i<n;i++){
 			dst->x=xx*src->x+xy*src->y+xt;
 			dst->y=yx*src->x+yy*src->y+yt;
@@ -118,10 +118,10 @@ public:
 			dst++;
 		}
 	}
-	inline auto axis_x()const->Vector2D{
+	inline constexpr auto axis_x()const->Vector2D{
 		return{xx,xy};
 	}
-	inline auto axis_y()const->Vector2D{
+	inline constexpr auto axis_y()const->Vector2D{
 		return{yx,yy};
 	}
 };
