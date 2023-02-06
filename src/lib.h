@@ -96,7 +96,7 @@ class Bitmap{
 	DimensionPx d_;
 	Data dt_;
 public:
-	inline constexpr Bitmap(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()}{}
+	constexpr Bitmap(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()}{}
 	inline constexpr auto dim()const->const DimensionPx&{return d_;}
 	inline constexpr auto data()const->const Data&{return dt_;}
 	inline constexpr auto pointer_offset(const CoordsPx p)const->Pointer{return dt_.pointer().offset(p.y()*d_.width()+p.x());}
@@ -306,7 +306,7 @@ class PrinterToBitmap{
 	bool transparent_; // ? implement
 	char padding1=0;
 public:
-	inline constexpr PrinterToBitmap(Bitmap&b):
+	constexpr PrinterToBitmap(Bitmap&b):
 		di_{static_cast<char*>(b.data().address())},
 		dil_{di_},
 		b_{b},
@@ -452,7 +452,7 @@ class Vga13h{
 	Bitmap b_;
 
 public:
-	inline Vga13h():b_{Address(0xa0000),DimensionPx{320,200}}{}
+	Vga13h():b_{Address(0xa0000),DimensionPx{320,200}}{}
 	inline constexpr auto bmp()->Bitmap&{return b_;}
 };
 
@@ -489,7 +489,7 @@ class Sprite{
 	Velocity v_;
 	Acceleration a_;
 public:
-	inline constexpr Sprite(const Bitmap&b,const Position&p,const Velocity&v,const Acceleration&a):
+	constexpr Sprite(const Bitmap&b,const Position&p,const Velocity&v,const Acceleration&a):
 		b_{b},p_{p},v_{v},a_{a}
 	{}
 	constexpr auto to(const Bitmap&dst)const{
