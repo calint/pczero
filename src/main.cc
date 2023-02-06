@@ -255,10 +255,10 @@ extern "C" [[noreturn]] void tsk4(){
 	default_object_def_rectangle=ObjectDefRectangle();
 	default_object_def_ship=ObjectDefShip();
 
-	const unsigned n=sizeof(objects_free_indexes)/sizeof(unsigned short);
+	const unsigned n=sizeof(objects_free_slots)/sizeof(unsigned short);
 //	out.printer().p_hex_32b(n).spc().p_hex_16b(objects_free_indexes_pos).spc();
 	for(unsigned short i=0;i<n;i++){
-		objects_free_indexes[i]=i;
+		objects_free_slots[i]=i;
 	}
 	//----------------------------------------------------------
 //	out.printer().p_hex_32b(sizeof(unsigned long)).spc().p_hex_32b(sizeof(unsigned));

@@ -21,11 +21,11 @@ class Object;
 
 constexpr static unsigned objects_len=8;
 static Object*objects[objects_len];
-static unsigned short objects_free_indexes[objects_len];
-static unsigned short objects_free_indexes_pos=objects_len-1;
+static unsigned short objects_free_slots[objects_len];
+static unsigned short objects_free_slots_pos=objects_len-1;
 auto objects_can_alloc()->bool;
 auto objects_can_alloc()->bool{
-	return objects_free_indexes_pos!=0;
+	return objects_free_slots_pos!=0;
 }
 class Object{
 protected:
@@ -64,20 +64,20 @@ public:
 		color_{color}
 	{
 //		out.printer().p("c ").p_hex_16b(objects_free_indexes_pos).spc().p("a:").p_hex_32b(reinterpret_cast<unsigned>(this)).spc();
-		if(!objects_free_indexes_pos){
+		if(!objects_free_slots_pos){
 			out.printer().p("e ");
 			return;
 		}
-		slot_=objects_free_indexes[objects_free_indexes_pos];
+		slot_=objects_free_slots[objects_free_slots_pos];
 		objects[slot_]=this;
-		objects_free_indexes_pos--;
+		objects_free_slots_pos--;
 	}
 	virtual~Object(){
 //		out.printer().p("d=").p_hex_16b(slot).p(' ');
 		objects[slot_]=nullptr;
-		objects_free_indexes_pos++;
+		objects_free_slots_pos++;
 //		out.printer().p("ofip=").p_hex_16b(objects_free_indexes_pos).p(' ');
-		objects_free_indexes[objects_free_indexes_pos]=slot_;
+		objects_free_slots[objects_free_slots_pos]=slot_;
 		delete[]pts_wld_;
 	}
 	inline constexpr auto def()const->const ObjectDef&{return def_;}
