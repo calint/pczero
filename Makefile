@@ -41,15 +41,6 @@ CW+=-Wno-global-constructors # global constructors ok here
 CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
 CW+=-Wno-unused-parameter # allow for debugging
 CW+=-Wno-weak-vtables # allow for source in include files
-#CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wmissing-declarations -Wmissing-include-dirs -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
-#CW+=-Wfatal-errors
-#CW+=-Wpadded
-#CW+=-Winline
-#CW+=-Wno-unused-private-field # disable warning regarding padding
-#CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
-#CW+=-Wno-unused-function # allow for debugging
-#CW+=-Wno-unused-variable # allow for debugging
-#CW+=-Wno-unused-parameter # allow for debugging
 CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
 CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
