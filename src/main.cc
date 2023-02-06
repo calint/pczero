@@ -242,7 +242,9 @@ public:
 //};
 
 extern "C" [[noreturn]] void tsk4(){
+	//----------------------------------------------------------
 	// init statics
+	//----------------------------------------------------------
 	default_object_def_rectangle=ObjectDefRectangle();
 	default_object_def_ship=ObjectDefShip();
 
@@ -251,9 +253,8 @@ extern "C" [[noreturn]] void tsk4(){
 	for(unsigned short i=0;i<n;i++){
 		objects_free_indexes[i]=i;
 	}
-
-
-//	out.printer().p_hex_32b(sizeof(unsigned long));
+	//----------------------------------------------------------
+//	out.printer().p_hex_32b(sizeof(unsigned long)).spc().p_hex_32b(sizeof(unsigned));
 	Ship*shp=new Ship;
 	shp->set_dangle(deg_to_rad(-5));
 	shp->set_dpos({1,1});
