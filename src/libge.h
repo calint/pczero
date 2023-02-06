@@ -19,15 +19,14 @@ static constexpr void dot(const Bitmap&bmp,const float x,const float y,const uns
 
 class Object;
 
-
 class Object{
 public:
-	constexpr static unsigned all_len=8;
+	constexpr static unsigned all_len=8; // maximum number of objects
 	static Object*all[]; // array of pointers to allocated objects
-	static unsigned short freeSlots[]; // free slots in all[]
+	static unsigned short freeSlots[]; // free indexes in all[]
 	static unsigned short freeSlots_pos; // index in freeSlots[] of next free slot
 protected:
-	Point2D pos_; // ? pos,dpos,agl,dagle not cache friendly
+	Point2D pos_; // ? [pos,dpos,agl,dagle] object size trashes cache when doing update
 	Point2D dpos_;
 	Angle agl_;
 	Angle dagl_;
