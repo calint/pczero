@@ -23,9 +23,19 @@ class Object{
 public:
 	constexpr static unsigned all_len=8; // maximum number of objects
 	static Object*all[]; // array of pointers to allocated objects
-	static unsigned short freeSlots[]; // free indexes in all[]
+	static unsigned short freeSlots[all_len]; // free indexes in all[]
 	static unsigned short freeSlots_pos; // index in freeSlots[] of next free slot
 	static inline auto hasFreeSlot()->bool{return freeSlots_pos!=0;}
+	static auto init_statics(){
+		const unsigned n=sizeof(freeSlots)/sizeof(unsigned short);
+	//	out.printer().p_hex_32b(n).spc().p_hex_16b(objects_free_indexes_pos).spc();
+		for(unsigned short i=0;i<n;i++){
+			freeSlots[i]=i;
+		}
+		freeSlots_pos=all_len-1;
+	}
+	static auto all_update();
+	static auto all_render(Bitmap&bmp);
 protected:
 	Point2D pos_; // ? [pos,dpos,agl,dagle] object size trashes cache when doing update
 	Point2D dpos_;
@@ -88,7 +98,7 @@ public:
 	inline constexpr auto set_dangle(const Angle rad){dagl_=rad;}
 	constexpr auto forward_vector()->Vector2D{
 		refresh_Mmw_if_invalid();
-		return Mmw_.axis_y();
+		return Mmw_.axis_y().negate();
 	}
 	constexpr virtual auto die()->void{
 //		unslot_object(this);
@@ -98,7 +108,7 @@ public:
 		pos_.inc_by(dpos_);
 		agl_+=dagl_;
 	}
-	constexpr virtual auto render(Bitmap&dsp)->void{
+	constexpr virtual auto render(const Bitmap&dsp)->void{
 		if(refresh_Mmw_if_invalid()){
 			// matrix is refreshed
 			Mmw_.transform(def_.pts_,pts_wld_,def_.npts_);
@@ -128,5 +138,19 @@ private:
 Object*Object::all[all_len];
 unsigned short Object::freeSlots_pos=all_len-1;
 unsigned short Object::freeSlots[all_len];
+auto Object::all_update(){
+	for(Object*o:Object::all){
+		if(!o)
+			continue;
+		o->update();
+	}
+}
+auto Object::all_render(Bitmap&bmp){
+	for(Object*o:Object::all){
+		if(!o)
+			continue;
+		o->render(bmp);
+	}
+}
 
 }// end namespace

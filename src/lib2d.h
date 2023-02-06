@@ -69,6 +69,11 @@ public:
 		x+=v.x;
 		y+=v.y;
 	}
+	inline constexpr auto negate()->Vector2D&{
+		x=-x;
+		y=-y;
+		return*this;
+	}
 //	auto operator<=>(const Vector2D&)const=default; // ? does not compile in clang++ without includes from std
 	constexpr auto operator==(const Vector2D&)const->bool=default;
 };
@@ -81,29 +86,10 @@ class Matrix2D{
 	float yx=0,yy=1,yt=0;
 	float ux=0,uy=0,id=1;
 public:
-//	inline auto set_identity(){
-//		xx=1;yx=0;tx=0;
-//		xy=0,yy=1,ty=0;
-//		xu=0,yu=0, i=1;
-//	}
-//	inline auto set_rotation(const Radians r){
-//		const float cs=cos(r);
-//		const float sn=sin(r);
-//		xx=cs;yx=-sn;tx=0;
-//		xy=sn,yy= cs,ty=0;
-//		xu= 0,yu=  0,i=1;
-//	}
-//	inline auto set_translation(const Vector2D&v){
-//		tx=v.x;
-//		ty=v.y;
-//	}
-
 	auto set_transform(const Scale scale,const Angle rotation,const Vector2D&translation){
 		// ! implement fsincos
 		float fcos,fsin;
 		sin_and_cos(rotation,fsin,fcos);
-//		const float cs=scale*cos(rotation);
-//		const float sn=scale*sin(rotation);
 		const float cs=scale*fcos;
 		const float sn=scale*fsin;
 		xx=cs;xy=-sn;xt=translation.x;
@@ -118,12 +104,8 @@ public:
 			dst++;
 		}
 	}
-	inline constexpr auto axis_x()const->Vector2D{
-		return{xx,xy};
-	}
-	inline constexpr auto axis_y()const->Vector2D{
-		return{yx,yy};
-	}
+	inline constexpr auto axis_x()const->Vector2D{return{xx,yx};} // math correct?
+	inline constexpr auto axis_y()const->Vector2D{return{xy,yy};} // math correct?
 };
 
 } // end namespace osca

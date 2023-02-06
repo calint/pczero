@@ -46,6 +46,7 @@ extern "C" void osca_init(){
 	*reinterpret_cast<int*>(0xa0000)=0x02;
 
 	// initiate statics
+	Object::init_statics();
 	heap=Heap();
 	out=PrinterToVga();
 
@@ -203,15 +204,37 @@ public:
 	}
 }default_object_def_ship;
 
+class Bullet:public Object{
+public:
+	Bullet():
+		Object{default_object_def_ship,2,{0,0},0,4}
+	{}
+	constexpr virtual auto update()->void override{
+		Object::update();
+		if(pos_.x>300){
+			delete this;
+			return;
+		}
+		if(pos_.x<20){
+			delete this;
+			return;
+		}
+		if(pos_.y>130){
+			delete this;
+			return;
+		}
+		if(pos_.y<70){
+			delete this;
+			return;
+		}
+	}
+};
+
 class Ship:public Object{
 public:
 	Ship():
-		Object{default_object_def_ship,5,{120,100},0,2}
+		Object{default_object_def_ship,4,{120,100},0,2}
 	{}
-//	virtual~Ship(){
-//		Object::~Object();
-////		Object::
-//	}
 
 	constexpr virtual auto update()->void override{
 		Object::update();
@@ -226,27 +249,14 @@ public:
 			set_dpos({dpos_.x,-dpos_.y});
 		}
 	}
-};
 
-//class Bullet:public Object{
-//public:
-//	Bullet():
-//		Object{default_object_def_ship,3,{0,0},0,4}
-//	{}
-//	virtual auto update()->void override{
-//		Object::update();
-//		if(pos_.x>300){
-//			die();
-//		}else if(pos_.x<20){
-//			die();
-//		}
-//		if(pos_.y>130){
-//			die();
-//		}else if(pos_.y<70){
-//			die();
-//		}
-//	}
-//};
+	auto fire(){
+		Bullet*b=new Bullet;
+		b->set_pos(pos_);
+		b->set_dpos(forward_vector().normalize().scale(3));
+		b->set_angle(agl_);
+	}
+};
 
 extern "C" [[noreturn]] void tsk4(){
 	//----------------------------------------------------------
@@ -255,13 +265,18 @@ extern "C" [[noreturn]] void tsk4(){
 	default_object_def_rectangle=ObjectDefRectangle();
 	default_object_def_ship=ObjectDefShip();
 
-	const unsigned n=sizeof(Object::freeSlots)/sizeof(unsigned short);
-//	out.printer().p_hex_32b(n).spc().p_hex_16b(objects_free_indexes_pos).spc();
-	for(unsigned short i=0;i<n;i++){
-		Object::freeSlots[i]=i;
-	}
 	//----------------------------------------------------------
-//	out.printer().p_hex_32b(sizeof(unsigned long)).spc().p_hex_32b(sizeof(unsigned));
+
+	// init stack
+	Vga13h dsp;
+	Bitmap&db=dsp.bmp();
+	PrinterToBitmap pb{db};
+	Degrees deg=0;
+	Matrix2D R;
+	const Address clear_start=db.data().pointer().offset(50*320).address();
+	const SizeBytes clear_n=320*100;
+	const Address heap_address=heap.address();
+	//	out.printer().p_hex_32b(sizeof(unsigned long)).spc().p_hex_32b(sizeof(unsigned));
 	Ship*shp=new Ship;
 	shp->set_dangle(deg_to_rad(-5));
 	shp->set_dpos({1,1});
@@ -273,40 +288,15 @@ extern "C" [[noreturn]] void tsk4(){
 	Object*wall=new Object{default_object_def_rectangle,10,{100,100},0,4};
 	wall->set_dangle(deg_to_rad(5));
 
-	// init stack
-	Vga13h dsp;
-	Bitmap&db=dsp.bmp();
-	PrinterToBitmap pb{db};
-	Degrees deg=0;
-	Matrix2D R;
-	const Address clear_start=db.data().pointer().offset(50*320).address();
-	const SizeBytes clear_n=320*100;
-	const Address heap_address=heap.address();
+//	Ship*shp3=new Ship;
+//	shp3->set_pos({160,100});
 	// start task
 	while(true){
-//		pz_memset(clear_start,0x11,clear_n);
 		pz_memcpy(heap_address,clear_start,clear_n);
-//		obj1.update();
-//		obj3->update();
-//		obj1.render(db);
-//		obj3->render(db);
 		pb.pos(2,1).fg(2).p("t=").p_hex_32b(osca_t);
-//		pb.pos(2,1).fg(2).p("t=").p_hex_32b(reinterpret_cast<unsigned>(freemem_start));
 
-		for(Object*o:Object::all){
-			if(!o)
-				continue;
-			o->update();
-		}
-		for(Object*o:Object::all){
-			if(!o)
-				continue;
-			o->render(db);
-		}
-
-		if(deg>360)
-			deg-=360;
-		deg+=5;
+		Object::all_update();
+		Object::all_render(db);
 
 		const char ch=table_scancode_to_ascii[osca_key];
 		if(ch){
@@ -334,9 +324,12 @@ extern "C" [[noreturn]] void tsk4(){
 				case'd':
 					shp->set_dpos({1,dp.y});
 					break;
-				case' ':
+				case'x':
 					delete shp;
 					shp=nullptr;
+					break;
+				case' ':
+					shp->fire();
 					break;
 				default:
 					break;
@@ -344,7 +337,11 @@ extern "C" [[noreturn]] void tsk4(){
 			}
 		}
 
+		if(deg>360)
+			deg-=360;
+		deg+=5;
 		const float rotation=deg_to_rad(deg);
+//		shp3->set_angle(rotation);
 		R.set_transform(5,rotation,{160,100});
 		// dot axis
 		dot(db,160,100,0xf);
