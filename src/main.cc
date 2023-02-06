@@ -311,7 +311,7 @@ extern "C" [[noreturn]] void tsk4(){
 		const char ch=table_scancode_to_ascii[osca_key];
 		if(ch){
 			if(ch=='c'){
-				if(objects_can_alloc()){
+				if(Object::hasFreeSlot()){
 					shp=new Ship;
 					shp->set_dangle(deg_to_rad(-5));
 					shp->set_dpos({1,1});

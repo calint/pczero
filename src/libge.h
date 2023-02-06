@@ -25,6 +25,7 @@ public:
 	static Object*all[]; // array of pointers to allocated objects
 	static unsigned short freeSlots[]; // free indexes in all[]
 	static unsigned short freeSlots_pos; // index in freeSlots[] of next free slot
+	static inline auto hasFreeSlot()->bool{return freeSlots_pos!=0;}
 protected:
 	Point2D pos_; // ? [pos,dpos,agl,dagle] object size trashes cache when doing update
 	Point2D dpos_;
@@ -124,11 +125,6 @@ private:
 		return true;
 	}
 };
-
-auto objects_can_alloc()->bool;
-auto objects_can_alloc()->bool{
-	return Object::freeSlots_pos!=0;
-}
 Object*Object::all[all_len];
 unsigned short Object::freeSlots_pos=all_len-1;
 unsigned short Object::freeSlots[all_len];
