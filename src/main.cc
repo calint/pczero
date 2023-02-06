@@ -24,8 +24,8 @@ void operator delete(void*ptr,unsigned size)noexcept;
 void operator delete[](void*ptr,unsigned size)noexcept;
 
 // called by C++ to allocate and free memory
-inline void*operator new[](unsigned count){return heap.alloc(count);}
-inline void*operator new(unsigned count){return heap.alloc(count);}
+void*operator new[](unsigned count){return heap.alloc(count);}
+void*operator new(unsigned count){return heap.alloc(count);}
 
 void operator delete(void*ptr)noexcept{
 //	out.printer().p("D:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
