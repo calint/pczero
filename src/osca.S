@@ -15,8 +15,6 @@
 # F0000-FFFFF  BIOS ROM
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - intro
 .set IDT,0x600 # interrupt descriptor table address
-.set LOAD_SECTORS,0x3f # 31½K (the whole 1st cylinder)
-#.set PROG_SIZE,0x200+LOAD_SECTORS*0x200
 .global osca_key # last pressed key
 .global osca_t # lower ticker value
 .global osca_th # high ticker value
@@ -40,21 +38,23 @@ mov %dl,osca_drv_b # save boot drive
 mov %bx,%ss # setup stack
 mov $_start,%sp # at 0x7c00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
-# %dl is the unchanged boot drive
 cld # clear direction (forward)
-mov $(0x0200+LOAD_SECTORS),%ax # command 2, 31½K (the whole 1st cylinder)
-mov $0x0002,%cx # from cylinder 0, sector 2
+# command 2 (%ah), sectors to read (%al) 0x3f (31½K)
+mov $0x023f,%ax
+# from cylinder 0 (%ch), sector 2 (%cl) (sector starts from 1, not 0)
+mov $0x0002,%cx
 xor %dh,%dh # head 0
-mov $0x07e0,%bx # to es:bx
-mov %bx,%es #
-xor %bx,%bx # es:bx=7e00:0000
+# %dl, drive number, is unchanged
+mov $0x07e0,%bx # to es:bx=7e00:0000
+mov %bx,%es
+xor %bx,%bx
 int $0x13 # read disk
-#jnc 1f # if no error jmp
+#jnc 1f # if no error
+#  # error
 #  mov $0xb800,%ax # console segment
 #  mov %ax,%es
-#  movw $0x4045,%es:0 # 'E1' to top left corner
-#  movw $0x4031,%es:2 #
-#  cli # hang
+#  movw $0x4045,%es:0 # E 'E1' to top left corner
+#  movw $0x4031,%es:2 # 1
 #  hlt
 #1:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - mode 13h

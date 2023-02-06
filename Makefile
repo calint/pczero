@@ -45,7 +45,7 @@ CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fa
 #CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
 # GNU ld (GNU Binutils for Ubuntu) 2.39
-LF=-T ../link.ld -melf_i386 -nostdlib
+LF=-T ../link.ld -melf_i386 -nostdlib # ../link.ld to be able to build in eclipse with same link.ld file
 
 # usb device
 INSTALL_TO=/dev/sda
@@ -61,6 +61,7 @@ build:
 	@echo
 #	clang-tidy src/main.cc
 #	@echo
+	# to be able to build in eclipse with same link.ld change directory to bin
 	cd bin && ld -o $(IMAGE) $(LF) && chmod -x $(IMAGE)
 	@echo
 	
