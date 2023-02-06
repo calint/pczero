@@ -18,7 +18,13 @@ static constexpr void dot(const Bitmap&bmp,const float x,const float y,const uns
 }
 
 class Object;
-const unsigned objects_len=8;
+
+constexpr static unsigned objects_len=8;
+class ObjectSlots{
+	Object*slots[objects_len];
+}object_slots;
+
+
 static Object*objects[objects_len];
 static unsigned short objects_free_indexes[objects_len];
 static unsigned short objects_free_indexes_pos=objects_len-1;

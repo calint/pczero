@@ -4,26 +4,29 @@
 #include "libge.h"
 
 using namespace osca;
-static char*freemem_ptr=reinterpret_cast<char*>(0x10'0000); // head memory at 1MB
-static char*freemem_start=reinterpret_cast<char*>(0x10'0000);
-//static char*freemem_ptr=reinterpret_cast<char*>(0xa0000+320); // put heap on screen
+
+static class Heap{
+	char*ptr_; // head memory at 1MB
+	void*start_;
+public:
+	Heap():
+		ptr_{reinterpret_cast<char*>(0x10'0000)},start_{reinterpret_cast<void*>(0x10'0000)}
+	{}
+	Address address()const{return start_;}
+	inline void*alloc(const unsigned size){
+		char*p=ptr_;
+		ptr_+=size;
+		return reinterpret_cast<void*>(p);
+	}
+}heap;
 
 void operator delete(void*ptr,unsigned size)noexcept;
 void operator delete[](void*ptr,unsigned size)noexcept;
 
 // called by C++ to allocate and free memory
-void*operator new[](unsigned count){
-	char*p=freemem_ptr;
-//	out.printer().p("na:").p_hex_32b(count).p(':').p_hex_32b(reinterpret_cast<unsigned int>(p)).p(' ');
-	freemem_ptr+=count;
-	return reinterpret_cast<void*>(p);
-}
-void*operator new(unsigned count){
-	char*p=freemem_ptr;
-//	err.printer().p_hex_32b(count).p(':').p_hex_32b(reinterpret_cast<unsigned int>(p)).p(' ');
-	freemem_ptr+=count;
-	return reinterpret_cast<void*>(p);
-}
+inline void*operator new[](unsigned count){return heap.alloc(count);}
+inline void*operator new(unsigned count){return heap.alloc(count);}
+
 void operator delete(void*ptr)noexcept{
 //	out.printer().p("D:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
 }
@@ -39,12 +42,16 @@ void operator delete[](void*ptr,unsigned size)noexcept{
 
 // called by osca from the keyboard interrupt
 extern "C" void osca_init(){
+	// dot on screen
 	*reinterpret_cast<int*>(0xa0000)=0x02;
+
 	// initiate statics
+	heap=Heap();
 	out=PrinterToVga();
+
 	// write heap memory default
 	const SizeBytes clear_n=320*100; // heap memory size
-	const Address heap_address=Address(freemem_start);
+	const Address heap_address=Address(heap.address());
 	pz_memset(heap_address,0x12,clear_n);
 }
 
@@ -274,7 +281,7 @@ extern "C" [[noreturn]] void tsk4(){
 	Matrix2D R;
 	const Address clear_start=db.data().pointer().offset(50*320).address();
 	const SizeBytes clear_n=320*100;
-	const Address heap_address=Address(freemem_start);
+	const Address heap_address=heap.address();
 	// start task
 	while(true){
 //		pz_memset(clear_start,0x11,clear_n);
