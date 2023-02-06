@@ -19,15 +19,13 @@ static constexpr void dot(const Bitmap&bmp,const float x,const float y,const uns
 
 class Object;
 
-constexpr static unsigned objects_len=8;
-static Object*objects[objects_len];
-static unsigned short objects_free_slots[objects_len];
-static unsigned short objects_free_slots_pos=objects_len-1;
-auto objects_can_alloc()->bool;
-auto objects_can_alloc()->bool{
-	return objects_free_slots_pos!=0;
-}
+
 class Object{
+public:
+	constexpr static unsigned all_len=8;
+	static Object*all[]; // array of pointers to allocated objects
+	static unsigned short freeSlots[]; // free slots in all[]
+	static unsigned short freeSlots_pos; // index in freeSlots[] of next free slot
 protected:
 	Point2D pos_; // ? pos,dpos,agl,dagle not cache friendly
 	Point2D dpos_;
@@ -63,22 +61,21 @@ public:
 		Mmw_scl_{0},
 		color_{color}
 	{
-//		out.printer().p("c ").p_hex_16b(objects_free_indexes_pos).spc().p("a:").p_hex_32b(reinterpret_cast<unsigned>(this)).spc();
-		if(!objects_free_slots_pos){
+		if(!freeSlots_pos){
 			out.printer().p("e ");
 			return;
 		}
-		slot_=objects_free_slots[objects_free_slots_pos];
-		objects[slot_]=this;
-		objects_free_slots_pos--;
+		slot_=freeSlots[freeSlots_pos];
+		all[slot_]=this;
+		freeSlots_pos--;
+//		out.printer().p_hex_16b(freeSlots_pos).spc();
 	}
 	virtual~Object(){
-//		out.printer().p("d=").p_hex_16b(slot).p(' ');
-		objects[slot_]=nullptr;
-		objects_free_slots_pos++;
-//		out.printer().p("ofip=").p_hex_16b(objects_free_indexes_pos).p(' ');
-		objects_free_slots[objects_free_slots_pos]=slot_;
+		all[slot_]=nullptr;
+		freeSlots_pos++;
+		freeSlots[freeSlots_pos]=slot_;
 		delete[]pts_wld_;
+//		out.printer().p_hex_16b(freeSlots_pos).spc();
 	}
 	inline constexpr auto def()const->const ObjectDef&{return def_;}
 	inline constexpr auto pos()const->const Point2D&{return pos_;}
@@ -128,5 +125,13 @@ private:
 		return true;
 	}
 };
+
+auto objects_can_alloc()->bool;
+auto objects_can_alloc()->bool{
+	return Object::freeSlots_pos!=0;
+}
+Object*Object::all[all_len];
+unsigned short Object::freeSlots_pos=all_len-1;
+unsigned short Object::freeSlots[all_len];
 
 }// end namespace

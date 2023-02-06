@@ -255,10 +255,10 @@ extern "C" [[noreturn]] void tsk4(){
 	default_object_def_rectangle=ObjectDefRectangle();
 	default_object_def_ship=ObjectDefShip();
 
-	const unsigned n=sizeof(objects_free_slots)/sizeof(unsigned short);
+	const unsigned n=sizeof(Object::freeSlots)/sizeof(unsigned short);
 //	out.printer().p_hex_32b(n).spc().p_hex_16b(objects_free_indexes_pos).spc();
 	for(unsigned short i=0;i<n;i++){
-		objects_free_slots[i]=i;
+		Object::freeSlots[i]=i;
 	}
 	//----------------------------------------------------------
 //	out.printer().p_hex_32b(sizeof(unsigned long)).spc().p_hex_32b(sizeof(unsigned));
@@ -293,12 +293,12 @@ extern "C" [[noreturn]] void tsk4(){
 		pb.pos(2,1).fg(2).p("t=").p_hex_32b(osca_t);
 //		pb.pos(2,1).fg(2).p("t=").p_hex_32b(reinterpret_cast<unsigned>(freemem_start));
 
-		for(Object*o:objects){
+		for(Object*o:Object::all){
 			if(!o)
 				continue;
 			o->update();
 		}
-		for(Object*o:objects){
+		for(Object*o:Object::all){
 			if(!o)
 				continue;
 			o->render(db);
