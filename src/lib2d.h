@@ -47,8 +47,6 @@ constexpr auto deg_to_rad(const Degrees deg)->Angle{
 	return deg*deg_to_rad;
 }
 
-const float float_dif=0.000001f;
-
 class Vector2D{
 public:
 	float x=0,y=0;
@@ -100,7 +98,7 @@ public:
 //		ty=v.y;
 //	}
 
-	inline auto set_transform(const Scale scale,const Angle rotation,const Vector2D&translation){
+	auto set_transform(const Scale scale,const Angle rotation,const Vector2D&translation){
 		// ! implement fsincos
 		float fcos,fsin;
 		sin_and_cos(rotation,fsin,fcos);

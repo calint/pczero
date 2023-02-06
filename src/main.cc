@@ -342,9 +342,9 @@ extern "C" [[noreturn]] void tsk4(){
 		// dot axis
 		dot(db,160,100,0xf);
 		const Vector2D xaxis=R.axis_x().normalize().scale(7);
-		dot(db,xaxis.x+160,xaxis.y+100,2);
+		dot(db,xaxis.x+160,xaxis.y+100,4);
 		const Vector2D yaxis=R.axis_y().normalize().scale(7);
-		dot(db,yaxis.x+160,yaxis.y+100,4);
+		dot(db,yaxis.x+160,yaxis.y+100,2);
 
 		osca_yield();
 	}
