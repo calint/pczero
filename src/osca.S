@@ -42,13 +42,13 @@ mov $_start,%sp # at 0x7c00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
 # %dl is the unchanged boot drive
 cld # clear direction (forward)
-mov $(0x0200+LOAD_SECTORS),%ax # command 2, 0x1f sectors
+mov $(0x0200+LOAD_SECTORS),%ax # command 2, 31½K (the whole 1st cylinder)
 mov $0x0002,%cx # from cylinder 0, sector 2
 xor %dh,%dh # head 0
 mov $0x07e0,%bx # to es:bx
 mov %bx,%es #
 xor %bx,%bx # es:bx=7e00:0000
-int $0x13 # read disks
+int $0x13 # read disk
 #jnc 1f # if no error jmp
 #  mov $0xb800,%ax # console segment
 #  mov %ax,%es
@@ -161,7 +161,9 @@ osca_key:.byte 0x00 # last key event
 .align 16,0x90
 isr_err:
   cli # pop error code and print it?
-  incw 0xa0000
+  pop %eax
+  mov %eax,0xa0000
+  incl 0xa0004
   jmp isr_err
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ikbd
 .align 16,0x90
@@ -184,6 +186,8 @@ isr_kbd:
 isr_tck:
   incl 0xa0000+320-4 # on screen, top right corner
   # enable this to disable task switching. will run only 'tsk0'
+#  incl osca_t # increase 64b ticker
+#  adcl $0,osca_th # add carry to upper 32 bits
 #  push %ax # ack irq
 #  mov $0x20,%al
 #  out %al,$0x20
@@ -242,6 +246,8 @@ isr_tck:
 # sector3: #0x8200 tasks state table
 .align 16,0x90
 tsk: # eip,  esp,       eflags,     bits,       edi        esi        ebp        esp0       ebx        edx        ecx        eax
+#  .long tsk4 ,0x000afa00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+
   .long tsk0 ,0x000afa00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
   .long tsk1 ,0x000af780,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
   .long tsk2 ,0x000af500,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000

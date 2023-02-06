@@ -11,7 +11,7 @@ static char*freemem_start=reinterpret_cast<char*>(0x10'0000);;
 // called by C++ to allocate and free memory
 void*operator new[](unsigned count){
 	char*p=freemem_ptr;
-//	err.printer().p_hex_32b(count).p(':').p_hex_32b(reinterpret_cast<unsigned int>(p)).p(' ');
+//	out.printer().p("na:").p_hex_32b(count).p(':').p_hex_32b(reinterpret_cast<unsigned int>(p)).p(' ');
 	freemem_ptr+=count;
 	return reinterpret_cast<void*>(p);
 }
@@ -22,16 +22,16 @@ void*operator new(unsigned count){
 	return reinterpret_cast<void*>(p);
 }
 void operator delete(void*ptr)noexcept{
-	out.printer().p("D:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+//	out.printer().p("D:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
 }
 void operator delete(void*ptr,unsigned size)noexcept{
-	out.printer().p("DS:").p_hex_32b(size).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+//	out.printer().p("DS:").p_hex_32b(size).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
 }
 void operator delete[](void*ptr)noexcept{
-	out.printer().p("DA:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+//	out.printer().p("DA:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
 }
 void operator delete[](void*ptr,unsigned size)noexcept{
-	out.printer().p("DSA:").p_hex_32b(size).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+//	out.printer().p("DSA:").p_hex_32b(size).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
 }
 
 // called by osca from the keyboard interrupt
@@ -174,7 +174,7 @@ public:
 			{-2, 1},
 		};
 	}
-}default_object_def_rectangöe;
+}default_object_def_rectangle;
 
 class ObjectDefShip:public ObjectDef{
 public:
@@ -236,29 +236,26 @@ public:
 
 extern "C" void tsk4(){
 	// init statics
-	default_object_def_rectangöe=ObjectDefRectangle();
+	default_object_def_rectangle=ObjectDefRectangle();
 	default_object_def_ship=ObjectDefShip();
-	unsigned n=sizeof(objects_free_indexes)/sizeof(unsigned short);
-	out.printer().p_hex_32b(n).spc().p_hex_16b(objects_free_indexes_pos).spc();
+	const unsigned n=sizeof(objects_free_indexes)/sizeof(unsigned short);
+//	out.printer().p_hex_32b(n).spc().p_hex_16b(objects_free_indexes_pos).spc();
 	for(unsigned short i=0;i<n;i++){
 		objects_free_indexes[i]=i;
 	}
 
-//	static Object*objects[16];
 
+//	out.printer().p_hex_32b(sizeof(unsigned long));
 	Ship*shp=new Ship;
-	Ship*shp2=new Ship;
-	Object*wall=new Object{default_object_def_rectangöe,10,{100,100},0,4};
-
-	wall->set_dangle(deg_to_rad(5));
 	shp->set_dangle(deg_to_rad(-5));
 	shp->set_dpos({1,1});
+
+	Ship*shp2=new Ship;
 	shp2->set_dangle(deg_to_rad(7));
 	shp2->set_dpos({-1,0});
 
-//	objects[15]=wall;
-//	objects[14]=shp;
-//	objects[13]=shp2;
+	Object*wall=new Object{default_object_def_rectangle,10,{100,100},0,4};
+	wall->set_dangle(deg_to_rad(5));
 
 	// init stack
 	Vga13h dsp;
@@ -298,35 +295,37 @@ extern "C" void tsk4(){
 
 		const char ch=table_scancode_to_ascii[osca_key];
 		if(ch){
-			const Point2D&dp=shp->dpos();
-			switch(ch){
-			case'w':
-				shp->set_dpos({dp.x,-1});
-				break;
-			case'a':
-				shp->set_dpos({-1,dp.y});
-				break;
-			case's':
-				shp->set_dpos({dp.x,1});
-				break;
-			case'd':
-				shp->set_dpos({1,dp.y});
-				break;
-			case'x':
+			if(ch=='c'){
 				if(objects_can_alloc()){
 					shp=new Ship;
 					shp->set_dangle(deg_to_rad(-5));
 					shp->set_dpos({1,1});
+				}else{
+					out.printer().p("e ");
 				}
-				break;
-			case' ':
-				if(shp){
+			}
+			if(shp){
+				const Point2D&dp=shp->dpos();
+				switch(ch){
+				case'w':
+					shp->set_dpos({dp.x,-1});
+					break;
+				case'a':
+					shp->set_dpos({-1,dp.y});
+					break;
+				case's':
+					shp->set_dpos({dp.x,1});
+					break;
+				case'd':
+					shp->set_dpos({1,dp.y});
+					break;
+				case' ':
 					delete shp;
 					shp=nullptr;
+					break;
+				default:
+					break;
 				}
-				break;
-			default:
-				break;
 			}
 		}
 

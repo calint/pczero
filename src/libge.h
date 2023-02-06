@@ -43,7 +43,7 @@ protected:
 	unsigned char padding1=0;
 	unsigned short slot=0;
 public:
-//	Object()=delete;
+	Object()=delete;
 	Object(const Object&)=delete; // copy ctor
 	Object(Object&&)=delete; // move ctor
 	Object&operator=(const Object&)=delete; // copy assignment
@@ -62,7 +62,7 @@ public:
 		Mmw_scl_{0},
 		color_{color}
 	{
-//		out.printer().p("c ").p_hex_16b(objects_free_indexes_pos).spc();
+//		out.printer().p("c ").p_hex_16b(objects_free_indexes_pos).spc().p("a:").p_hex_32b(reinterpret_cast<unsigned>(this)).spc();
 		if(!objects_free_indexes_pos){
 			out.printer().p("e ");
 			return;
@@ -72,10 +72,10 @@ public:
 		objects_free_indexes_pos--;
 	}
 	virtual~Object(){
-		out.printer().p("d ").p_hex_16b(slot).p(' ');
+//		out.printer().p("d=").p_hex_16b(slot).p(' ');
 		objects[slot]=nullptr;
 		objects_free_indexes_pos++;
-//		out.printer().p("i:").p_hex_16b(objects_free_indexes_pos).p(' ');
+//		out.printer().p("ofip=").p_hex_16b(objects_free_indexes_pos).p(' ');
 		objects_free_indexes[objects_free_indexes_pos]=slot;
 		delete[]pts_wld_;
 	}

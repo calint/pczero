@@ -18,11 +18,13 @@ CC=g++ -std=c++2a
 CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
 CW+=-Wfatal-errors
 CW+=-Wpadded
-CW+=-Winline
+#CW+=-Winline
 CW+=-Wno-analyzer-malloc-leak
 CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
-CW+=-Wno-unused-function
-CF=-O2 -m32 -fno-builtin -nostdlib -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
+CW+=-Wno-unused-function # allow for debugging
+CW+=-Wno-unused-variable # allow for debugging
+CW+=-Wno-unused-parameter # allow for debugging
+CF=-Og -m32 -fno-builtin -nostdlib -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
 CF+=-fconserve-stack # try to inhibit excessive use of stack by optimizer
 CF+=-fanalyzer
 CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
@@ -36,7 +38,9 @@ CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fa
 #CW+=-Winline
 #CW+=-Wno-unused-private-field # disable warning regarding padding
 #CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
-#CW+=-Wno-unused-function
+#CW+=-Wno-unused-function # allow for debugging
+#CW+=-Wno-unused-variable # allow for debugging
+#CW+=-Wno-unused-parameter # allow for debugging
 #CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
 #CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
@@ -55,6 +59,8 @@ build:
 	@echo
 	$(CC) -c src/main.cc -o bin/src/main.o $(CF) $(CW)
 	@echo
+#	clang-tidy src/main.cc
+#	@echo
 	cd bin && ld -o $(IMAGE) $(LF) && chmod -x $(IMAGE)
 	@echo
 	

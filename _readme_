@@ -1,3 +1,5 @@
 2023-02-06:
-	g++ -O3 does not work, clang++ -O3 ok
+	problem: g++ -O3 does not work, clang++ -O3 ok
+	resolution: g++ -O3 generates bigger image than loaded (>32KB)
+	
 	
