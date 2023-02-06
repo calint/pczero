@@ -14,26 +14,33 @@ FILES+=src/lib.h src/lib2d.h src/libge.h
 AF=--march=i386 --32
 
 # g++ (Ubuntu 12.2.0-3ubuntu1) 12.2.0
-CC=g++ -std=c++2a
-CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
-CW+=-Wfatal-errors
-CW+=-Wpadded
-#CW+=-Winline
-CW+=-Wno-analyzer-malloc-leak
-CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
-CW+=-Wno-unused-function # allow for debugging
-CW+=-Wno-unused-variable # allow for debugging
-CW+=-Wno-unused-parameter # allow for debugging
-CF=-O3 -m32 -fno-builtin -nostdlib -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
-CF+=-fconserve-stack # try to inhibit excessive use of stack by optimizer
-CF+=-fanalyzer
-CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
+#CC=g++ -std=c++2a
+#CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
+#CW+=-Wfatal-errors
+#CW+=-Wpadded
+##CW+=-Winline
+#CW+=-Wno-analyzer-malloc-leak
+#CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
+#CW+=-Wno-unused-function # allow for debugging
+#CW+=-Wno-unused-variable # allow for debugging
+#CW+=-Wno-unused-parameter # allow for debugging
+#CF=-O3 -m32 -fno-builtin -nostdlib -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
+#CF+=-fconserve-stack # try to inhibit excessive use of stack by optimizer
+#CF+=-fanalyzer
+#CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
 #Ubuntu clang version 15.0.6
 #Target: x86_64-pc-linux-gnu
-#CC=clang++ -std=c++2a
-##CW=-Weverything
-##CW+=-Wno-c++98-compat
+CC=clang++ -std=c++2a
+CW=-Weverything
+CW+=-Werror
+CW+=-Wno-c++98-compat
+CW+=-Wno-c++98-c++11-compat-binary-literal
+CW+=-Wno-c++98-compat-bind-to-temporary-copy
+CW+=-Wno-global-constructors # global constructors ok here
+CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
+CW+=-Wno-unused-parameter # allow for debugging
+CW+=-Wno-weak-vtables # allow for source in include files
 #CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wmissing-declarations -Wmissing-include-dirs -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
 #CW+=-Wfatal-errors
 #CW+=-Wpadded
@@ -43,8 +50,8 @@ CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fa
 #CW+=-Wno-unused-function # allow for debugging
 #CW+=-Wno-unused-variable # allow for debugging
 #CW+=-Wno-unused-parameter # allow for debugging
-#CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
-#CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
+CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
+CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
 # GNU ld (GNU Binutils for Ubuntu) 2.39
 LF=-T ../link.ld -melf_i386 -nostdlib # ../link.ld to be able to build in eclipse with same link.ld file

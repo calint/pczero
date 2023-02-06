@@ -8,6 +8,9 @@ static char*freemem_ptr=reinterpret_cast<char*>(0x10'0000); // head memory at 1M
 static char*freemem_start=reinterpret_cast<char*>(0x10'0000);
 //static char*freemem_ptr=reinterpret_cast<char*>(0xa0000+320); // put heap on screen
 
+void operator delete(void*ptr,unsigned size)noexcept;
+void operator delete[](void*ptr,unsigned size)noexcept;
+
 // called by C++ to allocate and free memory
 void*operator new[](unsigned count){
 	char*p=freemem_ptr;
@@ -36,7 +39,7 @@ void operator delete[](void*ptr,unsigned size)noexcept{
 
 // called by osca from the keyboard interrupt
 extern "C" void osca_init(){
-	*(int*)(0xa0000)=0x02;
+	*reinterpret_cast<int*>(0xa0000)=0x02;
 	// initiate statics
 	out=PrinterToVga();
 	// write heap memory default
@@ -46,10 +49,10 @@ extern "C" void osca_init(){
 }
 
 
-extern "C" void tsk0();
-extern "C" void tsk2();
-extern "C" void tsk3();
-extern "C" void tsk4();
+extern "C" [[noreturn]] void tsk0();
+extern "C" [[noreturn]] void tsk2();
+extern "C" [[noreturn]] void tsk3();
+extern "C" [[noreturn]] void tsk4();
 
 class{
 	unsigned char buf[2<<4]; // minimum size 2 and a power of 2, max size 256
@@ -77,14 +80,14 @@ public:
 
 // called by osca from the keyboard interrupt
 extern "C" void osca_keyb_ev(){
-	*(int*)(0xa0000+4)=osca_key;
+	*reinterpret_cast<int*>(0xa0000+4)=osca_key;
 	osca_keyb.on_key(osca_key);
-	static char*p=(char*)(0xa0000+320*49+100);
-	*p++=(char)osca_key;
+	static unsigned char*p=reinterpret_cast<unsigned char*>(0xa0000+320*49+100);
+	*p++=osca_key;
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk0(){
+extern "C" [[noreturn]] void tsk0(){
 	Vga13h dsp;
 	PrinterToBitmap pb{dsp.bmp()};
 
@@ -143,7 +146,7 @@ asm("  incl 0xa0044");
 asm("  hlt");
 asm("  jmp tsk1");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk2(){
+extern "C" [[noreturn]] void tsk2(){
 	while(true){
 //		osca_yield();
 		// copy kernel to screen
@@ -157,7 +160,7 @@ extern "C" void tsk2(){
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" void tsk3(){
+extern "C" [[noreturn]] void tsk3(){
 	Vga13h dsp;
 	while(true){
 //		osca_yield();
@@ -166,7 +169,7 @@ extern "C" void tsk3(){
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-class ObjectDefRectangle:public ObjectDef{
+static class ObjectDefRectangle:public ObjectDef{
 public:
 	ObjectDefRectangle(){
 		npts_=5;
@@ -180,7 +183,7 @@ public:
 	}
 }default_object_def_rectangle;
 
-class ObjectDefShip:public ObjectDef{
+static class ObjectDefShip:public ObjectDef{
 public:
 	ObjectDefShip(){
 		npts_=4;
@@ -238,10 +241,11 @@ public:
 //	}
 //};
 
-extern "C" void tsk4(){
+extern "C" [[noreturn]] void tsk4(){
 	// init statics
 	default_object_def_rectangle=ObjectDefRectangle();
 	default_object_def_ship=ObjectDefShip();
+
 	const unsigned n=sizeof(objects_free_indexes)/sizeof(unsigned short);
 //	out.printer().p_hex_32b(n).spc().p_hex_16b(objects_free_indexes_pos).spc();
 	for(unsigned short i=0;i<n;i++){

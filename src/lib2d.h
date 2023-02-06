@@ -79,9 +79,9 @@ using Scale=float;
 using Count=int;
 
 class Matrix2D{
-	float	xx=1,xy=0,xt=0,
-			yx=0,yy=1,yt=0,
-			ux=0,uy=0,id=1;
+	float xx=1,xy=0,xt=0;
+	float yx=0,yy=1,yt=0;
+	float ux=0,uy=0,id=1;
 public:
 //	inline auto set_identity(){
 //		xx=1;yx=0;tx=0;
@@ -109,8 +109,8 @@ public:
 		const float cs=scale*fcos;
 		const float sn=scale*fsin;
 		xx=cs;xy=-sn;xt=translation.x;
-		yx=sn,yy= cs,yt=translation.y;
-		ux= 0,uy=  0,id=1;
+		yx=sn;yy= cs;yt=translation.y;
+		ux= 0;uy=  0;id=1;
 	}
 	auto transform(const Vector2D src[],Vector2D dst[],const unsigned n)const{
 		for(unsigned i=0;i<n;i++){

@@ -1,7 +1,7 @@
 #pragma once
 #include "lib2d.h"
 
-using namespace osca;
+namespace osca{
 
 using Point2D=Vector2D;
 
@@ -127,3 +127,5 @@ private:
 		return true;
 	}
 };
+
+}// end namespace
