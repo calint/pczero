@@ -4,8 +4,8 @@
 #include "libge.h"
 
 using namespace osca;
-static char*freemem_ptr=reinterpret_cast<char*>(0x10'0000);
-static char*freemem_start=reinterpret_cast<char*>(0x10'0000);;
+static char*freemem_ptr=reinterpret_cast<char*>(0x10'0000); // head memory at 1MB
+static char*freemem_start=reinterpret_cast<char*>(0x10'0000);
 //static char*freemem_ptr=reinterpret_cast<char*>(0xa0000+320); // put heap on screen
 
 // called by C++ to allocate and free memory
