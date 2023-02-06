@@ -32,6 +32,8 @@ CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fa
 #Ubuntu clang version 15.0.6
 #Target: x86_64-pc-linux-gnu
 #CC=clang++ -std=c++2a
+##CW=-Weverything
+##CW+=-Wno-c++98-compat
 #CW=-pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wmissing-declarations -Wmissing-include-dirs -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
 #CW+=-Wfatal-errors
 #CW+=-Wpadded
@@ -61,7 +63,7 @@ build:
 	@echo
 #	clang-tidy src/main.cc
 #	@echo
-	# to be able to build in eclipse with same link.ld change directory to bin
+	@# to be able to build in eclipse with same link.ld change directory to bin
 	cd bin && ld -o $(IMAGE) $(LF) && chmod -x $(IMAGE)
 	@echo
 	
