@@ -39,6 +39,10 @@ extern "C" void osca_init(){
 	*(int*)(0xa0000)=0x02;
 	// initiate statics
 	out=PrinterToVga();
+	// write heap memory default
+	const SizeBytes clear_n=320*100; // heap memory size
+	const Address heap_address=Address(freemem_start);
+	pz_memset(heap_address,0x12,clear_n);
 }
 
 
@@ -266,7 +270,6 @@ extern "C" void tsk4(){
 	const Address clear_start=db.data().pointer().offset(50*320).address();
 	const SizeBytes clear_n=320*100;
 	const Address heap_address=Address(freemem_start);
-
 	// start task
 	while(true){
 //		pz_memset(clear_start,0x11,clear_n);
