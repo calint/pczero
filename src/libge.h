@@ -7,8 +7,8 @@ using Point2D=Vector2D;
 
 class ObjectDef{
 public:
-	Point2D*pts=nullptr;
-	unsigned pts_count=0;
+	Point2D*pts_=nullptr;
+	unsigned npts_=0; // number of points
 };
 
 static void dot(const Bitmap&bmp,const float x,const float y,const unsigned char color){
@@ -28,7 +28,7 @@ auto objects_can_alloc()->bool{
 }
 class Object{
 protected:
-	Point2D pos_; // ? pos,rot,dpos,drot not cache friendly
+	Point2D pos_; // ? pos,dpos,agl,dagle not cache friendly
 	Point2D dpos_;
 	Angle agl_;
 	Angle dagl_;
@@ -41,7 +41,7 @@ protected:
 	Scale Mmw_scl_;
 	unsigned char color_;
 	unsigned char padding1=0;
-	unsigned short slot=0;
+	unsigned short slot_=0; // index in objects pointer array
 public:
 	Object()=delete;
 	Object(const Object&)=delete; // copy ctor
@@ -50,12 +50,12 @@ public:
 //	Object&operator=(Object&&)=delete; // move assignment
 	Object(const ObjectDef&def,const Scale scl,const Point2D&pos,const Angle rad,const unsigned char color):
 		pos_{pos},
-		dpos_{0},
+		dpos_{0,0},
 		agl_{rad},
 		dagl_{0},
 		scl_{scl},
 		def_{def},
-		pts_wld_{new Point2D[def.pts_count]},
+		pts_wld_{new Point2D[def.npts_]},
 		Mmw_{},
 		Mmw_pos_{0,0},
 		Mmw_agl_{0},
@@ -67,16 +67,16 @@ public:
 			out.printer().p("e ");
 			return;
 		}
-		slot=objects_free_indexes[objects_free_indexes_pos];
-		objects[slot]=this;
+		slot_=objects_free_indexes[objects_free_indexes_pos];
+		objects[slot_]=this;
 		objects_free_indexes_pos--;
 	}
 	virtual~Object(){
 //		out.printer().p("d=").p_hex_16b(slot).p(' ');
-		objects[slot]=nullptr;
+		objects[slot_]=nullptr;
 		objects_free_indexes_pos++;
 //		out.printer().p("ofip=").p_hex_16b(objects_free_indexes_pos).p(' ');
-		objects_free_indexes[objects_free_indexes_pos]=slot;
+		objects_free_indexes[objects_free_indexes_pos]=slot_;
 		delete[]pts_wld_;
 	}
 	inline auto def()const->const ObjectDef&{return def_;}
@@ -103,11 +103,11 @@ public:
 	virtual auto render(Bitmap&dsp)->void{
 		if(refresh_Mmw_if_invalid()){
 			// matrix is refreshed
-			Mmw_.transform(def_.pts,pts_wld_,def_.pts_count);
+			Mmw_.transform(def_.pts_,pts_wld_,def_.npts_);
 		}
 		// check if model to world matrix needs update
 		Point2D*ptr=pts_wld_;
-		for(unsigned i=0;i<def_.pts_count;i++){
+		for(unsigned i=0;i<def_.npts_;i++){
 			dot(dsp,ptr->x,ptr->y,color_);
 			ptr++;
 		}

@@ -169,8 +169,8 @@ extern "C" void tsk3(){
 class ObjectDefRectangle:public ObjectDef{
 public:
 	ObjectDefRectangle(){
-		pts_count=5;
-		pts=new Point2D[pts_count]{
+		npts_=5;
+		pts_=new Point2D[npts_]{
 			{ 0, 0},
 			{-2,-1},
 			{ 2,-1},
@@ -183,8 +183,8 @@ public:
 class ObjectDefShip:public ObjectDef{
 public:
 	ObjectDefShip(){
-		pts_count=4;
-		pts=new Point2D[pts_count]{
+		npts_=4;
+		pts_=new Point2D[npts_]{
 			{ 0, 0},
 			{ 0,-1},
 			{-1,.5},
