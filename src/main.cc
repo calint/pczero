@@ -8,6 +8,7 @@ using namespace osca;
 static class Heap{
 	char*ptr_; // head memory at 1MB
 	void*start_;
+	SizeBytes size_=320*100;
 public:
 	Heap():
 		ptr_{reinterpret_cast<char*>(0x10'0000)},start_{reinterpret_cast<void*>(0x10'0000)}
@@ -18,6 +19,7 @@ public:
 		ptr_+=size;
 		return reinterpret_cast<void*>(p);
 	}
+	inline constexpr SizeBytes size()const{return size_;}
 }heap;
 
 void operator delete(void*ptr,unsigned size)noexcept;
@@ -51,9 +53,7 @@ extern "C" void osca_init(){
 	heap=Heap();
 
 	// write heap memory default
-	const SizeBytes clear_n=320*100; // heap memory size
-	const Address heap_address=Address(heap.address());
-	pz_memset(heap_address,0x12,clear_n);
+	pz_memset(Address(heap.address()),0x12,heap.size());
 }
 
 
