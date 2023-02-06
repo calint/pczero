@@ -46,9 +46,9 @@ extern "C" void osca_init(){
 	*reinterpret_cast<int*>(0xa0000)=0x02;
 
 	// initiate statics
+	out=PrinterToVga();
 	Object::init_statics();
 	heap=Heap();
-	out=PrinterToVga();
 
 	// write heap memory default
 	const SizeBytes clear_n=320*100; // heap memory size
