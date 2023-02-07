@@ -5,26 +5,20 @@
 
 using namespace osca;
 
-class Heap{ // ? make to static only class
-	Data d_;
-	char*ptr_;
-	char*ptr_lim_;
+class Heap{
+	static Data d_;
+	static char*ptr_;
+	static char*ptr_lim_;
 public:
-	Heap(Data d):
-		d_{d},
-		ptr_{reinterpret_cast<char*>(d.address())},
-		ptr_lim_{ptr_+d.size()}
-	{}
-	constexpr Heap&operator=(Heap&&other){
-		if(this==&other)
-			return*this;
-		d_=other.d_;
-		ptr_=other.ptr_;
-		ptr_lim_=other.ptr_lim_;
-		return*this;
+	static auto init_statics(const Data&d){
+		d_=d;
+		ptr_=reinterpret_cast<char*>(d.address());
+		ptr_lim_=ptr_+d.size();
 	}
-	constexpr inline const Data&data()const{return d_;}
-	inline void*alloc(const unsigned size){
+	static inline const Data&data(){
+		return d_;
+	}
+	static inline auto alloc(const unsigned size)->void*{
 		char*p=ptr_;
 		ptr_+=size;
 		if(ptr_>ptr_lim_){
@@ -32,21 +26,23 @@ public:
 		}
 		return reinterpret_cast<void*>(p);
 	}
-	inline void*alloc_physics_states(const unsigned count){
-		return nullptr;
-	}
-	auto clear_buffer(unsigned char b){
+	static auto clear_buffer(unsigned char b)->void{
 		pz_memset(d_.address(),b,d_.size());
 	}
 };
-static Heap heap_main{{reinterpret_cast<char*>(0x10'0000),320*100}};
+Data Heap::d_={nullptr,0};
+char*Heap::ptr_;
+char*Heap::ptr_lim_;
+
 
 void operator delete(void*ptr,unsigned size)noexcept;
 void operator delete[](void*ptr,unsigned size)noexcept;
 
 // called by C++ to allocate and free memory
-void*operator new[](unsigned count){return heap_main.alloc(count);}
-void*operator new(unsigned count){return heap_main.alloc(count);}
+//void*operator new[](unsigned count){return heap_main.alloc(count);}
+//void*operator new(unsigned count){return heap_main.alloc(count);}
+void*operator new[](unsigned count){return Heap::alloc(count);}
+void*operator new(unsigned count){return Heap::alloc(count);}
 
 void operator delete(void*ptr)noexcept{
 //	out.printer().p("D:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
@@ -66,21 +62,18 @@ extern "C" void osca_init(){
 	// green dot on screen (top left)
 	*reinterpret_cast<int*>(0xa0000)=0x02;
 
+	// clear 128 KB starting at 1 MB with 0x20
+	pz_memset(Address(0x10'0000),0x11,0x20'000);
+
 	// initiate statics
 	vga13h=Vga13h();
 	err=PrinterToVga();
 	err.pos({1,1}).fg(4);
 	out=PrinterToVga();
 	out.pos({1,2}).fg(2);
-
-	// clear 128 KB starting at 1 MB with 0x20
-	pz_memset(Address(0x10'0000),0x11,0x20'000);
-
-	heap_main=Heap({Address(0x10'0000),320*50});
-	heap_main.clear_buffer(0x12);
-
+	Heap::init_statics({Address(0x10'0000),320*50});
+	Heap::clear_buffer(0x12);
 	Object::init_statics();
-
 	PhysicsState::init_statics(Address(0x11'0000),Object::all_len);
 	PhysicsState::clear_buffer(1);
 }
@@ -298,7 +291,8 @@ extern "C" [[noreturn]] void tsk4(){
 	Degrees deg=0;
 	Matrix2D R;
 
-	const Address heap_address=heap_main.data().address();
+//	const Address heap_address=heap_main.data().address();
+	const Address heap_address=Heap::data().address();
 	const Address heap_disp_at_addr=db.data().pointer().offset(50*320).address();
 	const SizeBytes heap_disp_size=320*50;
 

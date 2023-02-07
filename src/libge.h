@@ -43,7 +43,11 @@ public:
 		pos_.inc_by(dpos_);
 		agl_+=dagl_;
 	}
+
 	//-----------------------------------------------------------
+	//-----------------------------------------------------------
+	//-----------------------------------------------------------
+
 	static PhysicsState*mem_start;
 	static PhysicsState*next_free;
 	static PhysicsState*mem_limit;
@@ -125,9 +129,9 @@ protected:
 	unsigned char padding1=0;
 	unsigned short slot_=0; // index in objects pointer array
 public:
-	constexpr Object()=delete;
+//	constexpr Object()=delete;
 	constexpr Object(const Object&)=delete; // copy ctor
-	constexpr Object(Object&&)=delete; // move ctor
+//	constexpr Object(Object&&)=delete; // move ctor
 	constexpr Object&operator=(const Object&)=delete; // copy assignment
 //	Object&operator=(Object&&)=delete; // move assignment
 	Object(const ObjectDef&def,const Scale scl,const Point2D&pos,const Angle rad,const unsigned char color):
