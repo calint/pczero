@@ -176,10 +176,9 @@ public:
 	}
 	constexpr virtual auto render(const Bitmap&dsp)->void{
 		if(refresh_Mmw_if_invalid()){
-			// matrix has been updated, update cache points
+			// matrix has been updated, update cached points
 			Mmw_.transform(def_.pts_,pts_wld_,def_.npts_);
 		}
-		// check if model to world matrix needs update
 		Point2D*ptr=pts_wld_;
 		for(unsigned i=0;i<def_.npts_;i++){
 			dot(dsp,ptr->x,ptr->y,color_);
@@ -191,15 +190,15 @@ private:
 		if(phy().agl_==Mmw_agl_&&phy().pos_==Mmw_pos_&&scl_==Mmw_scl_)
 			return false;
 		Mmw_.set_transform(scl_,phy().agl_,phy().pos_);
+		Mmw_scl_=scl_;
 		Mmw_agl_=phy().agl_;
 		Mmw_pos_=phy().pos_;
-		Mmw_scl_=scl_;
 		return true;
 	}
 };
 Object*Object::all[all_len];
-unsigned short Object::freeSlots_ix=all_len-1;
 unsigned short Object::freeSlots[all_len];
+unsigned short Object::freeSlots_ix=all_len-1;
 auto Object::update_all(){
 	static Object*deleted[all_len]; // ? temporary impl
 	int deleted_ix=0;
