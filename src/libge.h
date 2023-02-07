@@ -55,7 +55,7 @@ public:
 	static auto alloc()->PhysicsState*{
 		// check buffer overrun
 		if(next_free==mem_limit){
-			out.printer().p("PhysicsState:e1");
+			err.printer().p("PhysicsState:e1");
 		}
 		PhysicsState*p=next_free;
 		next_free++;
@@ -149,7 +149,7 @@ public:
 		phy_->obj_=this;
 
 		if(!freeSlots_ix){
-			out.printer().pos(1,1).p("out of free slots");
+			err.printer().pos(1,1).p("out of free slots");
 			return;
 		}
 		slot_=freeSlots[freeSlots_ix];

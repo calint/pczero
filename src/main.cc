@@ -28,14 +28,14 @@ public:
 		char*p=ptr_;
 		ptr_+=size;
 		if(ptr_>ptr_lim_){
-			out.printer().pos(1,1).p("heap overrun");// ? hlt
+			err.printer().pos(1,1).p("heap overrun");// ? hlt
 		}
 		return reinterpret_cast<void*>(p);
 	}
 	inline void*alloc_physics_states(const unsigned count){
 		return nullptr;
 	}
-	auto clear(unsigned char b){
+	auto clear_buffer(unsigned char b){
 		pz_memset(d_.address(),b,d_.size());
 	}
 };
@@ -67,19 +67,14 @@ extern "C" void osca_init(){
 	*reinterpret_cast<int*>(0xa0000)=0x02;
 
 	// initiate statics
-	out=PrinterToVga();
+	err=PrinterToVga();
+	heap_main=Heap({reinterpret_cast<char*>(0x10'0000),320*50});
+	heap_main.clear_buffer(0x12);
+
 	Object::init_statics();
+
 	PhysicsState::init_statics(Address(0x11'0000),Object::all_len);
 	PhysicsState::clear_buffer(1);
-
-	heap_main=Heap({reinterpret_cast<char*>(0x10'0000),320*50});
-	// write heap memory default
-	heap_main.clear(0x12);
-	pz_memset(heap_main.data().address(),0x12,heap_main.data().size());
-	// write PhysicsState memory default
-//	pz_memset(Address(PhysicsState::mem_start),0x1,SizeBytes(320*50));
-
-//	out.printer().p_hex_32b(sizeof(PhysicsState));
 }
 
 
@@ -339,7 +334,7 @@ extern "C" [[noreturn]] void tsk4(){
 					shp->phy().set_dangle(deg_to_rad(-5));
 					shp->phy().set_dpos({1,1});
 				}else{
-					out.printer().pos(1,1).p("out of free slots");
+					err.printer().pos(1,1).p("out of free slots");
 				}
 			}
 			if(shp){

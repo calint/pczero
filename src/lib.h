@@ -475,8 +475,8 @@ public:
 };
 
 // used to print at row 1 column 1. initiated in main.cc::osca_init()
-extern PrinterToVga out;
-PrinterToVga out;
+extern PrinterToVga err;
+PrinterToVga err;
 
 using PositionPx=CoordsPx;
 using Position=Coords;
