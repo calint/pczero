@@ -5,29 +5,42 @@
 
 using namespace osca;
 
-static class Heap{
-	char*ptr_; // head memory at 1MB
-	void*start_;
-	SizeBytes size_=320*100;
+class Heap{
+	Data d_;
+	char*ptr_;
+	char*ptr_lim_;
 public:
-	Heap():
-		ptr_{reinterpret_cast<char*>(0x10'0000)},start_{reinterpret_cast<void*>(0x10'0000)}
+	Heap(Data d):
+		d_{d},
+		ptr_{reinterpret_cast<char*>(d.address())},
+		ptr_lim_{ptr_+d.size()}
 	{}
-	Address address()const{return start_;}
+	constexpr Heap&operator=(Heap&&other){
+		if(this==&other)
+			return*this;
+		d_=other.d_;
+		ptr_=other.ptr_;
+		ptr_lim_=other.ptr_lim_;
+		return*this;
+	}
+	constexpr inline const Data&data()const{return d_;}
 	inline void*alloc(const unsigned size){
 		char*p=ptr_;
 		ptr_+=size;
+		if(ptr_>ptr_lim_){
+			out.printer().p("heap overrun ");// ? hlt
+		}
 		return reinterpret_cast<void*>(p);
 	}
-	inline constexpr SizeBytes size()const{return size_;}
-}heap;
+};
+static Heap heap_main{{reinterpret_cast<char*>(0x10'0000),320*100}};
 
 void operator delete(void*ptr,unsigned size)noexcept;
 void operator delete[](void*ptr,unsigned size)noexcept;
 
 // called by C++ to allocate and free memory
-void*operator new[](unsigned count){return heap.alloc(count);}
-void*operator new(unsigned count){return heap.alloc(count);}
+void*operator new[](unsigned count){return heap_main.alloc(count);}
+void*operator new(unsigned count){return heap_main.alloc(count);}
 
 void operator delete(void*ptr)noexcept{
 //	out.printer().p("D:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
@@ -50,10 +63,10 @@ extern "C" void osca_init(){
 	// initiate statics
 	out=PrinterToVga();
 	Object::init_statics();
-	heap=Heap();
+	heap_main=Heap({reinterpret_cast<char*>(0x10'0000),320*50});
 
 	// write heap memory default
-	pz_memset(Address(heap.address()),0x12,heap.size());
+	pz_memset(heap_main.data().address(),0x12,heap_main.data().size());
 }
 
 
@@ -211,19 +224,19 @@ public:
 	{}
 	constexpr virtual auto update()->void override{
 		Object::update();
-		if(pos_.x>300){
+		if(phy_.pos().x>300){
 			delete this;
 			return;
 		}
-		if(pos_.x<20){
+		if(phy_.pos().x<20){
 			delete this;
 			return;
 		}
-		if(pos_.y>130){
+		if(phy_.pos().y>130){
 			delete this;
 			return;
 		}
-		if(pos_.y<70){
+		if(phy_.pos().y<70){
 			delete this;
 			return;
 		}
@@ -238,23 +251,23 @@ public:
 
 	constexpr virtual auto update()->void override{
 		Object::update();
-		if(pos_.x>300){
-			set_dpos({-dpos_.x,dpos_.y});
-		}else if(pos_.x<20){
-			set_dpos({-dpos_.x,dpos_.y});
+		if(phy_.pos().x>300){
+			phy_.set_dpos({-phy_.dpos().x,phy_.dpos().y});
+		}else if(phy_.pos().x<20){
+			phy_.set_dpos({-phy_.dpos().x,phy_.dpos().y});
 		}
-		if(pos_.y>130){
-			set_dpos({dpos_.x,-dpos_.y});
-		}else if(pos_.y<70){
-			set_dpos({dpos_.x,-dpos_.y});
+		if(phy_.pos().y>130){
+			phy_.set_dpos({phy_.dpos().x,-phy_.dpos().y});
+		}else if(phy_.pos().y<70){
+			phy_.set_dpos({phy_.dpos().x,-phy_.dpos().y});
 		}
 	}
 
 	auto fire(){
 		Bullet*b=new Bullet;
-		b->set_pos(pos_);
-		b->set_dpos(forward_vector().normalize().scale(3));
-		b->set_angle(agl_);
+		b->phy().set_pos(phy().pos());
+		b->phy().set_dpos(forward_vector().normalize().scale(3));
+		b->phy().set_angle(phy().agl_);
 	}
 };
 
@@ -275,18 +288,18 @@ extern "C" [[noreturn]] void tsk4(){
 	Matrix2D R;
 	const Address clear_start=db.data().pointer().offset(50*320).address();
 	const SizeBytes clear_n=320*100;
-	const Address heap_address=heap.address();
+	const Address heap_address=heap_main.data().address();
 	//	out.printer().p_hex_32b(sizeof(unsigned long)).spc().p_hex_32b(sizeof(unsigned));
 	Ship*shp=new Ship;
-	shp->set_dangle(deg_to_rad(-5));
-	shp->set_dpos({1,1});
+	shp->phy().set_dangle(deg_to_rad(-5));
+	shp->phy().set_dpos({1,1});
 
 	Ship*shp2=new Ship;
-	shp2->set_dangle(deg_to_rad(7));
-	shp2->set_dpos({-1,0});
+	shp2->phy().set_dangle(deg_to_rad(7));
+	shp2->phy().set_dpos({-1,0});
 
 	Object*wall=new Object{default_object_def_rectangle,10,{100,100},0,4};
-	wall->set_dangle(deg_to_rad(5));
+	wall->phy().set_dangle(deg_to_rad(5));
 
 //	Ship*shp3=new Ship;
 //	shp3->set_pos({160,100});
@@ -303,26 +316,26 @@ extern "C" [[noreturn]] void tsk4(){
 			if(ch=='c'){
 				if(Object::hasFreeSlot()){
 					shp=new Ship;
-					shp->set_dangle(deg_to_rad(-5));
-					shp->set_dpos({1,1});
+					shp->phy().set_dangle(deg_to_rad(-5));
+					shp->phy().set_dpos({1,1});
 				}else{
 					out.printer().p("e ");
 				}
 			}
 			if(shp){
-				const Point2D&dp=shp->dpos();
+				const Point2D&dp=shp->phy().dpos();
 				switch(ch){
 				case'w':
-					shp->set_dpos({dp.x,-1});
+					shp->phy().set_dpos({dp.x,-1});
 					break;
 				case'a':
-					shp->set_dpos({-1,dp.y});
+					shp->phy().set_dpos({-1,dp.y});
 					break;
 				case's':
-					shp->set_dpos({dp.x,1});
+					shp->phy().set_dpos({dp.x,1});
 					break;
 				case'd':
-					shp->set_dpos({1,dp.y});
+					shp->phy().set_dpos({1,dp.y});
 					break;
 				case'x':
 					delete shp;

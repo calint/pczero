@@ -75,7 +75,7 @@ print:
 	@echo "wc source | gzip"
 	@cat $(FILES)|gzip|wc
 	@echo
-	@if [ $(shell stat -c "%s" bin/pczero.img) -ge 32768 ]; then echo '!!! IMAGE FILE GREATER THAN OSCA LOADS'; echo; fi
+	@if [ $(shell stat -c "%s" bin/pczero.img) -ge 66048 ]; then echo '!!!';echo '!!! IMAGE FILE GREATER THAN OSCA LOADS';echo '!!!';echo; fi
 	
 clean:
 	@rm -fr bin/*

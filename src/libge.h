@@ -17,11 +17,30 @@ static constexpr void dot(const Bitmap&bmp,const float x,const float y,const uns
 	bmp.pointer_offset({xi,yi}).write(color);
 }
 
+class PhysicsState{
+public:
+	Point2D pos_; // ? [pos,dpos,agl,dagle] object size trashes cache when doing update
+	Point2D dpos_;
+	Angle agl_;
+	Angle dagl_;
+	inline constexpr auto pos()const->const Point2D&{return pos_;}
+	inline constexpr auto dpos()const->const Point2D&{return dpos_;}
+	inline constexpr auto angle()const->Angle{return agl_;}
+	inline constexpr auto set_pos(const Point2D&p){pos_=p;}
+	inline constexpr auto set_dpos(const Point2D&p){dpos_=p;}
+	inline constexpr auto set_angle(const Angle rad){agl_=rad;}
+	inline constexpr auto set_dangle(const Angle rad){dagl_=rad;}
+	constexpr inline auto update()->void{
+		pos_.inc_by(dpos_);
+		agl_+=dagl_;
+	}
+};
+
 class Object;
 
 class Object{
 public:
-	constexpr static unsigned all_len=8; // maximum number of objects
+	constexpr static unsigned all_len=64; // maximum number of objects
 	static Object*all[]; // array of pointers to allocated objects
 	static unsigned short freeSlots[all_len]; // free indexes in all[]
 	static unsigned short freeSlots_pos; // index in freeSlots[] of next free slot
@@ -37,10 +56,7 @@ public:
 	static auto all_update();
 	static auto all_render(Bitmap&bmp);
 protected:
-	Point2D pos_; // ? [pos,dpos,agl,dagle] object size trashes cache when doing update
-	Point2D dpos_;
-	Angle agl_;
-	Angle dagl_;
+	PhysicsState phy_;
 	Scale scl_;
 	const ObjectDef&def_;
 	Point2D*pts_wld_; // transformed model to world cache
@@ -58,10 +74,7 @@ public:
 	constexpr Object&operator=(const Object&)=delete; // copy assignment
 //	Object&operator=(Object&&)=delete; // move assignment
 	Object(const ObjectDef&def,const Scale scl,const Point2D&pos,const Angle rad,const unsigned char color):
-		pos_{pos},
-		dpos_{0,0},
-		agl_{rad},
-		dagl_{0},
+		phy_{{pos},{0,0},rad,0},
 		scl_{scl},
 		def_{def},
 		pts_wld_{new Point2D[def.npts_]},
@@ -87,15 +100,9 @@ public:
 		delete[]pts_wld_;
 //		out.printer().p_hex_16b(freeSlots_pos).spc();
 	}
-	inline constexpr auto def()const->const ObjectDef&{return def_;}
-	inline constexpr auto pos()const->const Point2D&{return pos_;}
-	inline constexpr auto dpos()const->const Point2D&{return dpos_;}
-	inline constexpr auto angle()const->Angle{return agl_;}
+	inline constexpr auto phy()->PhysicsState&{return phy_;}
 	inline constexpr auto scale()const->Scale{return scl_;}
-	inline constexpr auto set_pos(const Point2D&p){pos_=p;}
-	inline constexpr auto set_dpos(const Point2D&p){dpos_=p;}
-	inline constexpr auto set_angle(const Angle rad){agl_=rad;}
-	inline constexpr auto set_dangle(const Angle rad){dagl_=rad;}
+	inline constexpr auto def()const->const ObjectDef&{return def_;}
 	constexpr auto forward_vector()->Vector2D{
 		refresh_Mmw_if_invalid();
 		return Mmw_.axis_y().negate();
@@ -105,8 +112,7 @@ public:
 //		delete this;
 	}
 	constexpr virtual auto update()->void{
-		pos_.inc_by(dpos_);
-		agl_+=dagl_;
+		phy_.update();
 	}
 	constexpr virtual auto render(const Bitmap&dsp)->void{
 		if(refresh_Mmw_if_invalid()){
@@ -125,12 +131,12 @@ public:
 	}
 private:
 	constexpr auto refresh_Mmw_if_invalid()->bool{
-		if(agl_==Mmw_agl_&&pos_==Mmw_pos_&&scl_==Mmw_scl_)
+		if(phy_.agl_==Mmw_agl_&&phy_.pos_==Mmw_pos_&&scl_==Mmw_scl_)
 			return false;
 //			err.printer().p("um:").p_hex_32b(reinterpret_cast<unsigned>(this)).p(' ');
-		Mmw_.set_transform(scl_,agl_,pos_);
-		Mmw_agl_=agl_;
-		Mmw_pos_=pos_;
+		Mmw_.set_transform(scl_,phy_.agl_,phy_.pos_);
+		Mmw_agl_=phy_.agl_;
+		Mmw_pos_=phy_.pos_;
 		Mmw_scl_=scl_;
 		return true;
 	}
