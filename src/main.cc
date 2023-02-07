@@ -343,7 +343,6 @@ extern "C" [[noreturn]] void tsk4(){
 				}
 			}
 			if(shp){
-				const Point2D&dp=shp->phy().dpos();
 				switch(ch){
 				case'w':
 					shp->phy().set_dpos(shp->forward_vector().scale(1));
