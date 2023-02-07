@@ -7,8 +7,8 @@ using namespace osca;
 
 class Heap{
 	static Data d_;
-	static char*ptr_;
-	static char*ptr_lim_;
+	static char*ptr_; // pointer to free memory
+	static char*ptr_lim_; // limit of buffer
 public:
 	static auto init_statics(const Data&d){
 		d_=d;
@@ -26,9 +26,7 @@ public:
 		}
 		return reinterpret_cast<void*>(p);
 	}
-	static auto clear_buffer(unsigned char b)->void{
-		pz_memset(d_.address(),b,d_.size());
-	}
+	static inline auto clear_buffer(unsigned char b)->void{d_.clear(b);}
 };
 Data Heap::d_;
 char*Heap::ptr_;

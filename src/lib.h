@@ -79,6 +79,7 @@ public:
 	inline constexpr auto pointer()const->Pointer{return{a_};}
 	inline auto to(const Data&d)const{pz_memcpy(d.address(),a_,s_);}
 	inline auto to(const Data&d,const SizeBytes sb)const{pz_memcpy(d.address(),a_,sb);}
+	inline auto clear(unsigned char byte=0){pz_memset(a_,byte,s_);}
 };
 
 template<typename T>
