@@ -5,7 +5,7 @@
 
 using namespace osca;
 
-class Heap{
+class Heap{ // ? make to static only class
 	Data d_;
 	char*ptr_;
 	char*ptr_lim_;
@@ -68,7 +68,12 @@ extern "C" void osca_init(){
 
 	// initiate statics
 	err=PrinterToVga();
+	err.printer().pos(1,1).fg(4);
 	out=PrinterToVga();
+	out.printer().pos(2,1).fg(2);
+
+	// clear 128 KB starting at 1 MB
+	pz_memset(Address(0x10'0000),0x11,0x20'000);
 
 	heap_main=Heap({reinterpret_cast<char*>(0x10'0000),320*50});
 	heap_main.clear_buffer(0x12);
@@ -303,7 +308,7 @@ extern "C" [[noreturn]] void tsk4(){
 	const SizeBytes physt_disp_size=320*50;
 
 	Ship*shp=new Ship;
-	shp->phy().set_dangle(deg_to_rad(-5));
+//	shp->phy().set_dangle(deg_to_rad(-5));
 	shp->phy().set_dpos({1,1});
 
 
@@ -341,16 +346,16 @@ extern "C" [[noreturn]] void tsk4(){
 				const Point2D&dp=shp->phy().dpos();
 				switch(ch){
 				case'w':
-					shp->phy().set_dpos({dp.x,-1});
+					shp->phy().set_dpos(shp->forward_vector().scale(4));
 					break;
 				case'a':
-					shp->phy().set_dpos({-1,dp.y});
+					shp->phy().agl_-=deg_to_rad(5);
 					break;
 				case's':
-					shp->phy().set_dpos({dp.x,1});
+					shp->phy().set_dpos({0,1});
 					break;
 				case'd':
-					shp->phy().set_dpos({1,dp.y});
+					shp->phy().agl_+=deg_to_rad(5);
 					break;
 				case'x':
 					delete shp;
