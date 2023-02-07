@@ -85,7 +85,7 @@ public:
 		}
 	}
 	static auto clear_buffer(unsigned char b){
-		const Address from=reinterpret_cast<void*>(mem_start);
+		const Address from=Address(mem_start);
 		const SizeBytes n=reinterpret_cast<SizeBytes>(mem_limit)-reinterpret_cast<SizeBytes>(mem_start);
 		pz_memset(from,b,n);
 	}
