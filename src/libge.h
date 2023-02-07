@@ -18,6 +18,7 @@ static constexpr void dot(const Bitmap&bmp,const float x,const float y,const uns
 }
 
 class Object;
+// physics states are kept in their own buffer for better CPU cache utilization at update
 class PhysicsState{
 public:
 	Point2D pos_;
@@ -25,12 +26,13 @@ public:
 	Point2D ddpos_;
 	Angle agl_;
 	Angle dagl_;
-	Object*obj_;
+	Object*obj_; // pointer to the object to which this physics state belongs to
 
 	inline constexpr auto pos()const->const Point2D&{return pos_;}
 	inline constexpr auto dpos()const->const Point2D&{return dpos_;}
 	inline constexpr auto ddpos()const->const Point2D&{return ddpos_;}
 	inline constexpr auto angle()const->Angle{return agl_;}
+	inline constexpr auto dangle()const->Angle{return dagl_;}
 	inline constexpr auto set_pos(const Point2D&p){pos_=p;}
 	inline constexpr auto set_dpos(const Point2D&p){dpos_=p;}
 	inline constexpr auto set_ddpos(const Point2D&p){ddpos_=p;}
@@ -41,18 +43,20 @@ public:
 		pos_.inc_by(dpos_);
 		agl_+=dagl_;
 	}
-
 	//-----------------------------------------------------------
 	static PhysicsState*mem_start;
 	static PhysicsState*next_free;
 	static PhysicsState*mem_limit;
-	static auto init_statics(){
-		mem_start=reinterpret_cast<PhysicsState*>(0x11'0000);
+	static auto init_statics(const Address bufferStart,const unsigned instancesCount){
+		mem_start=reinterpret_cast<PhysicsState*>(bufferStart);
 		next_free=mem_start;
-		mem_limit=reinterpret_cast<PhysicsState*>(mem_start+128);
+		mem_limit=reinterpret_cast<PhysicsState*>(mem_start+instancesCount);
 	}
 	static auto alloc()->PhysicsState*{
-		// ? check overrun
+		// check buffer overrun
+		if(next_free==mem_limit){
+			out.printer().p("PhysicsState:e1");
+		}
 		PhysicsState*p=next_free;
 		next_free++;
 		return p;
@@ -62,8 +66,13 @@ public:
 		// decrement next_free to point to last state in heap
 		// copy last state to the freed area
 		// return pointer to object that needs to update phy_ pointer
+
+		// check buffer underflow
+//		if(next_free==mem_start){
+//			out.printer().p("PhysicsState:e2");
+//		}
 		next_free--;
-		pz_memset(next_free,2,sizeof(PhysicsState)); // debugging
+		pz_memset(next_free,2,sizeof(PhysicsState)); // ? debugging
 		Object*o=next_free->obj_;
 		*phy=*next_free;
 		return o;
@@ -75,11 +84,9 @@ public:
 			ptr++;
 		}
 	}
-	static auto clear(unsigned char b){
+	static auto clear_buffer(unsigned char b){
 		const Address from=reinterpret_cast<void*>(mem_start);
 		const SizeBytes n=reinterpret_cast<SizeBytes>(mem_limit)-reinterpret_cast<SizeBytes>(mem_start);
-//		const unsigned nu=static_cast<unsigned>(n);
-//		out.printer().p_hex_32b(nu);
 		pz_memset(from,b,n);
 	}
 };
@@ -92,27 +99,28 @@ public:
 	constexpr static unsigned all_len=64; // maximum number of objects
 	static Object*all[]; // array of pointers to allocated objects
 	static unsigned short freeSlots[all_len]; // free indexes in all[]
-	static unsigned short freeSlots_pos; // index in freeSlots[] of next free slot
-	static inline auto hasFreeSlot()->bool{return freeSlots_pos!=0;}
+	static unsigned short freeSlots_ix; // index in freeSlots[] of next free slot
+	static inline auto hasFreeSlot()->bool{return freeSlots_ix!=0;}
 	static auto init_statics(){
 		const unsigned n=sizeof(freeSlots)/sizeof(unsigned short);
 	//	out.printer().p_hex_32b(n).spc().p_hex_16b(objects_free_indexes_pos).spc();
 		for(unsigned short i=0;i<n;i++){
 			freeSlots[i]=i;
 		}
-		freeSlots_pos=all_len-1;
+		freeSlots_ix=all_len-1;
 	}
 	static auto all_update();
 	static auto all_render(Bitmap&bmp);
 protected:
-	PhysicsState*phy_;
+	PhysicsState*phy_; // kept in own buffer of states for better CPU cache utilization at update
+	                   // may change between frames (when objects are deleted)
 	Scale scl_;
 	const ObjectDef&def_;
-	Point2D*pts_wld_; // transformed model to world cache
+	Point2D*pts_wld_; // transformed model to world points cache
 	Matrix2D Mmw_; // model to world transform
-	Point2D Mmw_pos_; // pos in transform matrix
-	Angle Mmw_agl_;
-	Scale Mmw_scl_;
+	Point2D Mmw_pos_; // current position used in transform matrix
+	Angle Mmw_agl_; // current angle used in transform matrix
+	Scale Mmw_scl_;  // current scale used in transform matrix
 	unsigned char color_;
 	unsigned char padding1=0;
 	unsigned short slot_=0; // index in objects pointer array
@@ -140,22 +148,20 @@ public:
 		phy_->dagl_=0;
 		phy_->obj_=this;
 
-		if(!freeSlots_pos){
+		if(!freeSlots_ix){
 			out.printer().pos(1,1).p("out of free slots");
 			return;
 		}
-		slot_=freeSlots[freeSlots_pos];
+		slot_=freeSlots[freeSlots_ix];
 		all[slot_]=this;
-		freeSlots_pos--;
-//		out.printer().p_hex_16b(freeSlots_pos).spc();
+		freeSlots_ix--;
 	}
 	virtual~Object(){
 		PhysicsState::free(this->phy_)->phy_=phy_;
 		all[slot_]=nullptr;
-		freeSlots_pos++;
-		freeSlots[freeSlots_pos]=slot_;
+		freeSlots_ix++;
+		freeSlots[freeSlots_ix]=slot_;
 		delete[]pts_wld_;
-//		out.printer().p_hex_16b(freeSlots_pos).spc();
 	}
 	inline constexpr auto phy()->PhysicsState&{return*phy_;}
 	inline constexpr auto scale()const->Scale{return scl_;}
@@ -168,7 +174,7 @@ public:
 	}
 	constexpr virtual auto render(const Bitmap&dsp)->void{
 		if(refresh_Mmw_if_invalid()){
-			// matrix is refreshed
+			// matrix has been updated, update cache points
 			Mmw_.transform(def_.pts_,pts_wld_,def_.npts_);
 		}
 		// check if model to world matrix needs update
@@ -185,7 +191,6 @@ private:
 	constexpr auto refresh_Mmw_if_invalid()->bool{
 		if(phy().agl_==Mmw_agl_&&phy().pos_==Mmw_pos_&&scl_==Mmw_scl_)
 			return false;
-//			err.printer().p("um:").p_hex_32b(reinterpret_cast<unsigned>(this)).p(' ');
 		Mmw_.set_transform(scl_,phy().agl_,phy().pos_);
 		Mmw_agl_=phy().agl_;
 		Mmw_pos_=phy().pos_;
@@ -194,7 +199,7 @@ private:
 	}
 };
 Object*Object::all[all_len];
-unsigned short Object::freeSlots_pos=all_len-1;
+unsigned short Object::freeSlots_ix=all_len-1;
 unsigned short Object::freeSlots[all_len];
 auto Object::all_update(){
 	for(Object*o:Object::all){

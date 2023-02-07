@@ -69,8 +69,8 @@ extern "C" void osca_init(){
 	// initiate statics
 	out=PrinterToVga();
 	Object::init_statics();
-	PhysicsState::init_statics();
-	PhysicsState::clear(1);
+	PhysicsState::init_statics(Address(0x11'0000),Object::all_len);
+	PhysicsState::clear_buffer(1);
 
 	heap_main=Heap({reinterpret_cast<char*>(0x10'0000),320*50});
 	// write heap memory default
