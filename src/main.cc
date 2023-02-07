@@ -28,9 +28,15 @@ public:
 		char*p=ptr_;
 		ptr_+=size;
 		if(ptr_>ptr_lim_){
-			out.printer().p("heap overrun ");// ? hlt
+			out.printer().pos(1,1).p("heap overrun");// ? hlt
 		}
 		return reinterpret_cast<void*>(p);
+	}
+	inline void*alloc_physics_states(const unsigned count){
+		return nullptr;
+	}
+	auto clear(unsigned char b){
+		pz_memset(d_.address(),b,d_.size());
 	}
 };
 static Heap heap_main{{reinterpret_cast<char*>(0x10'0000),320*100}};
@@ -63,10 +69,17 @@ extern "C" void osca_init(){
 	// initiate statics
 	out=PrinterToVga();
 	Object::init_statics();
-	heap_main=Heap({reinterpret_cast<char*>(0x10'0000),320*50});
+	PhysicsState::init_statics();
+	PhysicsState::clear(1);
 
+	heap_main=Heap({reinterpret_cast<char*>(0x10'0000),320*50});
 	// write heap memory default
+	heap_main.clear(0x12);
 	pz_memset(heap_main.data().address(),0x12,heap_main.data().size());
+	// write PhysicsState memory default
+//	pz_memset(Address(PhysicsState::mem_start),0x1,SizeBytes(320*50));
+
+//	out.printer().p_hex_32b(sizeof(PhysicsState));
 }
 
 
@@ -172,12 +185,13 @@ extern "C" [[noreturn]] void tsk2(){
 //		osca_yield();
 		// copy kernel to screen
 		Data src=Data(Address(0x07c00),512*3);// kernel binary
-		Data dst1=Data(Address(0x11'0000),512*3);// to odd meg testing a20 enabled line
+//		Data dst1=Data(Address(0x11'0000),512*3);// to odd meg testing a20 enabled line
 		Data dst2=Data(Address(0xa'0000+320*150),512*3);// on screen line 150
 //		Data dst2=Data(Address(0xabb80),512*3);// on screen line 150
-		src.to(dst1);
-//		osca_yield();
-		dst1.to(dst2);
+//		src.to(dst1);
+		src.to(dst2);
+		osca_yield();
+//		dst1.to(dst2);
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -224,19 +238,19 @@ public:
 	{}
 	constexpr virtual auto update()->void override{
 		Object::update();
-		if(phy_.pos().x>300){
+		if(phy().pos().x>300){
 			delete this;
 			return;
 		}
-		if(phy_.pos().x<20){
+		if(phy().pos().x<20){
 			delete this;
 			return;
 		}
-		if(phy_.pos().y>130){
+		if(phy().pos().y>130){
 			delete this;
 			return;
 		}
-		if(phy_.pos().y<70){
+		if(phy().pos().y<70){
 			delete this;
 			return;
 		}
@@ -251,15 +265,11 @@ public:
 
 	constexpr virtual auto update()->void override{
 		Object::update();
-		if(phy_.pos().x>300){
-			phy_.set_dpos({-phy_.dpos().x,phy_.dpos().y});
-		}else if(phy_.pos().x<20){
-			phy_.set_dpos({-phy_.dpos().x,phy_.dpos().y});
+		if(phy().pos().x>300||phy().pos().x<20){
+			phy().dpos_.x=-phy().dpos_.x;
 		}
-		if(phy_.pos().y>130){
-			phy_.set_dpos({phy_.dpos().x,-phy_.dpos().y});
-		}else if(phy_.pos().y<70){
-			phy_.set_dpos({phy_.dpos().x,-phy_.dpos().y});
+		if(phy().pos().y>130||phy().pos().y<70){
+			phy().dpos_.y=-phy().dpos_.y;
 		}
 	}
 
@@ -286,13 +296,19 @@ extern "C" [[noreturn]] void tsk4(){
 	PrinterToBitmap pb{db};
 	Degrees deg=0;
 	Matrix2D R;
-	const Address clear_start=db.data().pointer().offset(50*320).address();
-	const SizeBytes clear_n=320*100;
+
 	const Address heap_address=heap_main.data().address();
-	//	out.printer().p_hex_32b(sizeof(unsigned long)).spc().p_hex_32b(sizeof(unsigned));
+	const Address heap_disp_at_addr=db.data().pointer().offset(50*320).address();
+	const SizeBytes heap_disp_size=320*50;
+
+	const Address physt_address=PhysicsState::mem_start;
+	const Address physt_disp_at_addr=db.data().pointer().offset(100*320).address();
+	const SizeBytes physt_disp_size=320*50;
+
 	Ship*shp=new Ship;
 	shp->phy().set_dangle(deg_to_rad(-5));
 	shp->phy().set_dpos({1,1});
+
 
 	Ship*shp2=new Ship;
 	shp2->phy().set_dangle(deg_to_rad(7));
@@ -305,9 +321,13 @@ extern "C" [[noreturn]] void tsk4(){
 //	shp3->set_pos({160,100});
 	// start task
 	while(true){
-		pz_memcpy(heap_address,clear_start,clear_n);
+		// copy heap
+		pz_memcpy(heap_address,heap_disp_at_addr,heap_disp_size);
+		pz_memcpy(physt_address,physt_disp_at_addr,physt_disp_size);
+
 		pb.pos(2,1).fg(2).p("t=").p_hex_32b(osca_t);
 
+		PhysicsState::update_physics_states();
 		Object::all_update();
 		Object::all_render(db);
 
@@ -319,7 +339,7 @@ extern "C" [[noreturn]] void tsk4(){
 					shp->phy().set_dangle(deg_to_rad(-5));
 					shp->phy().set_dpos({1,1});
 				}else{
-					out.printer().p("e ");
+					out.printer().pos(1,1).p("out of free slots");
 				}
 			}
 			if(shp){

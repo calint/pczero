@@ -17,26 +17,75 @@ static constexpr void dot(const Bitmap&bmp,const float x,const float y,const uns
 	bmp.pointer_offset({xi,yi}).write(color);
 }
 
+class Object;
 class PhysicsState{
 public:
-	Point2D pos_; // ? [pos,dpos,agl,dagle] object size trashes cache when doing update
+	Point2D pos_;
 	Point2D dpos_;
+	Point2D ddpos_;
 	Angle agl_;
 	Angle dagl_;
+	Object*obj_;
+
 	inline constexpr auto pos()const->const Point2D&{return pos_;}
 	inline constexpr auto dpos()const->const Point2D&{return dpos_;}
+	inline constexpr auto ddpos()const->const Point2D&{return ddpos_;}
 	inline constexpr auto angle()const->Angle{return agl_;}
 	inline constexpr auto set_pos(const Point2D&p){pos_=p;}
 	inline constexpr auto set_dpos(const Point2D&p){dpos_=p;}
+	inline constexpr auto set_ddpos(const Point2D&p){ddpos_=p;}
 	inline constexpr auto set_angle(const Angle rad){agl_=rad;}
 	inline constexpr auto set_dangle(const Angle rad){dagl_=rad;}
 	constexpr inline auto update()->void{
+		dpos_.inc_by(ddpos_);
 		pos_.inc_by(dpos_);
 		agl_+=dagl_;
 	}
-};
 
-class Object;
+	//-----------------------------------------------------------
+	static PhysicsState*mem_start;
+	static PhysicsState*next_free;
+	static PhysicsState*mem_limit;
+	static auto init_statics(){
+		mem_start=reinterpret_cast<PhysicsState*>(0x11'0000);
+		next_free=mem_start;
+		mem_limit=reinterpret_cast<PhysicsState*>(mem_start+128);
+	}
+	static auto alloc()->PhysicsState*{
+		// ? check overrun
+		PhysicsState*p=next_free;
+		next_free++;
+		return p;
+	}
+	// returns pointer to object that has a new address for physics state
+	static auto free(PhysicsState*phy)->Object*{
+		// decrement next_free to point to last state in heap
+		// copy last state to the freed area
+		// return pointer to object that needs to update phy_ pointer
+		next_free--;
+		pz_memset(next_free,2,sizeof(PhysicsState)); // debugging
+		Object*o=next_free->obj_;
+		*phy=*next_free;
+		return o;
+	}
+	static auto update_physics_states(){
+		PhysicsState*ptr=mem_start;
+		while(ptr<next_free){
+			ptr->update();
+			ptr++;
+		}
+	}
+	static auto clear(unsigned char b){
+		const Address from=reinterpret_cast<void*>(mem_start);
+		const SizeBytes n=reinterpret_cast<SizeBytes>(mem_limit)-reinterpret_cast<SizeBytes>(mem_start);
+//		const unsigned nu=static_cast<unsigned>(n);
+//		out.printer().p_hex_32b(nu);
+		pz_memset(from,b,n);
+	}
+};
+PhysicsState*PhysicsState::mem_start;
+PhysicsState*PhysicsState::mem_limit;
+PhysicsState*PhysicsState::next_free;
 
 class Object{
 public:
@@ -56,7 +105,7 @@ public:
 	static auto all_update();
 	static auto all_render(Bitmap&bmp);
 protected:
-	PhysicsState phy_;
+	PhysicsState*phy_;
 	Scale scl_;
 	const ObjectDef&def_;
 	Point2D*pts_wld_; // transformed model to world cache
@@ -74,7 +123,7 @@ public:
 	constexpr Object&operator=(const Object&)=delete; // copy assignment
 //	Object&operator=(Object&&)=delete; // move assignment
 	Object(const ObjectDef&def,const Scale scl,const Point2D&pos,const Angle rad,const unsigned char color):
-		phy_{{pos},{0,0},rad,0},
+		phy_{PhysicsState::alloc()},
 		scl_{scl},
 		def_{def},
 		pts_wld_{new Point2D[def.npts_]},
@@ -84,8 +133,15 @@ public:
 		Mmw_scl_{0},
 		color_{color}
 	{
+		phy_->pos_=pos;
+		phy_->dpos_={0,0};
+		phy_->ddpos_={0,0};
+		phy_->agl_=rad;
+		phy_->dagl_=0;
+		phy_->obj_=this;
+
 		if(!freeSlots_pos){
-			out.printer().p("e ");
+			out.printer().pos(1,1).p("out of free slots");
 			return;
 		}
 		slot_=freeSlots[freeSlots_pos];
@@ -94,25 +150,21 @@ public:
 //		out.printer().p_hex_16b(freeSlots_pos).spc();
 	}
 	virtual~Object(){
+		PhysicsState::free(this->phy_)->phy_=phy_;
 		all[slot_]=nullptr;
 		freeSlots_pos++;
 		freeSlots[freeSlots_pos]=slot_;
 		delete[]pts_wld_;
 //		out.printer().p_hex_16b(freeSlots_pos).spc();
 	}
-	inline constexpr auto phy()->PhysicsState&{return phy_;}
+	inline constexpr auto phy()->PhysicsState&{return*phy_;}
 	inline constexpr auto scale()const->Scale{return scl_;}
 	inline constexpr auto def()const->const ObjectDef&{return def_;}
 	constexpr auto forward_vector()->Vector2D{
 		refresh_Mmw_if_invalid();
 		return Mmw_.axis_y().negate();
 	}
-	constexpr virtual auto die()->void{
-//		unslot_object(this);
-//		delete this;
-	}
 	constexpr virtual auto update()->void{
-		phy_.update();
 	}
 	constexpr virtual auto render(const Bitmap&dsp)->void{
 		if(refresh_Mmw_if_invalid()){
@@ -131,12 +183,12 @@ public:
 	}
 private:
 	constexpr auto refresh_Mmw_if_invalid()->bool{
-		if(phy_.agl_==Mmw_agl_&&phy_.pos_==Mmw_pos_&&scl_==Mmw_scl_)
+		if(phy().agl_==Mmw_agl_&&phy().pos_==Mmw_pos_&&scl_==Mmw_scl_)
 			return false;
 //			err.printer().p("um:").p_hex_32b(reinterpret_cast<unsigned>(this)).p(' ');
-		Mmw_.set_transform(scl_,phy_.agl_,phy_.pos_);
-		Mmw_agl_=phy_.agl_;
-		Mmw_pos_=phy_.pos_;
+		Mmw_.set_transform(scl_,phy().agl_,phy().pos_);
+		Mmw_agl_=phy().agl_;
+		Mmw_pos_=phy().pos_;
 		Mmw_scl_=scl_;
 		return true;
 	}
