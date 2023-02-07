@@ -30,7 +30,7 @@ public:
 		pz_memset(d_.address(),b,d_.size());
 	}
 };
-Data Heap::d_={nullptr,0};
+Data Heap::d_;
 char*Heap::ptr_;
 char*Heap::ptr_lim_;
 
