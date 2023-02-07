@@ -157,6 +157,9 @@ public:
 		freeSlots_ix--;
 	}
 	virtual~Object(){
+		// free returns a pointer to the object that has had it's
+		// physics state moved to the newly freed physics location.
+		// set the pointer of that object's phy to the freed one
 		PhysicsState::free(this->phy_)->phy_=phy_;
 		all[slot_]=nullptr;
 		freeSlots_ix++;
