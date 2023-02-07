@@ -28,7 +28,7 @@ public:
 	}
 	static inline auto clear_buffer(unsigned char b)->void{d_.clear(b);}
 };
-Data Heap::d_;
+Data Heap::d_ {nullptr,0};
 char*Heap::ptr_;
 char*Heap::ptr_lim_;
 
@@ -316,7 +316,7 @@ extern "C" [[noreturn]] void tsk4(){
 		pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
 		pz_memcpy(physt_disp_at_addr,physt_address,physt_disp_size);
 
-		pb.pos({1,2}).fg(2).p("t=").p_hex_32b(osca_t);
+		pb.pos({50,2}).fg(2).p("t=").p_hex_32b(osca_t);
 
 		PhysicsState::update_physics_states();
 		Object::update_all();
