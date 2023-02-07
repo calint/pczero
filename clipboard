@@ -2,7 +2,7 @@ objdump -b binary -m i8086 -D bin/pczero.img | less
 
 objdump -b binary -m i8086 -D bin/pczero.img | grep call
 
-objdump -d Debug/src/main.o | less
+objdump -d bin/src/main.o | less
 
 objdump -b binary -m i8086 -D bin/pczero.img | grep call
 

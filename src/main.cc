@@ -28,7 +28,7 @@ public:
 		char*p=ptr_;
 		ptr_+=size;
 		if(ptr_>ptr_lim_){
-			err.printer().pos(1,1).p("heap overrun");// ? hlt
+			err.pos({1,1}).p("heap overrun");// ? hlt
 		}
 		return reinterpret_cast<void*>(p);
 	}
@@ -63,14 +63,15 @@ void operator delete[](void*ptr,unsigned size)noexcept{
 
 // called by osca from the keyboard interrupt
 extern "C" void osca_init(){
-	// dot on screen
+	// green dot on screen (top left)
 	*reinterpret_cast<int*>(0xa0000)=0x02;
 
 	// initiate statics
+	vga13h=Vga13h();
 	err=PrinterToVga();
-	err.printer().pos(1,1).fg(4);
+	err.pos({1,1}).fg(4);
 	out=PrinterToVga();
-	out.printer().pos(2,1).fg(2);
+	out.pos({1,2}).fg(2);
 
 	// clear 128 KB starting at 1 MB with 0x20
 	pz_memset(Address(0x10'0000),0x11,0x20'000);
@@ -124,14 +125,13 @@ extern "C" void osca_keyb_ev(){
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] void tsk0(){
-	Vga13h dsp;
-	PrinterToBitmap pb{dsp.bmp()};
+	PrinterToBitmap pb{vga13h.bmp()};
 
-	pb.pos(1,30);
+	pb.pos({30,1});
 	for(int i=0;i<16;i++){
 		pb.p_hex(i);
 	}
-	pb.fg(5).pos(2,13);
+	pb.fg(5).pos({13,2});
 	for(char i='0';i<='9';i++){
 		pb.p(i);
 	}
@@ -139,16 +139,16 @@ extern "C" [[noreturn]] void tsk0(){
 	for(char i='a';i<='z';i++){
 		pb.p(i);
 	}
-	pb.fg(7).pos(3,13+10);
+	pb.fg(7).pos({13+10,3});
 	for(char i='A';i<='Z';i++){
 		pb.p(i);
 	}
 
-	pb.fg(2).pos(4,15).p("hello world!").nl();
+	pb.fg(2).pos({15,4}).p("hello world!").nl();
 	pb.fg(6).p("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
 	pb.fg(7).p(' ').p_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
-	pb.pos(7,5).fg(2).p('_');
+	pb.pos({5,7}).fg(2).p('_');
 
 	while(true){
 		// handle keyboard events
@@ -198,11 +198,11 @@ extern "C" [[noreturn]] void tsk2(){
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] void tsk3(){
-	Vga13h dsp;
 	while(true){
-//		osca_yield();
+		vga13h.bmp().data().pointer().offset(8).write(osca_t);
+		osca_yield(); // without this the next line is optimized away. why=
 //		*(int*)(0xa0000+320-4)=osca_t;
-		dsp.bmp().data().pointer().offset(8).write(osca_t);
+//		err.pos({1,1}).p_hex_32b(reinterpret_cast<unsigned>(osca_t));
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -293,8 +293,7 @@ extern "C" [[noreturn]] void tsk4(){
 	//----------------------------------------------------------
 
 	// init stack
-	Vga13h dsp;
-	Bitmap&db=dsp.bmp();
+	Bitmap&db=vga13h.bmp();
 	PrinterToBitmap pb{db};
 	Degrees deg=0;
 	Matrix2D R;
@@ -322,10 +321,10 @@ extern "C" [[noreturn]] void tsk4(){
 	// start task
 	while(true){
 		// copy heap
-		pz_memcpy(heap_address,heap_disp_at_addr,heap_disp_size);
-		pz_memcpy(physt_address,physt_disp_at_addr,physt_disp_size);
+		pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
+		pz_memcpy(physt_disp_at_addr,physt_address,physt_disp_size);
 
-		pb.pos(2,1).fg(2).p("t=").p_hex_32b(osca_t);
+		pb.pos({1,2}).fg(2).p("t=").p_hex_32b(osca_t);
 
 		PhysicsState::update_physics_states();
 		Object::update_all();
@@ -339,7 +338,7 @@ extern "C" [[noreturn]] void tsk4(){
 					shp->phy().set_dangle(deg_to_rad(-5));
 					shp->phy().set_dpos({1,1});
 				}else{
-					err.printer().pos(1,1).p("out of free slots");
+					err.pos({1,1}).p("out of free slots");
 				}
 			}
 			if(shp){

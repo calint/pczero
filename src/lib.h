@@ -5,7 +5,31 @@ using Address=void*;
 using Size=int;
 using SizeBytes=Size;
 
-inline void pz_memcpy(Address from,Address to,SizeBytes n){
+//extern "C" void memcpy(void*to,void*from,unsigned n);
+//extern "C" void memcpy(void*to,void*from,unsigned n){
+//	asm("mov %0,%%esi;"
+//		"mov %1,%%edi;"
+//		"mov %2,%%ecx;"
+//		"rep movsb;"
+//		:
+//		:"r"(from),"r"(to),"r"(n)
+//		:"%esi","%edi","%ecx" // ? clobbers memory?
+//	);
+//}
+//extern "C" void*memset(void*s,unsigned char c,unsigned n);
+//extern "C" void*memset(void*s,unsigned char c,unsigned n){
+//	asm("mov %0,%%edi;"
+//		"mov %1,%%al;"
+//		"mov %2,%%ecx;"
+//		"rep stosb;"
+//		:
+//		:"r"(s),"r"(c),"r"(n)
+//		:"%edi","%al","%ecx" // ? clobbers memory?
+//	);
+//	return s;
+//}
+
+inline void pz_memcpy(Address to,Address from,SizeBytes n){
 	asm("mov %0,%%esi;"
 		"mov %1,%%edi;"
 		"mov %2,%%ecx;"
@@ -52,8 +76,8 @@ public:
 	inline constexpr auto address()const->Address{return a_;}
 	inline constexpr auto size()const->SizeBytes{return s_;}
 	inline constexpr auto pointer()const->Pointer{return{a_};}
-	inline auto to(const Data&d)const{pz_memcpy(a_,d.address(),s_);}
-	inline auto to(const Data&d,const SizeBytes sb)const{pz_memcpy(a_,d.address(),sb);}
+	inline auto to(const Data&d)const{pz_memcpy(d.address(),a_,s_);}
+	inline auto to(const Data&d,const SizeBytes sb)const{pz_memcpy(d.address(),a_,sb);}
 };
 
 template<typename T>
@@ -289,8 +313,7 @@ static const unsigned int table_ascii_to_font[]{
 		0,0,0,0,0,
 };
 
-using Row=Size;
-using Column=Size;
+using CoordsChar=CoordsT<int>;
 using Color8b=char;
 class PrinterToBitmap{
 	char*di_; // current pixel in bitmap
@@ -318,9 +341,9 @@ public:
 		transparent_{false}
 	{}
 
-	inline constexpr auto pos(const Row r,const Column c)->PrinterToBitmap&{
+	constexpr auto pos(const CoordsChar p)->PrinterToBitmap&{
 		di_=static_cast<char*>(b_.data().address());
-		di_+=bmp_wi_*r*font_hi_+c*font_wi_;
+		di_+=bmp_wi_*p.y()*font_hi_+p.x()*font_wi_;
 		dil_=di_;
 		return*this;
 	}
@@ -455,21 +478,32 @@ public:
 	inline constexpr auto bmp()->Bitmap&{return b_;}
 };
 
-class PrinterToVga{
-	Vga13h dsp;
-	PrinterToBitmap ptb;
+//class PrinterToVga{
+//	Vga13h dsp;
+//	PrinterToBitmap ptb;
+//public:
+//	PrinterToVga():
+//		dsp{},ptb{dsp.bmp()}
+//	{
+//		ptb.pos({1,1}).fg(4);
+//	}
+////	inline auto p(const char*s){ptb.p(s);}
+//	inline constexpr auto printer()->PrinterToBitmap&{return ptb;}
+//	constexpr PrinterToVga&operator=(PrinterToVga&&o){
+//		dsp=o.dsp;
+//		ptb=o.ptb;
+//		return*this;
+//	}
+//};
+extern Vga13h vga13h;
+Vga13h vga13h;
+
+class PrinterToVga:public PrinterToBitmap{
 public:
 	PrinterToVga():
-		dsp{},ptb{dsp.bmp()}
+		PrinterToBitmap(vga13h.bmp())
 	{
-		ptb.pos(1,1).fg(4);
-	}
-//	inline auto p(const char*s){ptb.p(s);}
-	inline constexpr auto printer()->PrinterToBitmap&{return ptb;}
-	constexpr PrinterToVga&operator=(PrinterToVga&&o){
-		dsp=o.dsp;
-		ptb=o.ptb;
-		return*this;
+		pos({1,1}).fg(4);
 	}
 };
 

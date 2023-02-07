@@ -24,7 +24,7 @@ AF=--march=i386 --32
 #CW+=-Wno-unused-function # allow for debugging
 #CW+=-Wno-unused-variable # allow for debugging
 #CW+=-Wno-unused-parameter # allow for debugging
-#CF=-O3 -m32 -fno-builtin -nostdlib -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
+#CF=-O3 -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
 #CF+=-fconserve-stack # try to inhibit excessive use of stack by optimizer
 #CF+=-fanalyzer
 #CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
@@ -33,6 +33,7 @@ AF=--march=i386 --32
 #Target: x86_64-pc-linux-gnu
 CC=clang++ -std=c++2a
 CW=-Weverything
+CW+=-Wfatal-errors
 CW+=-Werror
 CW+=-Wno-c++98-compat
 CW+=-Wno-c++98-c++11-compat-binary-literal
@@ -41,7 +42,7 @@ CW+=-Wno-global-constructors # global constructors ok here
 CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
 CW+=-Wno-unused-parameter # allow for debugging
 CW+=-Wno-weak-vtables # allow for source in include files
-CF=-O3 -fno-builtin -nostdlib -m32 -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
+CF=-O3 -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
 CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
 # GNU ld (GNU Binutils for Ubuntu) 2.39
