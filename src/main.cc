@@ -68,6 +68,8 @@ extern "C" void osca_init(){
 
 	// initiate statics
 	err=PrinterToVga();
+	out=PrinterToVga();
+
 	heap_main=Heap({reinterpret_cast<char*>(0x10'0000),320*50});
 	heap_main.clear_buffer(0x12);
 
@@ -226,29 +228,28 @@ public:
 	}
 }default_object_def_ship;
 
+
+static unsigned char colr;
 class Bullet:public Object{
 public:
 	Bullet():
-		Object{default_object_def_ship,2,{0,0},0,4}
+		Object{default_object_def_ship,3,{0,0},0,++colr}
 	{}
-	constexpr virtual auto update()->void override{
+	constexpr virtual auto update()->bool override{
 		Object::update();
 		if(phy().pos().x>300){
-			delete this;
-			return;
+			return false;
 		}
 		if(phy().pos().x<20){
-			delete this;
-			return;
+			return false;
 		}
 		if(phy().pos().y>130){
-			delete this;
-			return;
+			return false;
 		}
 		if(phy().pos().y<70){
-			delete this;
-			return;
+			return false;
 		}
+		return true;
 	}
 };
 
@@ -258,7 +259,7 @@ public:
 		Object{default_object_def_ship,4,{120,100},0,2}
 	{}
 
-	constexpr virtual auto update()->void override{
+	constexpr virtual auto update()->bool override{
 		Object::update();
 		if(phy().pos().x>300||phy().pos().x<20){
 			phy().dpos_.x=-phy().dpos_.x;
@@ -266,13 +267,14 @@ public:
 		if(phy().pos().y>130||phy().pos().y<70){
 			phy().dpos_.y=-phy().dpos_.y;
 		}
+		return true;
 	}
 
 	auto fire(){
 		Bullet*b=new Bullet;
 		b->phy().set_pos(phy().pos());
-		b->phy().set_dpos(forward_vector().normalize().scale(3));
-		b->phy().set_angle(phy().agl_);
+		b->phy().set_dpos(forward_vector().scale(5));
+		b->phy().set_angle(phy().angle());
 	}
 };
 
@@ -312,8 +314,6 @@ extern "C" [[noreturn]] void tsk4(){
 	Object*wall=new Object{default_object_def_rectangle,10,{100,100},0,4};
 	wall->phy().set_dangle(deg_to_rad(5));
 
-//	Ship*shp3=new Ship;
-//	shp3->set_pos({160,100});
 	// start task
 	while(true){
 		// copy heap
@@ -323,8 +323,8 @@ extern "C" [[noreturn]] void tsk4(){
 		pb.pos(2,1).fg(2).p("t=").p_hex_32b(osca_t);
 
 		PhysicsState::update_physics_states();
-		Object::all_update();
-		Object::all_render(db);
+		Object::update_all();
+		Object::render_all(db);
 
 		const char ch=table_scancode_to_ascii[osca_key];
 		if(ch){

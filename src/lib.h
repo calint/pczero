@@ -15,7 +15,6 @@ inline void pz_memcpy(Address from,Address to,SizeBytes n){
 		:"%esi","%edi","%ecx" // ? clobbers memory?
 	);
 }
-
 inline void pz_memset(Address to,unsigned char v,SizeBytes n){
 	asm("mov %0,%%edi;"
 		"mov %1,%%al;"
@@ -474,6 +473,8 @@ public:
 	}
 };
 
+extern PrinterToVga out;
+PrinterToVga out;
 // used to print at row 1 column 1. initiated in main.cc::osca_init()
 extern PrinterToVga err;
 PrinterToVga err;

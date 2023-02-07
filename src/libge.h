@@ -19,7 +19,7 @@ static constexpr void dot(const Bitmap&bmp,const float x,const float y,const uns
 
 class Object;
 // physics states are kept in their own buffer for better CPU cache utilization at update
-class PhysicsState{
+class PhysicsState final{
 public:
 	Point2D pos_;
 	Point2D dpos_;
@@ -65,16 +65,16 @@ public:
 	static auto free(PhysicsState*phy)->Object*{
 		// decrement next_free to point to last state in heap
 		// copy last state to the freed area
-		// return pointer to object that needs to update phy_ pointer
+		// return pointer to object that has had it's phy_ moved
 
 		// check buffer underflow
 //		if(next_free==mem_start){
 //			out.printer().p("PhysicsState:e2");
 //		}
 		next_free--;
-		pz_memset(next_free,2,sizeof(PhysicsState)); // ? debugging
 		Object*o=next_free->obj_;
 		*phy=*next_free;
+//		pz_memset(next_free,3,sizeof(PhysicsState)); // ? debugging
 		return o;
 	}
 	static auto update_physics_states(){
@@ -109,8 +109,8 @@ public:
 		}
 		freeSlots_ix=all_len-1;
 	}
-	static auto all_update();
-	static auto all_render(Bitmap&bmp);
+	static auto update_all();
+	static auto render_all(Bitmap&bmp);
 protected:
 	PhysicsState*phy_; // kept in own buffer of states for better CPU cache utilization at update
 	                   // may change between frames (when objects are deleted)
@@ -166,11 +166,13 @@ public:
 	inline constexpr auto phy()->PhysicsState&{return*phy_;}
 	inline constexpr auto scale()const->Scale{return scl_;}
 	inline constexpr auto def()const->const ObjectDef&{return def_;}
-	constexpr auto forward_vector()->Vector2D{
+	auto forward_vector()->Vector2D{
 		refresh_Mmw_if_invalid();
-		return Mmw_.axis_y().negate();
+		return Mmw_.axis_y().negate().normalize();
 	}
-	constexpr virtual auto update()->void{
+	// returns false if object is to be deleted
+	constexpr virtual auto update()->bool{
+		return true;
 	}
 	constexpr virtual auto render(const Bitmap&dsp)->void{
 		if(refresh_Mmw_if_invalid()){
@@ -183,9 +185,6 @@ public:
 			dot(dsp,ptr->x,ptr->y,color_);
 			ptr++;
 		}
-	}
-	auto fire(){
-
 	}
 private:
 	constexpr auto refresh_Mmw_if_invalid()->bool{
@@ -201,14 +200,24 @@ private:
 Object*Object::all[all_len];
 unsigned short Object::freeSlots_ix=all_len-1;
 unsigned short Object::freeSlots[all_len];
-auto Object::all_update(){
+auto Object::update_all(){
+	static Object*deleted[all_len]; // ? temporary impl
+	int deleted_ix=0;
 	for(Object*o:Object::all){
 		if(!o)
 			continue;
-		o->update();
+		if(!o->update()){
+			deleted[deleted_ix]=o;
+			deleted_ix++;
+		}
+	}
+//	out.printer().pos(1,1);
+	for(int i=0;i<deleted_ix;i++){
+//		out.printer().p_hex_16b(static_cast<unsigned short>(i)).p(' ');
+		delete deleted[i];
 	}
 }
-auto Object::all_render(Bitmap&bmp){
+auto Object::render_all(Bitmap&bmp){
 	for(Object*o:Object::all){
 		if(!o)
 			continue;
