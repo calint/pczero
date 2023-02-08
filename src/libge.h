@@ -125,8 +125,8 @@ namespace enable{
 	constexpr bool draw_bounding_circle=false;
 }
 namespace metrics{
-	unsigned short collisions_check=0;
-	unsigned short collisions_check_bounding_shapes=0;
+	static unsigned short collisions_check=0;
+	static unsigned short collisions_check_bounding_shapes=0;
 	auto reset();
 	auto reset(){
 		collisions_check=0;
@@ -397,8 +397,6 @@ public:
 				Object*o1=used_ixes[i].obj;
 				Object*o2=used_ixes[j].obj;
 				// check if objects are interested in collision check
-				const TypeBits tb1=o1->type_bits();
-				const TypeBits tb2=o2->type_bits();
 				const bool o1_check_col_with_o2=o1->colchk_tb_&o2->tb_;
 				const bool o2_check_col_with_o1=o2->colchk_tb_&o1->tb_;
 				if(!o1_check_col_with_o2&&!o2_check_col_with_o1)

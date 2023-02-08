@@ -203,11 +203,8 @@ public:
 		Object{0b100,0b10,rectangle_def,scl,pos,agl,3}
 	{}
 	// returns false if object is to be deleted
-	constexpr virtual auto on_collision(Object&other)->bool{
-//		out.p("col ").p_hex_8b(static_cast<unsigned char>(other.type_bits()));
-		if(other.type_bits()==2) // collision with type bullet
-			return false; // delete
-		return true;
+	constexpr virtual auto on_collision(Object&other)->bool override{
+		return false; // collision with type 'bullet'
 	}
 };
 
@@ -235,7 +232,7 @@ public:
 		return true;
 	}
 	// returns false if object is to be deleted
-	constexpr virtual auto on_collision(Object&other)->bool{
+	constexpr virtual auto on_collision(Object&other)->bool override{
 		return false;
 	}
 };
@@ -259,10 +256,9 @@ public:
 	}
 
 	// returns false if object is to be deleted
-	constexpr virtual auto on_collision(Object&other)->bool{
-		if(other.type_bits()==4) // collision with type wall
-			return false; // delete
-		return true;
+	constexpr virtual auto on_collision(Object&other)->bool override{
+		// collision with 'wall'
+		return false;
 	}
 
 	auto fire(){
