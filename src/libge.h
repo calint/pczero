@@ -122,6 +122,15 @@ PhysicsState*PhysicsState::next_free;
 using SlotIx=unsigned short; // index in Object::freeSlots[]
 using ObjectIx=unsigned short; // index in Object::all[]
 
+constexpr bool enable_draw_normals=false;
+constexpr bool enable_draw_collision_check=false;
+
+struct SlotInfo{
+	ObjectIx oix=0; // index in Object::all[]
+	char padding1=0;
+	char padding2=0;
+	Object*obj=nullptr; // object owning this slot
+};
 class Object{
 protected:
 	PhysicsState*phy_; // kept in own buffer of states for better CPU cache utilization at update
@@ -134,9 +143,12 @@ protected:
 	Point2D Mmw_pos_; // current position used in transform matrix
 	Angle Mmw_agl_; // current angle used in transform matrix
 	Scale Mmw_scl_;  // current scale used in transform matrix
-	ObjectIx slot_=0; // index in objects pointer array
-	unsigned char color_;
+	ObjectIx obj_ix_=0; // index in objects pointer array
+	SlotIx used_ix_=0; // index in usedSlots array
+	unsigned char color_=1;
 	char padding1=0;
+	char padding2=0;
+	char padding3=0;
 public:
 //	constexpr Object()=delete;
 	constexpr Object(const Object&)=delete; // copy ctor
@@ -162,23 +174,39 @@ public:
 		phy_->obj=this;
 
 		// allocate index in all[] from free slots
-		if(!freeSlots_ix){
+		if(!free_ixes_i){
 			err.p("out of free slots");
 			osca_halt();
 		}
-		slot_=freeSlots[freeSlots_ix];
-		all[slot_]=this;
-		freeSlots_ix--;
+		// get the next free slot
+		obj_ix_=free_ixes[free_ixes_i];
+		free_ixes_i--;
+		// assign slot to this object
+		all[obj_ix_]=this;
+		// add the new slot to used objects
+		used_ixes[used_ixes_i]={obj_ix_,0,0,this};
+		used_ix_=used_ixes_i;
+		used_ixes_i++;
 	}
 	virtual~Object(){
 		// free returns a pointer to the object that has had it's
 		// physics state moved to the newly freed physics location.
 		// set the pointer of that object's phy to the freed one
 		PhysicsState::free(this->phy_)->phy_=phy_;
-		all[slot_]=nullptr;
-		freeSlots_ix++;
-		freeSlots[freeSlots_ix]=slot_;
+		all[obj_ix_]=nullptr; // ? not necessary
+		// add slot to free slots
+		free_ixes_i++;
+		free_ixes[free_ixes_i]=obj_ix_;
+		// move last slot in 'used' array to the freed slot
+		used_ixes_i--;
+		SlotInfo movedSlot=used_ixes[used_ixes_i];
+		// update object used_ix_ to the freed slot index
+		movedSlot.obj->used_ix_=used_ix_;
+		// store it in the freed slot
+		used_ixes[used_ix_]=movedSlot;
+		// delete cached points
 		delete[]pts_wld_;
+		delete[]nmls_wld_;
 	}
 	inline constexpr auto phy()->PhysicsState&{return*phy_;}
 	inline constexpr auto scale()const->Scale{return scl_;}
@@ -198,14 +226,16 @@ public:
 			dot(dsp,pt->x,pt->y,color_);
 			pt++;
 		}
-		Point2D*nml=nmls_wld_;
-		for(unsigned i=0;i<def_.nbnd;i++){
-			Vector2D v=*nml;
-			v.normalize().scale(3);
-			Point2D p=pts_wld_[def_.bnd[i]];
-			Vector2D v1={p.x+nml->x,p.y+nml->y};
-			dot(dsp,v1.x,v1.y,0xf);
-			nml++;
+		if(enable_draw_normals){
+			Point2D*nml=nmls_wld_;
+			for(unsigned i=0;i<def_.nbnd;i++){
+				Vector2D v=*nml;
+				v.normalize().scale(3);
+				Point2D p=pts_wld_[def_.bnd[i]];
+				Vector2D v1={p.x+nml->x,p.y+nml->y};
+				dot(dsp,v1.x,v1.y,0xf);
+				nml++;
+			}
 		}
 	}
 private:
@@ -230,37 +260,59 @@ private:
 	//----------------------------------------------------------------
 public:
 	static Object*all[objects_max]; // array of pointers to allocated objects
-	static ObjectIx freeSlots[objects_max]; // free indexes in all[]
-	static SlotIx freeSlots_ix; // index in freeSlots[] of next free slot
-	static inline auto hasFreeSlot()->bool{return freeSlots_ix!=0;}
+	static ObjectIx free_ixes[objects_max]; // free indexes in all[]
+	static SlotIx free_ixes_i; // index in freeSlots[] of next free slot
+	static SlotInfo used_ixes[objects_max]; // free indexes in all[]
+	static SlotIx used_ixes_i; // index in freeSlots[] of next free slot
+	static inline auto hasFreeSlot()->bool{return free_ixes_i!=0;}
 	static auto init_statics(){
-		const unsigned n=sizeof(freeSlots)/sizeof(ObjectIx);
+		const unsigned n=sizeof(free_ixes)/sizeof(ObjectIx);
 		for(SlotIx i=0;i<n;i++){
-			freeSlots[i]=i;
+			free_ixes[i]=i;
 		}
-		freeSlots_ix=objects_max-1;
+		free_ixes_i=objects_max-1;
+	}
+	static inline auto object_for_used_slot(const SlotIx i)->Object*{
+//		Object*o=all[used_ixes[i].oix];
+		Object*o=used_ixes[i].obj;
+		if(!o){
+			err.p("null-pointer-exception [e1]");
+			osca_halt();
+		}
+		return o;
 	}
 	static auto update_all(){
 		static Object*deleted[objects_max]; // ? temporary impl
 		int deleted_ix=0;
-		for(Object*o:Object::all){
-			if(!o)
-				continue;
+		for(SlotIx i=0;i<used_ixes_i;i++){
+			Object*o=object_for_used_slot(i);
 			if(!o->update()){
 				deleted[deleted_ix]=o;
 				deleted_ix++;
 			}
 		}
+//		for(Object*o:Object::all){
+//			if(!o)
+//				continue;
+//			if(!o->update()){
+//				deleted[deleted_ix]=o;
+//				deleted_ix++;
+//			}
+//		}
 		for(int i=0;i<deleted_ix;i++){
 			delete deleted[i];
 		}
 	}
 	static auto render_all(Bitmap&bmp){
-		for(Object*o:Object::all){
-			if(!o)
-				continue;
+		for(SlotIx i=0;i<used_ixes_i;i++){
+			Object*o=object_for_used_slot(i);
 			o->render(bmp);
 		}
+//		for(Object*o:Object::all){
+//			if(!o)
+//				continue;
+//			o->render(bmp);
+//		}
 	}
 	static auto check_collision(Object&o1,Object&o2)->bool{
 		o1.refresh_wld_points();
@@ -276,7 +328,9 @@ public:
 			// for each normal in o2
 			for(unsigned j=0;j<o2.def_.nbnd;j++){
 				const Vector2D&p2=o2.pts_wld_[o2.def_.bnd[j]];
-				dot(vga13h.bmp(),p2.x,p2.y,5);
+				if(enable_draw_collision_check){
+					dot(vga13h.bmp(),p2.x,p2.y,5);
+				}
 				const Vector2D&nl=o2.nmls_wld_[j];
 				const Vector2D v=p1-p2;
 				if(v.dot(nl)>0){
@@ -293,7 +347,9 @@ public:
 	}
 };
 Object*Object::all[objects_max];
-ObjectIx Object::freeSlots[objects_max];
-SlotIx Object::freeSlots_ix=objects_max-1;
+ObjectIx Object::free_ixes[objects_max];
+SlotIx Object::free_ixes_i=objects_max-1;
+SlotInfo Object::used_ixes[objects_max];
+SlotIx Object::used_ixes_i=0;
 
 }// end namespace

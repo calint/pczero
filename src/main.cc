@@ -194,12 +194,13 @@ extern "C" [[noreturn]] void tsk3(){
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 static ObjectDef rectangle_def;
 static ObjectDef ship_def;
+static ObjectDef bullet_def;
 
 static unsigned char colr;
 class Bullet:public Object{
 public:
 	Bullet():
-		Object{ship_def,3,{0,0},0,++colr}
+		Object{bullet_def,.5f,{0,0},0,++colr}
 	{}
 	constexpr virtual auto update()->bool override{
 		Object::update();
@@ -244,18 +245,30 @@ public:
 	}
 };
 
+static auto draw_axis(Bitmap&dsp){
+	static Degrees deg=0;
+	static Matrix2D R;
+	if(deg>360)
+		deg-=360;
+	deg+=5;
+	const float rotation=deg_to_rad(deg);
+//		shp3->set_angle(rotation);
+	R.set_transform(5,rotation,{160,100});
+	// dot axis
+	dot(dsp,160,100,0xf);
+	const Vector2D xaxis=R.axis_x().normalize().scale(7);
+	dot(dsp,xaxis.x+160,xaxis.y+100,4);
+	const Vector2D yaxis=R.axis_y().normalize().scale(7);
+	dot(dsp,yaxis.x+160,yaxis.y+100,2);
+}
+
 extern "C" [[noreturn]] void tsk4(){
 	//----------------------------------------------------------
 	// init statics
 	//----------------------------------------------------------
 	// ? read from file
 	rectangle_def={5,4,
-		new Point2D[]{
-//			{ 0,0},
-//			{-1,-1},
-//			{-1, 1},
-//			{ 1, 1},
-//			{ 1,-1},
+		new Point2D[]{ // points in model coordinates, negative Y is "forward"
 			{ 0,0},
 			{-1,-.5f},
 			{-1, .5f},
@@ -265,7 +278,7 @@ extern "C" [[noreturn]] void tsk4(){
 		new PointIx[]{1,2,3,4} // bounding convex polygon CCW
 	};
 	rectangle_def.init_normals();
-	// ? read from file
+
 	ship_def={4,3,
 		new Point2D[]{
 			{ 0, 0},
@@ -276,13 +289,21 @@ extern "C" [[noreturn]] void tsk4(){
 		new PointIx[]{1,2,3} // bounding convex polygon CCW
 	};
 	ship_def.init_normals();
-	//----------------------------------------------------------
+
+	bullet_def={4,3,
+		new Point2D[]{
+			{ 0,-1},
+			{-1,.5},
+			{ 1,.5},
+		},
+		new PointIx[]{0,1,2} // bounding convex polygon CCW
+	};
+	bullet_def.init_normals();
+//----------------------------------------------------------
 
 	// init stack
 	Bitmap&dsp=vga13h.bmp();
 	PrinterToBitmap pb{dsp};
-	Degrees deg=0;
-	Matrix2D R;
 
 //	const Address heap_address=heap_main.data().address();
 	const Address heap_address=Heap::data().address();
@@ -290,7 +311,7 @@ extern "C" [[noreturn]] void tsk4(){
 	const SizeBytes heap_disp_size=320*100;
 
 	Ship*shp=new Ship;
-	shp->phy().pos={120,100};
+	shp->phy().pos={160,100};
 //	shp->phy().dpos={1,1};
 
 //	Ship*shp2=new Ship;
@@ -298,22 +319,27 @@ extern "C" [[noreturn]] void tsk4(){
 //	shp2->phy().dagl=deg_to_rad(7);
 //	shp2->phy().dpos={-1,0};
 
-	Object*wall=new Object{rectangle_def,10,{100,100},0,3};
-//	wall->phy().dagl=deg_to_rad(5);
+	Object*wall=new Object{rectangle_def,10,{130,100},0,3};
+//	new Object{rectangle_def,10,{130,80},deg_to_rad(90),3};
+	wall->phy().agl=deg_to_rad(45);
+//	wall->phy().dagl=deg_to_rad(1);
 
 	// start task
 	while(true){
 		// copy heap
 		pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
 
+		pb.pos({40,2}).fg(2).p("f=").p_hex_8b(static_cast<unsigned char>(Object::free_ixes_i));
+		pb.pos({45,2}).fg(2).p("s=").p_hex_8b(static_cast<unsigned char>(Object::used_ixes_i));
 		pb.pos({50,2}).fg(2).p("t=").p_hex_32b(osca_t);
 
 		PhysicsState::update_physics_states();
 		Object::update_all();
 		Object::render_all(dsp);
 		shp->phy().dpos={0,0};
-		const bool collision=Object::check_collision(*shp,*wall);
-		out.pos({1,2}).p(collision?"col  ":"nocol");
+		const bool collision1=Object::check_collision(*shp,*wall);
+		const bool collision2=Object::check_collision(*wall,*shp);
+		out.pos({1,2}).p(collision1||collision2?"col  ":"nocol");
 
 		const char ch=table_scancode_to_ascii[osca_key];
 		if(ch){
@@ -330,16 +356,16 @@ extern "C" [[noreturn]] void tsk4(){
 			if(shp){
 				switch(ch){
 				case'w':
-					shp->phy().dpos=shp->forward_vector().scale(.5f);
+					shp->phy().dpos=shp->forward_vector().scale(.3f);
 					break;
 				case'a':
-					shp->phy().agl-=deg_to_rad(5);
+					shp->phy().agl-=deg_to_rad(2);
 					break;
 				case's':
-					shp->phy().dpos={0,1};
+					shp->phy().dpos=shp->forward_vector().negate().scale(.3f);
 					break;
 				case'd':
-					shp->phy().agl+=deg_to_rad(5);
+					shp->phy().agl+=deg_to_rad(2);
 					break;
 				case'x':
 					delete shp;
@@ -354,18 +380,7 @@ extern "C" [[noreturn]] void tsk4(){
 			}
 		}
 
-		if(deg>360)
-			deg-=360;
-		deg+=5;
-		const float rotation=deg_to_rad(deg);
-//		shp3->set_angle(rotation);
-		R.set_transform(5,rotation,{160,100});
-		// dot axis
-		dot(dsp,160,100,0xf);
-		const Vector2D xaxis=R.axis_x().normalize().scale(7);
-		dot(dsp,xaxis.x+160,xaxis.y+100,4);
-		const Vector2D yaxis=R.axis_y().normalize().scale(7);
-		dot(dsp,yaxis.x+160,yaxis.y+100,2);
+//		draw_axis(dsp);
 
 		osca_yield();
 	}
