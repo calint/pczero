@@ -197,39 +197,14 @@ extern "C" [[noreturn]] void tsk3(){
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-static class ObjectDefRectangle:public ObjectDef{
-public:
-	constexpr ObjectDefRectangle(){
-		npts_=5;
-		pts_=new Point2D[npts_]{
-			{ 0, 0},
-			{-2,-1},
-			{ 2,-1},
-			{ 2, 1},
-			{-2, 1},
-		};
-	}
-}default_object_def_rectangle;
-
-static class ObjectDefShip:public ObjectDef{
-public:
-	constexpr ObjectDefShip(){
-		npts_=4;
-		pts_=new Point2D[npts_]{
-			{ 0, 0},
-			{ 0,-1},
-			{-1,.5},
-			{ 1,.5},
-		};
-	}
-}default_object_def_ship;
-
+static ObjectDef rectangle_def;
+static ObjectDef ship_def;
 
 static unsigned char colr;
 class Bullet:public Object{
 public:
 	Bullet():
-		Object{default_object_def_ship,3,{0,0},0,++colr}
+		Object{ship_def,3,{0,0},0,++colr}
 	{}
 	constexpr virtual auto update()->bool override{
 		Object::update();
@@ -252,7 +227,7 @@ public:
 class Ship:public Object{
 public:
 	Ship():
-		Object{default_object_def_ship,4,{120,100},0,2}
+		Object{ship_def,4,{120,100},0,2}
 	{}
 
 	constexpr virtual auto update()->bool override{
@@ -278,8 +253,22 @@ extern "C" [[noreturn]] void tsk4(){
 	//----------------------------------------------------------
 	// init statics
 	//----------------------------------------------------------
-	default_object_def_rectangle=ObjectDefRectangle();
-	default_object_def_ship=ObjectDefShip();
+	rectangle_def={5,new Point2D[]{
+		{ 0, 0},
+		{-2,-1},
+		{ 2,-1},
+		{ 2, 1},
+		{-2, 1},
+	}};
+	ship_def={4,new Point2D[]{
+		{ 0, 0},
+		{ 0,-1},
+		{-1,.5},
+		{ 1,.5},
+	}};
+
+//	default_object_def_rectangle=ObjectDefRectangle();
+//	default_object_def_ship=ObjectDefShip();
 
 	//----------------------------------------------------------
 
@@ -307,7 +296,7 @@ extern "C" [[noreturn]] void tsk4(){
 	shp2->phy().set_dangle(deg_to_rad(7));
 	shp2->phy().set_dpos({-1,0});
 
-	Object*wall=new Object{default_object_def_rectangle,10,{100,100},0,4};
+	Object*wall=new Object{rectangle_def,10,{100,100},0,4};
 	wall->phy().set_dangle(deg_to_rad(5));
 
 	// start task

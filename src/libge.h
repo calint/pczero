@@ -5,10 +5,10 @@ namespace osca{
 
 using Point2D=Vector2D;
 
-class ObjectDef{
+class ObjectDef final{
 public:
-	Point2D*pts_=nullptr;
 	unsigned npts_=0; // number of points
+	Point2D*pts_=nullptr;
 };
 
 static constexpr void dot(const Bitmap&bmp,const float x,const float y,const unsigned char color){
