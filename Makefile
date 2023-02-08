@@ -8,7 +8,7 @@ IMAGE=pczero.img
 SRC=src/osca.S src/main.cc
 # all files with source, used in 'print'
 FILES=$(SRC)
-FILES+=src/lib.h src/lib2d.h src/libge.h
+FILES+=src/osca.h src/lib.h src/lib2d.h src/libge.h
 
 # GNU assembler (GNU Binutils for Ubuntu) 2.39
 AF=--march=i386 --32
@@ -76,7 +76,7 @@ print:
 	@echo "wc source | gzip"
 	@cat $(FILES)|gzip|wc
 	@echo
-	@if [ $(shell stat -c "%s" pczero.img) -ge 66048 ]; then echo '!!!';echo '!!! IMAGE FILE GREATER THAN OSCA LOADS';echo '!!!';echo; fi
+	@if [ $(shell stat -c "%s" $(IMAGE)) -ge 66048 ]; then echo '!!!';echo '!!! IMAGE FILE GREATER THAN OSCA LOADS';echo '!!!';echo; fi
 	
 clean:
 	@rm -fr bin/*
