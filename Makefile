@@ -47,7 +47,7 @@ CF+=-Wfatal-errors # stop at first error
 CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
 # GNU ld (GNU Binutils for Ubuntu) 2.39
-LF=-Tlink.ld -melf_i386 -nostdlib # ../link.ld to be able to build in eclipse with same link.ld file
+LF=-Tlink.ld -melf_i386 -nostdlib
 
 # usb device
 INSTALL_TO=/dev/sda
