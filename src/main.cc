@@ -188,9 +188,7 @@ extern "C" [[noreturn]] void tsk2(){
 extern "C" [[noreturn]] void tsk3(){
 	while(true){
 		vga13h.bmp().data().pointer().offset(8).write(osca_t);
-		osca_yield(); // without this the next line is optimized away. why=
-//		*(int*)(0xa0000+320-4)=osca_t;
-//		err.pos({1,1}).p_hex_32b(reinterpret_cast<unsigned>(osca_t));
+		osca_yield(); // ? without this dot on screen is optimized away
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
