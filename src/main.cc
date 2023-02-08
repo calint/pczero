@@ -22,7 +22,7 @@ public:
 		char*p=ptr_;
 		ptr_+=size;
 		if(ptr_>ptr_lim_){
-			err.pos({1,1}).p("heap overrun");// ? hlt
+			err.p("heap overrun");// ? hlt
 			osca_halt();
 		}
 		return reinterpret_cast<void*>(p);
@@ -315,7 +315,7 @@ extern "C" [[noreturn]] void tsk4(){
 					shp->phy().set_dangle(deg_to_rad(-5));
 					shp->phy().set_dpos({1,1});
 				}else{
-					err.pos({1,1}).p("out of free slots");
+					err.p("out of free slots");
 					osca_halt();
 				}
 			}

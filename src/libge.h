@@ -133,15 +133,15 @@ public:
 		Mmw_scl_{0},
 		color_{color}
 	{
+		// initiate physics state
+		*phy_=PhysicsState{};
 		phy_->pos_=pos;
-		phy_->dpos_={0,0};
-		phy_->ddpos_={0,0};
 		phy_->agl_=rad;
-		phy_->dagl_=0;
 		phy_->obj_=this;
 
+		// allocate index in all[] from free slots
 		if(!freeSlots_ix){
-			err.pos({1,1}).p("out of free slots");
+			err.p("out of free slots");
 			osca_halt();
 			return;
 		}
