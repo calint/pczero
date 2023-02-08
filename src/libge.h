@@ -124,6 +124,15 @@ namespace enable{
 	constexpr bool draw_collision_check=false;
 	constexpr bool draw_bounding_circle=false;
 }
+namespace metrics{
+	unsigned short collisions_check=0;
+	unsigned short collisions_check_bounding_shapes=0;
+	auto reset();
+	auto reset(){
+		collisions_check=0;
+		collisions_check_bounding_shapes=0;
+	}
+}
 
 using SlotIx=unsigned short; // index in Object::freeSlots[]
 using ObjectIx=unsigned short; // index in Object::all[]
@@ -135,6 +144,7 @@ struct SlotInfo{
 class Object{
 protected:
 	TypeBits tb_;
+	TypeBits colchk_tb_; // bits used to and with other object type_bits and if true then wants collision check
 	PhysicsState*phy_; // kept in own buffer of states for better CPU cache utilization at update
 	                   // may change between frames (when objects are deleted)
 	Scale scl_;
@@ -155,8 +165,9 @@ public:
 //	constexpr Object(Object&&)=delete; // move ctor
 	constexpr Object&operator=(const Object&)=delete; // copy assignment
 //	Object&operator=(Object&&)=delete; // move assignment
-	Object(const TypeBits tb,const ObjectDef&def,const Scale scl,const Point2D&pos,const Angle rad,const unsigned char color):
+	Object(const TypeBits tb,const TypeBits colchk_tb,const ObjectDef&def,const Scale scl,const Point2D&pos,const Angle rad,const unsigned char color):
 		tb_{tb},
+		colchk_tb_{colchk_tb},
 		phy_{PhysicsState::alloc()},
 		scl_{scl},
 		def_{def},
@@ -332,7 +343,8 @@ public:
 //		out.p("bounds ");
 		return true;
 	}
-	static auto check_collision(Object&o1,Object&o2)->bool{
+	// checks if o1 points in o2 bounding shape
+	static auto is_in_collision(Object&o1,Object&o2)->bool{
 		// check bounding spheres
 		o1.refresh_wld_points();
 		o2.refresh_wld_points();
@@ -384,28 +396,49 @@ public:
 			for(unsigned j=i+1;j<used_ixes_i;j++){
 				Object*o1=used_ixes[i].obj;
 				Object*o2=used_ixes[j].obj;
+				// check if objects are interested in collision check
+				const TypeBits tb1=o1->type_bits();
+				const TypeBits tb2=o2->type_bits();
+				const bool o1_check_col_with_o2=o1->colchk_tb_&o2->tb_;
+				const bool o2_check_col_with_o1=o2->colchk_tb_&o1->tb_;
+				if(!o1_check_col_with_o2&&!o2_check_col_with_o1)
+					continue;
+//				out.p("chk ").p_hex_8b(static_cast<unsigned char>(tb1)).p(' ').p_hex_8b(static_cast<unsigned char>(tb2)).p(' ');
+				metrics::collisions_check++;
 				if(!Object::check_collision_bounding_circles(*o1,*o2))
 					continue;
-				if(Object::check_collision(*o1,*o2)){
-					if(!o1->on_collision(*o2)){
-						deleted[deleted_ix++]=o1;
+				metrics::collisions_check_bounding_shapes++;
+				// check if o1 points in o2 bounding shape
+				if(Object::is_in_collision(*o1,*o2)){
+					if(o1_check_col_with_o2){
+						// o1 type wants to handle collisions with o2 type
+						if(!o1->on_collision(*o2)){
+							deleted[deleted_ix++]=o1;
+						}
 					}
-					if(!o2->on_collision(*o1)){
-						deleted[deleted_ix++]=o2;
+					if(o2_check_col_with_o1){
+						// o2 type wants to handle collisions with o1 type
+						if(!o2->on_collision(*o1)){
+							deleted[deleted_ix++]=o2;
+						}
 					}
 					continue;
 				}
-				if(Object::check_collision(*o2,*o1)){
-					if(!o1->on_collision(*o2)){
-						deleted[deleted_ix++]=o1;
+				// check if o2 points in o1 bounding shape
+				if(Object::is_in_collision(*o2,*o1)){
+					if(o1_check_col_with_o2){
+						if(!o1->on_collision(*o2)){
+							deleted[deleted_ix++]=o1;
+						}
 					}
-					if(!o2->on_collision(*o1)){
-						deleted[deleted_ix++]=o2;
+					if(o2_check_col_with_o1){
+						if(!o2->on_collision(*o1)){
+							deleted[deleted_ix++]=o2;
+						}
 					}
 				}
 			}
 		}
-
 		for(int i=0;i<deleted_ix;i++){
 			delete deleted[i];
 		}

@@ -198,8 +198,9 @@ static ObjectDef bullet_def;
 
 class Wall:public Object{
 public:
+	// type bits 0b100 check collision with type 'bullet' 0b10
 	Wall(const Scale scl,const Point2D&pos,const Angle agl):
-		Object{4,rectangle_def,scl,pos,agl,3}
+		Object{0b100,0b10,rectangle_def,scl,pos,agl,3}
 	{}
 	// returns false if object is to be deleted
 	constexpr virtual auto on_collision(Object&other)->bool{
@@ -214,7 +215,8 @@ static unsigned char colr;
 class Bullet:public Object{
 public:
 	Bullet():
-		Object{2,bullet_def,.5f,{0,0},0,++colr}
+		// type bits 0b10 check collision with type 'wall' 0b100
+		Object{0b10,0b100,bullet_def,.5f,{0,0},0,++colr}
 	{}
 	constexpr virtual auto update()->bool override{
 		Object::update();
@@ -234,16 +236,15 @@ public:
 	}
 	// returns false if object is to be deleted
 	constexpr virtual auto on_collision(Object&other)->bool{
-		if(other.type_bits()==4) // collision with type wall
-			return false; // delete
-		return true;
+		return false;
 	}
 };
 
 class Ship:public Object{
 public:
 	Ship():
-		Object{1,ship_def,4,{0,0},0,2}
+		// type bits 0b1 check collision with nothing 'wall' 0b100
+		Object{0b1,0b100,ship_def,4,{0,0},0,2}
 	{}
 
 	constexpr virtual auto update()->bool override{
@@ -329,16 +330,13 @@ extern "C" [[noreturn]] void tsk4(){
 //----------------------------------------------------------
 
 	// init stack
-	Bitmap&dsp=vga13h.bmp();
-	PrinterToBitmap pb{dsp};
-
-//	const Address heap_address=heap_main.data().address();
 	const Address heap_address=Heap::data().address();
-	const Address heap_disp_at_addr=dsp.data().pointer().offset(50*320).address();
+	const Address heap_disp_at_addr=vga13h.bmp().data().pointer().offset(50*320).address();
 	const SizeBytes heap_disp_size=320*100;
 
 	Ship*shp=new Ship;
 	shp->phy().pos={160,100};
+	shp->phy().agl=deg_to_rad(180);
 
 	for(float i=30;i<300;i+=20){
 		new Wall(5,{i,120},deg_to_rad(i));
@@ -346,17 +344,22 @@ extern "C" [[noreturn]] void tsk4(){
 
 	// start task
 	while(true){
+		metrics::reset();
 		// copy heap
 		pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
 
-		pb.pos({40,2}).fg(2).p("f=").p_hex_8b(static_cast<unsigned char>(Object::free_ixes_i));
-		pb.pos({45,2}).fg(2).p("s=").p_hex_8b(static_cast<unsigned char>(Object::used_ixes_i));
-		pb.pos({50,2}).fg(2).p("t=").p_hex_32b(osca_t);
-
 		PhysicsState::update_physics_states();
 		Object::update_all();
-		Object::render_all(dsp);
+		Object::render_all(vga13h.bmp());
 		Object::check_collisions();
+
+		//		out.pos({0,2}).p("                                              ").pos({0,2});
+		out.pos({26,2}).fg(2).p("c=").p_hex_16b(metrics::collisions_check);
+		out.pos({33,2}).fg(2).p("b=").p_hex_16b(metrics::collisions_check_bounding_shapes);
+		out.pos({40,2}).fg(2).p("f=").p_hex_8b(static_cast<unsigned char>(Object::free_ixes_i));
+		out.pos({45,2}).fg(2).p("s=").p_hex_8b(static_cast<unsigned char>(Object::used_ixes_i));
+		out.pos({50,2}).fg(2).p("t=").p_hex_32b(osca_t);
+
 		shp->phy().dpos={0,0};
 
 		const char ch=table_scancode_to_ascii[osca_key];
@@ -364,8 +367,8 @@ extern "C" [[noreturn]] void tsk4(){
 			if(ch=='c'){
 				if(Object::hasFreeSlot()){
 					shp=new Ship;
-					shp->phy().dagl=deg_to_rad(-5);
-					shp->phy().dpos={1,1};
+					shp->phy().pos={160,100};
+					shp->phy().agl=deg_to_rad(180);
 				}else{
 					err.p("out of free slots");
 					osca_halt();
