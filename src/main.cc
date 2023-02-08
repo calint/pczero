@@ -222,7 +222,7 @@ public:
 class Ship:public Object{
 public:
 	Ship():
-		Object{ship_def,4,{120,100},0,2}
+		Object{ship_def,4,{0,0},0,2}
 	{}
 
 	constexpr virtual auto update()->bool override{
@@ -262,9 +262,6 @@ extern "C" [[noreturn]] void tsk4(){
 		{ 1,.5},
 	}};
 
-//	default_object_def_rectangle=ObjectDefRectangle();
-//	default_object_def_ship=ObjectDefShip();
-
 	//----------------------------------------------------------
 
 	// init stack
@@ -279,16 +276,16 @@ extern "C" [[noreturn]] void tsk4(){
 	const SizeBytes heap_disp_size=320*100;
 
 	Ship*shp=new Ship;
-//	shp->phy().set_dangle(deg_to_rad(-5));
-	shp->phy().set_dpos({1,1});
-
+	shp->phy().pos_={120,100};
+	shp->phy().dpos_={1,1};
 
 	Ship*shp2=new Ship;
-	shp2->phy().set_dangle(deg_to_rad(7));
-	shp2->phy().set_dpos({-1,0});
+	shp2->phy().pos_={100,100};
+	shp2->phy().dagl_=deg_to_rad(7);
+	shp2->phy().dpos_={-1,0};
 
 	Object*wall=new Object{rectangle_def,10,{100,100},0,4};
-	wall->phy().set_dangle(deg_to_rad(5));
+	wall->phy().dagl_=deg_to_rad(5);
 
 	// start task
 	while(true){
