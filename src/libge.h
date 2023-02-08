@@ -192,11 +192,7 @@ public:
 		return true;
 	}
 	constexpr virtual auto render(const Bitmap&dsp)->void{
-		if(refresh_Mmw_if_invalid()){
-			// matrix has been updated, update cached points
-			Mmw_.transform(def_.pts,pts_wld_,def_.npts);
-			Mmw_.rotate(def_.nmls,nmls_wld_,def_.nbnd);
-		}
+		refresh_wld_points();
 		Point2D*pt=pts_wld_;
 		for(unsigned i=0;i<def_.npts;i++){
 			dot(dsp,pt->x,pt->y,color_);
@@ -213,6 +209,13 @@ public:
 		}
 	}
 private:
+	constexpr auto refresh_wld_points()->void{
+		if(!refresh_Mmw_if_invalid())
+			return;
+		// matrix has been updated, update cached points
+		Mmw_.transform(def_.pts,pts_wld_,def_.npts);
+		Mmw_.rotate(def_.nmls,nmls_wld_,def_.nbnd);
+	}
 	constexpr auto refresh_Mmw_if_invalid()->bool{
 		if(phy().agl==Mmw_agl_&&phy().pos==Mmw_pos_&&scl_==Mmw_scl_)
 			return false;
@@ -258,6 +261,35 @@ public:
 				continue;
 			o->render(bmp);
 		}
+	}
+	static auto check_collision(Object&o1,Object&o2)->bool{
+		o1.refresh_wld_points();
+		o2.refresh_wld_points();
+		// for each point in o1 check if behind every normal of o2
+		// if behind every normal then within the convex polygon thus collision
+
+		bool is_collision=false;
+		// for each point in o1
+		for(unsigned i=0;i<o1.def_.npts;i++){
+			const Point2D&p1=o1.pts_wld_[i];
+			is_collision=true; // assume is collision
+			// for each normal in o2
+			for(unsigned j=0;j<o2.def_.nbnd;j++){
+				const Vector2D&p2=o2.pts_wld_[o2.def_.bnd[j]];
+				dot(vga13h.bmp(),p2.x,p2.y,5);
+				const Vector2D&nl=o2.nmls_wld_[j];
+				const Vector2D v=p1-p2;
+				if(v.dot(nl)>0){
+					// p "in front" of v, cannot be collision
+					is_collision=false;
+					break;
+				}
+			}
+			// if point within all lines then p1 is within o2 bounding shape
+			if(is_collision)
+				return true;
+		}
+		return false;
 	}
 };
 Object*Object::all[objects_max];

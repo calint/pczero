@@ -74,6 +74,9 @@ public:
 		y=-y;
 		return*this;
 	}
+	inline constexpr auto dot(const Vector2D&v)const->float{
+		return x*v.x+y*v.y;
+	}
 //	auto operator<=>(const Vector2D&)const=default; // ? does not compile in clang++ without includes from std
 	constexpr inline auto operator==(const Vector2D&)const->bool=default;
 	constexpr inline auto operator-(const Vector2D&other)const->Vector2D{return{x-other.x,y-other.y};}

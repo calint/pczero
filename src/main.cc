@@ -291,15 +291,15 @@ extern "C" [[noreturn]] void tsk4(){
 
 	Ship*shp=new Ship;
 	shp->phy().pos={120,100};
-	shp->phy().dpos={1,1};
+//	shp->phy().dpos={1,1};
 
-	Ship*shp2=new Ship;
-	shp2->phy().pos={100,100};
-	shp2->phy().dagl=deg_to_rad(7);
-	shp2->phy().dpos={-1,0};
+//	Ship*shp2=new Ship;
+//	shp2->phy().pos={100,100};
+//	shp2->phy().dagl=deg_to_rad(7);
+//	shp2->phy().dpos={-1,0};
 
-	Object*wall=new Object{rectangle_def,10,{100,100},0,4};
-	wall->phy().dagl=deg_to_rad(5);
+	Object*wall=new Object{rectangle_def,10,{100,100},0,3};
+//	wall->phy().dagl=deg_to_rad(5);
 
 	// start task
 	while(true){
@@ -311,6 +311,9 @@ extern "C" [[noreturn]] void tsk4(){
 		PhysicsState::update_physics_states();
 		Object::update_all();
 		Object::render_all(dsp);
+		shp->phy().dpos={0,0};
+		const bool collision=Object::check_collision(*shp,*wall);
+		out.pos({1,2}).p(collision?"col  ":"nocol");
 
 		const char ch=table_scancode_to_ascii[osca_key];
 		if(ch){
