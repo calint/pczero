@@ -27,7 +27,7 @@ public:
 		}
 		return reinterpret_cast<void*>(p);
 	}
-	static inline auto clear_buffer(const unsigned char b)->void{d_.clear(b);}
+	static inline auto clear_buffer(const unsigned char b=0)->void{d_.clear(b);}
 };
 Data Heap::d_ {nullptr,0};
 char*Heap::ptr_;
