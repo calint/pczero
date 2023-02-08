@@ -43,7 +43,7 @@ CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
 CW+=-Wno-unused-parameter # allow for debugging
 CW+=-Wno-unused-function # allow for debugging
 CW+=-Wno-weak-vtables # allow for source in include files
-CF=-O3 -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
+CF=-Os -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
 CF+=-Wfatal-errors # stop at first error
 CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
@@ -76,6 +76,8 @@ print:
 	@echo
 	@echo "wc source | gzip"
 	@cat $(FILES)|gzip|wc
+	@echo
+	@echo -n "calls: " && objdump -d bin/src/main.o | grep call | wc -l
 	@echo
 	@if [ $(shell stat -c "%s" $(IMAGE)) -ge 66048 ]; then echo '!!!';echo '!!! IMAGE FILE GREATER THAN OSCA LOADS';echo '!!!';echo; fi
 	
