@@ -55,7 +55,6 @@ public:
 	static PhysicsState*mem_limit;
 	static auto init_statics(){
 		mem_start=new PhysicsState[objects_max];
-//		mem_start=reinterpret_cast<PhysicsState*>(bufferStart);
 		next_free=mem_start;
 		mem_limit=reinterpret_cast<PhysicsState*>(mem_start+objects_max);
 	}
@@ -217,9 +216,7 @@ public:
 				deleted_ix++;
 			}
 		}
-	//	out.printer().pos(1,1);
 		for(int i=0;i<deleted_ix;i++){
-	//		out.printer().p_hex_16b(static_cast<unsigned short>(i)).p(' ');
 			delete deleted[i];
 		}
 	}
