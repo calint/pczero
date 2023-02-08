@@ -337,9 +337,16 @@ extern "C" [[noreturn]] void tsk4(){
 		Object::update_all();
 		Object::render_all(dsp);
 		shp->phy().dpos={0,0};
-		const bool collision1=Object::check_collision(*shp,*wall);
-		const bool collision2=Object::check_collision(*wall,*shp);
-		out.pos({1,2}).p(collision1||collision2?"col  ":"nocol");
+
+		out.pos({1,2}).p("                         ").pos({1,2});
+		if(Object::check_collision_bounding_circles(*shp,*wall)){
+			const bool collision1=Object::check_collision(*shp,*wall);
+			out.p(collision1?"col   ":"nocol ");
+			if(!collision1){
+				const bool collision2=Object::check_collision(*wall,*shp);
+				out.p(collision2?"col   ":"nocol ");
+			}
+		}
 
 		const char ch=table_scancode_to_ascii[osca_key];
 		if(ch){

@@ -119,12 +119,14 @@ PhysicsState*PhysicsState::mem_start;
 PhysicsState*PhysicsState::mem_limit;
 PhysicsState*PhysicsState::next_free;
 
+namespace enable{
+	constexpr bool draw_normals=false;
+	constexpr bool draw_collision_check=false;
+	constexpr bool draw_bounding_circle=true;
+}
+
 using SlotIx=unsigned short; // index in Object::freeSlots[]
 using ObjectIx=unsigned short; // index in Object::all[]
-
-constexpr bool enable_draw_normals=false;
-constexpr bool enable_draw_collision_check=false;
-
 struct SlotInfo{
 	Object**oix=nullptr; // pointer to element in Object::all[]
 	Object*obj=nullptr; // object owning this slot
@@ -141,7 +143,7 @@ protected:
 	Point2D Mmw_pos_; // current position used in transform matrix
 	Angle Mmw_agl_; // current angle used in transform matrix
 	Scale Mmw_scl_;  // current scale used in transform matrix
-	Object**obj_ix_=nullptr; // pointer to element int all[]
+//	Object**obj_ix_=nullptr; // pointer to element int all[]
 	SlotIx used_ix_=0; // index in used_ixes array
 	unsigned char color_=1;
 	char padding1=0;
@@ -175,7 +177,7 @@ public:
 			osca_halt();
 		}
 		// get the next free slot
-		obj_ix_=free_ixes[free_ixes_i]; // pointer to element in all[]
+		Object**obj_ix_=free_ixes[free_ixes_i]; // pointer to element in all[]
 		free_ixes_i--;
 		// assign slot to this object
 		*obj_ix_=this;
@@ -190,11 +192,12 @@ public:
 		// set the pointer of that object's phy to the freed one
 		PhysicsState::free(this->phy_)->phy_=phy_;
 
-		// adjust used_ixes
-		*obj_ix_=nullptr; // ? debugging
+		// get slot info for this object
+		SlotInfo this_slot=used_ixes[used_ix_];
+		*this_slot.oix=nullptr;
 		// add slot to free slots
 		free_ixes_i++;
-		free_ixes[free_ixes_i]=obj_ix_;
+		free_ixes[free_ixes_i]=this_slot.oix;
 		// move last slot in 'used' array to the freed slot
 		used_ixes_i--;
 		SlotInfo movedSlot=used_ixes[used_ixes_i];
@@ -224,7 +227,7 @@ public:
 			dot(dsp,pt->x,pt->y,color_);
 			pt++;
 		}
-		if(enable_draw_normals){
+		if(enable::draw_normals){
 			Point2D*nml=nmls_wld_;
 			for(unsigned i=0;i<def_.nbnd;i++){
 				Vector2D v=*nml;
@@ -300,12 +303,33 @@ public:
 			o->render(dsp);
 		}
 	}
+	static auto check_collision_bounding_circles(Object&o1,Object&o2)->bool{
+		if(enable::draw_bounding_circle){
+			draw_bounding_circle(vga13h.bmp(),o1);
+			draw_bounding_circle(vga13h.bmp(),o2);
+		}
+		const float r1=o1.scale();
+		const float r2=o2.scale();
+		const Point2D p1=o1.phy().pos;
+		const Point2D p2=o2.phy().pos;
+
+		// check if: sqrt(dx*dx+dy*dy)<r1+r2
+		const float dist2=r1*r1+2*r1*r2+r2*r2; // distance^2
+		Vector2D v{p2.x-p1.x,p2.y-p1.y};
+		v.x*=v.x;
+		v.y*=v.y;
+		const float d2=v.x+v.y;
+		if(d2>dist2)
+			return false;
+		out.p("bounds ");
+		return true;
+	}
 	static auto check_collision(Object&o1,Object&o2)->bool{
+		// check bounding spheres
 		o1.refresh_wld_points();
 		o2.refresh_wld_points();
 		// for each point in o1 check if behind every normal of o2
 		// if behind every normal then within the convex polygon thus collision
-
 		bool is_collision=false;
 		// for each point in o1
 		for(unsigned i=0;i<o1.def_.npts;i++){
@@ -314,7 +338,7 @@ public:
 			// for each normal in o2
 			for(unsigned j=0;j<o2.def_.nbnd;j++){
 				const Vector2D&p2=o2.pts_wld_[o2.def_.bnd[j]];
-				if(enable_draw_collision_check){
+				if(enable::draw_collision_check){
 					dot(vga13h.bmp(),p2.x,p2.y,5);
 				}
 				const Vector2D&nl=o2.nmls_wld_[j];
@@ -330,6 +354,19 @@ public:
 				return true;
 		}
 		return false;
+	}
+	static auto draw_bounding_circle(Bitmap&dsp,Object&o)->void{
+		Point2D p=o.phy().pos;
+		float scl=o.scale();
+		const unsigned segments=static_cast<unsigned>(4.f*o.scale());
+		Angle th=0;
+		Angle dth=2*PI/static_cast<Angle>(segments);
+		for(unsigned i=0;i<segments;i++){
+			const Coord x=p.x+scl*cos(th);
+			const Coord y=p.y+scl*sin(th);
+			dot(dsp,x,y,1);
+			th+=dth;
+		}
 	}
 };
 Object*Object::all[objects_max];
