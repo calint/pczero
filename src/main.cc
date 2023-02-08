@@ -337,6 +337,8 @@ extern "C" [[noreturn]] void tsk4(){
 		new Wall(5,{i,120},deg_to_rad(i));
 	}
 
+//	out.p_hex_16b(static_cast<unsigned short>(sizeof(Object))).pos({1,2});
+
 	// start task
 	while(true){
 		metrics::reset();
