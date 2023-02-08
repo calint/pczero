@@ -8,7 +8,7 @@ using Point2D=Vector2D;
 class ObjectDef final{
 public:
 	unsigned npts_=0; // number of points
-	Point2D*pts_=nullptr;
+	Point2D*pts_=nullptr; // array of points
 };
 
 static constexpr void dot(const Bitmap&bmp,const float x,const float y,const unsigned char color){
@@ -17,9 +17,9 @@ static constexpr void dot(const Bitmap&bmp,const float x,const float y,const uns
 	bmp.pointer_offset({xi,yi}).write(color);
 }
 
-class Object;
 constexpr static unsigned objects_max=64; // maximum number of objects
 
+class Object;
 // physics states are kept in their own buffer for better CPU cache utilization at update
 class PhysicsState final{
 public:
