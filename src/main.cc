@@ -203,16 +203,16 @@ public:
 	{}
 	constexpr virtual auto update()->bool override{
 		Object::update();
-		if(phy().pos().x>300){
+		if(phy().pos.x>300){
 			return false;
 		}
-		if(phy().pos().x<20){
+		if(phy().pos.x<20){
 			return false;
 		}
-		if(phy().pos().y>130){
+		if(phy().pos.y>130){
 			return false;
 		}
-		if(phy().pos().y<70){
+		if(phy().pos.y<70){
 			return false;
 		}
 		return true;
@@ -227,20 +227,20 @@ public:
 
 	constexpr virtual auto update()->bool override{
 		Object::update();
-		if(phy().pos().x>300||phy().pos().x<20){
-			phy().dpos_.x=-phy().dpos_.x;
+		if(phy().pos.x>300||phy().pos.x<20){
+			phy().dpos.x=-phy().dpos.x;
 		}
-		if(phy().pos().y>130||phy().pos().y<70){
-			phy().dpos_.y=-phy().dpos_.y;
+		if(phy().pos.y>130||phy().pos.y<70){
+			phy().dpos.y=-phy().dpos.y;
 		}
 		return true;
 	}
 
 	auto fire(){
 		Bullet*b=new Bullet;
-		b->phy().set_pos(phy().pos());
-		b->phy().set_dpos(forward_vector().scale(5));
-		b->phy().set_angle(phy().angle());
+		b->phy().pos=phy().pos;
+		b->phy().dpos=forward_vector().scale(5);
+		b->phy().agl=phy().agl;
 	}
 };
 
@@ -276,16 +276,16 @@ extern "C" [[noreturn]] void tsk4(){
 	const SizeBytes heap_disp_size=320*100;
 
 	Ship*shp=new Ship;
-	shp->phy().pos_={120,100};
-	shp->phy().dpos_={1,1};
+	shp->phy().pos={120,100};
+	shp->phy().dpos={1,1};
 
 	Ship*shp2=new Ship;
-	shp2->phy().pos_={100,100};
-	shp2->phy().dagl_=deg_to_rad(7);
-	shp2->phy().dpos_={-1,0};
+	shp2->phy().pos={100,100};
+	shp2->phy().dagl=deg_to_rad(7);
+	shp2->phy().dpos={-1,0};
 
 	Object*wall=new Object{rectangle_def,10,{100,100},0,4};
-	wall->phy().dagl_=deg_to_rad(5);
+	wall->phy().dagl=deg_to_rad(5);
 
 	// start task
 	while(true){
@@ -303,8 +303,8 @@ extern "C" [[noreturn]] void tsk4(){
 			if(ch=='c'){
 				if(Object::hasFreeSlot()){
 					shp=new Ship;
-					shp->phy().dagl_=deg_to_rad(-5);
-					shp->phy().dpos_={1,1};
+					shp->phy().dagl=deg_to_rad(-5);
+					shp->phy().dpos={1,1};
 				}else{
 					err.p("out of free slots");
 					osca_halt();
@@ -313,16 +313,16 @@ extern "C" [[noreturn]] void tsk4(){
 			if(shp){
 				switch(ch){
 				case'w':
-					shp->phy().dpos_=shp->forward_vector().scale(.5f);
+					shp->phy().dpos=shp->forward_vector().scale(.5f);
 					break;
 				case'a':
-					shp->phy().agl_-=deg_to_rad(5);
+					shp->phy().agl-=deg_to_rad(5);
 					break;
 				case's':
-					shp->phy().dpos_={0,1};
+					shp->phy().dpos={0,1};
 					break;
 				case'd':
-					shp->phy().agl_+=deg_to_rad(5);
+					shp->phy().agl+=deg_to_rad(5);
 					break;
 				case'x':
 					delete shp;

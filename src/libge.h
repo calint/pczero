@@ -23,27 +23,27 @@ class Object;
 // physics states are kept in their own buffer for better CPU cache utilization at update
 class PhysicsState final{
 public:
-	Point2D pos_{0,0};
-	Point2D dpos_{0,0};
-	Point2D ddpos_{0,0};
-	Angle agl_=0;
-	Angle dagl_=0;
-	Object*obj_=nullptr; // pointer to the object to which this physics state belongs to
+	Point2D pos{0,0};
+	Point2D dpos{0,0};
+	Point2D ddpos{0,0};
+	Angle agl=0;
+	Angle dagl=0;
+	Object*obj=nullptr; // pointer to the object to which this physics state belongs to
 
-	inline constexpr auto pos()const->const Point2D&{return pos_;}
-	inline constexpr auto dpos()const->const Point2D&{return dpos_;}
-	inline constexpr auto ddpos()const->const Point2D&{return ddpos_;}
-	inline constexpr auto angle()const->Angle{return agl_;}
-	inline constexpr auto dangle()const->Angle{return dagl_;}
-	inline constexpr auto set_pos(const Point2D&p){pos_=p;}
-	inline constexpr auto set_dpos(const Point2D&p){dpos_=p;}
-	inline constexpr auto set_ddpos(const Point2D&p){ddpos_=p;}
-	inline constexpr auto set_angle(const Angle rad){agl_=rad;}
-	inline constexpr auto set_dangle(const Angle rad){dagl_=rad;}
+//	inline constexpr auto pos()const->const Point2D&{return pos_;}
+//	inline constexpr auto dpos()const->const Point2D&{return dpos_;}
+//	inline constexpr auto ddpos()const->const Point2D&{return ddpos_;}
+//	inline constexpr auto angle()const->Angle{return agl_;}
+//	inline constexpr auto dangle()const->Angle{return dagl_;}
+//	inline constexpr auto set_pos(const Point2D&p){pos_=p;}
+//	inline constexpr auto set_dpos(const Point2D&p){dpos_=p;}
+//	inline constexpr auto set_ddpos(const Point2D&p){ddpos_=p;}
+//	inline constexpr auto set_angle(const Angle rad){agl_=rad;}
+//	inline constexpr auto set_dangle(const Angle rad){dagl_=rad;}
 	constexpr inline auto update()->void{
-		dpos_.inc_by(ddpos_);
-		pos_.inc_by(dpos_);
-		agl_+=dagl_;
+		dpos.inc_by(ddpos);
+		pos.inc_by(dpos);
+		agl+=dagl;
 	}
 
 	//-----------------------------------------------------------
@@ -79,7 +79,7 @@ public:
 //			out.printer().p("PhysicsState:e2");
 //		}
 		next_free--;
-		Object*o=next_free->obj_;
+		Object*o=next_free->obj;
 		*phy=*next_free;
 //		pz_memset(next_free,3,sizeof(PhysicsState)); // ? debugging
 		return o;
@@ -101,6 +101,9 @@ PhysicsState*PhysicsState::mem_start;
 PhysicsState*PhysicsState::mem_limit;
 PhysicsState*PhysicsState::next_free;
 
+using SlotIx=unsigned short; // index in Object::freeSlots[]
+using ObjectIx=unsigned short; // index in Object::all[]
+
 class Object{
 protected:
 	PhysicsState*phy_; // kept in own buffer of states for better CPU cache utilization at update
@@ -112,9 +115,9 @@ protected:
 	Point2D Mmw_pos_; // current position used in transform matrix
 	Angle Mmw_agl_; // current angle used in transform matrix
 	Scale Mmw_scl_;  // current scale used in transform matrix
+	ObjectIx slot_=0; // index in objects pointer array
 	unsigned char color_;
-	unsigned char padding1=0;
-	unsigned short slot_=0; // index in objects pointer array
+	char padding1=0;
 public:
 //	constexpr Object()=delete;
 	constexpr Object(const Object&)=delete; // copy ctor
@@ -134,9 +137,9 @@ public:
 	{
 		// initiate physics state
 		*phy_=PhysicsState{};
-		phy_->pos_=pos;
-		phy_->agl_=rad;
-		phy_->obj_=this;
+		phy_->pos=pos;
+		phy_->agl=rad;
+		phy_->obj=this;
 
 		// allocate index in all[] from free slots
 		if(!freeSlots_ix){
@@ -181,12 +184,12 @@ public:
 	}
 private:
 	constexpr auto refresh_Mmw_if_invalid()->bool{
-		if(phy().agl_==Mmw_agl_&&phy().pos_==Mmw_pos_&&scl_==Mmw_scl_)
+		if(phy().agl==Mmw_agl_&&phy().pos==Mmw_pos_&&scl_==Mmw_scl_)
 			return false;
-		Mmw_.set_transform(scl_,phy().agl_,phy().pos_);
+		Mmw_.set_transform(scl_,phy().agl,phy().pos);
 		Mmw_scl_=scl_;
-		Mmw_agl_=phy().agl_;
-		Mmw_pos_=phy().pos_;
+		Mmw_agl_=phy().agl;
+		Mmw_pos_=phy().pos;
 		return true;
 	}
 	//----------------------------------------------------------------
@@ -194,12 +197,12 @@ private:
 	//----------------------------------------------------------------
 public:
 	static Object*all[objects_max]; // array of pointers to allocated objects
-	static unsigned short freeSlots[objects_max]; // free indexes in all[]
-	static unsigned short freeSlots_ix; // index in freeSlots[] of next free slot
+	static ObjectIx freeSlots[objects_max]; // free indexes in all[]
+	static SlotIx freeSlots_ix; // index in freeSlots[] of next free slot
 	static inline auto hasFreeSlot()->bool{return freeSlots_ix!=0;}
 	static auto init_statics(){
-		const unsigned n=sizeof(freeSlots)/sizeof(unsigned short);
-		for(unsigned short i=0;i<n;i++){
+		const unsigned n=sizeof(freeSlots)/sizeof(ObjectIx);
+		for(SlotIx i=0;i<n;i++){
 			freeSlots[i]=i;
 		}
 		freeSlots_ix=objects_max-1;
@@ -228,7 +231,7 @@ public:
 	}
 };
 Object*Object::all[objects_max];
-unsigned short Object::freeSlots[objects_max];
-unsigned short Object::freeSlots_ix=objects_max-1;
+ObjectIx Object::freeSlots[objects_max];
+SlotIx Object::freeSlots_ix=objects_max-1;
 
 }// end namespace
