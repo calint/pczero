@@ -127,12 +127,14 @@ namespace enable{
 
 using SlotIx=unsigned short; // index in Object::freeSlots[]
 using ObjectIx=unsigned short; // index in Object::all[]
+using TypeBits=unsigned;
 struct SlotInfo{
 	Object**oix=nullptr; // pointer to element in Object::all[]
 	Object*obj=nullptr; // object owning this slot
 };
 class Object{
 protected:
+	TypeBits tb_;
 	PhysicsState*phy_; // kept in own buffer of states for better CPU cache utilization at update
 	                   // may change between frames (when objects are deleted)
 	Scale scl_;
@@ -153,7 +155,8 @@ public:
 //	constexpr Object(Object&&)=delete; // move ctor
 	constexpr Object&operator=(const Object&)=delete; // copy assignment
 //	Object&operator=(Object&&)=delete; // move assignment
-	Object(const ObjectDef&def,const Scale scl,const Point2D&pos,const Angle rad,const unsigned char color):
+	Object(const TypeBits tb,const ObjectDef&def,const Scale scl,const Point2D&pos,const Angle rad,const unsigned char color):
+		tb_{tb},
 		phy_{PhysicsState::alloc()},
 		scl_{scl},
 		def_{def},
@@ -209,6 +212,7 @@ public:
 		delete[]pts_wld_;
 		delete[]nmls_wld_;
 	}
+	inline constexpr auto type_bits()const->TypeBits{return tb_;}	// returns false if object is to be deleted
 	inline constexpr auto phy()->PhysicsState&{return*phy_;}
 	inline constexpr auto scale()const->Scale{return scl_;}
 	inline constexpr auto def()const->const ObjectDef&{return def_;}
@@ -238,6 +242,10 @@ public:
 				nml++;
 			}
 		}
+	}
+	// returns false if object is to be deleted
+	constexpr virtual auto on_collision(Object&other)->bool{
+		return true;
 	}
 private:
 	constexpr auto refresh_wld_points()->void{

@@ -200,7 +200,7 @@ static unsigned char colr;
 class Bullet:public Object{
 public:
 	Bullet():
-		Object{bullet_def,.5f,{0,0},0,++colr}
+		Object{2,bullet_def,.5f,{0,0},0,++colr}
 	{}
 	constexpr virtual auto update()->bool override{
 		Object::update();
@@ -223,7 +223,7 @@ public:
 class Ship:public Object{
 public:
 	Ship():
-		Object{ship_def,4,{0,0},0,2}
+		Object{1,ship_def,4,{0,0},0,2}
 	{}
 
 	constexpr virtual auto update()->bool override{
@@ -234,6 +234,13 @@ public:
 		if(phy().pos.y>130||phy().pos.y<70){
 			phy().dpos.y=-phy().dpos.y;
 		}
+		return true;
+	}
+
+	// returns false if object is to be deleted
+	constexpr virtual auto on_collision(Object&other)->bool{
+		if(other.type_bits()==4) // collision with type wall
+			return false; // delete
 		return true;
 	}
 
@@ -319,7 +326,7 @@ extern "C" [[noreturn]] void tsk4(){
 //	shp2->phy().dagl=deg_to_rad(7);
 //	shp2->phy().dpos={-1,0};
 
-	Object*wall=new Object{rectangle_def,10,{130,100},0,3};
+	Object*wall=new Object{4,rectangle_def,10,{130,100},0,3};
 //	new Object{rectangle_def,10,{130,80},deg_to_rad(90),3};
 	wall->phy().agl=deg_to_rad(45);
 //	wall->phy().dagl=deg_to_rad(1);
@@ -339,12 +346,33 @@ extern "C" [[noreturn]] void tsk4(){
 		shp->phy().dpos={0,0};
 
 		out.pos({1,2}).p("                         ").pos({1,2});
-		if(Object::check_collision_bounding_circles(*shp,*wall)){
-			const bool collision1=Object::check_collision(*shp,*wall);
-			out.p(collision1?"col   ":"nocol ");
-			if(!collision1){
-				const bool collision2=Object::check_collision(*wall,*shp);
-				out.p(collision2?"col   ":"nocol ");
+		if(shp&&wall){
+			if(Object::check_collision_bounding_circles(*shp,*wall)){
+				const bool collision1=Object::check_collision(*shp,*wall);
+				out.p(collision1?"col   ":"nocol ");
+				if(collision1){
+					if(!shp->on_collision(*wall)){
+						delete shp;
+						shp=nullptr;
+					}
+					if(!wall->on_collision(*shp)){
+						delete wall;
+						wall=nullptr;
+					}
+				}else{
+					const bool collision2=Object::check_collision(*wall,*shp);
+					out.p(collision2?"col   ":"nocol ");
+					if(collision2){
+						if(!shp->on_collision(*wall)){
+							delete shp;
+							shp=nullptr;
+						}
+						if(!wall->on_collision(*shp)){
+							delete wall;
+							wall=nullptr;
+						}
+					}
+				}
 			}
 		}
 
