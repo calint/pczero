@@ -16,6 +16,14 @@ public:
 	Wall(const Scale scl,const Point2D&pos,const Angle agl):
 		Object{0b100,0b10,rectangle_def,scl,pos,agl,3}
 	{}
+
+	constexpr virtual auto update()->bool override{
+		if(phy().pos.y>130||phy().pos.y<70){
+			phy().dpos.y=-phy().dpos.y;
+		}
+		return true;
+	}
+
 	// returns false if object is to be deleted
 	constexpr virtual auto on_collision(Object&other)->bool override{
 		return false; // collision with type 'bullet'
@@ -87,7 +95,7 @@ public:
 	}
 };
 
-static class OscaGame{
+class OscaGame{
 public:
 	OscaGame(){
 		//----------------------------------------------------------
@@ -141,6 +149,7 @@ public:
 		for(float i=30;i<300;i+=20){
 			Wall*w=new Wall(5,{i,90},deg_to_rad(i));
 			w->phy().dagl=deg_to_rad(1);
+			w->phy().dpos={0,.2f};
 		}
 
 	//	out.p_hex_16b(static_cast<unsigned short>(sizeof(Object))).pos({1,2});
@@ -230,6 +239,6 @@ public:
 		const Vector2D yaxis=R.axis_y().normalize().scale(7);
 		dot(dsp,yaxis.x+160,yaxis.y+100,2);
 	}
-}osca_game;
+};
 
 } // end namespace
