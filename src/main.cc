@@ -22,7 +22,7 @@ public:
 		char*p=ptr_;
 		ptr_+=size;
 		if(ptr_>ptr_lim_){
-			err.p("heap overrun");// ? hlt
+			err.p("heap overrun");
 			osca_halt();
 		}
 		return reinterpret_cast<void*>(p);
