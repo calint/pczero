@@ -162,7 +162,7 @@ public:
 	inline constexpr auto def()const->const ObjectDef&{return def_;}
 	auto forward_vector()->Vector2D{
 		refresh_Mmw_if_invalid();
-		return Mmw_.axis_y().negate().normalize();
+		return Mmw_.axis_y().negate().normalize(); // ? not negated (if pos y is up)
 	}
 	// returns false if object is to be deleted
 	constexpr virtual auto update()->bool{
