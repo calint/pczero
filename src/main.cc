@@ -34,26 +34,23 @@ char*Heap::ptr_;
 char*Heap::ptr_lim_;
 
 
+// called by C++ to allocate and free memory
 void operator delete(void*ptr,unsigned size)noexcept;
 void operator delete[](void*ptr,unsigned size)noexcept;
 
-// called by C++ to allocate and free memory
-//void*operator new[](unsigned count){return heap_main.alloc(count);}
-//void*operator new(unsigned count){return heap_main.alloc(count);}
 void*operator new[](unsigned count){return Heap::alloc(count);}
 void*operator new(unsigned count){return Heap::alloc(count);}
-
 void operator delete(void*ptr)noexcept{
-//	out.printer().p("D:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+//	out.p("d:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
 }
 void operator delete(void*ptr,unsigned size)noexcept{
-//	out.printer().p("DS:").p_hex_32b(size).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+//	out.p("ds:").p_hex_16b(static_cast<unsigned short>(size)).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
 }
 void operator delete[](void*ptr)noexcept{
-//	out.printer().p("DA:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+//	out.p("da:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
 }
 void operator delete[](void*ptr,unsigned size)noexcept{
-//	out.printer().p("DSA:").p_hex_32b(size).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+//	out.p("das:").p_hex_16b(static_cast<unsigned short>(size)).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
 }
 
 // called by osca from the keyboard interrupt
@@ -237,6 +234,7 @@ public:
 };
 
 class Ship:public Object{
+	unsigned fire_t=0;
 public:
 	Ship():
 		// type bits 0b1 check collision with nothing 'wall' 0b100
@@ -261,9 +259,13 @@ public:
 	}
 
 	auto fire(){
+		const unsigned dt=osca_t-fire_t;
+		if(dt<5)
+			return;
+		fire_t=osca_t;
 		Bullet*b=new Bullet;
 		b->phy().pos=phy().pos;
-		b->phy().dpos=forward_vector().scale(5);
+		b->phy().dpos=forward_vector().scale(3);
 		b->phy().agl=phy().agl;
 	}
 };
@@ -330,11 +332,12 @@ extern "C" [[noreturn]] void tsk4(){
 	const SizeBytes heap_disp_size=320*100;
 
 	Ship*shp=new Ship;
-	shp->phy().pos={160,100};
-	shp->phy().agl=deg_to_rad(180);
+	shp->phy().pos={160,130};
+//	shp->phy().agl=deg_to_rad(180);
 
 	for(float i=30;i<300;i+=20){
-		new Wall(5,{i,120},deg_to_rad(i));
+		Wall*w=new Wall(5,{i,90},deg_to_rad(i));
+		w->phy().dagl=deg_to_rad(1);
 	}
 
 //	out.p_hex_16b(static_cast<unsigned short>(sizeof(Object))).pos({1,2});
@@ -342,8 +345,11 @@ extern "C" [[noreturn]] void tsk4(){
 	// start task
 	while(true){
 		metrics::reset();
-		// copy heap
+
+		// copy heap to screen
 		pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
+
+		out.pos({0,1});//.p("                                                            ").pos({0,1});
 
 		PhysicsState::update_physics_states();
 		Object::render_all(vga13h.bmp());
