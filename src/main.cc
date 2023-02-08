@@ -160,7 +160,7 @@ extern "C" [[noreturn]] void tsk0(){
 			if(!ch) // not an ascii. probably key release
 				continue;
 			if(ch>='a'&&ch<='z')
-				ch&=~0x20;
+				ch&=~0x20; // to upper case
 			pb.backspace().p(ch).p('_');
 		}
 		osca_yield();
