@@ -242,10 +242,8 @@ public:
 		return Mmw_.axis_y().negate().normalize(); // ? not negated (if positive y is up)
 	}
 	// returns false if object is to be deleted
-	constexpr virtual auto update()->bool{
-		return true;
-	}
-	constexpr virtual auto render(const Bitmap&dsp)->void{
+	constexpr virtual auto update()->bool{return true;}
+	constexpr virtual auto render(Bitmap&dsp)->void{
 		refresh_wld_points();
 		Point2D*pt=pts_wld_;
 		for(unsigned i=0;i<def_.npts;i++){
@@ -263,7 +261,24 @@ public:
 				nml++;
 			}
 		}
+		if(enable::draw_bounding_circle){
+			draw_bounding_circle(dsp);
+		}
 	}
+	constexpr auto draw_bounding_circle(Bitmap&dsp)->void{
+		Point2D p=phy().pos;
+		float scl=scale();
+		const unsigned segments=static_cast<unsigned>(4.f*scale());
+		Angle th=0;
+		Angle dth=2*PI/static_cast<Angle>(segments);
+		for(unsigned i=0;i<segments;i++){
+			const Coord x=p.x+scl*cos(th);
+			const Coord y=p.y+scl*sin(th);
+			dot(dsp,x,y,1);
+			th+=dth;
+		}
+	}
+
 	// returns false if object is to be deleted
 	constexpr virtual auto on_collision(Object&other)->bool{
 		return true;
@@ -326,10 +341,6 @@ public:
 		}
 	}
 	static auto check_collision_bounding_circles(Object&o1,Object&o2)->bool{
-		if(enable::draw_bounding_circle){
-			draw_bounding_circle(vga13h.bmp(),o1);
-			draw_bounding_circle(vga13h.bmp(),o2);
-		}
 		const float r1=o1.scale();
 		const float r2=o2.scale();
 		const Point2D p1=o1.phy().pos;
@@ -377,19 +388,6 @@ public:
 				return true;
 		}
 		return false;
-	}
-	static auto draw_bounding_circle(Bitmap&dsp,Object&o)->void{
-		Point2D p=o.phy().pos;
-		float scl=o.scale();
-		const unsigned segments=static_cast<unsigned>(4.f*o.scale());
-		Angle th=0;
-		Angle dth=2*PI/static_cast<Angle>(segments);
-		for(unsigned i=0;i<segments;i++){
-			const Coord x=p.x+scl*cos(th);
-			const Coord y=p.y+scl*sin(th);
-			dot(dsp,x,y,1);
-			th+=dth;
-		}
 	}
 	static auto check_collisions(){
 		for(unsigned i=0;i<used_ixes_i-1u;i++){
