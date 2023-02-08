@@ -193,7 +193,7 @@ public:
 		PhysicsState::free(this->phy_)->phy_=phy_;
 
 		// get slot info for this object
-		SlotInfo this_slot=used_ixes[used_ix_];
+		SlotInfo this_slot=used_ixes[used_ix_]; // ? this lookup can be optimized with a **Object in a field. speed vs space
 		*this_slot.oix=nullptr;
 		// add slot to free slots
 		free_ixes_i++;
