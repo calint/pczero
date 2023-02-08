@@ -1,2 +1,8 @@
 # pczero
-experiments with bootable x86 assembler and C/C++ image for protected mode i386 platform
+experiments with bootable image of x86 and protected mode 32 bit code for the i386 platform
+
+written in assembler and C++
+
+contains:
+* minimal kernel supporting multiple tasks
+* sample toy application of a 2D game engine
