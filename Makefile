@@ -14,7 +14,7 @@ FILES+=src/osca.h src/lib.h src/lib2d.h src/libge.h
 AF=--march=i386 --32
 
 # g++ (Ubuntu 12.2.0-3ubuntu1) 12.2.0
-#CC=g++ -std=c++2a
+#CC=g++ -std=c++2b # c++ 23
 #CW=-pedantic -pedantic-errors -Wall -Wextra -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
 #CW+=-Werror # warnings are errors
 #CW+=-Wpadded # warn when complier pads a data structure
@@ -32,7 +32,7 @@ AF=--march=i386 --32
 
 #Ubuntu clang version 15.0.6
 #Target: x86_64-pc-linux-gnu
-CC=clang++ -std=c++2a
+CC=clang++ -std=c++2b # c++ 23
 CW=-Weverything
 CW+=-Werror # warnings are errors
 CW+=-Wno-c++98-compat
