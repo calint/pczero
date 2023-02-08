@@ -356,7 +356,7 @@ public:
 //		out.p("bounds ");
 		return true;
 	}
-	// checks if o1 points in o2 bounding shape
+	// checks if any o1 points are in o2 bounding shape
 	static auto is_in_collision(Object&o1,Object&o2)->bool{
 		// check bounding spheres
 		o1.refresh_wld_points();
