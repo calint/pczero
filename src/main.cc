@@ -265,14 +265,14 @@ extern "C" [[noreturn]] void tsk4(){
 	//----------------------------------------------------------
 
 	// init stack
-	Bitmap&db=vga13h.bmp();
-	PrinterToBitmap pb{db};
+	Bitmap&dsp=vga13h.bmp();
+	PrinterToBitmap pb{dsp};
 	Degrees deg=0;
 	Matrix2D R;
 
 //	const Address heap_address=heap_main.data().address();
 	const Address heap_address=Heap::data().address();
-	const Address heap_disp_at_addr=db.data().pointer().offset(50*320).address();
+	const Address heap_disp_at_addr=dsp.data().pointer().offset(50*320).address();
 	const SizeBytes heap_disp_size=320*100;
 
 	Ship*shp=new Ship;
@@ -296,15 +296,15 @@ extern "C" [[noreturn]] void tsk4(){
 
 		PhysicsState::update_physics_states();
 		Object::update_all();
-		Object::render_all(db);
+		Object::render_all(dsp);
 
 		const char ch=table_scancode_to_ascii[osca_key];
 		if(ch){
 			if(ch=='c'){
 				if(Object::hasFreeSlot()){
 					shp=new Ship;
-					shp->phy().set_dangle(deg_to_rad(-5));
-					shp->phy().set_dpos({1,1});
+					shp->phy().dagl_=deg_to_rad(-5);
+					shp->phy().dpos_={1,1};
 				}else{
 					err.p("out of free slots");
 					osca_halt();
@@ -313,13 +313,13 @@ extern "C" [[noreturn]] void tsk4(){
 			if(shp){
 				switch(ch){
 				case'w':
-					shp->phy().set_dpos(shp->forward_vector().scale(1));
+					shp->phy().dpos_=shp->forward_vector().scale(.5f);
 					break;
 				case'a':
 					shp->phy().agl_-=deg_to_rad(5);
 					break;
 				case's':
-					shp->phy().set_dpos({0,1});
+					shp->phy().dpos_={0,1};
 					break;
 				case'd':
 					shp->phy().agl_+=deg_to_rad(5);
@@ -344,11 +344,11 @@ extern "C" [[noreturn]] void tsk4(){
 //		shp3->set_angle(rotation);
 		R.set_transform(5,rotation,{160,100});
 		// dot axis
-		dot(db,160,100,0xf);
+		dot(dsp,160,100,0xf);
 		const Vector2D xaxis=R.axis_x().normalize().scale(7);
-		dot(db,xaxis.x+160,xaxis.y+100,4);
+		dot(dsp,xaxis.x+160,xaxis.y+100,4);
 		const Vector2D yaxis=R.axis_y().normalize().scale(7);
-		dot(db,yaxis.x+160,yaxis.y+100,2);
+		dot(dsp,yaxis.x+160,yaxis.y+100,2);
 
 		osca_yield();
 	}
