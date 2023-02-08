@@ -143,7 +143,6 @@ public:
 		if(!freeSlots_ix){
 			err.p("out of free slots");
 			osca_halt();
-			return;
 		}
 		slot_=freeSlots[freeSlots_ix];
 		all[slot_]=this;
