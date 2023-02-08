@@ -120,15 +120,14 @@ PhysicsState*PhysicsState::mem_limit;
 PhysicsState*PhysicsState::next_free;
 
 namespace enable{
-	constexpr bool draw_normals=false;
-	constexpr bool draw_collision_check=false;
-	constexpr bool draw_bounding_circle=false;
+	constexpr static bool draw_normals=false;
+	constexpr static bool draw_collision_check=false;
+	constexpr static bool draw_bounding_circle=false;
 }
 namespace metrics{
 	static unsigned short collisions_check=0;
 	static unsigned short collisions_check_bounding_shapes=0;
-	auto reset();
-	auto reset(){
+	static auto reset(){
 		collisions_check=0;
 		collisions_check_bounding_shapes=0;
 	}
