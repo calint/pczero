@@ -5,10 +5,28 @@ namespace osca{
 
 using Point2D=Vector2D;
 
+using PointIx=unsigned short;
+
 class ObjectDef final{
 public:
-	unsigned npts_=0; // number of points
-	Point2D*pts_=nullptr; // array of points
+	unsigned short npts=0; // number of points in pts
+	unsigned short nbnd=0; // number of indexes in bnd
+	Point2D*pts=nullptr; // array of points used for rendering and bounding shape
+	PointIx*bnd=nullptr; // indexes in pts that defines the bounding shape as a convex polygon
+	Vector2D*nmls=nullptr; // normals to the lines defined in bnd
+
+	auto init_normals(){
+		nmls=new Vector2D[nbnd];
+		const unsigned n=nbnd-1;
+		for(unsigned i=0;i<n;i++){
+			const Vector2D d=pts[bnd[i+1]]-pts[bnd[i]];
+			nmls[i]={-d.y,d.x}; // normal to he line d
+			nmls[i].normalize();
+		}
+		const Vector2D d=pts[bnd[0]]-pts[bnd[nbnd-1]];
+		nmls[nbnd-1]={-d.y,d.x}; // normal to he line d
+		nmls[nbnd-1].normalize();
+	}
 };
 
 static constexpr void dot(const Bitmap&bmp,const float x,const float y,const unsigned char color){
@@ -111,6 +129,7 @@ protected:
 	Scale scl_;
 	const ObjectDef&def_;
 	Point2D*pts_wld_; // transformed model to world points cache
+	Vector2D*nmls_wld_; // normals of bounding shape rotated to the world coordinates (not normalized if scale!=1)
 	Matrix2D Mmw_; // model to world transform
 	Point2D Mmw_pos_; // current position used in transform matrix
 	Angle Mmw_agl_; // current angle used in transform matrix
@@ -128,7 +147,8 @@ public:
 		phy_{PhysicsState::alloc()},
 		scl_{scl},
 		def_{def},
-		pts_wld_{new Point2D[def.npts_]},
+		pts_wld_{new Point2D[def.npts]},
+		nmls_wld_{new Vector2D[def.nbnd]},
 		Mmw_{},
 		Mmw_pos_{0,0},
 		Mmw_agl_{0},
@@ -174,12 +194,22 @@ public:
 	constexpr virtual auto render(const Bitmap&dsp)->void{
 		if(refresh_Mmw_if_invalid()){
 			// matrix has been updated, update cached points
-			Mmw_.transform(def_.pts_,pts_wld_,def_.npts_);
+			Mmw_.transform(def_.pts,pts_wld_,def_.npts);
+			Mmw_.rotate(def_.nmls,nmls_wld_,def_.nbnd);
 		}
-		Point2D*ptr=pts_wld_;
-		for(unsigned i=0;i<def_.npts_;i++){
-			dot(dsp,ptr->x,ptr->y,color_);
-			ptr++;
+		Point2D*pt=pts_wld_;
+		for(unsigned i=0;i<def_.npts;i++){
+			dot(dsp,pt->x,pt->y,color_);
+			pt++;
+		}
+		Point2D*nml=nmls_wld_;
+		for(unsigned i=0;i<def_.nbnd;i++){
+			Vector2D v=*nml;
+			v.normalize().scale(3);
+			Point2D p=pts_wld_[def_.bnd[i]];
+			Vector2D v1={p.x+nml->x,p.y+nml->y};
+			dot(dsp,v1.x,v1.y,0xf);
+			nml++;
 		}
 	}
 private:

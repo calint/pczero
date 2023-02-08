@@ -75,7 +75,8 @@ public:
 		return*this;
 	}
 //	auto operator<=>(const Vector2D&)const=default; // ? does not compile in clang++ without includes from std
-	constexpr auto operator==(const Vector2D&)const->bool=default;
+	constexpr inline auto operator==(const Vector2D&)const->bool=default;
+	constexpr inline auto operator-(const Vector2D&other)const->Vector2D{return{x-other.x,y-other.y};}
 };
 
 using Scale=float;
@@ -100,6 +101,14 @@ public:
 		for(unsigned i=0;i<n;i++){
 			dst->x=xx*src->x+xy*src->y+xt;
 			dst->y=yx*src->x+yy*src->y+yt;
+			src++;
+			dst++;
+		}
+	}
+	constexpr auto rotate(const Vector2D src[],Vector2D dst[],const unsigned n)const{
+		for(unsigned i=0;i<n;i++){
+			dst->x=xx*src->x+xy*src->y;
+			dst->y=yx*src->x+yy*src->y;
 			src++;
 			dst++;
 		}

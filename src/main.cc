@@ -248,20 +248,34 @@ extern "C" [[noreturn]] void tsk4(){
 	//----------------------------------------------------------
 	// init statics
 	//----------------------------------------------------------
-	rectangle_def={5,new Point2D[]{
-		{ 0, 0},
-		{-2,-1},
-		{ 2,-1},
-		{ 2, 1},
-		{-2, 1},
-	}};
-	ship_def={4,new Point2D[]{
-		{ 0, 0},
-		{ 0,-1},
-		{-1,.5},
-		{ 1,.5},
-	}};
-
+	// ? read from file
+	rectangle_def={5,4,
+		new Point2D[]{
+//			{ 0,0},
+//			{-1,-1},
+//			{-1, 1},
+//			{ 1, 1},
+//			{ 1,-1},
+			{ 0,0},
+			{-1,-.5f},
+			{-1, .5f},
+			{ 1, .5f},
+			{ 1,-.5f},
+		},
+		new PointIx[]{1,2,3,4} // bounding convex polygon CCW
+	};
+	rectangle_def.init_normals();
+	// ? read from file
+	ship_def={4,3,
+		new Point2D[]{
+			{ 0, 0},
+			{ 0,-1},
+			{-1,.5},
+			{ 1,.5},
+		},
+		new PointIx[]{1,2,3} // bounding convex polygon CCW
+	};
+	ship_def.init_normals();
 	//----------------------------------------------------------
 
 	// init stack
