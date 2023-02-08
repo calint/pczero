@@ -1,33 +1,35 @@
 #pragma once
+
+// built-in functions replacements (used by clang++ -O0)
+extern "C" void memcpy(void*to,void*from,unsigned n);
+extern "C" void memcpy(void*to,void*from,unsigned n){
+	asm("mov %0,%%esi;"
+		"mov %1,%%edi;"
+		"mov %2,%%ecx;"
+		"rep movsb;"
+		:
+		:"r"(from),"r"(to),"r"(n)
+		:"%esi","%edi","%ecx" // ? clobbers memory?
+	);
+}
+extern "C" void*memset(void*s,unsigned char c,unsigned n);
+extern "C" void*memset(void*s,unsigned char c,unsigned n){
+	asm("mov %0,%%edi;"
+		"mov %1,%%al;"
+		"mov %2,%%ecx;"
+		"rep stosb;"
+		:
+		:"r"(s),"r"(c),"r"(n)
+		:"%edi","%al","%ecx" // ? clobbers memory?
+	);
+	return s;
+}
+
 namespace osca{
 
 using Address=void*;
 using Size=int;
 using SizeBytes=Size;
-
-//extern "C" void memcpy(void*to,void*from,unsigned n);
-//extern "C" void memcpy(void*to,void*from,unsigned n){
-//	asm("mov %0,%%esi;"
-//		"mov %1,%%edi;"
-//		"mov %2,%%ecx;"
-//		"rep movsb;"
-//		:
-//		:"r"(from),"r"(to),"r"(n)
-//		:"%esi","%edi","%ecx" // ? clobbers memory?
-//	);
-//}
-//extern "C" void*memset(void*s,unsigned char c,unsigned n);
-//extern "C" void*memset(void*s,unsigned char c,unsigned n){
-//	asm("mov %0,%%edi;"
-//		"mov %1,%%al;"
-//		"mov %2,%%ecx;"
-//		"rep stosb;"
-//		:
-//		:"r"(s),"r"(c),"r"(n)
-//		:"%edi","%al","%ecx" // ? clobbers memory?
-//	);
-//	return s;
-//}
 
 inline void pz_memcpy(Address to,Address from,SizeBytes n){
 	asm("mov %0,%%esi;"
@@ -39,6 +41,7 @@ inline void pz_memcpy(Address to,Address from,SizeBytes n){
 		:"%esi","%edi","%ecx" // ? clobbers memory?
 	);
 }
+
 inline void pz_memset(Address to,unsigned char v,SizeBytes n){
 	asm("mov %0,%%edi;"
 		"mov %1,%%al;"
