@@ -41,6 +41,7 @@ CW+=-Wno-c++98-compat-bind-to-temporary-copy
 CW+=-Wno-global-constructors # global constructors ok here
 CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
 CW+=-Wno-unused-parameter # allow for debugging
+CW+=-Wno-unused-function # allow for debugging
 CW+=-Wno-weak-vtables # allow for source in include files
 CF=-O3 -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
 CF+=-Wfatal-errors # stop at first error

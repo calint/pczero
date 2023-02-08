@@ -126,9 +126,7 @@ constexpr bool enable_draw_normals=false;
 constexpr bool enable_draw_collision_check=false;
 
 struct SlotInfo{
-	ObjectIx oix=0; // index in Object::all[]
-	char padding1=0;
-	char padding2=0;
+	Object**oix=nullptr; // pointer to element in Object::all[]
 	Object*obj=nullptr; // object owning this slot
 };
 class Object{
@@ -143,12 +141,10 @@ protected:
 	Point2D Mmw_pos_; // current position used in transform matrix
 	Angle Mmw_agl_; // current angle used in transform matrix
 	Scale Mmw_scl_;  // current scale used in transform matrix
-	ObjectIx obj_ix_=0; // index in objects pointer array
-	SlotIx used_ix_=0; // index in usedSlots array
+	Object**obj_ix_=nullptr; // pointer to element int all[]
+	SlotIx used_ix_=0; // index in used_ixes array
 	unsigned char color_=1;
 	char padding1=0;
-	char padding2=0;
-	char padding3=0;
 public:
 //	constexpr Object()=delete;
 	constexpr Object(const Object&)=delete; // copy ctor
@@ -179,12 +175,12 @@ public:
 			osca_halt();
 		}
 		// get the next free slot
-		obj_ix_=free_ixes[free_ixes_i];
+		obj_ix_=free_ixes[free_ixes_i]; // pointer to element in all[]
 		free_ixes_i--;
 		// assign slot to this object
-		all[obj_ix_]=this;
+		*obj_ix_=this;
 		// add the new slot to used objects
-		used_ixes[used_ixes_i]={obj_ix_,0,0,this};
+		used_ixes[used_ixes_i]={obj_ix_,this};
 		used_ix_=used_ixes_i;
 		used_ixes_i++;
 	}
@@ -193,7 +189,9 @@ public:
 		// physics state moved to the newly freed physics location.
 		// set the pointer of that object's phy to the freed one
 		PhysicsState::free(this->phy_)->phy_=phy_;
-		all[obj_ix_]=nullptr; // ? not necessary
+
+		// adjust used_ixes
+		*obj_ix_=nullptr; // ? debugging
 		// add slot to free slots
 		free_ixes_i++;
 		free_ixes[free_ixes_i]=obj_ix_;
@@ -260,20 +258,19 @@ private:
 	//----------------------------------------------------------------
 public:
 	static Object*all[objects_max]; // array of pointers to allocated objects
-	static ObjectIx free_ixes[objects_max]; // free indexes in all[]
+	static Object**free_ixes[objects_max]; // free indexes in all[]
 	static SlotIx free_ixes_i; // index in freeSlots[] of next free slot
 	static SlotInfo used_ixes[objects_max]; // free indexes in all[]
 	static SlotIx used_ixes_i; // index in freeSlots[] of next free slot
 	static inline auto hasFreeSlot()->bool{return free_ixes_i!=0;}
 	static auto init_statics(){
-		const unsigned n=sizeof(free_ixes)/sizeof(ObjectIx);
+		const unsigned n=sizeof(free_ixes)/sizeof(Object**);
 		for(SlotIx i=0;i<n;i++){
-			free_ixes[i]=i;
+			free_ixes[i]=&all[i];
 		}
 		free_ixes_i=objects_max-1;
 	}
 	static inline auto object_for_used_slot(const SlotIx i)->Object*{
-//		Object*o=all[used_ixes[i].oix];
 		Object*o=used_ixes[i].obj;
 		if(!o){
 			err.p("null-pointer-exception [e1]");
@@ -284,6 +281,7 @@ public:
 	static auto update_all(){
 		static Object*deleted[objects_max]; // ? temporary impl
 		int deleted_ix=0;
+
 		for(SlotIx i=0;i<used_ixes_i;i++){
 			Object*o=object_for_used_slot(i);
 			if(!o->update()){
@@ -291,28 +289,16 @@ public:
 				deleted_ix++;
 			}
 		}
-//		for(Object*o:Object::all){
-//			if(!o)
-//				continue;
-//			if(!o->update()){
-//				deleted[deleted_ix]=o;
-//				deleted_ix++;
-//			}
-//		}
+
 		for(int i=0;i<deleted_ix;i++){
 			delete deleted[i];
 		}
 	}
-	static auto render_all(Bitmap&bmp){
+	static auto render_all(Bitmap&dsp){
 		for(SlotIx i=0;i<used_ixes_i;i++){
 			Object*o=object_for_used_slot(i);
-			o->render(bmp);
+			o->render(dsp);
 		}
-//		for(Object*o:Object::all){
-//			if(!o)
-//				continue;
-//			o->render(bmp);
-//		}
 	}
 	static auto check_collision(Object&o1,Object&o2)->bool{
 		o1.refresh_wld_points();
@@ -333,7 +319,7 @@ public:
 				}
 				const Vector2D&nl=o2.nmls_wld_[j];
 				const Vector2D v=p1-p2;
-				if(v.dot(nl)>0){
+				if(v.dot(nl)>=0){ // ? use abs(v)<0.0001f (example)
 					// p "in front" of v, cannot be collision
 					is_collision=false;
 					break;
@@ -347,7 +333,7 @@ public:
 	}
 };
 Object*Object::all[objects_max];
-ObjectIx Object::free_ixes[objects_max];
+Object**Object::free_ixes[objects_max];
 SlotIx Object::free_ixes_i=objects_max-1;
 SlotInfo Object::used_ixes[objects_max];
 SlotIx Object::used_ixes_i=0;
