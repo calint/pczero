@@ -133,24 +133,27 @@ namespace metrics{
 		collisions_check_bounding_shapes=0;
 	}
 }
-// update_all and check_collisions generate lists of objects to be deleted
-// after the phase. deleted objects are added and after the phase committed.
+// update_all() and check_collisions() generate lists of objects to be deleted.
+// the delete happens after the phase does deleted_commit()
 namespace world{
 	auto deleted_add(Object*o)->void;
 	auto deleted_commit()->void;
 }
 
 using SlotIx=unsigned short; // index in Object::freeSlots[]
-using ObjectIx=unsigned short; // index in Object::all[]
-using TypeBits=unsigned;
+
+// info that together with ~Object maintains usedSlots[]
 struct SlotInfo{
 	Object**oix=nullptr; // pointer to element in Object::all[]
 	Object*obj=nullptr; // object owning this slot
 };
+
+using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types.
+
 class Object{
 protected:
-	TypeBits tb_;
-	TypeBits colchk_tb_; // bits used to and with other object type_bits and if true then wants collision check
+	TypeBits tb_; // object type that is usually a bit (32 object types supported)
+	TypeBits colchk_tb_; // bits used to logical and with other object's type_bits and if true then collision detection is done
 	PhysicsState*phy_; // kept in own buffer of states for better CPU cache utilization at update
 	                   // may change between frames (when objects are deleted)
 	Scale scl_;
