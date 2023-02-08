@@ -345,8 +345,8 @@ extern "C" [[noreturn]] void tsk4(){
 		pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
 
 		PhysicsState::update_physics_states();
-		Object::update_all();
 		Object::render_all(vga13h.bmp());
+		Object::update_all();
 		Object::check_collisions();
 
 		//		out.pos({0,2}).p("                                              ").pos({0,2});

@@ -133,6 +133,12 @@ namespace metrics{
 		collisions_check_bounding_shapes=0;
 	}
 }
+// update_all and check_collisions generate lists of objects to be deleted
+// after the phase. deleted objects are added and after the phase committed.
+namespace world{
+	auto deleted_add(Object*o)->void;
+	auto deleted_commit()->void;
+}
 
 using SlotIx=unsigned short; // index in Object::freeSlots[]
 using ObjectIx=unsigned short; // index in Object::all[]
@@ -301,20 +307,13 @@ public:
 		return o;
 	}
 	static auto update_all(){
-		static Object*deleted[objects_max]; // ? todo temporary for now
-		int deleted_ix=0;
-
 		for(SlotIx i=0;i<used_ixes_i;i++){
 			Object*o=object_for_used_slot(i);
 			if(!o->update()){
-				deleted[deleted_ix]=o;
-				deleted_ix++;
+				world::deleted_add(o);
 			}
 		}
-
-		for(int i=0;i<deleted_ix;i++){
-			delete deleted[i];
-		}
+		world::deleted_commit();
 	}
 	static auto render_all(Bitmap&dsp){
 		for(SlotIx i=0;i<used_ixes_i;i++){
@@ -389,9 +388,6 @@ public:
 		}
 	}
 	static auto check_collisions(){
-		static Object*deleted[objects_max]; // ? todo temporary for now
-		int deleted_ix=0;
-
 		for(unsigned i=0;i<used_ixes_i-1u;i++){
 			for(unsigned j=i+1;j<used_ixes_i;j++){
 				Object*o1=used_ixes[i].obj;
@@ -411,13 +407,13 @@ public:
 					if(o1_check_col_with_o2){
 						// o1 type wants to handle collisions with o2 type
 						if(!o1->on_collision(*o2)){
-							deleted[deleted_ix++]=o1;
+							world::deleted_add(o1);
 						}
 					}
 					if(o2_check_col_with_o1){
 						// o2 type wants to handle collisions with o1 type
 						if(!o2->on_collision(*o1)){
-							deleted[deleted_ix++]=o2;
+							world::deleted_add(o2);
 						}
 					}
 					continue;
@@ -426,20 +422,18 @@ public:
 				if(Object::is_in_collision(*o2,*o1)){
 					if(o1_check_col_with_o2){
 						if(!o1->on_collision(*o2)){
-							deleted[deleted_ix++]=o1;
+							world::deleted_add(o1);
 						}
 					}
 					if(o2_check_col_with_o1){
 						if(!o2->on_collision(*o1)){
-							deleted[deleted_ix++]=o2;
+							world::deleted_add(o2);
 						}
 					}
 				}
 			}
 		}
-		for(int i=0;i<deleted_ix;i++){
-			delete deleted[i];
-		}
+		world::deleted_commit();
 	}
 };
 Object*Object::all[objects_max];
@@ -447,5 +441,20 @@ Object**Object::free_ixes[objects_max];
 SlotIx Object::free_ixes_i=objects_max-1;
 SlotInfo Object::used_ixes[objects_max];
 SlotIx Object::used_ixes_i=0;
+
+namespace world{
+	static Object*deleted[objects_max]; // ? todo improve with lesser memory footprint
+	static int deleted_ix=0;
+	auto deleted_add(Object*o)->void{
+		deleted[deleted_ix]=o;
+		deleted_ix++;
+	}
+	auto deleted_commit()->void{
+		for(int i=0;i<deleted_ix;i++){
+			delete deleted[i];
+		}
+		deleted_ix=0;
+	}
+}
 
 }// end namespace
