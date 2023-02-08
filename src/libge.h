@@ -135,8 +135,8 @@ namespace metrics{
 // update_all() and check_collisions() generate lists of objects to be deleted.
 // the delete happens after the phase does deleted_commit()
 namespace world{
-	auto deleted_add(Object*o)->void;
-	auto deleted_commit()->void;
+	static auto deleted_add(Object*o)->void;
+	static auto deleted_commit()->void;
 }
 
 using SlotIx=unsigned short; // index in Object::freeSlots[]
@@ -446,11 +446,11 @@ SlotIx Object::used_ixes_i=0;
 namespace world{
 	static Object*deleted[objects_max]; // ? todo improve with lesser memory footprint
 	static int deleted_ix=0;
-	auto deleted_add(Object*o)->void{ // ! this might be called several times for the same object
+	static auto deleted_add(Object*o)->void{ // ! this might be called several times for the same object
 		deleted[deleted_ix]=o;
 		deleted_ix++;
 	}
-	auto deleted_commit()->void{
+	static auto deleted_commit()->void{
 		for(int i=0;i<deleted_ix;i++){
 			// ! check if object already deleted.
 			// heap keeps deleted object valid when this is called.
