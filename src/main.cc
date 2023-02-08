@@ -61,7 +61,7 @@ extern "C" void osca_init(){
 	// green dot on screen (top left)
 	*reinterpret_cast<int*>(0xa0000)=0x02;
 
-	// clear 64 KB starting at 1 MB
+	// set 64 KB of 0x11 starting at 1 MB
 	pz_memset(Address(0x10'0000),0x11,0x1'0000);
 
 	// initiate statics
