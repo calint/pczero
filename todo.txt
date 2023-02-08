@@ -1,3 +1,8 @@
+[ ] libge heap optimized for Object
+[ ] O(1) delete and nearly O(1) alloc
+[ ]   HeapElem{*prv,*nxt,ushort size,ubyte sizeh,ubyte bits} 12 B
+[ ]     bits: 1=deleted, allows multiple delete calls during a frame
+[ ]     size: 20 bits
 [o] input text
 [x]   step 1. one keyboard buffer for the system
 [ ]   step 2. "osca_keyb_task" pointer to function that should read keyboard
@@ -15,13 +20,6 @@
 [ ]   movsl,movsw,movsb optimization?
 [x] test writing to second meg to confirm enabling of a20 line
 [x]   is enabled by default in qemu and on asus zenbook
-[ ] kernel events to task
-[ ]   pointer to task record of focused task
-[ ]   in task record - pointer to ring buffer of events
-[ ]   keyboard event
-[ ]     {byte event=key,byte scan_code} 2B
-[ ] task event loop
-[ ]   task.next_event()->byte* // pointer to next event or 0 if done
 [x] bitmap
 [ ]   optimized for 32b memcpy?
 [o] sprite with transparency
@@ -38,7 +36,15 @@
 [x]   characters
 [x]   strings
 [ ]   integers
+[ ]   floats
 [ ] pointing device
 [ ]   events
 [ ]     {byte event=move,byte pad,short x,short y} 6B
 [ ]     {byte event=click,byte btn} 2B
+[ ] kernel events to task
+[ ]   pointer to task record of focused task
+[ ]   in task record - pointer to ring buffer of events
+[ ]   keyboard event
+[ ]     {byte event=key,byte scan_code} 2B
+[ ] task event loop
+[ ]   task.next_event()->byte* // pointer to next event or 0 if done
