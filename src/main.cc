@@ -23,10 +23,11 @@ public:
 		ptr_+=size;
 		if(ptr_>ptr_lim_){
 			err.pos({1,1}).p("heap overrun");// ? hlt
+			osca_halt();
 		}
 		return reinterpret_cast<void*>(p);
 	}
-	static inline auto clear_buffer(unsigned char b)->void{d_.clear(b);}
+	static inline auto clear_buffer(const unsigned char b)->void{d_.clear(b);}
 };
 Data Heap::d_ {nullptr,0};
 char*Heap::ptr_;
@@ -60,8 +61,8 @@ extern "C" void osca_init(){
 	// green dot on screen (top left)
 	*reinterpret_cast<int*>(0xa0000)=0x02;
 
-	// clear 128 KB starting at 1 MB with 0x20
-	pz_memset(Address(0x10'0000),0x11,0x20'000);
+	// clear 648 KB starting at 1 MB with 0x20
+	pz_memset(Address(0x10'0000),0x11,0x10'000);
 
 	// initiate statics
 	vga13h=Vga13h();
@@ -72,7 +73,7 @@ extern "C" void osca_init(){
 	Heap::init_statics({Address(0x10'0000),320*50});
 	Heap::clear_buffer(0x12);
 	Object::init_statics();
-	PhysicsState::init_statics(Address(0x11'0000),Object::all_len);
+	PhysicsState::init_statics();
 	PhysicsState::clear_buffer(1);
 }
 
@@ -281,11 +282,7 @@ extern "C" [[noreturn]] void tsk4(){
 //	const Address heap_address=heap_main.data().address();
 	const Address heap_address=Heap::data().address();
 	const Address heap_disp_at_addr=db.data().pointer().offset(50*320).address();
-	const SizeBytes heap_disp_size=320*50;
-
-	const Address physt_address=PhysicsState::mem_start;
-	const Address physt_disp_at_addr=db.data().pointer().offset(100*320).address();
-	const SizeBytes physt_disp_size=320*50;
+	const SizeBytes heap_disp_size=320*100;
 
 	Ship*shp=new Ship;
 //	shp->phy().set_dangle(deg_to_rad(-5));
@@ -303,7 +300,6 @@ extern "C" [[noreturn]] void tsk4(){
 	while(true){
 		// copy heap
 		pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
-		pz_memcpy(physt_disp_at_addr,physt_address,physt_disp_size);
 
 		pb.pos({50,2}).fg(2).p("t=").p_hex_32b(osca_t);
 
@@ -320,6 +316,7 @@ extern "C" [[noreturn]] void tsk4(){
 					shp->phy().set_dpos({1,1});
 				}else{
 					err.pos({1,1}).p("out of free slots");
+					osca_halt();
 				}
 			}
 			if(shp){

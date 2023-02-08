@@ -18,15 +18,17 @@ static constexpr void dot(const Bitmap&bmp,const float x,const float y,const uns
 }
 
 class Object;
+constexpr static unsigned objects_max=64; // maximum number of objects
+
 // physics states are kept in their own buffer for better CPU cache utilization at update
 class PhysicsState final{
 public:
-	Point2D pos_;
-	Point2D dpos_;
-	Point2D ddpos_;
-	Angle agl_;
-	Angle dagl_;
-	Object*obj_; // pointer to the object to which this physics state belongs to
+	Point2D pos_{0,0};
+	Point2D dpos_{0,0};
+	Point2D ddpos_{0,0};
+	Angle agl_=0;
+	Angle dagl_=0;
+	Object*obj_=nullptr; // pointer to the object to which this physics state belongs to
 
 	inline constexpr auto pos()const->const Point2D&{return pos_;}
 	inline constexpr auto dpos()const->const Point2D&{return dpos_;}
@@ -51,15 +53,17 @@ public:
 	static PhysicsState*mem_start;
 	static PhysicsState*next_free;
 	static PhysicsState*mem_limit;
-	static auto init_statics(const Address bufferStart,const unsigned instancesCount){
-		mem_start=reinterpret_cast<PhysicsState*>(bufferStart);
+	static auto init_statics(){
+		mem_start=new PhysicsState[objects_max];
+//		mem_start=reinterpret_cast<PhysicsState*>(bufferStart);
 		next_free=mem_start;
-		mem_limit=reinterpret_cast<PhysicsState*>(mem_start+instancesCount);
+		mem_limit=reinterpret_cast<PhysicsState*>(mem_start+objects_max);
 	}
 	static auto alloc()->PhysicsState*{
 		// check buffer overrun
 		if(next_free==mem_limit){
 			err.p("PhysicsState:e1");
+			osca_halt();
 		}
 		PhysicsState*p=next_free;
 		next_free++;
@@ -99,22 +103,6 @@ PhysicsState*PhysicsState::mem_limit;
 PhysicsState*PhysicsState::next_free;
 
 class Object{
-public:
-	constexpr static unsigned all_len=64; // maximum number of objects
-	static Object*all[]; // array of pointers to allocated objects
-	static unsigned short freeSlots[all_len]; // free indexes in all[]
-	static unsigned short freeSlots_ix; // index in freeSlots[] of next free slot
-	static inline auto hasFreeSlot()->bool{return freeSlots_ix!=0;}
-	static auto init_statics(){
-		const unsigned n=sizeof(freeSlots)/sizeof(unsigned short);
-	//	out.printer().p_hex_32b(n).spc().p_hex_16b(objects_free_indexes_pos).spc();
-		for(unsigned short i=0;i<n;i++){
-			freeSlots[i]=i;
-		}
-		freeSlots_ix=all_len-1;
-	}
-	static auto update_all();
-	static auto render_all(Bitmap&bmp);
 protected:
 	PhysicsState*phy_; // kept in own buffer of states for better CPU cache utilization at update
 	                   // may change between frames (when objects are deleted)
@@ -154,6 +142,7 @@ public:
 
 		if(!freeSlots_ix){
 			err.pos({1,1}).p("out of free slots");
+			osca_halt();
 			return;
 		}
 		slot_=freeSlots[freeSlots_ix];
@@ -202,33 +191,49 @@ private:
 		Mmw_pos_=phy().pos_;
 		return true;
 	}
-};
-Object*Object::all[all_len];
-unsigned short Object::freeSlots[all_len];
-unsigned short Object::freeSlots_ix=all_len-1;
-auto Object::update_all(){
-	static Object*deleted[all_len]; // ? temporary impl
-	int deleted_ix=0;
-	for(Object*o:Object::all){
-		if(!o)
-			continue;
-		if(!o->update()){
-			deleted[deleted_ix]=o;
-			deleted_ix++;
+	//----------------------------------------------------------------
+	// statics
+	//----------------------------------------------------------------
+public:
+	static Object*all[objects_max]; // array of pointers to allocated objects
+	static unsigned short freeSlots[objects_max]; // free indexes in all[]
+	static unsigned short freeSlots_ix; // index in freeSlots[] of next free slot
+	static inline auto hasFreeSlot()->bool{return freeSlots_ix!=0;}
+	static auto init_statics(){
+		const unsigned n=sizeof(freeSlots)/sizeof(unsigned short);
+	//	out.printer().p_hex_32b(n).spc().p_hex_16b(objects_free_indexes_pos).spc();
+		for(unsigned short i=0;i<n;i++){
+			freeSlots[i]=i;
+		}
+		freeSlots_ix=objects_max-1;
+	}
+	static auto update_all(){
+		static Object*deleted[objects_max]; // ? temporary impl
+		int deleted_ix=0;
+		for(Object*o:Object::all){
+			if(!o)
+				continue;
+			if(!o->update()){
+				deleted[deleted_ix]=o;
+				deleted_ix++;
+			}
+		}
+	//	out.printer().pos(1,1);
+		for(int i=0;i<deleted_ix;i++){
+	//		out.printer().p_hex_16b(static_cast<unsigned short>(i)).p(' ');
+			delete deleted[i];
 		}
 	}
-//	out.printer().pos(1,1);
-	for(int i=0;i<deleted_ix;i++){
-//		out.printer().p_hex_16b(static_cast<unsigned short>(i)).p(' ');
-		delete deleted[i];
+	static auto render_all(Bitmap&bmp){
+		for(Object*o:Object::all){
+			if(!o)
+				continue;
+			o->render(bmp);
+		}
 	}
-}
-auto Object::render_all(Bitmap&bmp){
-	for(Object*o:Object::all){
-		if(!o)
-			continue;
-		o->render(bmp);
-	}
-}
+};
+Object*Object::all[objects_max];
+unsigned short Object::freeSlots[objects_max];
+unsigned short Object::freeSlots_ix=objects_max-1;
 
 }// end namespace
