@@ -176,16 +176,12 @@ asm("  jmp tsk1");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] void tsk2(){
 	while(true){
-//		osca_yield();
 		// copy kernel to screen
-		Data src=Data(Address(0x07c00),512*3);// kernel binary
-//		Data dst1=Data(Address(0x11'0000),512*3);// to odd meg testing a20 enabled line
-		Data dst2=Data(Address(0xa'0000+320*150),512*3);// on screen line 150
-//		Data dst2=Data(Address(0xabb80),512*3);// on screen line 150
-//		src.to(dst1);
-		src.to(dst2);
+		constexpr int kernel_size=512*3;
+		Data src=Data(Address(0x7c00),kernel_size); // kernel binary
+		Data dst=Data(Address(0xa'0000+320*150),kernel_size); // on screen
+		src.to(dst);
 		osca_yield();
-//		dst1.to(dst2);
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
