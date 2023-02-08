@@ -196,6 +196,20 @@ static ObjectDef rectangle_def;
 static ObjectDef ship_def;
 static ObjectDef bullet_def;
 
+class Wall:public Object{
+public:
+	Wall(const Scale scl,const Point2D&pos,const Angle agl):
+		Object{4,rectangle_def,scl,pos,agl,3}
+	{}
+	// returns false if object is to be deleted
+	constexpr virtual auto on_collision(Object&other)->bool{
+//		out.p("col ").p_hex_8b(static_cast<unsigned char>(other.type_bits()));
+		if(other.type_bits()==2) // collision with type bullet
+			return false; // delete
+		return true;
+	}
+};
+
 static unsigned char colr;
 class Bullet:public Object{
 public:
@@ -216,6 +230,12 @@ public:
 		if(phy().pos.y<70){
 			return false;
 		}
+		return true;
+	}
+	// returns false if object is to be deleted
+	constexpr virtual auto on_collision(Object&other)->bool{
+		if(other.type_bits()==4) // collision with type wall
+			return false; // delete
 		return true;
 	}
 };
@@ -319,17 +339,10 @@ extern "C" [[noreturn]] void tsk4(){
 
 	Ship*shp=new Ship;
 	shp->phy().pos={160,100};
-//	shp->phy().dpos={1,1};
 
-//	Ship*shp2=new Ship;
-//	shp2->phy().pos={100,100};
-//	shp2->phy().dagl=deg_to_rad(7);
-//	shp2->phy().dpos={-1,0};
-
-	Object*wall=new Object{4,rectangle_def,10,{130,100},0,3};
-//	new Object{rectangle_def,10,{130,80},deg_to_rad(90),3};
-	wall->phy().agl=deg_to_rad(45);
-//	wall->phy().dagl=deg_to_rad(1);
+	for(float i=30;i<300;i+=20){
+		new Wall(5,{i,120},deg_to_rad(i));
+	}
 
 	// start task
 	while(true){
@@ -343,38 +356,8 @@ extern "C" [[noreturn]] void tsk4(){
 		PhysicsState::update_physics_states();
 		Object::update_all();
 		Object::render_all(dsp);
+		Object::check_collisions();
 		shp->phy().dpos={0,0};
-
-		out.pos({1,2}).p("                         ").pos({1,2});
-		if(shp&&wall){
-			if(Object::check_collision_bounding_circles(*shp,*wall)){
-				const bool collision1=Object::check_collision(*shp,*wall);
-				out.p(collision1?"col   ":"nocol ");
-				if(collision1){
-					if(!shp->on_collision(*wall)){
-						delete shp;
-						shp=nullptr;
-					}
-					if(!wall->on_collision(*shp)){
-						delete wall;
-						wall=nullptr;
-					}
-				}else{
-					const bool collision2=Object::check_collision(*wall,*shp);
-					out.p(collision2?"col   ":"nocol ");
-					if(collision2){
-						if(!shp->on_collision(*wall)){
-							delete shp;
-							shp=nullptr;
-						}
-						if(!wall->on_collision(*shp)){
-							delete wall;
-							wall=nullptr;
-						}
-					}
-				}
-			}
-		}
 
 		const char ch=table_scancode_to_ascii[osca_key];
 		if(ch){
@@ -403,8 +386,9 @@ extern "C" [[noreturn]] void tsk4(){
 					shp->phy().agl+=deg_to_rad(2);
 					break;
 				case'x':
-					delete shp;
-					shp=nullptr;
+					for(float i=30;i<300;i+=20){
+						new Wall(5,{i,120},deg_to_rad(i));
+					}
 					break;
 				case' ':
 					shp->fire();

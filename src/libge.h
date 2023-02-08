@@ -122,7 +122,7 @@ PhysicsState*PhysicsState::next_free;
 namespace enable{
 	constexpr bool draw_normals=false;
 	constexpr bool draw_collision_check=false;
-	constexpr bool draw_bounding_circle=true;
+	constexpr bool draw_bounding_circle=false;
 }
 
 using SlotIx=unsigned short; // index in Object::freeSlots[]
@@ -290,7 +290,7 @@ public:
 		return o;
 	}
 	static auto update_all(){
-		static Object*deleted[objects_max]; // ? temporary impl
+		static Object*deleted[objects_max]; // ? todo temporary for now
 		int deleted_ix=0;
 
 		for(SlotIx i=0;i<used_ixes_i;i++){
@@ -329,7 +329,7 @@ public:
 		const float d2=v.x+v.y;
 		if(d2>dist2)
 			return false;
-		out.p("bounds ");
+//		out.p("bounds ");
 		return true;
 	}
 	static auto check_collision(Object&o1,Object&o2)->bool{
@@ -374,6 +374,40 @@ public:
 			const Coord y=p.y+scl*sin(th);
 			dot(dsp,x,y,1);
 			th+=dth;
+		}
+	}
+	static auto check_collisions(){
+		static Object*deleted[objects_max]; // ? todo temporary for now
+		int deleted_ix=0;
+
+		for(unsigned i=0;i<used_ixes_i-1u;i++){
+			for(unsigned j=i+1;j<used_ixes_i;j++){
+				Object*o1=used_ixes[i].obj;
+				Object*o2=used_ixes[j].obj;
+				if(!Object::check_collision_bounding_circles(*o1,*o2))
+					continue;
+				if(Object::check_collision(*o1,*o2)){
+					if(!o1->on_collision(*o2)){
+						deleted[deleted_ix++]=o1;
+					}
+					if(!o2->on_collision(*o1)){
+						deleted[deleted_ix++]=o2;
+					}
+					continue;
+				}
+				if(Object::check_collision(*o2,*o1)){
+					if(!o1->on_collision(*o2)){
+						deleted[deleted_ix++]=o1;
+					}
+					if(!o2->on_collision(*o1)){
+						deleted[deleted_ix++]=o2;
+					}
+				}
+			}
+		}
+
+		for(int i=0;i<deleted_ix;i++){
+			delete deleted[i];
 		}
 	}
 };
