@@ -199,7 +199,6 @@ public:
 	static inline auto hasFreeSlot()->bool{return freeSlots_ix!=0;}
 	static auto init_statics(){
 		const unsigned n=sizeof(freeSlots)/sizeof(unsigned short);
-	//	out.printer().p_hex_32b(n).spc().p_hex_16b(objects_free_indexes_pos).spc();
 		for(unsigned short i=0;i<n;i++){
 			freeSlots[i]=i;
 		}
