@@ -47,7 +47,7 @@ CF+=-Wfatal-errors # stop at first error
 CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
 # GNU ld (GNU Binutils for Ubuntu) 2.39
-LF=-T ../link.ld -melf_i386 -nostdlib # ../link.ld to be able to build in eclipse with same link.ld file
+LF=-Tlink.ld -melf_i386 -nostdlib # ../link.ld to be able to build in eclipse with same link.ld file
 
 # usb device
 INSTALL_TO=/dev/sda
@@ -63,13 +63,12 @@ build:
 	@echo
 #	clang-tidy src/main.cc
 #	@echo
-	@# to be able to build in eclipse with same link.ld change directory to bin
-	cd bin && ld -o $(IMAGE) $(LF) && chmod -x $(IMAGE)
+	ld -o $(IMAGE) $(LF) && chmod -x $(IMAGE)
 	@echo
 	
 print:
 	@echo sizes
-	@du -b bin/$(IMAGE) $(FILES)
+	@du -b $(IMAGE) $(FILES)
 	@echo
 	@echo wc source
 	@wc $(FILES)
@@ -77,13 +76,13 @@ print:
 	@echo "wc source | gzip"
 	@cat $(FILES)|gzip|wc
 	@echo
-	@if [ $(shell stat -c "%s" bin/pczero.img) -ge 66048 ]; then echo '!!!';echo '!!! IMAGE FILE GREATER THAN OSCA LOADS';echo '!!!';echo; fi
+	@if [ $(shell stat -c "%s" pczero.img) -ge 66048 ]; then echo '!!!';echo '!!! IMAGE FILE GREATER THAN OSCA LOADS';echo '!!!';echo; fi
 	
 clean:
 	@rm -fr bin/*
 
 display:
-	qemu-system-i386 -m 2M -drive file=bin/$(IMAGE),format=raw
+	qemu-system-i386 -m 2M -drive file=$(IMAGE),format=raw
 	@echo
 
 install:
