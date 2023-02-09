@@ -390,7 +390,7 @@ public:
 		bool is_collision=false;
 		// for each point in o1 bounding shape
 		for(unsigned i=0;i<o1.def_.nbnd;i++){
-			const Point2D&p1=o1.pts_wld_[i];
+			const Point2D&p1=o1.pts_wld_[o1.def_.bnd[i]];
 			is_collision=true; // assume is collision
 			// for each normal in o2
 			for(unsigned j=0;j<o2.def_.nbnd;j++){
