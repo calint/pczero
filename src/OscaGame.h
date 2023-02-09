@@ -42,7 +42,7 @@ class Bullet:public Object{
 public:
 	Bullet():
 		// type bits 0b10 check collision with type 'wall' 0b100
-		Object{0b10,0b100,bullet_def,.5f,{0,0},0,4}
+		Object{0b10,0b100,bullet_def,1,{0,0},0,4}
 	{}
 	constexpr virtual auto update()->bool override{
 		Object::update();

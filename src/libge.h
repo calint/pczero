@@ -387,20 +387,25 @@ public:
 		if(o2.def_.nbnd<3)
 			return false;
 
-		bool is_collision=false;
 		// for each point in o1 bounding shape
-		for(unsigned i=0;i<o1.def_.nbnd;i++){
-			const Point2D&p1=o1.pts_wld_[o1.def_.bnd[i]];
-			is_collision=true; // assume is collision
+		const PointIx*bndptr1=o1.def_.bnd; // bounding point index
+		const unsigned short nbnd1=o1.def_.nbnd;
+		const unsigned short nbnd2=o2.def_.nbnd;
+		for(unsigned i=0;i<nbnd1;i++){
+			// reference pts_pts_wld_[bnd[i]]
+			const Point2D&p1=o1.pts_wld_[*bndptr1++];
 			// for each normal in o2
-			for(unsigned j=0;j<o2.def_.nbnd;j++){
-				const Vector2D&p2=o2.pts_wld_[o2.def_.bnd[j]];
+			const PointIx*bndptr2=o2.def_.bnd;  // bounding point index
+			const Vector2D*nlptr=o2.nmls_wld_; // normals
+			bool is_collision=true; // assume is collision
+			for(unsigned j=0;j<nbnd2;j++){
+				// reference vector_pts_wld_[bnd[j]]
+				const Vector2D&p2=o2.pts_wld_[*bndptr2++];
 				if(enable::draw_collision_check){
 					dot(vga13h.bmp(),p2.x,p2.y,5);
 				}
-				const Vector2D&nl=o2.nmls_wld_[j]; // normal for this line
 				const Vector2D v=p1-p2; // vector from line point to point to check
-				if(v.dot(nl)>0){ // use abs(v)<0.0001f (example)?
+				if(v.dot(*nlptr++)>0){ // use abs(v)<0.0001f (example)?
 					// p "in front" of v, cannot be collision
 					is_collision=false;
 					break;
