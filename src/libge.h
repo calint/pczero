@@ -376,7 +376,7 @@ public:
 				}
 				const Vector2D&nl=o2.nmls_wld_[j];
 				const Vector2D v=p1-p2;
-				if(v.dot(nl)>0){ // ? use abs(v)<0.0001f (example)
+				if(v.dot(nl)>0){ // use abs(v)<0.0001f (example)?
 					// p "in front" of v, cannot be collision
 					is_collision=false;
 					break;
