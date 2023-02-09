@@ -18,11 +18,13 @@ static ObjectDef wall_def;
 static ObjectDef missile_def;
 
 class Enemy:public Object{
+	static constexpr Scale scale=5;
+	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 public:
 	// type bits 0b100 check collision with
 	// 'bullet'  0b0'0010
 	Enemy(const Point2D&pos,const Angle agl):
-		Object{0b100,0b10,enemy_def,5,pos,agl,3}
+		Object{0b100,0b10,enemy_def,scale,bounding_radius,pos,agl,3}
 	{
 		game::enemies_alive++;
 	}
@@ -42,6 +44,8 @@ public:
 };
 
 class Bullet:public Object{
+	static constexpr Scale scale=1;
+	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 public:
 	Bullet():
 		// type bits 0b10 check collision with
@@ -49,7 +53,7 @@ public:
 		// 'enemies' 0b0'0100
 		// 'walls'   0b0'1000
 		// 'missiles'0b1'0000
-		Object{0b10,0b1'1101,bullet_def,1,{0,0},0,4}
+		Object{0b10,0b1'1101,bullet_def,scale,bounding_radius,{0,0},0,4}
 	{}
 	constexpr virtual auto update()->bool override{
 		Object::update();
@@ -74,6 +78,8 @@ public:
 };
 
 class Ship:public Object{
+	static constexpr Scale scale=5;
+	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 	unsigned fire_t=0;
 public:
 	Ship():
@@ -82,7 +88,7 @@ public:
 		// 'enemies' 0b0'0100
 		// 'walls'   0b0'1000
 		// 'missiles'0b1'0000
-		Object{0b1,0b1'1110,ship_def,4,{0,0},0,2}
+		Object{0b1,0b1'1110,ship_def,scale,bounding_radius,{0,0},0,2}
 	{}
 
 	constexpr virtual auto update()->bool override{
@@ -122,15 +128,17 @@ class Wall:public Object{
 public:
 	// type bits 0b100 check collision with nothing
 	Wall(const Scale scl,const Point2D&pos,const Angle agl):
-		Object{0b0'1000,0,wall_def,scl,pos,agl,3}
+		Object{0b0'1000,0,wall_def,scl,scl*sqrt_of_2,pos,agl,3}
 	{}
 };
 
 
 class Missile:public Object{
+	static constexpr Scale scale=2;
+	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 public:
 	Missile():
-		Object{0b1'0000,0b1111,missile_def,2,{0,0},0,4}
+		Object{0b1'0000,0b1111,missile_def,scale,bounding_radius,{0,0},0,4}
 	{}
 	constexpr virtual auto update()->bool override{
 		Object::update();

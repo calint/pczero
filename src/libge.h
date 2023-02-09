@@ -123,7 +123,7 @@ PhysicsState*PhysicsState::next_free;
 namespace enable{
 	constexpr static bool draw_normals=false;
 	constexpr static bool draw_collision_check=false;
-	constexpr static bool draw_bounding_circle=false;
+	constexpr static bool draw_bounding_circle=true;
 }
 
 constexpr bool metrics_enable=true;
@@ -179,7 +179,7 @@ public:
 //	constexpr Object(Object&&)=delete; // move ctor
 	constexpr Object&operator=(const Object&)=delete; // copy assignment
 //	Object&operator=(Object&&)=delete; // move assignment
-	Object(const TypeBits tb,const TypeBits colchk_tb,const ObjectDef&def,const Scale scl,const Point2D&pos,const Angle rad,const unsigned char color):
+	Object(const TypeBits tb,const TypeBits colchk_tb,const ObjectDef&def,const Scale scl,const Scale bounding_radius,const Point2D&pos,const Angle rad,const unsigned char color):
 		tb_{tb},
 		colchk_tb_{colchk_tb},
 		phy_{PhysicsState::alloc()},
@@ -191,7 +191,7 @@ public:
 		Mmw_pos_{0,0},
 		Mmw_agl_{0},
 		Mmw_scl_{0},
-		br_{scl*sqrt_of_2},
+		br_{bounding_radius},
 		color_{color}
 	{
 		// initiate physics state
