@@ -156,6 +156,7 @@ public:
 		const Address heap_disp_at_addr=vga13h.bmp().data().pointer().offset(50*320).address();
 		const SizeBytes heap_disp_size=320*100;
 
+
 		Ship*shp=new Ship;
 		shp->phy().pos={160,130};
 

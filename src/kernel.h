@@ -10,33 +10,118 @@ extern "C" [[noreturn]] void tsk3();
 extern "C" [[noreturn]] void tsk4();
 
 namespace osca{
+	class HeapEntry{
+	public:
+		void*ptr;
+		unsigned size;
+	};
 	class Heap{
 		static Data d_;
 		static char*ptr_; // pointer to free memory
 		static char*ptr_lim_; // limit of buffer
+		static HeapEntry*entry_used_start_; // beginning of vector containing used memory info
+		static HeapEntry*entry_used_next_;
+		static HeapEntry*entry_used_lim_;
+		static HeapEntry*entry_free_start_; // beginning of vector containing freed memory info
+		static HeapEntry*entry_free_next_;
+		static HeapEntry*entry_free_lim_;
+		static constexpr Size heap_entries_max=256; // ? setting
 	public:
-		static auto init_statics(const Data&d){
+		static auto init_statics(const Data&d)->void{
 			d_=d;
 			ptr_=reinterpret_cast<char*>(d.address());
-			ptr_lim_=ptr_+d.size();
+			entry_used_start_=static_cast<HeapEntry*>(d.limit())-heap_entries_max;
+			entry_used_next_=entry_used_start_;
+			entry_used_lim_=entry_used_start_+heap_entries_max;
+
+			entry_free_start_=entry_used_start_-heap_entries_max;
+			entry_free_next_=entry_free_start_;
+			entry_free_lim_=entry_free_start_+heap_entries_max;
+			ptr_lim_=reinterpret_cast<char*>(entry_used_start_);
 		}
-		static inline const Data&data(){
+		static inline auto data()->const Data&{
 			return d_;
 		}
-		static inline auto alloc(const unsigned size)->void*{
+		static auto alloc(const unsigned size)->void*{
+			// try to find a free slot with that size
+			HeapEntry*he=entry_free_start_;
+			while(he<entry_free_lim_){
+				if(he->size==size){
+					// found a matching size entry
+					void*p=he->ptr;
+					// move to used entries
+					if(entry_used_next_>=entry_used_lim_){
+						err.p("Heap.alloc: 1");
+						osca_halt();
+					}
+					*entry_used_next_=*he;
+					entry_used_next_++;
+					// copy last free to this slot
+					entry_free_next_--;
+					*he=*entry_free_next_;
+					pz_memset(entry_free_next_,3,sizeof(HeapEntry));
+					return p;
+				}
+				he++;
+			}
+			// did not find in free list
 			char*p=ptr_;
 			ptr_+=size;
 			if(ptr_>ptr_lim_){
-				err.p("heap overrun");
+				err.p("alloc: heap overrun");
 				osca_halt();
 			}
+			if(entry_used_next_>=entry_used_lim_){
+				err.p("alloc: heap entries overrun");
+				osca_halt();
+			}
+			// write to used list
+			*entry_used_next_={p,size};
+			entry_used_next_++;
 			return reinterpret_cast<void*>(p);
 		}
-		static inline auto clear_buffer(const unsigned char b=0)->void{d_.clear(b);}
+		static auto free(void*ptr)->void{
+			HeapEntry*hep=entry_used_start_;
+			while(hep<entry_used_next_){
+				if(hep->ptr==ptr){
+					// found the allocation entry
+					// copy entry from used to free
+					if(entry_free_next_>=entry_free_lim_){
+						err.p("free: heap entries overrun");
+						osca_halt();
+					}
+					*entry_free_next_=*hep;
+					entry_free_next_++;
+
+					// copy last entry from used list to this entry
+					entry_used_next_--;
+					*hep=*entry_used_next_;
+
+					// debugging
+					pz_memset(ptr,5,static_cast<SizeBytes>(hep->size));
+					pz_memset(entry_used_next_,5,sizeof(HeapEntry));
+					return;
+				}
+				hep++;
+			}
+			err.p("Heap.free: 1");
+			osca_halt();
+		}
+		static auto clear_buffer(const unsigned char b=0){d_.clear(b);}
+		static auto clear_heap_entries(unsigned char b1=0,unsigned char b2=0){
+			pz_memset(entry_free_start_,b1,heap_entries_max*sizeof(HeapEntry));
+			pz_memset(entry_used_start_,b2,heap_entries_max*sizeof(HeapEntry));
+		}
 	};
 	Data Heap::d_ {nullptr,0};
 	char*Heap::ptr_;
 	char*Heap::ptr_lim_;
+	HeapEntry*Heap::entry_used_start_;
+	HeapEntry*Heap::entry_used_next_;
+	HeapEntry*Heap::entry_used_lim_;
+	HeapEntry*Heap::entry_free_start_;
+	HeapEntry*Heap::entry_free_next_;
+	HeapEntry*Heap::entry_free_lim_;
 }
 // called by C++ to allocate and free memory
 void operator delete(void*ptr,unsigned size)noexcept;
@@ -45,16 +130,20 @@ void operator delete[](void*ptr,unsigned size)noexcept;
 void*operator new[](unsigned count){return osca::Heap::alloc(count);}
 void*operator new(unsigned count){return osca::Heap::alloc(count);}
 void operator delete(void*ptr)noexcept{
-//	out.p("d:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+	//	out.p("d:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+	osca::Heap::free(ptr);
 }
 void operator delete(void*ptr,unsigned size)noexcept{
-//	out.p("ds:").p_hex_16b(static_cast<unsigned short>(size)).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+	//	out.p("ds:").p_hex_16b(static_cast<unsigned short>(size)).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+	osca::Heap::free(ptr);
 }
 void operator delete[](void*ptr)noexcept{
-//	out.p("da:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+	//	out.p("da:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+	osca::Heap::free(ptr);
 }
 void operator delete[](void*ptr,unsigned size)noexcept{
-//	out.p("das:").p_hex_16b(static_cast<unsigned short>(size)).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+	//	out.p("das:").p_hex_16b(static_cast<unsigned short>(size)).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
+	osca::Heap::free(ptr);
 }
 
 namespace osca{
@@ -108,6 +197,7 @@ extern "C" void osca_init(){
 	out.pos({1,2}).fg(2);
 	Heap::init_statics({Address(0x10'0000),320*50});
 	Heap::clear_buffer(0x12);
+	Heap::clear_heap_entries(3,5);
 	Object::init_statics();
 	PhysicsState::init_statics();
 	PhysicsState::clear_buffer(1);

@@ -42,7 +42,9 @@ inline void pz_memcpy(Address to,Address from,SizeBytes n){
 	);
 }
 
-inline void pz_memset(Address to,unsigned char v,SizeBytes n){
+//inline void pz_memset(Address to,unsigned char v,SizeBytes n){
+void pz_memset(Address to,unsigned char v,SizeBytes n);
+void pz_memset(Address to,unsigned char v,SizeBytes n){
 	asm("mov %0,%%edi;"
 		"mov %1,%%al;"
 		"mov %2,%%ecx;"
@@ -83,6 +85,7 @@ public:
 	inline auto to(const Data&d)const{pz_memcpy(d.address(),a_,s_);} // ? bounds check
 	inline auto to(const Data&d,const SizeBytes sb)const{pz_memcpy(d.address(),a_,sb);} // ? bounds check
 	inline auto clear(unsigned char byte=0)const{pz_memset(a_,byte,s_);}
+	inline constexpr auto limit()const->Address{return static_cast<char*>(a_)+s_;}
 };
 
 template<typename T>
