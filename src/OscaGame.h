@@ -115,7 +115,6 @@ public:
 		//----------------------------------------------------------
 		// init statics
 		//----------------------------------------------------------
-		// ? read from file
 		rectangle_def={5,4,
 			new Point2D[]{ // points in model coordinates, negative Y is "forward"
 				{ 0,0},
@@ -159,12 +158,9 @@ public:
 
 		Ship*shp=new Ship;
 		shp->phy().pos={160,130};
-//
-//		Wall*w=new Wall(5,{160,90},0);
-//		w->phy().dagl=deg_to_rad(1);
-
 		create_scene();
 
+//		Ship*shp=nullptr;
 	//	out.p_hex_16b(static_cast<unsigned short>(sizeof(Object))).pos({1,2});
 
 		// start task
