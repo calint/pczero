@@ -160,19 +160,18 @@ protected:
 	TypeBits colchk_tb_; // bits used to logical and with other object's type_bits and if true then collision detection is done
 	PhysicsState*phy_; // kept in own buffer of states for better CPU cache utilization at update
 	                   // may change between frames (when objects are deleted)
-	Scale scl_;
-	const ObjectDef&def_;
+	Scale scl_; // scale that is used in transform from model to world coordinates
+	const ObjectDef&def_; // contains the model definition
 	Point2D*pts_wld_; // transformed model to world points cache
 	Vector2D*nmls_wld_; // normals of bounding shape rotated to the world coordinates (not normalized if scale!=1)
 	Matrix2D Mmw_; // model to world transform
 	Point2D Mmw_pos_; // current position used in transform matrix
 	Angle Mmw_agl_; // current angle used in transform matrix
 	Scale Mmw_scl_;  // current scale used in transform matrix
-//	Object**obj_ix_=nullptr; // pointer to element int all[]
 	Scale br_; // bounding radius
-	SlotIx used_ix_=0; // index in used_ixes array
+	SlotIx used_ix_=0; // index in used_ixes array. used at new and delete
 	unsigned char color_=1;
-	unsigned char bits_=0; // flags, bit 1: set==dead
+	unsigned char bits_=0; // flags, bit 1:dead
 public:
 //	constexpr Object()=delete;
 	constexpr Object(const Object&)=delete; // copy ctor
