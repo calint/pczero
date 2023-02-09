@@ -94,7 +94,7 @@ public:
 
 	auto fire(){
 		const unsigned dt=osca_t-fire_t;
-		if(dt<5)
+		if(dt<3)
 			return;
 		fire_t=osca_t;
 		Bullet*b=new Bullet;
@@ -154,7 +154,7 @@ public:
 			new Point2D[]{
 				{ 0,0},
 			},
-			new PointIx[]{0} // bounding convex polygon CCW
+			new PointIx[]{} // bounding convex polygon CCW
 		};
 		bullet_def.init_normals();
 	}
@@ -173,6 +173,12 @@ public:
 //		Ship*shp=nullptr;
 	//	out.p_hex_16b(static_cast<unsigned short>(sizeof(Object))).pos({1,2});
 
+		constexpr unsigned char key_w=0;
+		constexpr unsigned char key_a=1;
+		constexpr unsigned char key_s=2;
+		constexpr unsigned char key_d=3;
+		constexpr unsigned char key_spc=4;
+		bool keyboard[]{false,false,false,false,false}; // wasd and space pressed status
 		// start task
 		while(true){
 			metrics::reset();
@@ -190,6 +196,7 @@ public:
 
 			//		out.pos({0,2}).p("                                              ").pos({0,2});
 			out.pos({12,2}).fg(2);
+			out.p("k=").p_hex_8b(static_cast<unsigned char>(osca_key)).spc();
 			out.p("e=").p_hex_8b(static_cast<unsigned char>(game::enemies_alive)).spc();
 			out.p("m=").p_hex_8b(static_cast<unsigned char>(metrics::matrix_set_transforms)).spc();
 			out.p("c=").p_hex_8b(static_cast<unsigned char>(metrics::collisions_checks)).spc();
@@ -205,35 +212,64 @@ public:
 			if(!game::player_alive)
 				shp=nullptr;
 
-			if(shp)
-				shp->phy().dpos={0,0};
-
 			const char ch=table_scancode_to_ascii[osca_key];
 			if(shp){
-				switch(ch){
-				case'w':
-					if(game::player_alive)
-						shp->phy().dpos=shp->forward_vector().scale(.3f);
-					break;
-				case'a':
-					if(game::player_alive)
-						shp->phy().agl-=deg_to_rad(2);
-					break;
-				case's':
-					if(game::player_alive)
-						shp->phy().dpos=shp->forward_vector().negate().scale(.3f);
-					break;
-				case'd':
-					if(game::player_alive)
-						shp->phy().agl+=deg_to_rad(2);
-					break;
-				case' ':
-					if(game::player_alive)
-						shp->fire();
-					break;
-				default:
-					break;
+				while(const unsigned kc=osca_keyb.get_next_scan_code()){
+					switch(kc){
+					case 0x11: // w pressed
+						keyboard[key_w]=true;
+						break;
+					case 0x91: // w released
+						keyboard[key_w]=false;
+						break;
+					case 0x1e: // a pressed
+						keyboard[key_a]=true;
+						break;
+					case 0x9e: // a released
+						keyboard[key_a]=false;
+						break;
+					case 0x1f: // s pressed
+						keyboard[key_s]=true;
+						break;
+					case 0x9f: // s released
+						keyboard[key_s]=false;
+						break;
+					case 0x20: // d pressed
+						keyboard[key_d]=true;
+						break;
+					case 0xa0: // d released
+						keyboard[key_d]=false;
+						break;
+					case 0x39: // space pressed
+						keyboard[key_spc]=true;
+						break;
+					case 0xb9: // space released
+						keyboard[key_spc]=false;
+						break;
+					default:
+						break;
+					}
 				}
+				if(keyboard[key_w])
+					shp->phy().dpos=shp->forward_vector().scale(.3f);
+
+				if(keyboard[key_a])
+					shp->phy().dagl=-deg_to_rad(2);
+
+				if(keyboard[key_s])
+					shp->phy().dpos=shp->forward_vector().negate().scale(.3f);
+
+				if(keyboard[key_d])
+					shp->phy().dagl=deg_to_rad(2);
+
+				if(!keyboard[key_a]&&!keyboard[key_d])
+					shp->phy().dagl=0;
+
+				if(!keyboard[key_w]&&!keyboard[key_s])
+					shp->phy().dpos={0,0};
+
+				if(keyboard[key_spc])
+					shp->fire();
 			}
 			switch(ch){
 			case'x':

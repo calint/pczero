@@ -185,10 +185,13 @@ namespace osca{
 
 // called by osca from the keyboard interrupt
 extern "C" void osca_keyb_ev(){
+	// on screen
 	*reinterpret_cast<int*>(0xa0000+4)=osca_key;
+
+	// to keyboard handler
 	osca::osca_keyb.on_key(osca_key);
-	static unsigned char*p=reinterpret_cast<unsigned char*>(0xa0000+320*49+100);
-	*p++=osca_key;
+//	static unsigned char*p=reinterpret_cast<unsigned char*>(0xa0000+320*49+100);
+//	*p++=osca_key;
 }
 
 // called by osca from the keyboard interrupt
