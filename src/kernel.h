@@ -90,6 +90,7 @@ extern "C" void osca_keyb_ev(){
 	static unsigned char*p=reinterpret_cast<unsigned char*>(0xa0000+320*49+100);
 	*p++=osca_key;
 }
+
 // called by osca from the keyboard interrupt
 extern "C" void osca_init(){
 	using namespace osca;

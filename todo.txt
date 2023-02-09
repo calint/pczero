@@ -1,8 +1,9 @@
-[ ] libge heap optimized for Object
-[ ] O(1) delete and nearly O(1) alloc
-[ ]   HeapElem{*prv,*nxt,ushort size,ubyte sizeh,ubyte bits} 12 B
-[ ]     bits: 1=deleted, allows multiple delete calls during a frame
-[ ]     size: 20 bits
+[ ] heap
+[ ]   step 1. simplest. linked list of free memory
+[ ]   step 2. hash table on size with linked list
+[ ]   step 3. libge heap optimized for Object
+[ ]     O(1) delete and nearly O(1) alloc
+[ ]       HeapElem{*prv,*nxt,ushort size,ubyte sizeh,ubyte bits} 12 B
 [o] input text
 [x]   step 1. one keyboard buffer for the system
 [ ]   step 2. "osca_keyb_task" pointer to function that should read keyboard

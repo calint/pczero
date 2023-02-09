@@ -20,11 +20,11 @@ public:
 		const unsigned n=nbnd-1;
 		for(unsigned i=0;i<n;i++){
 			const Vector2D d=pts[bnd[i+1]]-pts[bnd[i]];
-			nmls[i]={-d.y,d.x}; // normal to he line d
+			nmls[i]={-d.y,d.x}; // normal to the line d
 			nmls[i].normalize();
 		}
 		const Vector2D d=pts[bnd[0]]-pts[bnd[nbnd-1]];
-		nmls[nbnd-1]={-d.y,d.x}; // normal to he line d
+		nmls[nbnd-1]={-d.y,d.x}; // normal to the line d
 		nmls[nbnd-1].normalize();
 	}
 };
