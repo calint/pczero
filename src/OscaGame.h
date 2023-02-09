@@ -280,15 +280,10 @@ public:
 			out.p("f=").p_hex_8b(static_cast<unsigned char>(Object::free_ixes_i)).spc();
 			out.p("u=").p_hex_8b(static_cast<unsigned char>(Object::used_ixes_i)).spc();
 			out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_t));
-//			shp->phy().agl+=deg_to_rad(1);
-//			shp->fire();
-//			osca_yield();
-//			continue;
 
 			if(!game::player_alive)
 				shp=nullptr;
 
-			const char ch=table_scancode_to_ascii[osca_key];
 			if(shp){
 				while(const unsigned kc=osca_keyb.get_next_scan_code()){
 					switch(kc){
@@ -347,7 +342,7 @@ public:
 				if(keyboard[key_spc])
 					shp->fire();
 			}
-			switch(ch){
+			switch(table_scancode_to_ascii[osca_key]){
 			case'x':
 				if(game::enemies_alive==0)
 					create_scene();
