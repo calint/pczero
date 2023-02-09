@@ -53,6 +53,8 @@ class Object;
 // the delete happens when deleted_commit() is called
 namespace world{
 	constexpr float sec_per_tick=1/18.2f; // the default 18.2 Hz clock
+	constexpr static Size nobjects_max=256; // maximum number of objects
+
 	static float time_s=0;
 	static float time_dt_s=0;
 	static float time_prv_s=0;
@@ -71,16 +73,14 @@ namespace world{
 	static auto deleted_commit()->void;
 }
 
-constexpr static Size nobjects_max=256; // maximum number of objects
-
 // physics states are kept in their own buffer for better CPU cache utilization at update
 class PhysicsState final{
 public:
 	Point2D pos{0,0};
-	Point2D dpos{0,0};
-	Point2D ddpos{0,0};
+	Point2D dpos{0,0}; // velocity per sec
+	Point2D ddpos{0,0}; // acceleration per sec
 	Angle agl=0;
-	Angle dagl=0;
+	Angle dagl=0; // angular velocity per sec
 	Object*obj=nullptr; // pointer to the object to which this physics state belongs to
 
 //	inline constexpr auto pos()const->const Point2D&{return pos_;}
@@ -107,9 +107,9 @@ public:
 	static PhysicsState*next_free;
 	static PhysicsState*mem_limit;
 	static auto init_statics(){
-		mem_start=new PhysicsState[nobjects_max];
+		mem_start=new PhysicsState[world::nobjects_max];
 		next_free=mem_start;
-		mem_limit=reinterpret_cast<PhysicsState*>(mem_start+nobjects_max);
+		mem_limit=reinterpret_cast<PhysicsState*>(mem_start+world::nobjects_max);
 	}
 	static auto alloc()->PhysicsState*{
 		// check buffer overrun
@@ -340,10 +340,10 @@ private:
 	// statics
 	//----------------------------------------------------------------
 public:
-	static Object*all[nobjects_max]; // array of pointers to allocated objects
-	static Object**free_ixes[nobjects_max]; // free indexes in all[]
+	static Object*all[world::nobjects_max]; // array of pointers to allocated objects
+	static Object**free_ixes[world::nobjects_max]; // free indexes in all[]
 	static SlotIx free_ixes_i; // index in freeSlots[] of next free slot
-	static SlotInfo used_ixes[nobjects_max]; // free indexes in all[]
+	static SlotInfo used_ixes[world::nobjects_max]; // free indexes in all[]
 	static SlotIx used_ixes_i; // index in freeSlots[] of next free slot
 	static inline auto hasFreeSlot()->bool{return free_ixes_i!=0;}
 	static auto init_statics(){
@@ -351,7 +351,7 @@ public:
 		for(SlotIx i=0;i<n;i++){
 			free_ixes[i]=&all[i];
 		}
-		free_ixes_i=nobjects_max-1;
+		free_ixes_i=world::nobjects_max-1;
 	}
 	static inline auto object_for_used_slot(const SlotIx i)->Object*{
 		Object*o=used_ixes[i].obj;
@@ -488,14 +488,14 @@ public:
 //		world::deleted_commit();
 	}
 };
-Object*Object::all[nobjects_max];
-Object**Object::free_ixes[nobjects_max];
-SlotIx Object::free_ixes_i=nobjects_max-1;
-SlotInfo Object::used_ixes[nobjects_max];
+Object*Object::all[world::nobjects_max];
+Object**Object::free_ixes[world::nobjects_max];
+SlotIx Object::free_ixes_i=world::nobjects_max-1;
+SlotInfo Object::used_ixes[world::nobjects_max];
 SlotIx Object::used_ixes_i=0;
 
 namespace world{
-	static Object*deleted[nobjects_max]; // ? todo improve with lesser memory footprint
+	static Object*deleted[world::nobjects_max]; // ? todo improve with lesser memory footprint
 	static int deleted_ix=0;
 	static auto deleted_add(Object*o)->void{ // ! this might be called several times for the same object
 //		if(!o->is_alive()){

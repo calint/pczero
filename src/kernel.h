@@ -209,7 +209,7 @@ extern "C" void osca_init(){
 	err.pos({1,1}).fg(4);
 	out=PrinterToVga();
 	out.pos({1,2}).fg(2);
-	Heap::init_statics({Address(0x10'0000),320*100},nobjects_max);
+	Heap::init_statics({Address(0x10'0000),320*100},world::nobjects_max);
 	Heap::clear_buffer(0x12);
 	Heap::clear_heap_entries(3,5);
 	Object::init_statics();
