@@ -14,12 +14,15 @@ namespace game{
 static ObjectDef enemy_def;
 static ObjectDef ship_def;
 static ObjectDef bullet_def;
+static ObjectDef wall_def;
+static ObjectDef missile_def;
 
 class Enemy:public Object{
 public:
-	// type bits 0b100 check collision with type 'bullet' 0b10
-	Enemy(const Scale scl,const Point2D&pos,const Angle agl):
-		Object{0b100,0b10,enemy_def,scl,pos,agl,3}
+	// type bits 0b100 check collision with
+	// 'bullet'  0b0'0010
+	Enemy(const Point2D&pos,const Angle agl):
+		Object{0b100,0b10,enemy_def,5,pos,agl,3}
 	{
 		game::enemies_alive++;
 	}
@@ -41,8 +44,12 @@ public:
 class Bullet:public Object{
 public:
 	Bullet():
-		// type bits 0b10 check collision with type 'wall' 0b100
-		Object{0b10,0b100,bullet_def,1,{0,0},0,4}
+		// type bits 0b10 check collision with
+		// 'ship'    0b0'0001
+		// 'enemies' 0b0'0100
+		// 'walls'   0b0'1000
+		// 'missiles'0b1'0000
+		Object{0b10,0b1'1101,bullet_def,1,{0,0},0,4}
 	{}
 	constexpr virtual auto update()->bool override{
 		Object::update();
@@ -70,8 +77,12 @@ class Ship:public Object{
 	unsigned fire_t=0;
 public:
 	Ship():
-		// type bits 0b1 check collision with nothing 'wall' 0b100
-		Object{0b1,0b110,ship_def,4,{0,0},0,2}
+		// type bits 0b1 check collision with:
+		// 'bullets' 0b0'0010
+		// 'enemies' 0b0'0100
+		// 'walls'   0b0'1000
+		// 'missiles'0b1'0000
+		Object{0b1,0b1'1110,ship_def,4,{0,0},0,2}
 	{}
 
 	constexpr virtual auto update()->bool override{
@@ -106,13 +117,56 @@ public:
 	}
 };
 
+
+class Wall:public Object{
+public:
+	// type bits 0b100 check collision with nothing
+	Wall(const Scale scl,const Point2D&pos,const Angle agl):
+		Object{0b0'1000,0,wall_def,scl,pos,agl,3}
+	{}
+};
+
+
+class Missile:public Object{
+public:
+	Missile():
+		Object{0b1'0000,0b1111,missile_def,2,{0,0},0,4}
+	{}
+	constexpr virtual auto update()->bool override{
+		Object::update();
+		if(phy().pos.x>300){
+			return false;
+		}
+		if(phy().pos.x<20){
+			return false;
+		}
+		if(phy().pos.y>130){
+			return false;
+		}
+		if(phy().pos.y<70){
+			return false;
+		}
+		return true;
+	}
+	// returns false if object is to be deleted
+	constexpr virtual auto on_collision(Object&other)->bool override{
+		return false;
+	}
+};
+
 class OscaGame{
 	auto create_scene(){
 		for(float i=30;i<300;i+=20){
-			Enemy*w=new Enemy(5,{i,90},deg_to_rad(i));
+			Enemy*w=new Enemy({i,90},deg_to_rad(i));
 			w->phy().dagl=deg_to_rad(1);
 			w->phy().dpos={0,.2f};
 		}
+	}
+	auto create_scene2(){
+		new Wall(20,{160,100},0);
+	}
+	auto create_scene3(){
+		new Enemy({160,100},0);
 	}
 public:
 	OscaGame(){
@@ -142,21 +196,34 @@ public:
 		};
 		ship_def.init_normals();
 
-//		bullet_def={4,3,
-//			new Point2D[]{
-//				{ 0,-1},
-//				{-1,.5},
-//				{ 1,.5},
-//			},
-//			new PointIx[]{0,1,2} // bounding convex polygon CCW
-//		};
 		bullet_def={1,1,
 			new Point2D[]{
-				{ 0,0},
+				{0,0},
 			},
 			new PointIx[]{} // bounding convex polygon CCW
 		};
 		bullet_def.init_normals();
+
+		wall_def={4,4,
+			new Point2D[]{ // points in model coordinates, negative Y is "forward"
+				{-1,-1},
+				{-1, 1},
+				{ 1, 1},
+				{ 1,-1},
+			},
+			new PointIx[]{0,1,2,3} // bounding convex polygon CCW
+		};
+		wall_def.init_normals();
+
+		missile_def={4,3,
+			new Point2D[]{
+				{ 0,-1},
+				{-1,.5},
+				{ 1,.5},
+			},
+			new PointIx[]{0,1,2} // bounding convex polygon CCW
+		};
+		missile_def.init_normals();
 	}
 
 	[[noreturn]] auto start(){
@@ -168,6 +235,7 @@ public:
 
 		Ship*shp=new Ship;
 		shp->phy().pos={160,130};
+//		create_scene();
 		create_scene();
 
 //		Ship*shp=nullptr;

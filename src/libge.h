@@ -153,7 +153,7 @@ struct SlotInfo{
 };
 
 using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types.
-
+constexpr Scale sqrt_of_2=1.414213562f;
 class Object{
 protected:
 	TypeBits tb_; // object type that is usually a bit (32 object types supported)
@@ -169,6 +169,7 @@ protected:
 	Angle Mmw_agl_; // current angle used in transform matrix
 	Scale Mmw_scl_;  // current scale used in transform matrix
 //	Object**obj_ix_=nullptr; // pointer to element int all[]
+	Scale br_; // bounding radius
 	SlotIx used_ix_=0; // index in used_ixes array
 	unsigned char color_=1;
 	unsigned char bits_=0; // flags, bit 1: set==dead
@@ -190,6 +191,7 @@ public:
 		Mmw_pos_{0,0},
 		Mmw_agl_{0},
 		Mmw_scl_{0},
+		br_{scl*sqrt_of_2},
 		color_{color}
 	{
 		// initiate physics state
@@ -271,13 +273,13 @@ public:
 	}
 	constexpr auto draw_bounding_circle(Bitmap&dsp)->void{
 		Point2D p=phy().pos;
-		float scl=scale();
+		float r=bounding_radius();
 		const unsigned segments=static_cast<unsigned>(5.f*scale());
 		Angle th=0;
 		Angle dth=2*PI/static_cast<Angle>(segments);
 		for(unsigned i=0;i<segments;i++){
-			const Coord x=p.x+scl*cos(th);
-			const Coord y=p.y+scl*sin(th);
+			const Coord x=p.x+r*cos(th);
+			const Coord y=p.y+r*sin(th);
 			dot(dsp,x,y,1);
 			th+=dth;
 		}
@@ -296,6 +298,8 @@ public:
 			bits_|=1;
 		}
 	}
+
+	constexpr inline auto bounding_radius()const->Scale{return br_;}
 
 private:
 	constexpr auto refresh_wld_points()->void{
@@ -357,8 +361,8 @@ public:
 		}
 	}
 	static auto check_collision_bounding_circles(Object&o1,Object&o2)->bool{
-		const float r1=o1.scale();
-		const float r2=o2.scale();
+		const float r1=o1.bounding_radius();
+		const float r2=o2.bounding_radius();
 		const Point2D p1=o1.phy().pos;
 		const Point2D p2=o2.phy().pos;
 
