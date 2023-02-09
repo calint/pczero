@@ -6,6 +6,10 @@
 
 namespace osca{
 
+namespace game{
+	static bool player_alive=true;
+}
+
 static ObjectDef rectangle_def;
 static ObjectDef ship_def;
 static ObjectDef bullet_def;
@@ -63,7 +67,7 @@ class Ship:public Object{
 public:
 	Ship():
 		// type bits 0b1 check collision with nothing 'wall' 0b100
-		Object{0b1,0b100,ship_def,4,{0,0},0,2}
+		Object{0b1,0b110,ship_def,4,{0,0},0,2}
 	{}
 
 	constexpr virtual auto update()->bool override{
@@ -80,6 +84,7 @@ public:
 	// returns false if object is to be deleted
 	constexpr virtual auto on_collision(Object&other)->bool override{
 		// collision with 'wall'
+		game::player_alive=false;
 		return false;
 	}
 
@@ -89,13 +94,22 @@ public:
 			return;
 		fire_t=osca_t;
 		Bullet*b=new Bullet;
-		b->phy().pos=phy().pos;
-		b->phy().dpos=forward_vector().scale(3);
+		Vector2D v=forward_vector();
+		v.scale(scl_); // place bullet in front of ship
+		b->phy().pos=phy().pos+v;
+		b->phy().dpos=v.normalize().scale(3);
 		b->phy().agl=phy().agl;
 	}
 };
 
 class OscaGame{
+	auto create_scene(){
+		for(float i=30;i<300;i+=20){
+			Wall*w=new Wall(5,{i,90},deg_to_rad(i));
+			w->phy().dagl=deg_to_rad(1);
+			w->phy().dpos={0,.2f};
+		}
+	}
 public:
 	OscaGame(){
 		//----------------------------------------------------------
@@ -144,13 +158,11 @@ public:
 
 		Ship*shp=new Ship;
 		shp->phy().pos={160,130};
-	//	shp->phy().agl=deg_to_rad(180);
 
-		for(float i=30;i<300;i+=20){
-			Wall*w=new Wall(5,{i,90},deg_to_rad(i));
-			w->phy().dagl=deg_to_rad(1);
-			w->phy().dpos={0,.2f};
-		}
+//		Wall*w=new Wall(5,{160,90},0);
+//		w->phy().dagl=deg_to_rad(1);
+
+		create_scene();
 
 	//	out.p_hex_16b(static_cast<unsigned short>(sizeof(Object))).pos({1,2});
 
@@ -167,54 +179,66 @@ public:
 			Object::render_all(vga13h.bmp());
 			Object::update_all();
 			Object::check_collisions();
+			if(!game::player_alive)
+				shp=nullptr;
 
 			//		out.pos({0,2}).p("                                              ").pos({0,2});
-			out.pos({26,2}).fg(2).p("c=").p_hex_16b(metrics::collisions_check);
-			out.pos({33,2}).fg(2).p("b=").p_hex_16b(metrics::collisions_check_bounding_shapes);
+			out.pos({19,2}).fg(2).p("m=").p_hex_16b(metrics::matrix_set_transforms);
+			out.pos({26,2}).fg(2).p("c=").p_hex_16b(metrics::collisions_checks);
+			out.pos({33,2}).fg(2).p("b=").p_hex_16b(metrics::collisions_checks_bounding_shapes);
 			out.pos({40,2}).fg(2).p("f=").p_hex_8b(static_cast<unsigned char>(Object::free_ixes_i));
-			out.pos({45,2}).fg(2).p("s=").p_hex_8b(static_cast<unsigned char>(Object::used_ixes_i));
+			out.pos({45,2}).fg(2).p("u=").p_hex_8b(static_cast<unsigned char>(Object::used_ixes_i));
 			out.pos({50,2}).fg(2).p("t=").p_hex_32b(osca_t);
 
-			shp->phy().dpos={0,0};
+			if(shp)
+				shp->phy().dpos={0,0};
 
 			const char ch=table_scancode_to_ascii[osca_key];
-			if(ch){
-				if(ch=='c'){
-					if(Object::hasFreeSlot()){
-						shp=new Ship;
-						shp->phy().pos={160,100};
-						shp->phy().agl=deg_to_rad(180);
-					}else{
-						err.p("out of free slots");
-						osca_halt();
-					}
-				}
-				if(shp){
-					switch(ch){
-					case'w':
+			if(shp){
+				switch(ch){
+				case'w':
+					if(game::player_alive)
 						shp->phy().dpos=shp->forward_vector().scale(.3f);
-						break;
-					case'a':
+					break;
+				case'a':
+					if(game::player_alive)
 						shp->phy().agl-=deg_to_rad(2);
-						break;
-					case's':
+					break;
+				case's':
+					if(game::player_alive)
 						shp->phy().dpos=shp->forward_vector().negate().scale(.3f);
-						break;
-					case'd':
+					break;
+				case'd':
+					if(game::player_alive)
 						shp->phy().agl+=deg_to_rad(2);
-						break;
-					case'x':
-						for(float i=30;i<300;i+=20){
-							new Wall(5,{i,120},deg_to_rad(i));
-						}
-						break;
-					case' ':
+					break;
+				case' ':
+					if(game::player_alive)
 						shp->fire();
-						break;
-					default:
-						break;
-					}
+					break;
+				default:
+					break;
 				}
+			}
+			switch(ch){
+			case'x':
+				create_scene();
+				break;
+			case'c':
+				if(Object::hasFreeSlot()){
+					if(shp)
+						break;
+					shp=new Ship;
+					shp->phy().pos={160,130};
+//					shp->phy().agl=deg_to_rad(180);
+					game::player_alive=true;
+				}else{
+					err.p("out of free slots");
+					osca_halt();
+				}
+				break;
+			default:
+				break;
 			}
 
 //			draw_axis(vga13h.bmp());

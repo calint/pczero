@@ -87,6 +87,7 @@ public:
 		return p;
 	}
 	// returns pointer to object that has a new address for physics state
+	// this function works with ~Object() to relocate physics state
 	static auto free(PhysicsState*phy)->Object*{
 		// decrement next_free to point to last state in heap
 		// copy last state to the freed area
@@ -99,7 +100,7 @@ public:
 		next_free--;
 		Object*o=next_free->obj;
 		*phy=*next_free;
-//		pz_memset(next_free,3,sizeof(PhysicsState)); // ? debugging
+		pz_memset(next_free,3,sizeof(PhysicsState)); // ? debugging
 		return o;
 	}
 	static auto update_physics_states(){
@@ -124,12 +125,16 @@ namespace enable{
 	constexpr static bool draw_collision_check=false;
 	constexpr static bool draw_bounding_circle=false;
 }
+
+constexpr bool metrics_enable=true;
 namespace metrics{
-	static unsigned short collisions_check=0;
-	static unsigned short collisions_check_bounding_shapes=0;
+	static unsigned short matrix_set_transforms=0;
+	static unsigned short collisions_checks=0;
+	static unsigned short collisions_checks_bounding_shapes=0;
 	static auto reset(){
-		collisions_check=0;
-		collisions_check_bounding_shapes=0;
+		matrix_set_transforms=0;
+		collisions_checks=0;
+		collisions_checks_bounding_shapes=0;
 	}
 }
 // update_all() and check_collisions() generate lists of objects to be deleted.
@@ -267,7 +272,7 @@ public:
 	constexpr auto draw_bounding_circle(Bitmap&dsp)->void{
 		Point2D p=phy().pos;
 		float scl=scale();
-		const unsigned segments=static_cast<unsigned>(4.f*scale());
+		const unsigned segments=static_cast<unsigned>(5.f*scale());
 		Angle th=0;
 		Angle dth=2*PI/static_cast<Angle>(segments);
 		for(unsigned i=0;i<segments;i++){
@@ -286,6 +291,8 @@ private:
 	constexpr auto refresh_wld_points()->void{
 		if(!refresh_Mmw_if_invalid())
 			return;
+		if(metrics_enable)
+			metrics::matrix_set_transforms++;
 		// matrix has been updated, update cached points
 		Mmw_.transform(def_.pts,pts_wld_,def_.npts);
 		Mmw_.rotate(def_.nmls,nmls_wld_,def_.nbnd);
@@ -345,12 +352,14 @@ public:
 		const Point2D p1=o1.phy().pos;
 		const Point2D p2=o2.phy().pos;
 
-		// check if: sqrt(dx*dx+dy*dy)<r1+r2
+		// check if: sqrt(dx*dx+dy*dy)<=r1+r2
 		const float dist2=r1*r1+2*r1*r2+r2*r2; // distance^2
 		Vector2D v{p2.x-p1.x,p2.y-p1.y};
 		v.x*=v.x;
 		v.y*=v.y;
 		const float d2=v.x+v.y;
+//		const float diff=d2-dist2;
+//		out.pos({0,1}).p_hex_32b(static_cast<unsigned>(diff));
 		if(d2>dist2)
 			return false;
 //		out.p("bounds ");
@@ -374,8 +383,8 @@ public:
 				if(enable::draw_collision_check){
 					dot(vga13h.bmp(),p2.x,p2.y,5);
 				}
-				const Vector2D&nl=o2.nmls_wld_[j];
-				const Vector2D v=p1-p2;
+				const Vector2D&nl=o2.nmls_wld_[j]; // normal for this line
+				const Vector2D v=p1-p2; // vector from line point to point to check
 				if(v.dot(nl)>0){ // use abs(v)<0.0001f (example)?
 					// p "in front" of v, cannot be collision
 					is_collision=false;
@@ -399,10 +408,12 @@ public:
 				if(!o1_check_col_with_o2&&!o2_check_col_with_o1)
 					continue;
 //				out.p("chk ").p_hex_8b(static_cast<unsigned char>(tb1)).p(' ').p_hex_8b(static_cast<unsigned char>(tb2)).p(' ');
-				metrics::collisions_check++;
+				if(metrics_enable)
+					metrics::collisions_checks++;
 				if(!Object::check_collision_bounding_circles(*o1,*o2))
 					continue;
-				metrics::collisions_check_bounding_shapes++;
+				if(metrics_enable)
+					metrics::collisions_checks_bounding_shapes++;
 				// check if o1 points in o2 bounding shape
 				if(Object::is_in_collision(*o1,*o2)){
 					if(o1_check_col_with_o2){
