@@ -35,7 +35,7 @@ static constexpr void dot(const Bitmap&bmp,const float x,const float y,const uns
 	bmp.pointer_offset({xi,yi}).write(color);
 }
 
-constexpr static unsigned objects_max=64; // maximum number of objects
+constexpr static Size nobjects_max=128; // maximum number of objects
 
 class Object;
 // physics states are kept in their own buffer for better CPU cache utilization at update
@@ -72,9 +72,9 @@ public:
 	static PhysicsState*next_free;
 	static PhysicsState*mem_limit;
 	static auto init_statics(){
-		mem_start=new PhysicsState[objects_max];
+		mem_start=new PhysicsState[nobjects_max];
 		next_free=mem_start;
-		mem_limit=reinterpret_cast<PhysicsState*>(mem_start+objects_max);
+		mem_limit=reinterpret_cast<PhysicsState*>(mem_start+nobjects_max);
 	}
 	static auto alloc()->PhysicsState*{
 		// check buffer overrun
@@ -320,10 +320,10 @@ private:
 	// statics
 	//----------------------------------------------------------------
 public:
-	static Object*all[objects_max]; // array of pointers to allocated objects
-	static Object**free_ixes[objects_max]; // free indexes in all[]
+	static Object*all[nobjects_max]; // array of pointers to allocated objects
+	static Object**free_ixes[nobjects_max]; // free indexes in all[]
 	static SlotIx free_ixes_i; // index in freeSlots[] of next free slot
-	static SlotInfo used_ixes[objects_max]; // free indexes in all[]
+	static SlotInfo used_ixes[nobjects_max]; // free indexes in all[]
 	static SlotIx used_ixes_i; // index in freeSlots[] of next free slot
 	static inline auto hasFreeSlot()->bool{return free_ixes_i!=0;}
 	static auto init_statics(){
@@ -331,7 +331,7 @@ public:
 		for(SlotIx i=0;i<n;i++){
 			free_ixes[i]=&all[i];
 		}
-		free_ixes_i=objects_max-1;
+		free_ixes_i=nobjects_max-1;
 	}
 	static inline auto object_for_used_slot(const SlotIx i)->Object*{
 		Object*o=used_ixes[i].obj;
@@ -381,10 +381,15 @@ public:
 		o1.refresh_wld_points();
 		o2.refresh_wld_points();
 		// for each point in o1 check if behind every normal of o2
-		// if behind every normal then within the convex polygon thus collision
+		// if behind every normal then within the convex bounding shape thus collision
+
+		// if o2 has no bounding shape (at least 3 points) return false
+		if(o2.def_.nbnd<3)
+			return false;
+
 		bool is_collision=false;
-		// for each point in o1
-		for(unsigned i=0;i<o1.def_.npts;i++){
+		// for each point in o1 bounding shape
+		for(unsigned i=0;i<o1.def_.nbnd;i++){
 			const Point2D&p1=o1.pts_wld_[i];
 			is_collision=true; // assume is collision
 			// for each normal in o2
@@ -458,14 +463,14 @@ public:
 //		world::deleted_commit();
 	}
 };
-Object*Object::all[objects_max];
-Object**Object::free_ixes[objects_max];
-SlotIx Object::free_ixes_i=objects_max-1;
-SlotInfo Object::used_ixes[objects_max];
+Object*Object::all[nobjects_max];
+Object**Object::free_ixes[nobjects_max];
+SlotIx Object::free_ixes_i=nobjects_max-1;
+SlotInfo Object::used_ixes[nobjects_max];
 SlotIx Object::used_ixes_i=0;
 
 namespace world{
-	static Object*deleted[objects_max]; // ? todo improve with lesser memory footprint
+	static Object*deleted[nobjects_max]; // ? todo improve with lesser memory footprint
 	static int deleted_ix=0;
 	static auto deleted_add(Object*o)->void{ // ! this might be called several times for the same object
 //		if(!o->is_alive()){

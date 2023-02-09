@@ -25,18 +25,24 @@ namespace osca{
 		static HeapEntry*entry_free_start_; // beginning of vector containing freed memory info
 		static HeapEntry*entry_free_next_;
 		static HeapEntry*entry_free_lim_;
-		static constexpr Size heap_entries_max=256; // ? setting
+		static Size nentries_max_;
 	public:
-		static auto init_statics(const Data&d)->void{
+		static auto init_statics(const Data&d,const Size nentries_max)->void{
 			d_=d;
 			ptr_=reinterpret_cast<char*>(d.address());
-			entry_used_start_=static_cast<HeapEntry*>(d.limit())-heap_entries_max;
-			entry_used_next_=entry_used_start_;
-			entry_used_lim_=entry_used_start_+heap_entries_max;
+			nentries_max_=nentries_max;
 
-			entry_free_start_=entry_used_start_-heap_entries_max;
+			entry_used_start_=static_cast<HeapEntry*>(d.limit())-nentries_max;
+			if(reinterpret_cast<char*>(entry_used_start_)<ptr_){
+				err.p("Heap.init_statics:1");
+				osca_halt();
+			}
+			entry_used_next_=entry_used_start_;
+			entry_used_lim_=entry_used_start_+nentries_max;
+
+			entry_free_start_=entry_used_start_-nentries_max;
 			entry_free_next_=entry_free_start_;
-			entry_free_lim_=entry_free_start_+heap_entries_max;
+			entry_free_lim_=entry_free_start_+nentries_max;
 			ptr_lim_=reinterpret_cast<char*>(entry_used_start_);
 		}
 		static inline auto data()->const Data&{
@@ -112,11 +118,13 @@ namespace osca{
 		}
 		static auto clear_buffer(const unsigned char b=0){d_.clear(b);}
 		static auto clear_heap_entries(unsigned char free_area=0,unsigned char used_area=0){
-			pz_memset(entry_free_start_,free_area,heap_entries_max*sizeof(HeapEntry));
-			pz_memset(entry_used_start_,used_area,heap_entries_max*sizeof(HeapEntry));
+			const SizeBytes hes=SizeBytes(sizeof(HeapEntry));
+			pz_memset(entry_free_start_,free_area,nentries_max_*hes);
+			pz_memset(entry_used_start_,used_area,nentries_max_*hes);
 		}
 	};
 	Data Heap::d_ {nullptr,0};
+	Size Heap::nentries_max_;
 	char*Heap::ptr_;
 	char*Heap::ptr_lim_;
 	HeapEntry*Heap::entry_used_start_;
@@ -198,7 +206,7 @@ extern "C" void osca_init(){
 	err.pos({1,1}).fg(4);
 	out=PrinterToVga();
 	out.pos({1,2}).fg(2);
-	Heap::init_statics({Address(0x10'0000),320*50});
+	Heap::init_statics({Address(0x10'0000),320*100},nobjects_max);
 	Heap::clear_buffer(0x12);
 	Heap::clear_heap_entries(3,5);
 	Object::init_statics();
