@@ -1,9 +1,8 @@
 [o] heap
-[x]   step 1. a vector of [*ptr,size] elements pointing to freed memory
-[ ]   step 2. hash table on size with vectors [*ptr,size]
-[ ]   step 3. libge heap optimized for Object
-[ ]     O(1) delete and nearly O(1) alloc
-[ ]       HeapElem{*prv,*nxt,ushort size,ubyte sizeh,ubyte bits} 12 B
+[x]   step 1. a vector of [*ptr,size] elements pointing to freed memory O(n)
+[ ]   step 2. hash table on size with vectors [*ptr,size]  O(n/x)
+[ ]   step 3. libge heap optimized for Object O(1) delete and nearly O(1) alloc
+[ ]     HeapElem{*prv,*nxt,ushort size,ubyte sizeh,ubyte bits} 12 B
 [o] input text
 [x]   step 1. one keyboard buffer for the system
 [ ]   step 2. "osca_keyb_task" pointer to function that should read keyboard
