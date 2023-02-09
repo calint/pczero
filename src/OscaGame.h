@@ -82,7 +82,7 @@ public:
 	}
 
 	// returns false if object is to be deleted
-	constexpr virtual auto on_collision(Object&other)->bool override{
+	virtual auto on_collision(Object&other)->bool override{
 		// collision with 'wall'
 		game::player_alive=false;
 		return false;

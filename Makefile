@@ -24,7 +24,7 @@ AF=--march=i386 --32
 #CW+=-Wno-unused-function # allow for debugging
 #CW+=-Wno-unused-variable # allow for debugging
 #CW+=-Wno-unused-parameter # allow for debugging
-#CF=-O3 -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
+#CF=-Os -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
 #CF+=-Wfatal-errors # stop at first error
 #CF+=-fconserve-stack # try to inhibit excessive use of stack by optimizer
 #CF+=-fanalyzer
