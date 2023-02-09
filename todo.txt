@@ -1,6 +1,6 @@
 [ ] heap
-[ ]   step 1. simplest. linked list of free memory
-[ ]   step 2. hash table on size with linked list
+[ ]   step 1. simplest. linked lists of free memory and used memory
+[ ]   step 2. hash table on size with linked lists
 [ ]   step 3. libge heap optimized for Object
 [ ]     O(1) delete and nearly O(1) alloc
 [ ]       HeapElem{*prv,*nxt,ushort size,ubyte sizeh,ubyte bits} 12 B
