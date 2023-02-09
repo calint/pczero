@@ -69,6 +69,10 @@ public:
 		x+=v.x;
 		y+=v.y;
 	}
+	inline constexpr auto inc_by(const Vector2D&v,const float dt_s){
+		x+=v.x*dt_s;
+		y+=v.y*dt_s;
+	}
 	inline constexpr auto negate()->Vector2D&{
 		x=-x;
 		y=-y;

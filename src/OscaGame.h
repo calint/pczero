@@ -80,7 +80,7 @@ public:
 class Ship:public Object{
 	static constexpr Scale scale=5;
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
-	unsigned fire_t=0;
+	float fire_t_s=0;
 public:
 	Ship():
 		// type bits 0b1 check collision with:
@@ -110,15 +110,15 @@ public:
 	}
 
 	auto fire(){
-		const unsigned dt=osca_t-fire_t;
-		if(dt<3)
+		const float dt=world::time_s-fire_t_s;
+		if(dt<.2f)
 			return;
-		fire_t=osca_t;
+		fire_t_s=world::time_s;
 		Bullet*b=new Bullet;
-		Vector2D v=forward_vector();
+		Vector2D v=forward_vector().scale(1.1f);
 		v.scale(scl_); // place bullet in front of ship
 		b->phy().pos=phy().pos+v;
-		b->phy().dpos=v.normalize().scale(3);
+		b->phy().dpos=v.normalize().scale(30);
 		b->phy().agl=phy().agl;
 	}
 };
@@ -165,9 +165,9 @@ public:
 class OscaGame{
 	auto create_scene(){
 		for(float i=30;i<300;i+=20){
-			Enemy*w=new Enemy({i,90},deg_to_rad(i));
-			w->phy().dagl=deg_to_rad(1);
-			w->phy().dpos={0,.2f};
+			Enemy*e=new Enemy({i,90},deg_to_rad(i));
+			e->phy().dagl=deg_to_rad(1);
+			e->phy().dpos={0,2};
 		}
 	}
 	auto create_scene2(){
@@ -255,9 +255,12 @@ public:
 		constexpr unsigned char key_d=3;
 		constexpr unsigned char key_spc=4;
 		bool keyboard[]{false,false,false,false,false}; // wasd and space pressed status
+
+		world::init();
 		// start task
 		while(true){
 			metrics::reset();
+			world::tick();
 
 			// copy heap to screen
 			pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
@@ -279,7 +282,9 @@ public:
 			out.p("b=").p_hex_8b(static_cast<unsigned char>(metrics::collisions_checks_bounding_shapes)).spc();
 			out.p("f=").p_hex_8b(static_cast<unsigned char>(Object::free_ixes_i)).spc();
 			out.p("u=").p_hex_8b(static_cast<unsigned char>(Object::used_ixes_i)).spc();
-			out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_t));
+			out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_t)).spc();
+			out.p("s=").p_hex_8b(static_cast<unsigned char>(world::time_s)).spc();
+			out.p("d=").p_hex_8b(static_cast<unsigned char>(world::time_dt_s*100)).spc();
 
 			if(!game::player_alive)
 				shp=nullptr;
@@ -322,16 +327,16 @@ public:
 					}
 				}
 				if(keyboard[key_w])
-					shp->phy().dpos=shp->forward_vector().scale(.3f);
+					shp->phy().dpos=shp->forward_vector().scale(7);
 
 				if(keyboard[key_a])
-					shp->phy().dagl=-deg_to_rad(2);
+					shp->phy().dagl=-deg_to_rad(40);
 
 				if(keyboard[key_s])
-					shp->phy().dpos=shp->forward_vector().negate().scale(.3f);
+					shp->phy().dpos=shp->forward_vector().negate().scale(7);
 
 				if(keyboard[key_d])
-					shp->phy().dagl=deg_to_rad(2);
+					shp->phy().dagl=deg_to_rad(40);
 
 				if(!keyboard[key_a]&&!keyboard[key_d])
 					shp->phy().dagl=0;

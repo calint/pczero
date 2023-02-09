@@ -35,9 +35,44 @@ static constexpr void dot(const Bitmap&bmp,const float x,const float y,const uns
 	bmp.pointer_offset({xi,yi}).write(color);
 }
 
-constexpr static Size nobjects_max=128; // maximum number of objects
+constexpr bool metrics_enable=true;
+namespace metrics{
+	static unsigned short matrix_set_transforms=0;
+	static unsigned short collisions_checks=0;
+	static unsigned short collisions_checks_bounding_shapes=0;
+	static auto reset(){
+		matrix_set_transforms=0;
+		collisions_checks=0;
+		collisions_checks_bounding_shapes=0;
+	}
+}
 
 class Object;
+
+// update_all() and check_collisions() generate lists of objects to be deleted.
+// the delete happens when deleted_commit() is called
+namespace world{
+	constexpr float sec_per_tick=1/18.2f; // the default 18.2 Hz clock
+	static float time_s=0;
+	static float time_dt_s=0;
+	static float time_prv_s=0;
+	static auto init(){
+		time_s=static_cast<float>(osca_t)*sec_per_tick;
+		// set previous time to a reasonable value so that dt does not
+		// become huge at first frame
+		time_prv_s=time_s-sec_per_tick;
+	}
+	static auto tick(){
+		time_s=static_cast<float>(osca_t)*sec_per_tick;
+		time_dt_s=time_s-time_prv_s;
+		time_prv_s=time_s;
+	}
+	static auto deleted_add(Object*o)->void;
+	static auto deleted_commit()->void;
+}
+
+constexpr static Size nobjects_max=256; // maximum number of objects
+
 // physics states are kept in their own buffer for better CPU cache utilization at update
 class PhysicsState final{
 public:
@@ -58,10 +93,10 @@ public:
 //	inline constexpr auto set_ddpos(const Point2D&p){ddpos_=p;}
 //	inline constexpr auto set_angle(const Angle rad){agl_=rad;}
 //	inline constexpr auto set_dangle(const Angle rad){dagl_=rad;}
-	constexpr inline auto update()->void{
-		dpos.inc_by(ddpos);
-		pos.inc_by(dpos);
-		agl+=dagl;
+	inline auto update()->void{
+		dpos.inc_by(ddpos,world::time_dt_s);
+		pos.inc_by(dpos,world::time_dt_s);
+		agl+=dagl*world::time_dt_s;
 	}
 
 	//-----------------------------------------------------------
@@ -124,24 +159,6 @@ namespace enable{
 	constexpr static bool draw_normals=false;
 	constexpr static bool draw_collision_check=false;
 	constexpr static bool draw_bounding_circle=true;
-}
-
-constexpr bool metrics_enable=true;
-namespace metrics{
-	static unsigned short matrix_set_transforms=0;
-	static unsigned short collisions_checks=0;
-	static unsigned short collisions_checks_bounding_shapes=0;
-	static auto reset(){
-		matrix_set_transforms=0;
-		collisions_checks=0;
-		collisions_checks_bounding_shapes=0;
-	}
-}
-// update_all() and check_collisions() generate lists of objects to be deleted.
-// the delete happens after the phase does deleted_commit()
-namespace world{
-	static auto deleted_add(Object*o)->void;
-	static auto deleted_commit()->void;
 }
 
 using SlotIx=unsigned short; // index in Object::freeSlots[]
