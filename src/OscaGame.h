@@ -159,7 +159,7 @@ public:
 
 		Ship*shp=new Ship;
 		shp->phy().pos={160,130};
-
+//
 //		Wall*w=new Wall(5,{160,90},0);
 //		w->phy().dagl=deg_to_rad(1);
 
@@ -173,15 +173,14 @@ public:
 
 			// copy heap to screen
 			pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
-
+//			err.pos({0,2});
 			out.pos({0,1});//.p("                                                            ").pos({0,1});
 
 			PhysicsState::update_physics_states();
 			Object::render_all(vga13h.bmp());
 			Object::update_all();
 			Object::check_collisions();
-			if(!game::player_alive)
-				shp=nullptr;
+			world::deleted_commit();
 
 			//		out.pos({0,2}).p("                                              ").pos({0,2});
 			out.pos({19,2}).fg(2).p("m=").p_hex_16b(metrics::matrix_set_transforms);
@@ -190,6 +189,13 @@ public:
 			out.pos({40,2}).fg(2).p("f=").p_hex_8b(static_cast<unsigned char>(Object::free_ixes_i));
 			out.pos({45,2}).fg(2).p("u=").p_hex_8b(static_cast<unsigned char>(Object::used_ixes_i));
 			out.pos({50,2}).fg(2).p("t=").p_hex_32b(osca_t);
+//			shp->phy().agl+=deg_to_rad(1);
+//			shp->fire();
+//			osca_yield();
+//			continue;
+
+			if(!game::player_alive)
+				shp=nullptr;
 
 			if(shp)
 				shp->phy().dpos={0,0};

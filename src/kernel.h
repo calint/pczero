@@ -43,6 +43,7 @@ namespace osca{
 			return d_;
 		}
 		static auto alloc(const unsigned size)->void*{
+//			err.p_hex_32b(size).spc();
 			// try to find a free slot with that size
 			HeapEntry*he=entry_free_start_;
 			while(he<entry_free_lim_){
@@ -68,11 +69,11 @@ namespace osca{
 			char*p=ptr_;
 			ptr_+=size;
 			if(ptr_>ptr_lim_){
-				err.p("alloc: heap overrun");
+				err.p("Heap.alloc: 2");
 				osca_halt();
 			}
 			if(entry_used_next_>=entry_used_lim_){
-				err.p("alloc: heap entries overrun");
+				err.p("Heap.alloc: 3");
 				osca_halt();
 			}
 			// write to used list
@@ -81,13 +82,14 @@ namespace osca{
 			return reinterpret_cast<void*>(p);
 		}
 		static auto free(void*ptr)->void{
+//			err.p_hex_32b(reinterpret_cast<unsigned>(ptr)).spc();
 			HeapEntry*hep=entry_used_start_;
 			while(hep<entry_used_next_){
 				if(hep->ptr==ptr){
 					// found the allocation entry
 					// copy entry from used to free
 					if(entry_free_next_>=entry_free_lim_){
-						err.p("free: heap entries overrun");
+						err.p("Heap.free: 1");
 						osca_halt();
 					}
 					*entry_free_next_=*hep;
@@ -95,10 +97,11 @@ namespace osca{
 
 					// copy last entry from used list to this entry
 					entry_used_next_--;
+					const unsigned size=hep->size;
 					*hep=*entry_used_next_;
 
 					// debugging
-					pz_memset(ptr,5,static_cast<SizeBytes>(hep->size));
+					pz_memset(ptr,0xf,SizeBytes(size));
 					pz_memset(entry_used_next_,5,sizeof(HeapEntry));
 					return;
 				}
@@ -108,9 +111,9 @@ namespace osca{
 			osca_halt();
 		}
 		static auto clear_buffer(const unsigned char b=0){d_.clear(b);}
-		static auto clear_heap_entries(unsigned char b1=0,unsigned char b2=0){
-			pz_memset(entry_free_start_,b1,heap_entries_max*sizeof(HeapEntry));
-			pz_memset(entry_used_start_,b2,heap_entries_max*sizeof(HeapEntry));
+		static auto clear_heap_entries(unsigned char free_area=0,unsigned char used_area=0){
+			pz_memset(entry_free_start_,free_area,heap_entries_max*sizeof(HeapEntry));
+			pz_memset(entry_used_start_,used_area,heap_entries_max*sizeof(HeapEntry));
 		}
 	};
 	Data Heap::d_ {nullptr,0};

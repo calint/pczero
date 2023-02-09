@@ -171,7 +171,7 @@ protected:
 //	Object**obj_ix_=nullptr; // pointer to element int all[]
 	SlotIx used_ix_=0; // index in used_ixes array
 	unsigned char color_=1;
-	char padding1=0;
+	unsigned char bits_=0; // flags, bit 1: set==dead
 public:
 //	constexpr Object()=delete;
 	constexpr Object(const Object&)=delete; // copy ctor
@@ -284,9 +284,19 @@ public:
 	}
 
 	// returns false if object is to be deleted
-	constexpr virtual auto on_collision(Object&other)->bool{
-		return true;
+	constexpr virtual auto on_collision(Object&other)->bool{return true;}
+
+	constexpr inline auto is_alive()->bool{return!(bits_&1);}
+
+	// used by 'world' to avoid deleting same object more than once
+	constexpr inline auto set_is_alive(const bool v)->void{
+		if(v){ // alive bit is 0
+			bits_&=0xff-1;
+		}else{ // not alive bit is 1
+			bits_|=1;
+		}
 	}
+
 private:
 	constexpr auto refresh_wld_points()->void{
 		if(!refresh_Mmw_if_invalid())
@@ -338,7 +348,7 @@ public:
 				world::deleted_add(o);
 			}
 		}
-		world::deleted_commit();
+//		world::deleted_commit();
 	}
 	static auto render_all(Bitmap&dsp){
 		for(SlotIx i=0;i<used_ixes_i;i++){
@@ -445,7 +455,7 @@ public:
 				}
 			}
 		}
-		world::deleted_commit();
+//		world::deleted_commit();
 	}
 };
 Object*Object::all[objects_max];
@@ -458,13 +468,18 @@ namespace world{
 	static Object*deleted[objects_max]; // ? todo improve with lesser memory footprint
 	static int deleted_ix=0;
 	static auto deleted_add(Object*o)->void{ // ! this might be called several times for the same object
+//		if(!o->is_alive()){
+//			err.p("world::deleted_add:1");
+//			osca_halt();
+//		}
+		if(!o->is_alive()) // check if object already deleted
+			return;
+		o->set_is_alive(false);
 		deleted[deleted_ix]=o;
 		deleted_ix++;
 	}
 	static auto deleted_commit()->void{
 		for(int i=0;i<deleted_ix;i++){
-			// ! check if object already deleted.
-			// heap keeps deleted object valid when this is called.
 			delete deleted[i];
 		}
 		deleted_ix=0;

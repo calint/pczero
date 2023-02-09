@@ -43,8 +43,7 @@ inline void pz_memcpy(Address to,Address from,SizeBytes n){
 }
 
 //inline void pz_memset(Address to,unsigned char v,SizeBytes n){
-void pz_memset(Address to,unsigned char v,SizeBytes n);
-void pz_memset(Address to,unsigned char v,SizeBytes n){
+inline void pz_memset(Address to,unsigned char v,SizeBytes n){
 	asm("mov %0,%%edi;"
 		"mov %1,%%al;"
 		"mov %2,%%ecx;"
