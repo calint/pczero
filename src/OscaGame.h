@@ -336,7 +336,7 @@ public:
 			out.p("u=").p_hex_8b(static_cast<unsigned char>(Object::used_ixes_i)).spc();
 			out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_t)).spc();
 			out.p("s=").p_hex_8b(static_cast<unsigned char>(world::time_s)).spc();
-			out.p("d=").p_hex_8b(static_cast<unsigned char>(world::time_dt_s*100)).spc();
+			out.p("d=").p_hex_8b(static_cast<unsigned char>(world::time_dt_s*1000)).spc();
 
 			if(!game::player_alive)
 				shp=nullptr;
