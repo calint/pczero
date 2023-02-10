@@ -10,12 +10,12 @@ extern "C" [[noreturn]] void tsk3();
 extern "C" [[noreturn]] void tsk4();
 
 namespace osca{
-	class HeapEntry{
+	class HeapEntry final{
 	public:
 		void*ptr;
 		unsigned size;
 	};
-	class Heap{
+	class Heap final{
 		static Data d_;
 		static char*ptr_; // pointer to free memory
 		static char*ptr_lim_; // limit of buffer

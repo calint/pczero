@@ -16,6 +16,8 @@ public:
 	Vector2D*nmls=nullptr; // normals to the lines defined in bnd
 
 	auto init_normals(){
+		if(nbnd==0)
+			return;
 		nmls=new Vector2D[nbnd];
 		const unsigned n=nbnd-1;
 		for(unsigned i=0;i<n;i++){
@@ -156,9 +158,11 @@ PhysicsState*PhysicsState::mem_limit;
 PhysicsState*PhysicsState::next_free;
 
 namespace enable{
+	constexpr static bool draw_dots=false;
+	constexpr static bool draw_polygons=true;
 	constexpr static bool draw_normals=false;
 	constexpr static bool draw_collision_check=false;
-	constexpr static bool draw_bounding_circle=true;
+	constexpr static bool draw_bounding_circle=false;
 }
 
 using SlotIx=unsigned short; // index in Object::freeSlots[]
@@ -267,10 +271,15 @@ public:
 	constexpr virtual auto update()->bool{return true;}
 	constexpr virtual auto render(Bitmap&dsp)->void{
 		refresh_wld_points();
-		Point2D*pt=pts_wld_;
-		for(unsigned i=0;i<def_.npts;i++){
-			dot(dsp,pt->x,pt->y,color_);
-			pt++;
+		if(enable::draw_polygons){
+			draw_polygon(dsp, pts_wld_, def_.nbnd, def_.bnd);
+		}
+		if(enable::draw_dots){
+			const Point2D*pt=pts_wld_;
+			for(unsigned i=0;i<def_.npts;i++){
+				dot(dsp,pt->x,pt->y,color_);
+				pt++;
+			}
 		}
 		if(enable::draw_normals){
 			Point2D*nml=nmls_wld_;
@@ -278,7 +287,7 @@ public:
 				Vector2D v=*nml;
 				v.normalize().scale(3);
 				Point2D p=pts_wld_[def_.bnd[i]];
-				Vector2D v1={p.x+nml->x,p.y+nml->y};
+				Vector2D v1{p.x+nml->x,p.y+nml->y};
 				dot(dsp,v1.x,v1.y,0xf);
 				nml++;
 			}
@@ -299,6 +308,125 @@ public:
 			dot(dsp,x,y,1);
 			th+=dth;
 		}
+	}
+	constexpr auto draw_polygon(Bitmap&dsp,const Point2D pts[],const PointIx npoly_ixs,const PointIx ix[])->void{
+//		const PointIx*pi=ix;
+//		for(PointIx i=0;i<npoly_ixs;i++){
+//			const Point2D&p=pts[*pi++];
+//			dot(dsp,p.x,p.y,4);
+//		}
+		if(npoly_ixs<2){
+			dot(dsp,pts[0].x,pts[0].y,color_);
+			return;
+		}
+		PointIx topy_ix=0;
+		const Point2D&first_point=pts[ix[0]];
+		Coord topx=first_point.x;
+		Coord topy=first_point.y;
+		PointIx i=1;
+		while(i<npoly_ixs){
+			const Point2D&p=pts[ix[i]];
+			const Coord y=p.y;
+			if(y<topy){
+				topy=y;
+				topx=p.x;
+				topy_ix=i;
+			}
+			i++;
+		}
+		PointIx ix_lft,ix_rht;
+		ix_lft=ix_rht=topy_ix;
+		Coord x_lft,x_rht;
+		x_lft=x_rht=topx;
+		bool adv_lft=true,adv_rht=true;
+		Coord dxdy_lft,dxdy_rht;
+		dxdy_lft=dxdy_rht=0;
+		Coord x_nxt_lft=0;
+		Coord y_nxt_lft=topy;
+		Coord x_nxt_rht=0;
+		Coord y_nxt_rht=topy;
+		Coord dy_rht=0;
+		Coord dy_lft=0;
+		Coord y=topy;
+		CoordPx wi=dsp.dim().width();
+		CoordPx y_scr=static_cast<CoordPx>(y);
+		unsigned char*pline=static_cast<unsigned char*>(dsp.data().address())+y_scr*wi;
+		PointIx last_elem_ix=npoly_ixs-1;
+		constexpr bool renderedges=false;
+		unsigned char color=color_;
+		while(true){
+			if(adv_lft){
+//				y_lft=y_nxt_lft;
+				if(ix_lft==last_elem_ix)ix_lft=0;
+				else ix_lft++;
+				x_nxt_lft=pts[ix[ix_lft]].x;
+				y_nxt_lft=pts[ix[ix_lft]].y; // ? whatif prevy==nxty
+//				dy_lft=y_nxt_lft-y_lft;
+				dy_lft=y_nxt_lft-y;
+				if(dy_lft!=0)dxdy_lft=(x_nxt_lft-x_lft)/dy_lft;
+				else dxdy_lft=0;
+			}
+			if(adv_rht){
+//				y_rht=y_nxt_rht;
+				if(ix_rht==0)ix_rht=last_elem_ix;
+				else ix_rht--;
+				x_nxt_rht=pts[ix[ix_rht]].x;
+				y_nxt_rht=pts[ix[ix_rht]].y;
+//				dy_rht=y_nxt_rht-y_rht;
+				dy_rht=y_nxt_rht-y;
+				if(dy_rht!=0)dxdy_rht=(x_nxt_rht-x_rht)/dy_rht;
+				else dxdy_rht=0;
+			}
+			CoordPx scan_lines_until_next_turn=0;
+			if(y_nxt_lft>y_nxt_rht){
+				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_rht-y);
+				adv_lft=false;
+				adv_rht=true;
+			}else{
+				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_lft-y);
+				adv_lft=true;
+				adv_rht=false;
+			}
+			while(true){
+				unsigned char*p=pline+static_cast<CoordPx>(x_lft);
+				unsigned char*p_rht=pline+static_cast<CoordPx>(x_rht);
+				if(p>p_rht) // ? can happen?
+					break;
+				if(scan_lines_until_next_turn<=0)
+					break;
+				scan_lines_until_next_turn--;
+				CoordPx npx=static_cast<CoordPx>(p_rht-p);
+				if(renderedges){
+					*p=color;
+					*(p+npx)=color;
+				}else{
+//					pz_memset(p,color,npx);
+					while(npx--)
+						*p++=color;
+				}
+				y+=1;
+				pline+=wi;
+				x_lft+=dxdy_lft;
+				x_rht+=dxdy_rht;
+			}
+			if(ix_lft==ix_rht)
+				break;
+			if(adv_lft){
+				x_lft=x_nxt_lft;
+//				y=y_nxt_lft;
+//				pline=((int)y)*w;
+			}
+			if(adv_rht){
+				x_rht=x_nxt_rht;
+//				y=y_nxt_rht;
+//				pline=((int)y)*w;
+			}
+		}
+//		const PointIx*pi=ix;
+//		for(PointIx j=0;j<npoly_ixs;j++){
+//			const Point2D&p=pts[*pi++];
+//			dot(dsp,p.x,p.y,static_cast<unsigned char>(4));
+//		}
 	}
 
 	// returns false if object is to be deleted
@@ -325,7 +453,8 @@ private:
 			metrics::matrix_set_transforms++;
 		// matrix has been updated, update cached points
 		Mmw_.transform(def_.pts,pts_wld_,def_.npts);
-		Mmw_.rotate(def_.nmls,nmls_wld_,def_.nbnd);
+		if(def_.nmls)
+			Mmw_.rotate(def_.nmls,nmls_wld_,def_.nbnd);
 	}
 	constexpr auto refresh_Mmw_if_invalid()->bool{
 		if(phy().agl==Mmw_agl_&&phy().pos==Mmw_pos_&&scl_==Mmw_scl_)
@@ -345,21 +474,13 @@ public:
 	static SlotIx free_ixes_i; // index in freeSlots[] of next free slot
 	static SlotInfo used_ixes[world::nobjects_max]; // free indexes in all[]
 	static SlotIx used_ixes_i; // index in freeSlots[] of next free slot
-	static inline auto hasFreeSlot()->bool{return free_ixes_i!=0;}
+//	static inline auto hasFreeSlot()->bool{return free_ixes_i!=0;}
 	static auto init_statics(){
 		const unsigned n=sizeof(free_ixes)/sizeof(Object**);
 		for(SlotIx i=0;i<n;i++){
 			free_ixes[i]=&all[i];
 		}
 		free_ixes_i=world::nobjects_max-1;
-	}
-	static inline auto object_for_used_slot(const SlotIx i)->Object*{
-		Object*o=used_ixes[i].obj;
-		if(!o){
-			err.p("null-pointer-exception [e1]");
-			osca_halt();
-		}
-		return o;
 	}
 	static auto update_all(){
 		for(SlotIx i=0;i<used_ixes_i;i++){
@@ -395,48 +516,6 @@ public:
 //		out.p("bounds ");
 		return true;
 	}
-	// checks if any o1 points are in o2 bounding shape
-	static auto is_in_collision(Object&o1,Object&o2)->bool{
-		// check bounding spheres
-		o1.refresh_wld_points();
-		o2.refresh_wld_points();
-		// for each point in o1 check if behind every normal of o2
-		// if behind every normal then within the convex bounding shape thus collision
-
-		// if o2 has no bounding shape (at least 3 points) return false
-		if(o2.def_.nbnd<3)
-			return false;
-
-		// for each point in o1 bounding shape
-		const PointIx*bndptr1=o1.def_.bnd; // bounding point index
-		const unsigned short nbnd1=o1.def_.nbnd;
-		const unsigned short nbnd2=o2.def_.nbnd;
-		for(unsigned i=0;i<nbnd1;i++){
-			// reference pts_pts_wld_[bnd[i]]
-			const Point2D&p1=o1.pts_wld_[*bndptr1++];
-			// for each normal in o2
-			const PointIx*bndptr2=o2.def_.bnd;  // bounding point index
-			const Vector2D*nlptr=o2.nmls_wld_; // normals
-			bool is_collision=true; // assume is collision
-			for(unsigned j=0;j<nbnd2;j++){
-				// reference vector_pts_wld_[bnd[j]]
-				const Vector2D&p2=o2.pts_wld_[*bndptr2++];
-				if(enable::draw_collision_check){
-					dot(vga13h.bmp(),p2.x,p2.y,5);
-				}
-				const Vector2D v=p1-p2; // vector from line point to point to check
-				if(v.dot(*nlptr++)>0){ // use abs(v)<0.0001f (example)?
-					// p "in front" of v, cannot be collision
-					is_collision=false;
-					break;
-				}
-			}
-			// if point within all lines then p1 is within o2 bounding shape
-			if(is_collision)
-				return true;
-		}
-		return false;
-	}
 	static auto check_collisions(){
 		for(unsigned i=0;i<used_ixes_i-1u;i++){
 			for(unsigned j=i+1;j<used_ixes_i;j++){
@@ -454,6 +533,11 @@ public:
 					continue;
 				if(metrics_enable)
 					metrics::collisions_checks_bounding_shapes++;
+
+				// refresh world coordinates
+				o1->refresh_wld_points();
+				o2->refresh_wld_points();
+
 				// check if o1 points in o2 bounding shape
 				if(Object::is_in_collision(*o1,*o2)){
 					if(o1_check_col_with_o2){
@@ -486,6 +570,57 @@ public:
 			}
 		}
 //		world::deleted_commit();
+	}
+
+private:
+	static inline auto object_for_used_slot(const SlotIx i)->Object*{
+		Object*o=used_ixes[i].obj;
+		if(!o){
+			err.p("null-pointer-exception [e1]");
+			osca_halt();
+		}
+		return o;
+	}
+	// checks if any o1 points are in o2 bounding shape
+	static auto is_in_collision(Object&o1,Object&o2)->bool{
+//		o1.refresh_wld_points();
+//		o2.refresh_wld_points();
+		// for each point in o1 check if behind every normal of o2
+		// if behind every normal then within the convex bounding shape thus collision
+
+		// if o2 has no bounding shape (at least 3 points) return false
+		if(o2.def_.nbnd<3) // ? check if points equal? with floats?
+			return false;
+
+		// for each point in o1 bounding shape
+		const PointIx*bndptr1=o1.def_.bnd; // bounding point index
+		const unsigned short nbnd1=o1.def_.nbnd;
+		const unsigned short nbnd2=o2.def_.nbnd;
+		for(unsigned i=0;i<nbnd1;i++){
+			// reference pts_pts_wld_[bnd[i]]
+			const Point2D&p1=o1.pts_wld_[*bndptr1++];
+			// for each normal in o2
+			const PointIx*bndptr2=o2.def_.bnd;  // bounding point index
+			const Vector2D*nlptr=o2.nmls_wld_; // normals
+			bool is_collision=true; // assume is collision
+			for(unsigned j=0;j<nbnd2;j++){
+				// reference vector_pts_wld_[bnd[j]]
+				const Vector2D&p2=o2.pts_wld_[*bndptr2++];
+				if(enable::draw_collision_check){
+					dot(vga13h.bmp(),p2.x,p2.y,5);
+				}
+				const Vector2D v=p1-p2; // vector from line point to point to check
+				if(v.dot(*nlptr++)>0){ // use abs(v)<0.0001f (example)?
+					// p "in front" of v, cannot be collision
+					is_collision=false;
+					break;
+				}
+			}
+			// if point within all lines then p1 is within o2 bounding shape
+			if(is_collision)
+				return true;
+		}
+		return false;
 	}
 };
 Object*Object::all[world::nobjects_max];

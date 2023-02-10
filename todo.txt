@@ -3,6 +3,12 @@
 [x]   step 1. a vector of [*ptr,size] elements pointing to freed memory. O(n) free O(n) alloc
 [ ]   step 2. hash table on size with vectors [*ptr,size]. O(n/x)
 [ ]   step 3. libge heap optimized for Object. O(1) free and nearly O(1) alloc
+[o] render convex polygons
+[o]   ObjectDef: polygons with indexes into the definition points
+[x]     step 1. use bounding shape polygon
+[ ]       review
+[ ]     step 2. define {color,npts,wld_pt_index[]}
+[ ]   render lines
 [o] input text
 [x]   step 1. one keyboard buffer for the system
 [ ]   step 2. "osca_keyb_task" pointer to function that should read keyboard

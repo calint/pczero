@@ -49,7 +49,7 @@ class Bullet:public Object{
 public:
 	Bullet():
 		// type bits 0b10 check collision with
-		// 'ship'    0b0'0001
+		// 'ships'    0b0'0001
 		// 'enemies' 0b0'0100
 		// 'walls'   0b0'1000
 		// 'missiles'0b1'0000
@@ -137,8 +137,14 @@ class Missile:public Object{
 	static constexpr Scale scale=2;
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 public:
+	// type bits 0b1 check collision with:
+	// 'ships'   0b0'0001
+	// 'bullets' 0b0'0010
+	// 'enemies' 0b0'0100
+	// 'walls'   0b0'1000
+	// 'missiles'0b1'0000
 	Missile():
-		Object{0b1'0000,0b1111,missile_def,scale,bounding_radius,{0,0},0,4}
+		Object{0b1'0000,0b1'1111,missile_def,scale,bounding_radius,{0,0},0,4}
 	{}
 	constexpr virtual auto update()->bool override{
 		Object::update();
@@ -171,7 +177,8 @@ class OscaGame{
 		}
 	}
 	auto create_scene2(){
-		new Wall(20,{160,100},0);
+		Object*o=new Wall(20,{160,100},0);
+		o->phy().dagl=deg_to_rad(1);
 	}
 	auto create_scene3(){
 		new Enemy({160,100},0);
@@ -204,11 +211,11 @@ public:
 		};
 		ship_def.init_normals();
 
-		bullet_def={1,1,
+		bullet_def={1,1, // ? why not 0 nbnd and nullptr bnd
 			new Point2D[]{
 				{0,0},
 			},
-			new PointIx[]{} // bounding convex polygon CCW
+			new PointIx[]{0} // bounding convex polygon CCW
 		};
 		bullet_def.init_normals();
 
@@ -243,8 +250,8 @@ public:
 
 		Ship*shp=new Ship;
 		shp->phy().pos={160,130};
-//		create_scene();
 		create_scene();
+//		create_scene2();
 
 //		Ship*shp=nullptr;
 	//	out.p_hex_16b(static_cast<unsigned short>(sizeof(Object))).pos({1,2});

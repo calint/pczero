@@ -96,7 +96,6 @@ class Matrix2D{
 	float ux=0,uy=0,id=1;
 public:
 	auto set_transform(const Scale scale,const Angle rotation,const Vector2D&translation){
-		// ! implement fsincos
 		float fcos,fsin;
 		sin_and_cos(rotation,fsin,fcos);
 		const float cs=scale*fcos;
