@@ -284,7 +284,7 @@ public:
 			draw_polygon(dsp, pts_wld_, def_.nbnd, def_.bnd,color_);
 		}
 		if(enable::draw_normals){
-			Point2D*nml=nmls_wld_;
+			const Point2D*nml=nmls_wld_;
 			for(PointIx i=0;i<def_.nbnd;i++){
 				Vector2D v=*nml;
 				v.normalize().scale(3);
@@ -311,7 +311,7 @@ public:
 			th+=dth;
 		}
 	}
-	constexpr auto draw_polygon(Bitmap&dsp,const Point2D pts[],const PointIx npoly_ixs,const PointIx ix[],unsigned char color)->void{
+	constexpr auto draw_polygon(Bitmap&dsp,const Point2D pts[],const PointIx npoly_ixs,const PointIx ix[],const Color8b color)->void{
 //		const PointIx*pi=ix;
 //		for(PointIx i=0;i<npoly_ixs;i++){
 //			const Point2D&p=pts[*pi++];
@@ -395,7 +395,7 @@ public:
 				adv_lft=false;
 				adv_rht=true;
 			}else{
-//				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_lft-y);
+//				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_lft-y); // this generates more artifacts
 				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_lft)-yscr;
 				adv_lft=true;
 				adv_rht=false;

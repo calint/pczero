@@ -71,7 +71,7 @@ class Bullet final:public Object{
 public:
 	Bullet():
 		// type bits 0b10 check collision with
-		// 'ships'    0b0'0001
+		// 'ships'   0b0'0001
 		// 'enemies' 0b0'0100
 		// 'walls'   0b0'1000
 		// 'missiles'0b1'0000
@@ -94,12 +94,16 @@ class Ship final:public Object{
 public:
 	Ship():
 		// type bits 0b1 check collision with:
+		// 'ships'   0b0'0001
 		// 'bullets' 0b0'0010
 		// 'enemies' 0b0'0100
 		// 'walls'   0b0'1000
 		// 'missiles'0b1'0000
-		Object{0b1,0b1'1110,ship_def,scale,bounding_radius,{0,0},0,2}
+		Object{0b1,0b1'1111,ship_def,scale,bounding_radius,{0,0},0,2}
 	{}
+	~Ship(){
+		game::player_alive=false;
+	}
 
 	constexpr virtual auto update()->bool override{
 		Object::update();
@@ -112,7 +116,6 @@ public:
 	// returns false if object is to be deleted
 	virtual auto on_collision(Object&other)->bool override{
 		// collision with 'wall'
-		game::player_alive=false;
 		return false;
 	}
 
@@ -155,19 +158,7 @@ public:
 	{}
 	constexpr virtual auto update()->bool override{
 		Object::update();
-		if(phy().pos.x>320-bounding_radius){
-			return false;
-		}
-		if(phy().pos.x<bounding_radius){
-			return false;
-		}
-		if(phy().pos.y>150-bounding_radius){
-			return false;
-		}
-		if(phy().pos.y<50+bounding_radius){
-			return false;
-		}
-		return true;
+		return object_within_play_area(*this);
 	}
 	// returns false if object is to be deleted
 	constexpr virtual auto on_collision(Object&other)->bool override{
