@@ -9,11 +9,11 @@ using PointIx=unsigned short;
 
 class ObjectDef final{
 public:
-	unsigned short npts=0; // number of points in pts
-	unsigned short nbnd=0; // number of indexes in bnd
+	PointIx npts=0; // number of points in pts
+	PointIx nbnd=0; // number of indexes in bnd
 	Point2D*pts=nullptr; // array of points used for rendering and bounding shape
-	PointIx*bnd=nullptr; // indexes in pts that defines the bounding shape as a convex polygon
-	Vector2D*nmls=nullptr; // normals to the lines defined in bnd
+	PointIx*bnd=nullptr; // indexes in pts that defines the bounding shape as a convex polygon CCW
+	Vector2D*nmls=nullptr; // normals to the lines defined by bnd
 
 	auto init_normals(){
 		if(nbnd==0)
@@ -31,7 +31,7 @@ public:
 	}
 };
 
-static constexpr void dot(const Bitmap&bmp,const float x,const float y,const unsigned char color){
+static constexpr void dot(const Bitmap&bmp,const float x,const float y,const Color8b color){
 	const int xi=static_cast<int>(x);
 	const int yi=static_cast<int>(y);
 	bmp.pointer_offset({xi,yi}).write(color);
@@ -166,7 +166,6 @@ namespace enable{
 }
 
 using SlotIx=unsigned short; // index in Object::freeSlots[]
-
 // info that together with ~Object maintains usedSlots[]
 struct SlotInfo{
 	Object**oix=nullptr; // pointer to element in Object::all[]
@@ -191,7 +190,7 @@ protected:
 	Scale Mmw_scl_;  // current scale used in transform matrix
 	Scale br_; // bounding radius
 	SlotIx used_ix_=0; // index in used_ixes array. used at new and delete
-	unsigned char color_=1;
+	Color8b color_=1;
 	unsigned char bits_=0; // flags, bit 1:dead
 public:
 //	constexpr Object()=delete;
@@ -199,7 +198,7 @@ public:
 //	constexpr Object(Object&&)=delete; // move ctor
 	constexpr Object&operator=(const Object&)=delete; // copy assignment
 //	Object&operator=(Object&&)=delete; // move assignment
-	Object(const TypeBits tb,const TypeBits colchk_tb,const ObjectDef&def,const Scale scl,const Scale bounding_radius,const Point2D&pos,const Angle rad,const unsigned char color):
+	Object(const TypeBits tb,const TypeBits colchk_tb,const ObjectDef&def,const Scale scl,const Scale bounding_radius,const Point2D&pos,const Angle rad,const Color8b color):
 		tb_{tb},
 		colchk_tb_{colchk_tb},
 		phy_{PhysicsState::alloc()},
@@ -272,7 +271,7 @@ public:
 	constexpr virtual auto render(Bitmap&dsp)->void{
 		refresh_wld_points();
 		if(enable::draw_polygons){
-			draw_polygon(dsp, pts_wld_, def_.nbnd, def_.bnd);
+			draw_polygon(dsp, pts_wld_, def_.nbnd, def_.bnd,color_);
 		}
 		if(enable::draw_dots){
 			const Point2D*pt=pts_wld_;
@@ -309,14 +308,14 @@ public:
 			th+=dth;
 		}
 	}
-	constexpr auto draw_polygon(Bitmap&dsp,const Point2D pts[],const PointIx npoly_ixs,const PointIx ix[])->void{
+	constexpr auto draw_polygon(Bitmap&dsp,const Point2D pts[],const PointIx npoly_ixs,const PointIx ix[],unsigned char color)->void{
 //		const PointIx*pi=ix;
 //		for(PointIx i=0;i<npoly_ixs;i++){
 //			const Point2D&p=pts[*pi++];
 //			dot(dsp,p.x,p.y,4);
 //		}
 		if(npoly_ixs<2){
-			dot(dsp,pts[0].x,pts[0].y,color_);
+			dot(dsp,pts[0].x,pts[0].y,color);
 			return;
 		}
 		PointIx topy_ix=0;
@@ -325,7 +324,7 @@ public:
 		Coord topy=first_point.y;
 		PointIx i=1;
 		while(i<npoly_ixs){
-			const Point2D&p=pts[ix[i]];
+			const Point2D&p=pts[ix[i]]; // ? use pointer
 			const Coord y=p.y;
 			if(y<topy){
 				topy=y;
@@ -350,49 +349,55 @@ public:
 		Coord y=topy;
 		CoordPx wi=dsp.dim().width();
 		CoordPx y_scr=static_cast<CoordPx>(y);
-		unsigned char*pline=static_cast<unsigned char*>(dsp.data().address())+y_scr*wi;
+		Color8b*pline=static_cast<Color8b*>(dsp.data().address())+y_scr*wi;
 		PointIx last_elem_ix=npoly_ixs-1;
 		constexpr bool renderedges=false;
-		unsigned char color=color_;
 		while(true){
 			if(adv_lft){
-//				y_lft=y_nxt_lft;
 				if(ix_lft==last_elem_ix)ix_lft=0;
 				else ix_lft++;
 				x_nxt_lft=pts[ix[ix_lft]].x;
 				y_nxt_lft=pts[ix[ix_lft]].y; // ? whatif prevy==nxty
-//				dy_lft=y_nxt_lft-y_lft;
 				dy_lft=y_nxt_lft-y;
-				if(dy_lft!=0)dxdy_lft=(x_nxt_lft-x_lft)/dy_lft;
-				else dxdy_lft=0;
+				if(dy_lft!=0){
+					dxdy_lft=(x_nxt_lft-x_lft)/dy_lft;
+				}else{
+//					err.p("dy0l");
+					dxdy_lft=0;
+				}
 			}
 			if(adv_rht){
-//				y_rht=y_nxt_rht;
 				if(ix_rht==0)ix_rht=last_elem_ix;
 				else ix_rht--;
 				x_nxt_rht=pts[ix[ix_rht]].x;
 				y_nxt_rht=pts[ix[ix_rht]].y;
-//				dy_rht=y_nxt_rht-y_rht;
 				dy_rht=y_nxt_rht-y;
-				if(dy_rht!=0)dxdy_rht=(x_nxt_rht-x_rht)/dy_rht;
-				else dxdy_rht=0;
+				if(dy_rht!=0){
+					dxdy_rht=(x_nxt_rht-x_rht)/dy_rht;
+				}else{
+//					err.p("dy0r");
+					dxdy_rht=0;
+				}
 			}
 			CoordPx scan_lines_until_next_turn=0;
+			const CoordPx yscr=static_cast<CoordPx>(y);
 			if(y_nxt_lft>y_nxt_rht){
-				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_rht-y);
+//				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_rht-y);
+				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_rht)-yscr;
 				adv_lft=false;
 				adv_rht=true;
 			}else{
-				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_lft-y);
+//				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_lft-y);
+				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_lft)-yscr;
 				adv_lft=true;
 				adv_rht=false;
 			}
 			while(true){
-				unsigned char*p=pline+static_cast<CoordPx>(x_lft);
-				unsigned char*p_rht=pline+static_cast<CoordPx>(x_rht);
-				if(p>p_rht) // ? can happen?
-					break;
 				if(scan_lines_until_next_turn<=0)
+					break;
+				Color8b*p=pline+static_cast<CoordPx>(x_lft);
+				Color8b*p_rht=pline+static_cast<CoordPx>(x_rht);
+				if(p>p_rht) // ? can happen?
 					break;
 				scan_lines_until_next_turn--;
 				CoordPx npx=static_cast<CoordPx>(p_rht-p);
@@ -400,9 +405,7 @@ public:
 					*p=color;
 					*(p+npx)=color;
 				}else{
-//					pz_memset(p,color,npx);
-					while(npx--)
-						*p++=color;
+					pz_memset(p,color,npx);
 				}
 				y+=1;
 				pline+=wi;
@@ -413,13 +416,13 @@ public:
 				break;
 			if(adv_lft){
 				x_lft=x_nxt_lft;
-//				y=y_nxt_lft;
-//				pline=((int)y)*w;
+				y=y_nxt_lft;
+//				pline=static_cast<Color8b*>(dsp.data().address())+static_cast<CoordPx>(y)*wi;
 			}
 			if(adv_rht){
 				x_rht=x_nxt_rht;
-//				y=y_nxt_rht;
-//				pline=((int)y)*w;
+				y=y_nxt_rht;
+//				pline=static_cast<Color8b*>(dsp.data().address())+static_cast<CoordPx>(y)*wi;
 			}
 		}
 //		const PointIx*pi=ix;

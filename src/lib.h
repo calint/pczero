@@ -321,10 +321,10 @@ static const unsigned int table_ascii_to_font[]{
 };
 
 using CoordsChar=CoordsT<int>;
-using Color8b=char;
+using Color8b=unsigned char;
 class PrinterToBitmap{
-	char*di_; // current pixel in bitmap
-	char*dil_; // beginning of current line
+	Color8b*di_; // current pixel in bitmap
+	Color8b*dil_; // beginning of current line
 	Bitmap&b_;
 	SizePx bmp_wi_;
 	SizePx font_wi_;
@@ -336,7 +336,7 @@ class PrinterToBitmap{
 	char padding1=0;
 public:
 	constexpr PrinterToBitmap(Bitmap&b):
-		di_{static_cast<char*>(b.data().address())},
+		di_{static_cast<Color8b*>(b.data().address())},
 		dil_{di_},
 		b_{b},
 		bmp_wi_{b.dim().width()},
@@ -349,7 +349,7 @@ public:
 	{}
 
 	constexpr auto pos(const CoordsChar p)->PrinterToBitmap&{
-		di_=static_cast<char*>(b_.data().address());
+		di_=static_cast<Color8b*>(b_.data().address());
 		di_+=bmp_wi_*p.y()*font_hi_+p.x()*font_wi_;
 		dil_=di_;
 		return*this;

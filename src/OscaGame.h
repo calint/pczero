@@ -183,6 +183,23 @@ class OscaGame{
 	auto create_scene3(){
 		new Enemy({160,100},0);
 	}
+	auto create_circle(const Count segments)->Point2D*{
+		Point2D*pts=new Point2D[segments];
+		Angle th=0;
+		Angle dth=2*PI/static_cast<Angle>(segments);
+		for(Count i=0;i<segments;i++){
+			pts[i]={cos(th),-sin(th)}; // CCW
+			th+=dth;
+		}
+		return pts;
+	}
+	auto create_circle_ix(const Count segments)->PointIx*{
+		PointIx*ix=new PointIx[segments];
+		for(PointIx i=0;i<segments;i++){
+			ix[i]=i;
+		}
+		return ix;
+	}
 public:
 	OscaGame(){
 		//----------------------------------------------------------
@@ -200,6 +217,20 @@ public:
 		};
 		enemy_def.init_normals();
 
+//		constexpr unsigned segments=8;
+//		ship_def={segments,segments,
+//			create_circle(segments),
+//			create_circle_ix(segments),
+//		};
+//		ship_def={4,4,
+//			new Point2D[]{ // points in model coordinates, negative Y is "forward"
+//				{-1,-1},
+//				{-1, 1},
+//				{ 1, 1},
+//				{ 1,-1},
+//			},
+//			new PointIx[]{0,1,2,3} // bounding convex polygon CCW
+//		};
 		ship_def={4,3,
 			new Point2D[]{
 				{ 0, 0},
@@ -337,13 +368,13 @@ public:
 					shp->phy().dpos=shp->forward_vector().scale(7);
 
 				if(keyboard[key_a])
-					shp->phy().dagl=-deg_to_rad(40);
+					shp->phy().dagl=-deg_to_rad(80);
 
 				if(keyboard[key_s])
 					shp->phy().dpos=shp->forward_vector().negate().scale(7);
 
 				if(keyboard[key_d])
-					shp->phy().dagl=deg_to_rad(40);
+					shp->phy().dagl=deg_to_rad(80);
 
 				if(!keyboard[key_a]&&!keyboard[key_d])
 					shp->phy().dagl=0;
