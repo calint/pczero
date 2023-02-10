@@ -370,7 +370,7 @@ public:
 		}
 	}
 
-	static auto draw_axis(Bitmap&dsp)->void{
+	static auto draw_axis(Bitmap&dsp){
 		static Degrees deg=0;
 		static Matrix2D R;
 		if(deg>360)

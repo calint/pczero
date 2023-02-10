@@ -93,7 +93,7 @@ public:
 //	inline constexpr auto set_ddpos(const Point2D&p){ddpos_=p;}
 //	inline constexpr auto set_angle(const Angle rad){agl_=rad;}
 //	inline constexpr auto set_dangle(const Angle rad){dagl_=rad;}
-	inline auto update()->void{
+	inline auto update(){
 		dpos.inc_by(ddpos,world::time_dt_s);
 		pos.inc_by(dpos,world::time_dt_s);
 		agl+=dagl*world::time_dt_s;
@@ -307,7 +307,7 @@ public:
 	constexpr inline auto is_alive()->bool{return!(bits_&1);}
 
 	// used by 'world' to avoid deleting same object more than once
-	constexpr inline auto set_is_alive(const bool v)->void{
+	constexpr inline auto set_is_alive(const bool v){
 		if(v){ // alive bit is 0
 			bits_&=0xff-1;
 		}else{ // not alive bit is 1

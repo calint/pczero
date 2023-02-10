@@ -27,7 +27,7 @@ namespace osca{
 		static HeapEntry*entry_free_lim_;
 		static Size nentries_max_;
 	public:
-		static auto init_statics(const Data&d,const Size nentries_max)->void{
+		static auto init_statics(const Data&d,const Size nentries_max){
 			d_=d;
 			ptr_=reinterpret_cast<char*>(d.address());
 			nentries_max_=nentries_max;
@@ -87,7 +87,7 @@ namespace osca{
 			entry_used_next_++;
 			return reinterpret_cast<void*>(p);
 		}
-		static auto free(void*ptr)->void{
+		static auto free(void*ptr){
 //			err.p_hex_32b(reinterpret_cast<unsigned>(ptr)).spc();
 			HeapEntry*hep=entry_used_start_;
 			while(hep<entry_used_next_){
