@@ -30,7 +30,7 @@ public:
 	}
 
 	constexpr virtual auto update()->bool override{
-		if(phy().pos.y>130||phy().pos.y<70){
+		if(phy().pos.y>125||phy().pos.y<70){
 			phy().dpos.y=-phy().dpos.y;
 		}
 		return true;
