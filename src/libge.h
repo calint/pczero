@@ -37,8 +37,8 @@ static constexpr void dot(const Bitmap&bmp,const float x,const float y,const Col
 	bmp.pointer_offset({xi,yi}).write(color);
 }
 
-constexpr bool metrics_enable=true;
 namespace metrics{
+	constexpr bool enabled=true;
 	static unsigned short matrix_set_transforms=0;
 	static unsigned short collisions_checks=0;
 	static unsigned short collisions_checks_bounding_shapes=0;
@@ -435,7 +435,7 @@ public:
 	// returns false if object is to be deleted
 	constexpr virtual auto on_collision(Object&other)->bool{return true;}
 
-	constexpr inline auto is_alive()->bool{return!(bits_&1);}
+	constexpr inline auto is_alive()const->bool{return!(bits_&1);}
 
 	// used by 'world' to avoid deleting same object more than once
 	constexpr inline auto set_is_alive(const bool v){
@@ -452,7 +452,7 @@ private:
 	constexpr auto refresh_wld_points()->void{
 		if(!refresh_Mmw_if_invalid())
 			return;
-		if(metrics_enable)
+		if(metrics::enabled)
 			metrics::matrix_set_transforms++;
 		// matrix has been updated, update cached points
 		Mmw_.transform(def_.pts,pts_wld_,def_.npts);
@@ -500,25 +500,6 @@ public:
 			o->render(dsp);
 		}
 	}
-	static auto check_collision_bounding_circles(Object&o1,Object&o2)->bool{
-		const float r1=o1.bounding_radius();
-		const float r2=o2.bounding_radius();
-		const Point2D p1=o1.phy().pos;
-		const Point2D p2=o2.phy().pos;
-
-		// check if: sqrt(dx*dx+dy*dy)<=r1+r2
-		const float dist2=r1*r1+2*r1*r2+r2*r2; // distance^2
-		Vector2 v{p2.x-p1.x,p2.y-p1.y};
-		v.x*=v.x;
-		v.y*=v.y;
-		const float d2=v.x+v.y;
-//		const float diff=d2-dist2;
-//		out.pos({0,1}).p_hex_32b(static_cast<unsigned>(diff));
-		if(d2>dist2)
-			return false;
-//		out.p("bounds ");
-		return true;
-	}
 	static auto check_collisions(){
 		for(unsigned i=0;i<used_ixes_i-1u;i++){
 			for(unsigned j=i+1;j<used_ixes_i;j++){
@@ -530,11 +511,11 @@ public:
 				if(!o1_check_col_with_o2&&!o2_check_col_with_o1)
 					continue;
 //				out.p("chk ").p_hex_8b(static_cast<unsigned char>(tb1)).p(' ').p_hex_8b(static_cast<unsigned char>(tb2)).p(' ');
-				if(metrics_enable)
+				if(metrics::enabled)
 					metrics::collisions_checks++;
 				if(!Object::check_collision_bounding_circles(*o1,*o2))
 					continue;
-				if(metrics_enable)
+				if(metrics::enabled)
 					metrics::collisions_checks_bounding_shapes++;
 
 				// refresh world coordinates
@@ -583,6 +564,25 @@ private:
 			osca_halt();
 		}
 		return o;
+	}
+	static auto check_collision_bounding_circles(Object&o1,Object&o2)->bool{
+		const float r1=o1.bounding_radius();
+		const float r2=o2.bounding_radius();
+		const Point2D p1=o1.phy().pos;
+		const Point2D p2=o2.phy().pos;
+
+		// check if: sqrt(dx*dx+dy*dy)<=r1+r2
+		const float dist2=r1*r1+2*r1*r2+r2*r2; // distance^2
+		Vector2 v{p2.x-p1.x,p2.y-p1.y};
+		v.x*=v.x;
+		v.y*=v.y;
+		const float d2=v.x+v.y;
+//		const float diff=d2-dist2;
+//		out.pos({0,1}).p_hex_32b(static_cast<unsigned>(diff));
+		if(d2>dist2)
+			return false;
+//		out.p("bounds ");
+		return true;
 	}
 	// checks if any o1 points are in o2 bounding shape
 	static auto is_in_collision(Object&o1,Object&o2)->bool{
