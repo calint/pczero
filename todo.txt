@@ -11,6 +11,7 @@
 [ ]       review
 [ ]     step 2. define {color,npts,wld_pt_index[]}
 [ ]   render lines
+[ ]   multiple bounding shapes per object to allow non convex shape
 [o] input text
 [x]   step 1. one keyboard buffer for the system
 [ ]   step 2. "osca_keyb_task" pointer to function that should read keyboard

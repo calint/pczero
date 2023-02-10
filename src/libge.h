@@ -160,6 +160,7 @@ PhysicsState*PhysicsState::next_free;
 namespace enable{
 	constexpr static bool draw_dots=true;
 	constexpr static bool draw_polygons=true;
+	constexpr static bool draw_polygons_edges=true;
 	constexpr static bool draw_normals=false;
 	constexpr static bool draw_collision_check=false;
 	constexpr static bool draw_bounding_circle=false;
@@ -283,7 +284,7 @@ public:
 		}
 		if(enable::draw_normals){
 			Point2D*nml=nmls_wld_;
-			for(unsigned i=0;i<def_.nbnd;i++){
+			for(PointIx i=0;i<def_.nbnd;i++){
 				Vector2D v=*nml;
 				v.normalize().scale(3);
 				Point2D p=pts_wld_[def_.bnd[i]];
@@ -352,7 +353,6 @@ public:
 		CoordPx y_scr=static_cast<CoordPx>(y);
 		Color8b*pline=static_cast<Color8b*>(dsp.data().address())+y_scr*wi;
 		PointIx last_elem_ix=npoly_ixs-1;
-		constexpr bool renderedges=false;
 		while(true){
 			if(adv_lft){
 				if(ix_lft==last_elem_ix){
@@ -410,7 +410,7 @@ public:
 					break;
 				scan_lines_until_next_turn--;
 				CoordPx npx=static_cast<CoordPx>(p_rht-p);
-				if(renderedges){
+				if(enable::draw_polygons_edges){
 					*p=color;
 					*(p+npx)=color;
 				}else{

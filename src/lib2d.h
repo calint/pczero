@@ -4,6 +4,7 @@ namespace osca{
 
 using Angle=float;
 using Scale=float;
+using Scalar=float;
 
 inline auto sin(const Angle radians)->float{
 	float v;

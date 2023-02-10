@@ -17,7 +17,7 @@ static ObjectDef bullet_def;
 static ObjectDef wall_def;
 static ObjectDef missile_def;
 
-class Enemy:public Object{
+class Enemy final:public Object{
 	static constexpr Scale scale=5;
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 public:
@@ -27,6 +27,9 @@ public:
 		Object{0b100,0b10,enemy_def,scale,bounding_radius,pos,agl,3}
 	{
 		game::enemies_alive++;
+	}
+	~Enemy()override{
+		game::enemies_alive--;
 	}
 
 	constexpr virtual auto update()->bool override{
@@ -38,12 +41,11 @@ public:
 
 	// returns false if object is to be deleted
 	virtual auto on_collision(Object&other)->bool override{
-		game::enemies_alive--;
 		return false; // collision with type 'bullet'
 	}
 };
 
-class Bullet:public Object{
+class Bullet final:public Object{
 	static constexpr Scale scale=1;
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 public:
@@ -77,8 +79,8 @@ public:
 	}
 };
 
-class Ship:public Object{
-	static constexpr Scale scale=5;
+class Ship final:public Object{
+	static constexpr Scale scale=4;
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 	float fire_t_s=0;
 public:
@@ -118,13 +120,13 @@ public:
 		Vector2D v=forward_vector().scale(1.1f);
 		v.scale(scl_); // place bullet in front of ship
 		b->phy().pos=phy().pos+v;
-		b->phy().dpos=v.normalize().scale(30);
+		b->phy().dpos=v.normalize().scale(40);
 		b->phy().agl=phy().agl;
 	}
 };
 
 
-class Wall:public Object{
+class Wall final:public Object{
 public:
 	// type bits 0b100 check collision with nothing
 	Wall(const Scale scl,const Point2D&pos,const Angle agl):
@@ -133,7 +135,7 @@ public:
 };
 
 
-class Missile:public Object{
+class Missile final:public Object{
 	static constexpr Scale scale=2;
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 public:
@@ -279,7 +281,8 @@ public:
 		const SizeBytes heap_disp_size=320*100;
 
 
-		constexpr Scale ship_dagl=90;
+		constexpr Angle ship_dagl=90;
+		constexpr Scalar ship_speed=20;
 		Ship*shp=new Ship;
 		shp->phy().pos={160,130};
 //		shp->phy().pos={160,100};
@@ -367,13 +370,13 @@ public:
 					}
 				}
 				if(keyboard[key_w])
-					shp->phy().dpos=shp->forward_vector().scale(7);
+					shp->phy().dpos=shp->forward_vector().scale(ship_speed);
 
 				if(keyboard[key_a])
 					shp->phy().dagl=-deg_to_rad(ship_dagl);
 
 				if(keyboard[key_s])
-					shp->phy().dpos=shp->forward_vector().negate().scale(7);
+					shp->phy().dpos=shp->forward_vector().negate().scale(ship_speed);
 
 				if(keyboard[key_d])
 					shp->phy().dagl=deg_to_rad(ship_dagl);
