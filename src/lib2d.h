@@ -47,44 +47,45 @@ constexpr auto deg_to_rad(const Degrees deg)->Angle{
 	return deg*deg_to_rad;
 }
 
-class Vector2D{
+class Vector2{
 public:
 	float x=0,y=0;
 //	Vector2D(){}
 //	Vector2D(const float x_,const float y_):x{x_},y{y_}{}
 	// normalizes this vector
-	inline auto normalize()->Vector2D&{
+	inline auto normalize()->Vector2&{
 		const float len=sqrt(x*x+y*y);
 		x/=len;
 		y/=len;
 		return*this;
 	}
 	// scales this vector
-	inline constexpr auto scale(float s)->Vector2D&{
+	inline constexpr auto scale(float s)->Vector2&{
 		x*=s;
 		y*=s;
 		return*this;
 	}
-	inline constexpr auto inc_by(const Vector2D&v){
+	inline constexpr auto inc_by(const Vector2&v){
 		x+=v.x;
 		y+=v.y;
 	}
-	inline constexpr auto inc_by(const Vector2D&v,const float dt_s){
+	inline constexpr auto inc_by(const Vector2&v,const float dt_s){
 		x+=v.x*dt_s;
 		y+=v.y*dt_s;
 	}
-	inline constexpr auto negate()->Vector2D&{
+	// negates this vector
+	inline constexpr auto negate()->Vector2&{
 		x=-x;
 		y=-y;
 		return*this;
 	}
-	inline constexpr auto dot(const Vector2D&v)const->float{
+	inline constexpr auto dot(const Vector2&v)const->float{
 		return x*v.x+y*v.y;
 	}
 //	auto operator<=>(const Vector2D&)const=default; // ? does not compile in clang++ without includes from std
-	constexpr inline auto operator==(const Vector2D&)const->bool=default;
-	constexpr inline auto operator-(const Vector2D&other)const->Vector2D{return{x-other.x,y-other.y};}
-	constexpr inline auto operator+(const Vector2D&other)const->Vector2D{return{x+other.x,y+other.y};}
+	constexpr inline auto operator==(const Vector2&)const->bool=default;
+	constexpr inline auto operator-(const Vector2&other)const->Vector2{return{x-other.x,y-other.y};}
+	constexpr inline auto operator+(const Vector2&other)const->Vector2{return{x+other.x,y+other.y};}
 };
 
 using Scale=float;
@@ -95,7 +96,7 @@ class Matrix2D{
 	float yx=0,yy=1,yt=0;
 	float ux=0,uy=0,id=1;
 public:
-	auto set_transform(const Scale scale,const Angle rotation,const Vector2D&translation){
+	auto set_transform(const Scale scale,const Angle rotation,const Vector2&translation){
 		float fcos,fsin;
 		sin_and_cos(rotation,fsin,fcos);
 		const float cs=scale*fcos;
@@ -104,7 +105,7 @@ public:
 		yx=sn;yy= cs;yt=translation.y;
 		ux= 0;uy=  0;id=1;
 	}
-	constexpr auto transform(const Vector2D src[],Vector2D dst[],const unsigned n)const{
+	constexpr auto transform(const Vector2 src[],Vector2 dst[],const unsigned n)const{
 		for(unsigned i=0;i<n;i++){
 			dst->x=xx*src->x+xy*src->y+xt;
 			dst->y=yx*src->x+yy*src->y+yt;
@@ -113,7 +114,7 @@ public:
 		}
 	}
 	// does the rotation part of the transform
-	constexpr auto rotate(const Vector2D src[],Vector2D dst[],const unsigned n)const{
+	constexpr auto rotate(const Vector2 src[],Vector2 dst[],const unsigned n)const{
 		for(unsigned i=0;i<n;i++){
 			dst->x=xx*src->x+xy*src->y;
 			dst->y=yx*src->x+yy*src->y;
@@ -121,8 +122,8 @@ public:
 			dst++;
 		}
 	}
-	inline constexpr auto axis_x()const->Vector2D{return{xx,yx};} // math correct?
-	inline constexpr auto axis_y()const->Vector2D{return{xy,yy};} // math correct?
+	inline constexpr auto axis_x()const->Vector2{return{xx,yx};} // math correct?
+	inline constexpr auto axis_y()const->Vector2{return{xy,yy};} // math correct?
 };
 
 } // end namespace osca

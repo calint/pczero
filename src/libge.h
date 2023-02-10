@@ -3,7 +3,7 @@
 
 namespace osca{
 
-using Point2D=Vector2D;
+using Point2D=Vector2;
 
 using PointIx=unsigned short;
 
@@ -13,19 +13,19 @@ public:
 	PointIx nbnd=0; // number of indexes in bnd
 	Point2D*pts=nullptr; // array of points used for rendering and bounding shape
 	PointIx*bnd=nullptr; // indexes in pts that defines the bounding shape as a convex polygon CCW
-	Vector2D*nmls=nullptr; // normals to the lines defined by bnd
+	Vector2*nmls=nullptr; // normals to the lines defined by bnd
 
 	auto init_normals(){
 		if(nbnd==0)
 			return;
-		nmls=new Vector2D[nbnd];
+		nmls=new Vector2[nbnd];
 		const unsigned n=nbnd-1;
 		for(unsigned i=0;i<n;i++){
-			const Vector2D d=pts[bnd[i+1]]-pts[bnd[i]];
+			const Vector2 d=pts[bnd[i+1]]-pts[bnd[i]];
 			nmls[i]={-d.y,d.x}; // normal to the line d
 			nmls[i].normalize();
 		}
-		const Vector2D d=pts[bnd[0]]-pts[bnd[nbnd-1]];
+		const Vector2 d=pts[bnd[0]]-pts[bnd[nbnd-1]];
 		nmls[nbnd-1]={-d.y,d.x}; // normal to the line d
 		nmls[nbnd-1].normalize();
 	}
@@ -183,7 +183,7 @@ protected:
 	Scale scl_; // scale that is used in transform from model to world coordinates
 	const ObjectDef&def_; // contains the model definition
 	Point2D*pts_wld_; // transformed model to world points cache
-	Vector2D*nmls_wld_; // normals of bounding shape rotated to the world coordinates (not normalized if scale!=1)
+	Vector2*nmls_wld_; // normals of bounding shape rotated to the world coordinates (not normalized if scale!=1)
 	Matrix2D Mmw_; // model to world transform
 	Point2D Mmw_pos_; // current position used in transform matrix
 	Angle Mmw_agl_; // current angle used in transform matrix
@@ -205,7 +205,7 @@ public:
 		scl_{scl},
 		def_{def},
 		pts_wld_{new Point2D[def.npts]},
-		nmls_wld_{new Vector2D[def.nbnd]},
+		nmls_wld_{new Vector2[def.nbnd]},
 		Mmw_{},
 		Mmw_pos_{0,0},
 		Mmw_agl_{0},
@@ -262,7 +262,7 @@ public:
 	inline constexpr auto phy()->PhysicsState&{return*phy_;}
 	inline constexpr auto scale()const->Scale{return scl_;}
 	inline constexpr auto def()const->const ObjectDef&{return def_;}
-	auto forward_vector()->Vector2D{
+	auto forward_vector()->Vector2{
 		refresh_Mmw_if_invalid();
 		return Mmw_.axis_y().negate().normalize(); // ? not negated (if positive y is up)
 	}
@@ -283,10 +283,10 @@ public:
 		if(enable::draw_normals){
 			Point2D*nml=nmls_wld_;
 			for(unsigned i=0;i<def_.nbnd;i++){
-				Vector2D v=*nml;
+				Vector2 v=*nml;
 				v.normalize().scale(3);
 				Point2D p=pts_wld_[def_.bnd[i]];
-				Vector2D v1{p.x+nml->x,p.y+nml->y};
+				Vector2 v1{p.x+nml->x,p.y+nml->y};
 				dot(dsp,v1.x,v1.y,0xf);
 				nml++;
 			}
@@ -508,7 +508,7 @@ public:
 
 		// check if: sqrt(dx*dx+dy*dy)<=r1+r2
 		const float dist2=r1*r1+2*r1*r2+r2*r2; // distance^2
-		Vector2D v{p2.x-p1.x,p2.y-p1.y};
+		Vector2 v{p2.x-p1.x,p2.y-p1.y};
 		v.x*=v.x;
 		v.y*=v.y;
 		const float d2=v.x+v.y;
@@ -604,15 +604,15 @@ private:
 			const Point2D&p1=o1.pts_wld_[*bndptr1++];
 			// for each normal in o2
 			const PointIx*bndptr2=o2.def_.bnd;  // bounding point index
-			const Vector2D*nlptr=o2.nmls_wld_; // normals
+			const Vector2*nlptr=o2.nmls_wld_; // normals
 			bool is_collision=true; // assume is collision
 			for(unsigned j=0;j<nbnd2;j++){
 				// reference vector_pts_wld_[bnd[j]]
-				const Vector2D&p2=o2.pts_wld_[*bndptr2++];
+				const Vector2&p2=o2.pts_wld_[*bndptr2++];
 				if(enable::draw_collision_check){
 					dot(vga13h.bmp(),p2.x,p2.y,5);
 				}
-				const Vector2D v=p1-p2; // vector from line point to point to check
+				const Vector2 v=p1-p2; // vector from line point to point to check
 				if(v.dot(*nlptr++)>0){ // use abs(v)<0.0001f (example)?
 					// p "in front" of v, cannot be collision
 					is_collision=false;

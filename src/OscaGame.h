@@ -115,7 +115,7 @@ public:
 			return;
 		fire_t_s=world::time_s;
 		Bullet*b=new Bullet;
-		Vector2D v=forward_vector().scale(1.1f);
+		Vector2 v=forward_vector().scale(1.1f);
 		v.scale(scl_); // place bullet in front of ship
 		b->phy().pos=phy().pos+v;
 		b->phy().dpos=v.normalize().scale(30);
@@ -419,9 +419,9 @@ public:
 		R.set_transform(5,rotation,{160,100});
 		// dot axis
 		dot(dsp,160,100,0xf);
-		const Vector2D xaxis=R.axis_x().normalize().scale(7);
+		const Vector2 xaxis=R.axis_x().normalize().scale(7);
 		dot(dsp,xaxis.x+160,xaxis.y+100,4);
-		const Vector2D yaxis=R.axis_y().normalize().scale(7);
+		const Vector2 yaxis=R.axis_y().normalize().scale(7);
 		dot(dsp,yaxis.x+160,yaxis.y+100,2);
 	}
 };
