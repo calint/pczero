@@ -18,7 +18,9 @@ AF=--march=i386 --32
 #CW=-pedantic -pedantic-errors -Wall -Wextra -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
 #CW+=-Werror # warnings are errors
 #CW+=-Wpadded # warn when complier pads a data structure
-##CW+=-Winline # don't warn about non-inlined functions
+#CW+=-Wsign-conversion 
+#CW+=-Wfloat-conversion 
+#CW+=-Winline # don't warn about non-inlined functions
 #CW+=-Wno-analyzer-malloc-leak
 #CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
 #CW+=-Wno-unused-function # allow for debugging
