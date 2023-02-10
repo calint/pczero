@@ -22,16 +22,16 @@ static DimensionPx play_area_dim{320,100};
 
 static constexpr auto object_within_play_area(Object&o)->bool{
 	const Scale bounding_radius=o.bounding_radius();
-	if(o.phy().pos.x>static_cast<Scale>(play_area_top_left.x()+play_area_dim.width())-bounding_radius){
+	if(o.phy().pos.x>static_cast<Coord>(play_area_top_left.x()+play_area_dim.width())-bounding_radius){
 		return false;
 	}
-	if(o.phy().pos.x<static_cast<Scale>(play_area_top_left.x())+bounding_radius){
+	if(o.phy().pos.x<static_cast<Coord>(play_area_top_left.x())+bounding_radius){
 		return false;
 	}
-	if(o.phy().pos.y>static_cast<Scale>(play_area_top_left.y()+play_area_dim.height())-bounding_radius){
+	if(o.phy().pos.y>static_cast<Coord>(play_area_top_left.y()+play_area_dim.height())-bounding_radius){
 		return false;
 	}
-	if(o.phy().pos.y<static_cast<Scale>(play_area_top_left.y())+bounding_radius){
+	if(o.phy().pos.y<static_cast<Coord>(play_area_top_left.y())+bounding_radius){
 		return false;
 	}
 	return true;
@@ -178,7 +178,7 @@ public:
 class OscaGame{
 	auto create_scene(){
 		for(float i=30;i<300;i+=20){
-			Enemy*e=new Enemy({i,90},deg_to_rad(i));
+			Enemy*e=new Enemy({i,60},deg_to_rad(i));
 			e->phy().dagl=deg_to_rad(10);
 			e->phy().dpos={0,2};
 		}
