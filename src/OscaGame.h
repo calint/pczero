@@ -8,7 +8,7 @@ namespace osca{
 
 namespace game{
 	static bool player_alive=true;
-	static Size enemies_alive=0;
+	static Count enemies_alive=0;
 }
 
 static ObjectDef enemy_def;
@@ -16,6 +16,26 @@ static ObjectDef ship_def;
 static ObjectDef bullet_def;
 static ObjectDef wall_def;
 static ObjectDef missile_def;
+
+static CoordsPx play_area_top_left{0,50};
+static DimensionPx play_area_dim{320,100};
+
+static constexpr auto object_within_play_area(Object&o)->bool{
+	const Scale bounding_radius=o.bounding_radius();
+	if(o.phy().pos.x>static_cast<Scale>(play_area_top_left.x()+play_area_dim.width())-bounding_radius){
+		return false;
+	}
+	if(o.phy().pos.x<static_cast<Scale>(play_area_top_left.x())+bounding_radius){
+		return false;
+	}
+	if(o.phy().pos.y>static_cast<Scale>(play_area_top_left.y()+play_area_dim.height())-bounding_radius){
+		return false;
+	}
+	if(o.phy().pos.y<static_cast<Scale>(play_area_top_left.y())+bounding_radius){
+		return false;
+	}
+	return true;
+}
 
 class Enemy final:public Object{
 	static constexpr Scale scale=5;
@@ -33,7 +53,7 @@ public:
 	}
 
 	constexpr virtual auto update()->bool override{
-		if(phy().pos.y>150-bounding_radius||phy().pos.y<50+bounding_radius){
+		if(!object_within_play_area(*this)){
 			phy().dpos.y=-phy().dpos.y;
 		}
 		return true;
@@ -59,19 +79,7 @@ public:
 	{}
 	constexpr virtual auto update()->bool override{
 		Object::update();
-		if(phy().pos.x>320-bounding_radius){
-			return false;
-		}
-		if(phy().pos.x<bounding_radius){
-			return false;
-		}
-		if(phy().pos.y>150-bounding_radius){
-			return false;
-		}
-		if(phy().pos.y<50+bounding_radius){
-			return false;
-		}
-		return true;
+		return object_within_play_area(*this);
 	}
 	// returns false if object is to be deleted
 	constexpr virtual auto on_collision(Object&other)->bool override{
@@ -95,11 +103,8 @@ public:
 
 	constexpr virtual auto update()->bool override{
 		Object::update();
-		if(phy().pos.x>320-bounding_radius||phy().pos.x<=bounding_radius){
-			phy().dpos.x=-phy().dpos.x;
-		}
-		if(phy().pos.y>150-bounding_radius||phy().pos.y<50+bounding_radius){
-			phy().dpos.y=-phy().dpos.y;
+		if(!object_within_play_area(*this)){
+			phy().dpos={0,0};
 		}
 		return true;
 	}
@@ -272,6 +277,10 @@ public:
 			new PointIx[]{0,1,2} // bounding convex polygon CCW
 		};
 		missile_def.init_normals();
+
+//		out.p_hex_32b(static_cast<unsigned>(play_area_top_left.y()));
+//		out.p_hex_32b(static_cast<unsigned>(play_area_dim.width()));
+//		osca_halt();
 	}
 
 	[[noreturn]] auto start(){
