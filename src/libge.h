@@ -160,6 +160,7 @@ PhysicsState*PhysicsState::next_free;
 namespace enable{
 	constexpr static bool draw_dots=true;
 	constexpr static bool draw_polygons=true;
+	constexpr static bool draw_polygons_fill=false;
 	constexpr static bool draw_polygons_edges=true;
 	constexpr static bool draw_normals=false;
 	constexpr static bool draw_collision_check=false;
@@ -410,11 +411,12 @@ public:
 					break;
 				scan_lines_until_next_turn--;
 				CoordPx npx=static_cast<CoordPx>(p_rht-p);
+				if(enable::draw_polygons_fill){
+					pz_memset(p,color,npx);
+				}
 				if(enable::draw_polygons_edges){
 					*p=color;
 					*(p+npx)=color;
-				}else{
-					pz_memset(p,color,npx);
 				}
 				y+=1;
 				pline+=wi;
