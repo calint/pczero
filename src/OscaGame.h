@@ -30,7 +30,7 @@ public:
 	}
 
 	constexpr virtual auto update()->bool override{
-		if(phy().pos.y>125||phy().pos.y<70){
+		if(phy().pos.y>150-bounding_radius||phy().pos.y<50+bounding_radius){
 			phy().dpos.y=-phy().dpos.y;
 		}
 		return true;
@@ -57,16 +57,16 @@ public:
 	{}
 	constexpr virtual auto update()->bool override{
 		Object::update();
-		if(phy().pos.x>300){
+		if(phy().pos.x>320-bounding_radius){
 			return false;
 		}
-		if(phy().pos.x<20){
+		if(phy().pos.x<bounding_radius){
 			return false;
 		}
-		if(phy().pos.y>130){
+		if(phy().pos.y>150-bounding_radius){
 			return false;
 		}
-		if(phy().pos.y<70){
+		if(phy().pos.y<50+bounding_radius){
 			return false;
 		}
 		return true;
@@ -93,10 +93,10 @@ public:
 
 	constexpr virtual auto update()->bool override{
 		Object::update();
-		if(phy().pos.x>300||phy().pos.x<20){
+		if(phy().pos.x>320-bounding_radius||phy().pos.x<=bounding_radius){
 			phy().dpos.x=-phy().dpos.x;
 		}
-		if(phy().pos.y>130||phy().pos.y<70){
+		if(phy().pos.y>150-bounding_radius||phy().pos.y<50+bounding_radius){
 			phy().dpos.y=-phy().dpos.y;
 		}
 		return true;
@@ -115,7 +115,7 @@ public:
 			return;
 		fire_t_s=world::time_s;
 		Bullet*b=new Bullet;
-		Vector2 v=forward_vector().scale(1.1f);
+		Vector2D v=forward_vector().scale(1.1f);
 		v.scale(scl_); // place bullet in front of ship
 		b->phy().pos=phy().pos+v;
 		b->phy().dpos=v.normalize().scale(30);
@@ -148,16 +148,16 @@ public:
 	{}
 	constexpr virtual auto update()->bool override{
 		Object::update();
-		if(phy().pos.x>300){
+		if(phy().pos.x>320-bounding_radius){
 			return false;
 		}
-		if(phy().pos.x<20){
+		if(phy().pos.x<bounding_radius){
 			return false;
 		}
-		if(phy().pos.y>130){
+		if(phy().pos.y>150-bounding_radius){
 			return false;
 		}
-		if(phy().pos.y<70){
+		if(phy().pos.y<50+bounding_radius){
 			return false;
 		}
 		return true;
@@ -172,7 +172,7 @@ class OscaGame{
 	auto create_scene(){
 		for(float i=30;i<300;i+=20){
 			Enemy*e=new Enemy({i,90},deg_to_rad(i));
-			e->phy().dagl=deg_to_rad(1);
+			e->phy().dagl=deg_to_rad(10);
 			e->phy().dpos={0,2};
 		}
 	}
@@ -279,8 +279,10 @@ public:
 		const SizeBytes heap_disp_size=320*100;
 
 
+		constexpr Scale ship_dagl=90;
 		Ship*shp=new Ship;
 		shp->phy().pos={160,130};
+//		shp->phy().pos={160,100};
 		create_scene();
 //		create_scene2();
 
@@ -368,13 +370,13 @@ public:
 					shp->phy().dpos=shp->forward_vector().scale(7);
 
 				if(keyboard[key_a])
-					shp->phy().dagl=-deg_to_rad(80);
+					shp->phy().dagl=-deg_to_rad(ship_dagl);
 
 				if(keyboard[key_s])
 					shp->phy().dpos=shp->forward_vector().negate().scale(7);
 
 				if(keyboard[key_d])
-					shp->phy().dagl=deg_to_rad(80);
+					shp->phy().dagl=deg_to_rad(ship_dagl);
 
 				if(!keyboard[key_a]&&!keyboard[key_d])
 					shp->phy().dagl=0;
@@ -409,7 +411,7 @@ public:
 	}
 
 	static auto draw_axis(Bitmap&dsp){
-		static Degrees deg=0;
+		static Angle deg=0;
 		static Matrix2D R;
 		if(deg>360)
 			deg-=360;
@@ -419,9 +421,9 @@ public:
 		R.set_transform(5,rotation,{160,100});
 		// dot axis
 		dot(dsp,160,100,0xf);
-		const Vector2 xaxis=R.axis_x().normalize().scale(7);
+		const Vector2D xaxis=R.axis_x().normalize().scale(7);
 		dot(dsp,xaxis.x+160,xaxis.y+100,4);
-		const Vector2 yaxis=R.axis_y().normalize().scale(7);
+		const Vector2D yaxis=R.axis_y().normalize().scale(7);
 		dot(dsp,yaxis.x+160,yaxis.y+100,2);
 	}
 };

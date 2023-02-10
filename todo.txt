@@ -1,4 +1,5 @@
 [ ] review 'using' Scale Coord etc
+[ ] move draw_x into Bitmap?
 [ ] better clock, higher resolution than the default 18.2 Hz
 [o] heap
 [x]   step 1. a vector of [*ptr,size] elements pointing to freed memory. O(n) free O(n) alloc
