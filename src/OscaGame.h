@@ -191,7 +191,7 @@ class OscaGame{
 		new Enemy({160,100},0);
 	}
 	auto create_circle(const Count segments)->Point2D*{
-		Point2D*pts=new Point2D[segments];
+		Point2D*pts=new Point2D[static_cast<unsigned>(segments)];
 		Angle th=0;
 		Angle dth=2*PI/static_cast<Angle>(segments);
 		for(Count i=0;i<segments;i++){
@@ -201,7 +201,7 @@ class OscaGame{
 		return pts;
 	}
 	auto create_circle_ix(const Count segments)->PointIx*{
-		PointIx*ix=new PointIx[segments];
+		PointIx*ix=new PointIx[static_cast<unsigned>(segments)];
 		for(PointIx i=0;i<segments;i++){
 			ix[i]=i;
 		}
