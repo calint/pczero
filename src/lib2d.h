@@ -90,6 +90,10 @@ public:
 	constexpr inline auto operator==(const Vector&)const->bool=default;
 	constexpr inline auto operator-(const Vector&other)const->Vector{return{x-other.x,y-other.y};}
 	constexpr inline auto operator+(const Vector&other)const->Vector{return{x+other.x,y+other.y};}
+
+	inline static constexpr auto from_to(const Vector&from,const Vector&to)->Vector{
+		return to-from;
+	}
 };
 
 using Count=Size;

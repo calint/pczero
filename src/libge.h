@@ -24,12 +24,10 @@ public:
 		const PointIx n=nbnd-1;
 		for(PointIx i=0;i<n;i++){
 			const Vector d=pts[bnd[i+1]]-pts[bnd[i]];
-			nmls[i]=d.normal();
-			nmls[i].normalize();
+			nmls[i]=d.normal().normalize();
 		}
 		const Vector d=pts[bnd[0]]-pts[bnd[nbnd-1]];
-		nmls[nbnd-1]={-d.y,d.x}; // normal to the line d
-		nmls[nbnd-1].normalize();
+		nmls[nbnd-1]=d.normal().normalize();
 	}
 };
 
@@ -164,7 +162,7 @@ namespace enable{
 	constexpr static bool draw_polygons=true;
 	constexpr static bool draw_polygons_fill=false;
 	constexpr static bool draw_polygons_edges=true;
-	constexpr static bool draw_normals=false;
+	constexpr static bool draw_normals=true;
 	constexpr static bool draw_collision_check=false;
 	constexpr static bool draw_bounding_circle=false;
 }
