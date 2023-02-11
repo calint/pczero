@@ -403,7 +403,7 @@ public:
 			while(true){
 				if(scan_lines_until_next_turn<=0)
 					break;
-//				Color8b*p=pline+static_cast<CoordPx>(x_lft+.5555f);
+//				Color8b*p_lft=pline+static_cast<CoordPx>(x_lft+.5555f);
 //				Color8b*p_rht=pline+static_cast<CoordPx>(x_rht+.5555f);
 				Color8b*p_lft=pline+static_cast<CoordPx>(x_lft);
 				Color8b*p_rht=pline+static_cast<CoordPx>(x_rht);
