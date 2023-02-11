@@ -13,7 +13,7 @@ public:
 	PointIx nbnd=0; // number of indexes in bnd
 	Point2D*pts=nullptr; // array of points used for rendering and bounding shape
 	PointIx*bnd=nullptr; // indexes in pts that defines the bounding shape as a convex polygon CCW
-	Vector2D*nmls=nullptr; // normals to the lines defined by bnd
+	Vector2D*nmls=nullptr; // normals to the lines defined by bnd (calculated by init_normals())
 
 	auto init_normals(){
 		if(nbnd<2){
