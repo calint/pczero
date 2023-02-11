@@ -55,7 +55,7 @@ public:
 	Real x=0,y=0;
 	// normalizes this vector
 	inline auto normalize()->Vector&{
-		const Coord len=sqrt(x*x+y*y);
+		const Real len=sqrt(x*x+y*y);
 		x/=len;
 		y/=len;
 		return*this;
