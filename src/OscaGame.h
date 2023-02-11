@@ -101,7 +101,7 @@ public:
 		// 'missiles'0b1'0000
 		Object{0b1,0b1'1111,ship_def,scale,bounding_radius,{0,0},0,2}
 	{}
-	~Ship(){
+	~Ship()override{
 		game::player_alive=false;
 	}
 

@@ -486,6 +486,7 @@ public:
 };
 
 // the vga 13h bitmap
+extern Vga13h vga13h;
 Vga13h vga13h;
 
 class PrinterToVga:public PrinterToBitmap{
@@ -498,7 +499,9 @@ public:
 };
 
 // debugging to vga13h
+extern PrinterToVga out;
 PrinterToVga out;
+extern PrinterToVga err;
 PrinterToVga err;
 
 using PositionPx=CoordsPx;
