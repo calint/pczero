@@ -485,24 +485,6 @@ public:
 	inline constexpr auto bmp()->Bitmap&{return b_;}
 };
 
-//class PrinterToVga{
-//	Vga13h dsp;
-//	PrinterToBitmap ptb;
-//public:
-//	PrinterToVga():
-//		dsp{},ptb{dsp.bmp()}
-//	{
-//		ptb.pos({1,1}).fg(4);
-//	}
-////	inline auto p(const char*s){ptb.p(s);}
-//	inline constexpr auto printer()->PrinterToBitmap&{return ptb;}
-//	constexpr PrinterToVga&operator=(PrinterToVga&&o){
-//		dsp=o.dsp;
-//		ptb=o.ptb;
-//		return*this;
-//	}
-//};
-extern Vga13h vga13h;
 Vga13h vga13h;
 
 class PrinterToVga:public PrinterToBitmap{
@@ -514,10 +496,8 @@ public:
 	}
 };
 
-extern PrinterToVga out;
+// debugging to vga13h
 PrinterToVga out;
-// used to print at row 1 column 1. initiated in main.cc::osca_init()
-extern PrinterToVga err;
 PrinterToVga err;
 
 using PositionPx=CoordsPx;

@@ -16,16 +16,16 @@ namespace osca{
 		unsigned size;
 	};
 	class Heap final{
-		static Data d_;
-		static char*ptr_; // pointer to free memory
-		static char*ptr_lim_; // limit of buffer
-		static HeapEntry*entry_used_start_; // beginning of vector containing used memory info
-		static HeapEntry*entry_used_next_;
-		static HeapEntry*entry_used_lim_;
-		static HeapEntry*entry_free_start_; // beginning of vector containing freed memory info
-		static HeapEntry*entry_free_next_;
-		static HeapEntry*entry_free_lim_;
-		static Size nentries_max_;
+		inline static Data d_{nullptr,0};
+		inline static char*ptr_{nullptr}; // pointer to free memory
+		inline static char*ptr_lim_{nullptr}; // limit of buffer
+		inline static HeapEntry*entry_used_start_{nullptr}; // beginning of vector containing used memory info
+		inline static HeapEntry*entry_used_next_{nullptr};
+		inline static HeapEntry*entry_used_lim_{nullptr};
+		inline static HeapEntry*entry_free_start_{nullptr}; // beginning of vector containing freed memory info
+		inline static HeapEntry*entry_free_next_{nullptr};
+		inline static HeapEntry*entry_free_lim_{nullptr};
+		inline static Size nentries_max_{0};
 	public:
 		static auto init_statics(const Data&d,const Size nentries_max){
 			d_=d;
@@ -123,16 +123,6 @@ namespace osca{
 			pz_memset(entry_used_start_,used_area,nentries_max_*hes);
 		}
 	};
-	Data Heap::d_ {nullptr,0};
-	Size Heap::nentries_max_;
-	char*Heap::ptr_;
-	char*Heap::ptr_lim_;
-	HeapEntry*Heap::entry_used_start_;
-	HeapEntry*Heap::entry_used_next_;
-	HeapEntry*Heap::entry_used_lim_;
-	HeapEntry*Heap::entry_free_start_;
-	HeapEntry*Heap::entry_free_next_;
-	HeapEntry*Heap::entry_free_lim_;
 }
 // called by C++ to allocate and free memory
 void operator delete(void*ptr,unsigned size)noexcept;

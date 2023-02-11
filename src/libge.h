@@ -105,9 +105,9 @@ public:
 	//-----------------------------------------------------------
 	//-----------------------------------------------------------
 
-	static PhysicsState*mem_start;
-	static PhysicsState*next_free;
-	static PhysicsState*mem_limit;
+	inline static PhysicsState*mem_start{nullptr};
+	inline static PhysicsState*next_free{nullptr};
+	inline static PhysicsState*mem_limit{nullptr};
 	static auto init_statics(){
 		mem_start=new PhysicsState[world::nobjects_max];
 		next_free=mem_start;
@@ -153,9 +153,6 @@ public:
 		pz_memset(from,b,n);
 	}
 };
-PhysicsState*PhysicsState::mem_start;
-PhysicsState*PhysicsState::mem_limit;
-PhysicsState*PhysicsState::next_free;
 
 namespace enable{
 	constexpr static bool draw_dots=true;
@@ -483,11 +480,11 @@ private:
 	// statics
 	//----------------------------------------------------------------
 public:
-	static Object*all[world::nobjects_max]; // array of pointers to allocated objects
-	static Object**free_ixes[world::nobjects_max]; // free indexes in all[]
-	static SlotIx free_ixes_i; // index in freeSlots[] of next free slot
-	static SlotInfo used_ixes[world::nobjects_max]; // free indexes in all[]
-	static SlotIx used_ixes_i; // index in freeSlots[] of next free slot
+	inline static Object*all[world::nobjects_max]; // array of pointers to allocated objects
+	inline static Object**free_ixes[world::nobjects_max]; // free indexes in all[]
+	inline static SlotIx free_ixes_i{0}; // index in freeSlots[] of next free slot
+	inline static SlotInfo used_ixes[world::nobjects_max]; // free indexes in all[]
+	inline static SlotIx used_ixes_i{0}; // index in freeSlots[] of next free slot
 //	static inline auto hasFreeSlot()->bool{return free_ixes_i!=0;}
 	static auto init_statics(){
 		const unsigned n=sizeof(free_ixes)/sizeof(Object**);
@@ -636,11 +633,6 @@ private:
 		return false;
 	}
 };
-Object*Object::all[world::nobjects_max];
-Object**Object::free_ixes[world::nobjects_max];
-SlotIx Object::free_ixes_i=world::nobjects_max-1;
-SlotInfo Object::used_ixes[world::nobjects_max];
-SlotIx Object::used_ixes_i=0;
 
 namespace world{
 	static Object*deleted[world::nobjects_max]; // ? todo improve with lesser memory footprint
