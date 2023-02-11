@@ -3,10 +3,12 @@
 namespace osca{
 
 using Angle=Real;
+using AngleRad=Angle;
+using AngleDeg=Angle;
 using Scale=Real;
 using Scalar=Real;
 
-inline auto sin(const Angle radians)->float{
+inline auto sin(const AngleRad radians)->float{
 	float v;
 	asm("fsin"
 		:"=t"(v) // "t": first (top of stack) floating point register
@@ -15,7 +17,7 @@ inline auto sin(const Angle radians)->float{
 	return v;
 }
 
-inline auto cos(const Angle radians)->float{
+inline auto cos(const AngleRad radians)->float{
 	float v;
 	asm("fcos"
 		:"=t"(v) // "t": first (top of stack) floating point register
@@ -25,7 +27,7 @@ inline auto cos(const Angle radians)->float{
 }
 
 // puts sin and cos value of 'radians' in 'fsin' and 'fcos'
-inline auto sin_and_cos(const Angle radians,float&fsin,float&fcos){
+inline auto sin_and_cos(const AngleRad radians,float&fsin,float&fcos){
 	asm("fsincos"
 		:"=t"(fcos),"=u"(fsin) // "u" : Second floating point register
 		:"0"(radians)
@@ -43,7 +45,7 @@ inline auto sqrt(const float s)->float{
 
 constexpr Real PI=3.141592653589793f;
 
-constexpr auto deg_to_rad(const Angle deg)->Angle{
+constexpr auto deg_to_rad(const AngleDeg deg)->AngleRad{
 	constexpr Real deg_to_rad=PI/180.f;
 	return deg*deg_to_rad;
 }
@@ -94,7 +96,7 @@ class Matrix2D{
 	Real yx=0,yy=1,yt=0;
 	Real ux=0,uy=0,id=1;
 public:
-	auto set_transform(const Scale scale,const Angle rotation,const Vector2D&translation){
+	auto set_transform(const Scale scale,const AngleRad rotation,const Vector2D&translation){
 		float fcos,fsin;
 		sin_and_cos(rotation,fsin,fcos);
 		const Real cs=scale*fcos;

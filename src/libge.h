@@ -56,7 +56,7 @@ class Object;
 // update_all() and check_collisions() generate lists of objects to be deleted.
 // the delete happens when deleted_commit() is called
 namespace world{
-	constexpr Real sec_per_tick=1/18.2f; // the default 18.2 Hz clock
+	constexpr static Real sec_per_tick=1/18.2f; // the default 18.2 Hz clock
 	constexpr static Size nobjects_max=256; // maximum number of objects
 
 	static Real time_s=0;
@@ -78,13 +78,16 @@ namespace world{
 }
 
 // physics states are kept in their own buffer for better CPU cache utilization at update
+using Velocity2D=Vector2D;
+using Acceleration2D=Vector2D;
+using AngularVelocity=AngleRad;
 class PhysicsState final{
 public:
 	Point2D pos{0,0};
-	Point2D dpos{0,0}; // velocity per sec
-	Point2D ddpos{0,0}; // acceleration per sec
-	Angle agl=0;
-	Angle dagl=0; // angular velocity per sec
+	Velocity2D dpos{0,0}; // velocity per sec
+	Acceleration2D ddpos{0,0}; // acceleration per sec
+	AngleRad agl=0;
+	AngularVelocity dagl=0; // angular velocity per sec
 	Object*obj=nullptr; // pointer to the object to which this physics state belongs to
 
 //	inline constexpr auto pos()const->const Point2D&{return pos_;}
@@ -187,7 +190,7 @@ protected:
 	Vector2D*nmls_wld_; // normals of bounding shape rotated to the world coordinates (not normalized if scale!=1)
 	Matrix2D Mmw_; // model to world transform
 	Point2D Mmw_pos_; // current position used in transform matrix
-	Angle Mmw_agl_; // current angle used in transform matrix
+	AngleRad Mmw_agl_; // current angle used in transform matrix
 	Scale Mmw_scl_;  // current scale used in transform matrix
 	Scalar br_; // bounding radius
 	SlotIx used_ix_=0; // index in used_ixes array. used at new and delete
@@ -199,7 +202,7 @@ public:
 //	constexpr Object(Object&&)=delete; // move ctor
 	constexpr Object&operator=(const Object&)=delete; // copy assignment
 //	Object&operator=(Object&&)=delete; // move assignment
-	Object(const TypeBits tb,const TypeBits colchk_tb,const ObjectDef&def,const Scale scl,const Scalar bounding_radius,const Point2D&pos,const Angle rad,const Color8b color):
+	Object(const TypeBits tb,const TypeBits colchk_tb,const ObjectDef&def,const Scale scl,const Scalar bounding_radius,const Point2D&pos,const AngleRad rad,const Color8b color):
 		tb_{tb},
 		colchk_tb_{colchk_tb},
 		phy_{PhysicsState::alloc()},
@@ -301,8 +304,8 @@ public:
 		Point2D p=phy().pos;
 		Scalar r=bounding_radius();
 		const Count segments=static_cast<Count>(5.f*scale());
-		Angle th=0;
-		Angle dth=2*PI/static_cast<Angle>(segments);
+		AngleRad th=0;
+		AngleRad dth=2*PI/static_cast<AngleRad>(segments);
 		for(Count i=0;i<segments;i++){
 			const Coord x=p.x+r*cos(th);
 			const Coord y=p.y+r*sin(th);

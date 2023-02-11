@@ -43,7 +43,7 @@ class Enemy final:public Object{
 public:
 	// type bits 0b100 check collision with
 	// 'bullet'  0b0'0010
-	Enemy(const Point2D&pos,const Angle agl):
+	Enemy(const Point2D&pos,const AngleRad agl):
 		Object{0b100,0b10,enemy_def,scale,bounding_radius,pos,agl,3}
 	{
 		game::enemies_alive++;
@@ -137,7 +137,7 @@ public:
 class Wall final:public Object{
 public:
 	// type bits 0b100 check collision with nothing
-	Wall(const Scale scl,const Point2D&pos,const Angle agl):
+	Wall(const Scale scl,const Point2D&pos,const AngleRad agl):
 		Object{0b0'1000,0,wall_def,scl,scl*sqrt_of_2,pos,agl,3}
 	{}
 };
@@ -183,8 +183,8 @@ class OscaGame{
 	}
 	auto create_circle(const Count segments)->Point2D*{
 		Point2D*pts=new Point2D[static_cast<unsigned>(segments)];
-		Angle th=0;
-		Angle dth=2*PI/static_cast<Angle>(segments);
+		AngleRad th=0;
+		AngleRad dth=2*PI/static_cast<AngleRad>(segments);
 		for(Count i=0;i<segments;i++){
 			pts[i]={cos(th),-sin(th)}; // CCW
 			th+=dth;
@@ -281,7 +281,7 @@ public:
 		const SizeBytes heap_disp_size=320*100;
 
 
-		constexpr Angle ship_dagl=90;
+		constexpr AngleRad ship_dagl=90;
 		constexpr Scalar ship_speed=20;
 		Ship*shp=new Ship;
 		shp->phy().pos={160,130};
@@ -414,12 +414,12 @@ public:
 	}
 
 	static auto draw_axis(Bitmap&dsp){
-		static Angle deg=0;
+		static AngleDeg deg=0;
 		static Matrix2D R;
 		if(deg>360)
 			deg-=360;
 		deg+=5;
-		const Angle rotation=deg_to_rad(deg);
+		const AngleRad rotation=deg_to_rad(deg);
 	//		shp3->set_angle(rotation);
 		R.set_transform(5,rotation,{160,100});
 		// dot axis
