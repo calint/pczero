@@ -189,7 +189,7 @@ protected:
 	Point2D Mmw_pos_; // current position used in transform matrix
 	Angle Mmw_agl_; // current angle used in transform matrix
 	Scale Mmw_scl_;  // current scale used in transform matrix
-	Scale br_; // bounding radius
+	Scalar br_; // bounding radius
 	SlotIx used_ix_=0; // index in used_ixes array. used at new and delete
 	Color8b color_=1;
 	unsigned char bits_=0; // flags, bit 1:dead
@@ -199,7 +199,7 @@ public:
 //	constexpr Object(Object&&)=delete; // move ctor
 	constexpr Object&operator=(const Object&)=delete; // copy assignment
 //	Object&operator=(Object&&)=delete; // move assignment
-	Object(const TypeBits tb,const TypeBits colchk_tb,const ObjectDef&def,const Scale scl,const Scale bounding_radius,const Point2D&pos,const Angle rad,const Color8b color):
+	Object(const TypeBits tb,const TypeBits colchk_tb,const ObjectDef&def,const Scale scl,const Scalar bounding_radius,const Point2D&pos,const Angle rad,const Color8b color):
 		tb_{tb},
 		colchk_tb_{colchk_tb},
 		phy_{PhysicsState::alloc()},
@@ -456,7 +456,7 @@ public:
 		}
 	}
 
-	constexpr inline auto bounding_radius()const->Scale{return br_;}
+	constexpr inline auto bounding_radius()const->Scalar{return br_;}
 
 private:
 	constexpr auto refresh_wld_points()->void{
