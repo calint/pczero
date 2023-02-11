@@ -1,4 +1,4 @@
-[ ] review 'using' Scale Coord etc
+[ ] review 'using' Scale Coord etc terminology
 [ ] move draw_x into Bitmap?
 [ ] libge: handle objects with null bounding points indexes, no normals
 [ ] better clock, higher resolution than the default 18.2 Hz
