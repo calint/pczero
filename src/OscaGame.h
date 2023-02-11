@@ -54,7 +54,7 @@ public:
 
 	virtual auto update()->bool override{
 		if(!object_within_play_area(*this)){
-			phy().dpos.y=-phy().dpos.y;
+			phy().vel.y=-phy().vel.y;
 		}
 		return true;
 	}
@@ -108,7 +108,7 @@ public:
 	virtual auto update()->bool override{
 		Object::update();
 		if(!object_within_play_area(*this)){
-			phy().dpos={0,0};
+			phy().vel={0,0};
 		}
 		return true;
 	}
@@ -128,7 +128,7 @@ public:
 		Vector2D v=forward_vector().scale(1.1f);
 		v.scale(scl_); // place bullet in front of ship
 		b->phy().pos=phy().pos+v;
-		b->phy().dpos=v.normalize().scale(40);
+		b->phy().vel=v.normalize().scale(40);
 		b->phy().agl=phy().agl;
 	}
 };
@@ -171,7 +171,7 @@ class OscaGame{
 		for(Real i=30;i<300;i+=20){
 			Enemy*e=new Enemy({i,60},deg_to_rad(i));
 			e->phy().dagl=deg_to_rad(10);
-			e->phy().dpos={0,2};
+			e->phy().vel={0,2};
 		}
 	}
 	auto create_scene2(){
@@ -370,13 +370,13 @@ public:
 					}
 				}
 				if(keyboard[key_w])
-					shp->phy().dpos=shp->forward_vector().scale(ship_speed);
+					shp->phy().vel=shp->forward_vector().scale(ship_speed);
 
 				if(keyboard[key_a])
 					shp->phy().dagl=-deg_to_rad(ship_dagl);
 
 				if(keyboard[key_s])
-					shp->phy().dpos=shp->forward_vector().negate().scale(ship_speed);
+					shp->phy().vel=shp->forward_vector().negate().scale(ship_speed);
 
 				if(keyboard[key_d])
 					shp->phy().dagl=deg_to_rad(ship_dagl);
@@ -385,7 +385,7 @@ public:
 					shp->phy().dagl=0;
 
 				if(!keyboard[key_w]&&!keyboard[key_s])
-					shp->phy().dpos={0,0};
+					shp->phy().vel={0,0};
 
 				if(keyboard[key_spc])
 					shp->fire();

@@ -84,8 +84,8 @@ using AngularVelocity=AngleRad;
 class PhysicsState final{
 public:
 	Point2D pos{0,0};
-	Velocity2D dpos{0,0}; // velocity per sec
-	Acceleration2D ddpos{0,0}; // acceleration per sec
+	Velocity2D vel{0,0}; // velocity per sec
+	Acceleration2D acc{0,0}; // acceleration per sec
 	AngleRad agl=0;
 	AngularVelocity dagl=0; // angular velocity per sec
 	Object*obj=nullptr; // pointer to the object to which this physics state belongs to
@@ -101,8 +101,8 @@ public:
 //	inline constexpr auto set_angle(const Angle rad){agl_=rad;}
 //	inline constexpr auto set_dangle(const Angle rad){dagl_=rad;}
 	inline auto update(){
-		dpos.inc_by(ddpos,world::time_dt_s);
-		pos.inc_by(dpos,world::time_dt_s);
+		vel.inc_by(acc,world::time_dt_s);
+		pos.inc_by(vel,world::time_dt_s);
 		agl+=dagl*world::time_dt_s;
 	}
 
