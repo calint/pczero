@@ -162,7 +162,7 @@ namespace enable{
 	constexpr static bool draw_polygons=true;
 	constexpr static bool draw_polygons_fill=false;
 	constexpr static bool draw_polygons_edges=true;
-	constexpr static bool draw_normals=true;
+	constexpr static bool draw_normals=false;
 	constexpr static bool draw_collision_check=false;
 	constexpr static bool draw_bounding_circle=false;
 }
