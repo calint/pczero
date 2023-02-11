@@ -7,8 +7,9 @@
 namespace osca{
 
 namespace game{
-	static bool player_alive=true;
-	static Count enemies_alive=0;
+//	static bool player_alive{true};
+	static Object*player{nullptr};
+	static Count enemies_alive{0};
 }
 
 static ObjectDef enemy_def;
@@ -16,6 +17,7 @@ static ObjectDef ship_def;
 static ObjectDef bullet_def;
 static ObjectDef wall_def;
 static ObjectDef missile_def;
+static ObjectDef boss_def;
 
 static CoordsPx play_area_top_left{0,50};
 static DimensionPx play_area_dim{320,100};
@@ -41,10 +43,14 @@ class Enemy final:public Object{
 	static constexpr Scale scale=5;
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 public:
-	// type bits 0b100 check collision with
-	// 'bullet'  0b0'0010
+	// 'ships'   0b00'0001
+	// 'bullets' 0b00'0010
+	// 'enemies' 0b00'0100
+	// 'walls'   0b00'1000
+	// 'missiles'0b01'0000
+	// 'bosses'  0b10'0000
 	Enemy(const Point&pos,const AngleRad agl):
-		Object{0b100,0b10,enemy_def,scale,bounding_radius,pos,agl,3}
+		Object{0b100,0b01'0010,enemy_def,scale,bounding_radius,pos,agl,3}
 	{
 		game::enemies_alive++;
 	}
@@ -70,12 +76,13 @@ class Bullet final:public Object{
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 public:
 	Bullet():
-		// type bits 0b10 check collision with
-		// 'ships'   0b0'0001
-		// 'enemies' 0b0'0100
-		// 'walls'   0b0'1000
-		// 'missiles'0b1'0000
-		Object{0b10,0b1'1101,bullet_def,scale,bounding_radius,{0,0},0,4}
+		// 'ships'   0b00'0001
+		// 'bullets' 0b00'0010
+		// 'enemies' 0b00'0100
+		// 'walls'   0b00'1000
+		// 'missiles'0b01'0000
+		// 'bosses'  0b10'0000
+		Object{0b10,0b11'1101,bullet_def,scale,bounding_radius,{0,0},0,4}
 	{}
 	virtual auto update()->bool override{
 		Object::update();
@@ -93,16 +100,16 @@ class Ship final:public Object{
 	Real fire_t_s=0;
 public:
 	Ship():
-		// type bits 0b1 check collision with:
-		// 'ships'   0b0'0001
-		// 'bullets' 0b0'0010
-		// 'enemies' 0b0'0100
-		// 'walls'   0b0'1000
-		// 'missiles'0b1'0000
-		Object{0b1,0b1'1111,ship_def,scale,bounding_radius,{0,0},0,2}
+		// 'ships'   0b00'0001
+		// 'bullets' 0b00'0010
+		// 'enemies' 0b00'0100
+		// 'walls'   0b00'1000
+		// 'missiles'0b01'0000
+		// 'bosses'  0b10'0000
+		Object{0b1,0b11'1111,ship_def,scale,bounding_radius,{0,0},0,2}
 	{}
 	~Ship()override{
-		game::player_alive=false;
+		game::player=nullptr;
 	}
 
 	virtual auto update()->bool override{
@@ -136,9 +143,8 @@ public:
 
 class Wall final:public Object{
 public:
-	// type bits 0b100 check collision with nothing
 	Wall(const Scale scl,const Point&pos,const AngleRad agl):
-		Object{0b0'1000,0,wall_def,scl,scl*sqrt_of_2,pos,agl,3}
+		Object{0b00'1000,0,wall_def,scl,scl*sqrt_of_2,pos,agl,3}
 	{}
 };
 
@@ -147,14 +153,14 @@ class Missile final:public Object{
 	static constexpr Scale scale=2;
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 public:
-	// type bits 0b1 check collision with:
-	// 'ships'   0b0'0001
-	// 'bullets' 0b0'0010
-	// 'enemies' 0b0'0100
-	// 'walls'   0b0'1000
-	// 'missiles'0b1'0000
+	// 'ships'   0b00'0001
+	// 'bullets' 0b00'0010
+	// 'enemies' 0b00'0100
+	// 'walls'   0b00'1000
+	// 'missiles'0b01'0000
+	// 'bosses'  0b10'0000
 	Missile():
-		Object{0b1'0000,0b1'1111,missile_def,scale,bounding_radius,{0,0},0,4}
+		Object{0b01'0000,0b11'1111,missile_def,scale,bounding_radius,{0,0},0,4}
 	{}
 	virtual auto update()->bool override{
 		Object::update();
@@ -166,6 +172,40 @@ public:
 	}
 };
 
+class Boss final:public Object{
+	static constexpr Scale scale=6;
+	static constexpr Scale bounding_radius=scale*sqrt_of_2;
+	Count health{10};
+public:
+	// 'ships'   0b00'0001
+	// 'bullets' 0b00'0010
+	// 'enemies' 0b00'0100
+	// 'walls'   0b00'1000
+	// 'missiles'0b01'0000
+	// 'bosses'  0b10'0000
+	Boss():
+		Object{0b10'0000,0b01'0010,boss_def,scale,bounding_radius,{0,0},0,4}
+	{}
+	virtual auto update()->bool override{
+		Object::update();
+		if(game::player){
+			Vector v=game::player->phy().pos-phy().pos;
+			v.normalize().scale(5);
+			phy().vel=v;
+		}else{
+			phy().vel={0,0};
+		}
+		return object_within_play_area(*this);
+	}
+	// returns false if object is to be deleted
+	virtual auto on_collision(Object&other)->bool override{
+		health--;
+		if(health<=0)
+			return false;
+		return true;
+	}
+};
+
 class OscaGame{
 	auto create_scene(){
 		for(Real i=30;i<300;i+=20){
@@ -173,6 +213,8 @@ class OscaGame{
 			e->phy().dagl=deg_to_rad(10);
 			e->phy().vel={0,2};
 		}
+		Object*o=new Boss;
+		o->phy().pos={160,60};
 	}
 	auto create_scene2(){
 		Object*o=new Wall(20,{160,100},0);
@@ -269,6 +311,13 @@ public:
 		};
 		missile_def.init_normals();
 
+		constexpr unsigned segments=6;
+		boss_def={segments,segments,
+			create_circle(segments),
+			create_circle_ix(segments),
+		};
+		boss_def.init_normals();
+
 //		out.p_hex_32b(static_cast<unsigned>(play_area_top_left.y()));
 //		out.p_hex_32b(static_cast<unsigned>(play_area_dim.width()));
 //		osca_halt();
@@ -285,6 +334,7 @@ public:
 		constexpr Scalar ship_speed=20;
 		Ship*shp=new Ship;
 		shp->phy().pos={160,130};
+		game::player=shp;
 //		shp->phy().pos={160,100};
 		create_scene();
 //		create_scene2();
@@ -329,7 +379,7 @@ public:
 			out.p("s=").p_hex_8b(static_cast<unsigned char>(world::time_s)).spc();
 			out.p("d=").p_hex_8b(static_cast<unsigned char>(world::time_dt_s*1000)).spc();
 
-			if(!game::player_alive)
+			if(!game::player)
 				shp=nullptr;
 
 			if(shp){
@@ -401,7 +451,7 @@ public:
 				shp=new Ship;
 				shp->phy().pos={160,130};
 //					shp->phy().agl=deg_to_rad(180);
-				game::player_alive=true;
+				game::player=shp;
 				break;
 			default:
 				break;
