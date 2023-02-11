@@ -21,8 +21,8 @@ public:
 			return;
 		}
 		nmls=new Vector[nbnd];
-		const unsigned n=nbnd-1;
-		for(unsigned i=0;i<n;i++){
+		const PointIx n=nbnd-1;
+		for(PointIx i=0;i<n;i++){
 			const Vector d=pts[bnd[i+1]]-pts[bnd[i]];
 			nmls[i]={-d.y,d.x}; // normal to the line d
 			nmls[i].normalize();
@@ -86,9 +86,9 @@ public:
 	Point pos{0,0};
 	Velocity vel{0,0}; // velocity per sec
 	Acceleration acc{0,0}; // acceleration per sec
-	AngleRad agl=0;
-	AngularVelocity dagl=0; // angular velocity per sec
-	Object*obj=nullptr; // pointer to the object to which this physics state belongs to
+	AngleRad agl{0};
+	AngularVelocity dagl{0}; // angular velocity per sec
+	Object*obj{nullptr}; // pointer to the object to which this physics state belongs to
 
 //	inline constexpr auto pos()const->const Point2D&{return pos_;}
 //	inline constexpr auto dpos()const->const Point2D&{return dpos_;}
