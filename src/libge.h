@@ -38,10 +38,10 @@ static constexpr void dot(const Bitmap&bmp,const Real x,const Real y,const Color
 }
 
 namespace metrics{
-	constexpr static bool enabled=true;
-	static unsigned short matrix_set_transforms=0;
-	static unsigned short collisions_checks=0;
-	static unsigned short collisions_checks_bounding_shapes=0;
+	constexpr static bool enabled{true};
+	static unsigned short matrix_set_transforms{0};
+	static unsigned short collisions_checks{0};
+	static unsigned short collisions_checks_bounding_shapes{0};
 	static auto reset(){
 		matrix_set_transforms=0;
 		collisions_checks=0;
@@ -54,12 +54,12 @@ class Object;
 // update_all() and check_collisions() generate lists of objects to be deleted.
 // the delete happens when deleted_commit() is called
 namespace world{
-	constexpr static Real sec_per_tick=1/18.2f; // the default 18.2 Hz clock
-	constexpr static Size nobjects_max=256; // maximum number of objects
+	constexpr static Real sec_per_tick{1/18.2f}; // the default 18.2 Hz clock
+	constexpr static Size nobjects_max{256}; // maximum number of objects
 
-	static Real time_s=0;
-	static Real time_dt_s=0;
-	static Real time_prv_s=0;
+	static Real time_s{0};
+	static Real time_dt_s{0};
+	static Real time_prv_s{0};
 	static auto init(){
 		time_s=static_cast<Real>(osca_t)*sec_per_tick;
 		// set previous time to a reasonable value so that dt does not
@@ -158,16 +158,16 @@ public:
 };
 
 namespace enable{
-	constexpr static bool draw_dots=true;
-	constexpr static bool draw_polygons=true;
-	constexpr static bool draw_polygons_fill=false;
-	constexpr static bool draw_polygons_edges=true;
-	constexpr static bool draw_normals=false;
-	constexpr static bool draw_collision_check=false;
-	constexpr static bool draw_bounding_circle=false;
+	constexpr static bool draw_dots{true};
+	constexpr static bool draw_polygons{true};
+	constexpr static bool draw_polygons_fill{false};
+	constexpr static bool draw_polygons_edges{true};
+	constexpr static bool draw_normals{false};
+	constexpr static bool draw_collision_check{false};
+	constexpr static bool draw_bounding_circle{false};
 }
 
-using SlotIx=unsigned short; // index in Object::freeSlots[]
+using SlotIx=short; // index in Object::freeSlots[]
 // info that together with ~Object maintains usedSlots[]
 struct SlotInfo{
 	Object**oix{nullptr}; // pointer to element in Object::all[]
@@ -490,7 +490,7 @@ public:
 	inline static SlotIx used_ixes_i{0}; // index in freeSlots[] of next free slot
 //	static inline auto hasFreeSlot()->bool{return free_ixes_i!=0;}
 	static auto init_statics(){
-		const unsigned n=sizeof(free_ixes)/sizeof(Object**);
+		const SlotIx n=sizeof(free_ixes)/sizeof(Object**);
 		for(SlotIx i=0;i<n;i++){
 			free_ixes[i]=&all[i];
 		}
@@ -512,7 +512,7 @@ public:
 		}
 	}
 	static auto check_collisions(){
-		for(SlotIx i=0;i<used_ixes_i-1u;i++){
+		for(SlotIx i=0;i<used_ixes_i-1;i++){
 			for(SlotIx j=i+1;j<used_ixes_i;j++){
 				Object*o1=used_ixes[i].obj;
 				Object*o2=used_ixes[j].obj;
@@ -639,7 +639,7 @@ private:
 
 namespace world{
 	static Object*deleted[world::nobjects_max]; // ? todo improve with lesser memory footprint
-	static int deleted_ix=0;
+	static int deleted_ix{0};
 	static auto deleted_add(Object*o)->void{ // ! this might be called several times for the same object
 //		if(!o->is_alive()){
 //			err.p("world::deleted_add:1");
