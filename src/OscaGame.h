@@ -52,7 +52,7 @@ public:
 		game::enemies_alive--;
 	}
 
-	constexpr virtual auto update()->bool override{
+	virtual auto update()->bool override{
 		if(!object_within_play_area(*this)){
 			phy().dpos.y=-phy().dpos.y;
 		}
@@ -77,12 +77,12 @@ public:
 		// 'missiles'0b1'0000
 		Object{0b10,0b1'1101,bullet_def,scale,bounding_radius,{0,0},0,4}
 	{}
-	constexpr virtual auto update()->bool override{
+	virtual auto update()->bool override{
 		Object::update();
 		return object_within_play_area(*this);
 	}
 	// returns false if object is to be deleted
-	constexpr virtual auto on_collision(Object&other)->bool override{
+	virtual auto on_collision(Object&other)->bool override{
 		return false;
 	}
 };
@@ -105,7 +105,7 @@ public:
 		game::player_alive=false;
 	}
 
-	constexpr virtual auto update()->bool override{
+	virtual auto update()->bool override{
 		Object::update();
 		if(!object_within_play_area(*this)){
 			phy().dpos={0,0};
@@ -156,12 +156,12 @@ public:
 	Missile():
 		Object{0b1'0000,0b1'1111,missile_def,scale,bounding_radius,{0,0},0,4}
 	{}
-	constexpr virtual auto update()->bool override{
+	virtual auto update()->bool override{
 		Object::update();
 		return object_within_play_area(*this);
 	}
 	// returns false if object is to be deleted
-	constexpr virtual auto on_collision(Object&other)->bool override{
+	virtual auto on_collision(Object&other)->bool override{
 		return false;
 	}
 };

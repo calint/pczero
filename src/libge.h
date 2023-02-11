@@ -268,8 +268,8 @@ public:
 		return Mmw_.axis_y().negate().normalize(); // ? not negated (if positive y is up)
 	}
 	// returns false if object is to be deleted
-	constexpr virtual auto update()->bool{return true;}
-	constexpr virtual auto render(Bitmap&dsp)->void{
+	virtual auto update()->bool{return true;}
+	virtual auto render(Bitmap&dsp)->void{
 		refresh_wld_points();
 		if(enable::draw_dots){
 			const Point2D*pt=pts_wld_;
@@ -443,7 +443,7 @@ public:
 	}
 
 	// returns false if object is to be deleted
-	constexpr virtual auto on_collision(Object&other)->bool{return true;}
+	virtual auto on_collision(Object&other)->bool{return true;}
 
 	constexpr inline auto is_alive()const->bool{return!(bits_&1);}
 
