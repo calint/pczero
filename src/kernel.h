@@ -12,8 +12,8 @@ extern "C" [[noreturn]] void tsk4();
 namespace osca{
 	class HeapEntry final{
 	public:
-		void*ptr;
-		unsigned size;
+		void*ptr; // pointer to memory
+		unsigned size; // size of allocated memory
 	};
 	class Heap final{
 		inline static Data d_{nullptr,0};
@@ -180,6 +180,7 @@ extern "C" void osca_keyb_ev(){
 
 	// to keyboard handler
 	osca::osca_keyb.on_key(osca_key);
+
 //	static unsigned char*p=reinterpret_cast<unsigned char*>(0xa0000+320*49+100);
 //	*p++=osca_key;
 }

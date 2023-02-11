@@ -485,12 +485,13 @@ public:
 	inline constexpr auto bmp()->Bitmap&{return b_;}
 };
 
+// the vga 13h bitmap
 Vga13h vga13h;
 
 class PrinterToVga:public PrinterToBitmap{
 public:
 	PrinterToVga():
-		PrinterToBitmap(vga13h.bmp())
+		PrinterToBitmap{vga13h.bmp()}
 	{
 		pos({1,1}).fg(4);
 	}
