@@ -503,46 +503,46 @@ extern PrinterToVga out;
 PrinterToVga out;
 extern PrinterToVga err;
 PrinterToVga err;
-
-using PositionPx=CoordsPx;
-using Position=Coords;
-using Velocity=Coords;
-using Acceleration=Coords;
-
-class Sprite{
-	const Bitmap&b_;
-	Position p_;
-	Velocity v_;
-	Acceleration a_;
-public:
-	constexpr Sprite(const Bitmap&b,const Position&p,const Velocity&v,const Acceleration&a):
-		b_{b},p_{p},v_{v},a_{a}
-	{}
-	constexpr auto to(const Bitmap&dst)const{
-		const char*si=static_cast<const char*>(b_.data().address());
-		char*di=static_cast<char*>(dst.data().address());
-		PositionPx p{static_cast<CoordPx>(p_.x()),static_cast<CoordPx>(p_.y())};
-		di+=p.y()*dst.dim().width()+p.x();
-		const SizePx ln=dst.dim().width()-b_.dim().width();
-		const SizePx h=b_.dim().height();
-		const SizePx w=b_.dim().width();
-		for(SizePx y=0;y<h;y++){
-			for(SizePx x=0;x<w;x++){
-				const char px=*si;
-				if(px){
-					*di=px;
-				}
-				si++;
-				di++;
-			}
-			di+=ln;
-		}
-	}
-	inline constexpr auto pos()const->const Position&{return p_;}
-	inline constexpr auto set_pos(const Position&p){p_=p;}
-	inline constexpr auto velocity()const->const Velocity&{return v_;}
-	inline constexpr auto set_velocity(const Velocity&v){v_=v;}
-	inline constexpr auto update(){v_.inc_by(a_);p_.inc_by(v_);}
-};
+//
+//using PositionPx=CoordsPx;
+//using Position=Coords;
+//using Velocity=Coords;
+//using Acceleration=Coords;
+//
+//class Sprite{
+//	const Bitmap&b_;
+//	Position p_;
+//	Velocity v_;
+//	Acceleration a_;
+//public:
+//	constexpr Sprite(const Bitmap&b,const Position&p,const Velocity&v,const Acceleration&a):
+//		b_{b},p_{p},v_{v},a_{a}
+//	{}
+//	constexpr auto to(const Bitmap&dst)const{
+//		const char*si=static_cast<const char*>(b_.data().address());
+//		char*di=static_cast<char*>(dst.data().address());
+//		PositionPx p{static_cast<CoordPx>(p_.x()),static_cast<CoordPx>(p_.y())};
+//		di+=p.y()*dst.dim().width()+p.x();
+//		const SizePx ln=dst.dim().width()-b_.dim().width();
+//		const SizePx h=b_.dim().height();
+//		const SizePx w=b_.dim().width();
+//		for(SizePx y=0;y<h;y++){
+//			for(SizePx x=0;x<w;x++){
+//				const char px=*si;
+//				if(px){
+//					*di=px;
+//				}
+//				si++;
+//				di++;
+//			}
+//			di+=ln;
+//		}
+//	}
+//	inline constexpr auto pos()const->const Position&{return p_;}
+//	inline constexpr auto set_pos(const Position&p){p_=p;}
+//	inline constexpr auto velocity()const->const Velocity&{return v_;}
+//	inline constexpr auto set_velocity(const Velocity&v){v_=v;}
+//	inline constexpr auto update(){v_.inc_by(a_);p_.inc_by(v_);}
+//};
 
 } // end namespace osca

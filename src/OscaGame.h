@@ -43,7 +43,7 @@ class Enemy final:public Object{
 public:
 	// type bits 0b100 check collision with
 	// 'bullet'  0b0'0010
-	Enemy(const Point2D&pos,const AngleRad agl):
+	Enemy(const Point&pos,const AngleRad agl):
 		Object{0b100,0b10,enemy_def,scale,bounding_radius,pos,agl,3}
 	{
 		game::enemies_alive++;
@@ -125,7 +125,7 @@ public:
 			return;
 		fire_t_s=world::time_s;
 		Bullet*b=new Bullet;
-		Vector2D v=forward_vector().scale(1.1f);
+		Vector v=forward_vector().scale(1.1f);
 		v.scale(scl_); // place bullet in front of ship
 		b->phy().pos=phy().pos+v;
 		b->phy().vel=v.normalize().scale(40);
@@ -137,7 +137,7 @@ public:
 class Wall final:public Object{
 public:
 	// type bits 0b100 check collision with nothing
-	Wall(const Scale scl,const Point2D&pos,const AngleRad agl):
+	Wall(const Scale scl,const Point&pos,const AngleRad agl):
 		Object{0b0'1000,0,wall_def,scl,scl*sqrt_of_2,pos,agl,3}
 	{}
 };
@@ -181,8 +181,8 @@ class OscaGame{
 	auto create_scene3(){
 		new Enemy({160,100},0);
 	}
-	auto create_circle(const Count segments)->Point2D*{
-		Point2D*pts=new Point2D[static_cast<unsigned>(segments)];
+	auto create_circle(const Count segments)->Point*{
+		Point*pts=new Point[static_cast<unsigned>(segments)];
 		AngleRad th=0;
 		AngleRad dth=2*PI/static_cast<AngleRad>(segments);
 		for(Count i=0;i<segments;i++){
@@ -204,7 +204,7 @@ public:
 		// init statics
 		//----------------------------------------------------------
 		enemy_def={5,4,
-			new Point2D[]{ // points in model coordinates, negative Y is "forward"
+			new Point[]{ // points in model coordinates, negative Y is "forward"
 				{ 0,0},
 				{-1,-.5f},
 				{-1, .5f},
@@ -230,7 +230,7 @@ public:
 //			new PointIx[]{0,1,2,3} // bounding convex polygon CCW
 //		};
 		ship_def={4,3,
-			new Point2D[]{
+			new Point[]{
 				{ 0, 0},
 				{ 0,-1},
 				{-1,.5},
@@ -241,7 +241,7 @@ public:
 		ship_def.init_normals();
 
 		bullet_def={1,1, // ? why not 0 nbnd and nullptr bnd
-			new Point2D[]{
+			new Point[]{
 				{0,0},
 			},
 			new PointIx[]{0} // bounding points and convex polygon CCW
@@ -249,7 +249,7 @@ public:
 		bullet_def.init_normals();
 
 		wall_def={4,4,
-			new Point2D[]{ // points in model coordinates, negative Y is "forward"
+			new Point[]{ // points in model coordinates, negative Y is "forward"
 				{-1,-1},
 				{-1, 1},
 				{ 1, 1},
@@ -260,7 +260,7 @@ public:
 		wall_def.init_normals();
 
 		missile_def={4,3,
-			new Point2D[]{
+			new Point[]{
 				{ 0,-1},
 				{-1,.5},
 				{ 1,.5},
@@ -424,9 +424,9 @@ public:
 		R.set_transform(5,rotation,{160,100});
 		// dot axis
 		dot(dsp,160,100,0xf);
-		const Vector2D xaxis=R.axis_x().normalize().scale(7);
+		const Vector xaxis=R.axis_x().normalize().scale(7);
 		dot(dsp,xaxis.x+160,xaxis.y+100,4);
-		const Vector2D yaxis=R.axis_y().normalize().scale(7);
+		const Vector yaxis=R.axis_y().normalize().scale(7);
 		dot(dsp,yaxis.x+160,yaxis.y+100,2);
 	}
 };

@@ -72,10 +72,10 @@ int $0x10
 #rep movsw
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - a20
 # enabled by default on non ancient pc?
-#movw $0x0404,%es:0x104
-#in $0x92,%al # enable a20 line (odd megs)
-#or $2,%al
-#out %al,$0x92
+movw $0x0404,%es:0x104
+in $0x92,%al # enable a20 line (odd megs)
+or $2,%al
+out %al,$0x92
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 32b
 #movw $0x0404,%es:0x108
 lgdt gdtr # load global descriptor tables

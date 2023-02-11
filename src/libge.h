@@ -3,7 +3,7 @@
 
 namespace osca{
 
-using Point2D=Vector2D;
+using Point=Vector;
 
 using PointIx=unsigned short;
 
@@ -11,23 +11,23 @@ class ObjectDef final{
 public:
 	PointIx npts=0; // number of points in pts
 	PointIx nbnd=0; // number of indexes in bnd
-	Point2D*pts=nullptr; // array of points used for rendering and bounding shape
+	Point*pts=nullptr; // array of points used for rendering and bounding shape
 	PointIx*bnd=nullptr; // indexes in pts that defines the bounding shape as a convex polygon CCW
-	Vector2D*nmls=nullptr; // normals to the lines defined by bnd (calculated by init_normals())
+	Vector*nmls=nullptr; // normals to the lines defined by bnd (calculated by init_normals())
 
 	auto init_normals(){
 		if(nbnd<2){
 			nmls=nullptr;
 			return;
 		}
-		nmls=new Vector2D[nbnd];
+		nmls=new Vector[nbnd];
 		const unsigned n=nbnd-1;
 		for(unsigned i=0;i<n;i++){
-			const Vector2D d=pts[bnd[i+1]]-pts[bnd[i]];
+			const Vector d=pts[bnd[i+1]]-pts[bnd[i]];
 			nmls[i]={-d.y,d.x}; // normal to the line d
 			nmls[i].normalize();
 		}
-		const Vector2D d=pts[bnd[0]]-pts[bnd[nbnd-1]];
+		const Vector d=pts[bnd[0]]-pts[bnd[nbnd-1]];
 		nmls[nbnd-1]={-d.y,d.x}; // normal to the line d
 		nmls[nbnd-1].normalize();
 	}
@@ -78,14 +78,14 @@ namespace world{
 }
 
 // physics states are kept in their own buffer for better CPU cache utilization at update
-using Velocity2D=Vector2D;
-using Acceleration2D=Vector2D;
+using Velocity=Vector;
+using Acceleration=Vector;
 using AngularVelocity=AngleRad;
 class PhysicsState final{
 public:
-	Point2D pos{0,0};
-	Velocity2D vel{0,0}; // velocity per sec
-	Acceleration2D acc{0,0}; // acceleration per sec
+	Point pos{0,0};
+	Velocity vel{0,0}; // velocity per sec
+	Acceleration acc{0,0}; // acceleration per sec
 	AngleRad agl=0;
 	AngularVelocity dagl=0; // angular velocity per sec
 	Object*obj=nullptr; // pointer to the object to which this physics state belongs to
@@ -186,10 +186,10 @@ protected:
 	                   // may change between frames (when objects are deleted)
 	Scale scl_; // scale that is used in transform from model to world coordinates
 	const ObjectDef&def_; // contains the model definition
-	Point2D*pts_wld_; // transformed model to world points cache
-	Vector2D*nmls_wld_; // normals of bounding shape rotated to the world coordinates (not normalized if scale!=1)
+	Point*pts_wld_; // transformed model to world points cache
+	Vector*nmls_wld_; // normals of bounding shape rotated to the world coordinates (not normalized if scale!=1)
 	Matrix2D Mmw_; // model to world transform
-	Point2D Mmw_pos_; // current position used in transform matrix
+	Point Mmw_pos_; // current position used in transform matrix
 	AngleRad Mmw_agl_; // current angle used in transform matrix
 	Scale Mmw_scl_;  // current scale used in transform matrix
 	Scalar br_; // bounding radius
@@ -202,14 +202,14 @@ public:
 //	constexpr Object(Object&&)=delete; // move ctor
 	constexpr Object&operator=(const Object&)=delete; // copy assignment
 //	Object&operator=(Object&&)=delete; // move assignment
-	Object(const TypeBits tb,const TypeBits colchk_tb,const ObjectDef&def,const Scale scl,const Scalar bounding_radius,const Point2D&pos,const AngleRad rad,const Color8b color):
+	Object(const TypeBits tb,const TypeBits colchk_tb,const ObjectDef&def,const Scale scl,const Scalar bounding_radius,const Point&pos,const AngleRad rad,const Color8b color):
 		tb_{tb},
 		colchk_tb_{colchk_tb},
 		phy_{PhysicsState::alloc()},
 		scl_{scl},
 		def_{def},
-		pts_wld_{new Point2D[def.npts]},
-		nmls_wld_{new Vector2D[def.nbnd]},
+		pts_wld_{new Point[def.npts]},
+		nmls_wld_{new Vector[def.nbnd]},
 		Mmw_{},
 		Mmw_pos_{0,0},
 		Mmw_agl_{0},
@@ -266,7 +266,7 @@ public:
 	inline constexpr auto phy()->PhysicsState&{return*phy_;}
 	inline constexpr auto scale()const->Scale{return scl_;}
 	inline constexpr auto def()const->const ObjectDef&{return def_;}
-	auto forward_vector()->Vector2D{
+	auto forward_vector()->Vector{
 		refresh_Mmw_if_invalid();
 		return Mmw_.axis_y().negate().normalize(); // ? not negated (if positive y is up)
 	}
@@ -275,7 +275,7 @@ public:
 	virtual auto render(Bitmap&dsp)->void{
 		refresh_wld_points();
 		if(enable::draw_dots){
-			const Point2D*pt=pts_wld_;
+			const Point*pt=pts_wld_;
 			for(unsigned i=0;i<def_.npts;i++){
 //				dot(dsp,pt->x,pt->y,color_);
 				dot(dsp,pt->x,pt->y,4);
@@ -286,12 +286,12 @@ public:
 			draw_polygon(dsp, pts_wld_, def_.nbnd, def_.bnd,color_);
 		}
 		if(enable::draw_normals){
-			const Point2D*nml=nmls_wld_;
+			const Point*nml=nmls_wld_;
 			for(PointIx i=0;i<def_.nbnd;i++){
-				Vector2D v=*nml;
+				Vector v=*nml;
 				v.normalize().scale(3);
-				Point2D p=pts_wld_[def_.bnd[i]];
-				Vector2D v1{p.x+nml->x,p.y+nml->y};
+				Point p=pts_wld_[def_.bnd[i]];
+				Vector v1{p.x+nml->x,p.y+nml->y};
 				dot(dsp,v1.x,v1.y,0xf);
 				nml++;
 			}
@@ -301,7 +301,7 @@ public:
 		}
 	}
 	constexpr auto draw_bounding_circle(Bitmap&dsp)->void{
-		Point2D p=phy().pos;
+		Point p=phy().pos;
 		Scalar r=bounding_radius();
 		const Count segments=static_cast<Count>(5.f*scale());
 		AngleRad th=0;
@@ -313,7 +313,7 @@ public:
 			th+=dth;
 		}
 	}
-	constexpr auto draw_polygon(Bitmap&dsp,const Point2D pts[],const PointIx npoly_ixs,const PointIx ix[],const Color8b color)->void{
+	constexpr auto draw_polygon(Bitmap&dsp,const Point pts[],const PointIx npoly_ixs,const PointIx ix[],const Color8b color)->void{
 //		const PointIx*pi=ix;
 //		for(PointIx i=0;i<npoly_ixs;i++){
 //			const Point2D&p=pts[*pi++];
@@ -324,12 +324,12 @@ public:
 			return;
 		}
 		PointIx topy_ix=0;
-		const Point2D&first_point=pts[ix[0]];
+		const Point&first_point=pts[ix[0]];
 		Coord topx=first_point.x;
 		Coord topy=first_point.y;
 		PointIx i=1;
 		while(i<npoly_ixs){
-			const Point2D&p=pts[ix[i]]; // ? use pointer
+			const Point&p=pts[ix[i]]; // ? use pointer
 			const Coord y=p.y;
 			if(y<topy){
 				topy=y;
@@ -581,12 +581,12 @@ private:
 	static auto check_collision_bounding_circles(Object&o1,Object&o2)->bool{
 		const Scalar r1=o1.bounding_radius();
 		const Scalar r2=o2.bounding_radius();
-		const Point2D p1=o1.phy().pos;
-		const Point2D p2=o2.phy().pos;
+		const Point p1=o1.phy().pos;
+		const Point p2=o2.phy().pos;
 
 		// check if: sqrt(dx*dx+dy*dy)<=r1+r2
 		const Real dist2=r1*r1+2*r1*r2+r2*r2; // distance^2
-		Vector2D v{p2.x-p1.x,p2.y-p1.y};
+		Vector v{p2.x-p1.x,p2.y-p1.y};
 		v.x*=v.x;
 		v.y*=v.y;
 		const Real d2=v.x+v.y;
@@ -613,18 +613,18 @@ private:
 		const PointIx*bndptr1=o1.def_.bnd; // bounding point index of o1
 		for(unsigned i=0;i<nbnd1;i++){
 			// reference pts_pts_wld_[bnd[i]]
-			const Point2D&p1=o1.pts_wld_[*bndptr1++];
+			const Point&p1=o1.pts_wld_[*bndptr1++];
 			// for each normal in o2
 			const PointIx*bndptr2=o2.def_.bnd;  // bounding point index
-			const Vector2D*nlptr=o2.nmls_wld_; // normals
+			const Vector*nlptr=o2.nmls_wld_; // normals
 			bool is_collision=true; // assume is collision
 			for(unsigned j=0;j<nbnd2;j++){
 				// reference vector_pts_wld_[bnd[j]]
-				const Vector2D&p2=o2.pts_wld_[*bndptr2++];
+				const Vector&p2=o2.pts_wld_[*bndptr2++];
 				if(enable::draw_collision_check){
 					dot(vga13h.bmp(),p2.x,p2.y,5);
 				}
-				const Vector2D v=p1-p2; // vector from line point to point to check
+				const Vector v=p1-p2; // vector from line point to point to check
 				if(v.dot(*nlptr++)>0){ // use abs(v)<0.0001f (example)?
 					// p "in front" of v, cannot be collision
 					is_collision=false;
