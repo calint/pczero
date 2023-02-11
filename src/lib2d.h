@@ -2,9 +2,9 @@
 
 namespace osca{
 
-using Angle=float;
-using Scale=float;
-using Scalar=float;
+using Angle=Real;
+using Scale=Real;
+using Scalar=Real;
 
 inline auto sin(const Angle radians)->float{
 	float v;
@@ -41,18 +41,16 @@ inline auto sqrt(const float s)->float{
 	return v;
 }
 
-constexpr float PI=3.141592653589793f;
+constexpr Real PI=3.141592653589793f;
 
 constexpr auto deg_to_rad(const Angle deg)->Angle{
-	constexpr float deg_to_rad=PI/180.f;
+	constexpr Real deg_to_rad=PI/180.f;
 	return deg*deg_to_rad;
 }
 
 class Vector2D{
 public:
-	Coord x=0,y=0;
-//	Vector2D(){}
-//	Vector2D(const float x_,const float y_):x{x_},y{y_}{}
+	Real x=0,y=0;
 	// normalizes this vector
 	inline auto normalize()->Vector2D&{
 		const Coord len=sqrt(x*x+y*y);
@@ -80,7 +78,7 @@ public:
 		y=-y;
 		return*this;
 	}
-	inline constexpr auto dot(const Vector2D&v)const->float{
+	inline constexpr auto dot(const Vector2D&v)const->Real{
 		return x*v.x+y*v.y;
 	}
 //	auto operator<=>(const Vector2D&)const=default; // ? does not compile in clang++ without includes from std
@@ -89,18 +87,18 @@ public:
 	constexpr inline auto operator+(const Vector2D&other)const->Vector2D{return{x+other.x,y+other.y};}
 };
 
-using Count=int;
+using Count=Size;
 
 class Matrix2D{
-	Coord xx=1,xy=0,xt=0;
-	Coord yx=0,yy=1,yt=0;
-	Coord ux=0,uy=0,id=1;
+	Real xx=1,xy=0,xt=0;
+	Real yx=0,yy=1,yt=0;
+	Real ux=0,uy=0,id=1;
 public:
 	auto set_transform(const Scale scale,const Angle rotation,const Vector2D&translation){
 		float fcos,fsin;
 		sin_and_cos(rotation,fsin,fcos);
-		const float cs=scale*fcos;
-		const float sn=scale*fsin;
+		const Real cs=scale*fcos;
+		const Real sn=scale*fsin;
 		xx=cs;xy=-sn;xt=translation.x;
 		yx=sn;yy= cs;yt=translation.y;
 		ux= 0;uy=  0;id=1;

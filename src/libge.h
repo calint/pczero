@@ -33,7 +33,7 @@ public:
 	}
 };
 
-static constexpr void dot(const Bitmap&bmp,const float x,const float y,const Color8b color){
+static constexpr void dot(const Bitmap&bmp,const Real x,const Real y,const Color8b color){
 	const int xi=static_cast<int>(x);
 	const int yi=static_cast<int>(y);
 	bmp.pointer_offset({xi,yi}).write(color);
@@ -56,20 +56,20 @@ class Object;
 // update_all() and check_collisions() generate lists of objects to be deleted.
 // the delete happens when deleted_commit() is called
 namespace world{
-	constexpr float sec_per_tick=1/18.2f; // the default 18.2 Hz clock
+	constexpr Real sec_per_tick=1/18.2f; // the default 18.2 Hz clock
 	constexpr static Size nobjects_max=256; // maximum number of objects
 
-	static float time_s=0;
-	static float time_dt_s=0;
-	static float time_prv_s=0;
+	static Real time_s=0;
+	static Real time_dt_s=0;
+	static Real time_prv_s=0;
 	static auto init(){
-		time_s=static_cast<float>(osca_t)*sec_per_tick;
+		time_s=static_cast<Real>(osca_t)*sec_per_tick;
 		// set previous time to a reasonable value so that dt does not
 		// become huge at first frame
 		time_prv_s=time_s-sec_per_tick;
 	}
 	static auto tick(){
-		time_s=static_cast<float>(osca_t)*sec_per_tick;
+		time_s=static_cast<Real>(osca_t)*sec_per_tick;
 		time_dt_s=time_s-time_prv_s;
 		time_prv_s=time_s;
 	}
@@ -299,11 +299,11 @@ public:
 	}
 	constexpr auto draw_bounding_circle(Bitmap&dsp)->void{
 		Point2D p=phy().pos;
-		float r=bounding_radius();
-		const unsigned segments=static_cast<unsigned>(5.f*scale());
+		Scalar r=bounding_radius();
+		const Count segments=static_cast<Count>(5.f*scale());
 		Angle th=0;
 		Angle dth=2*PI/static_cast<Angle>(segments);
-		for(unsigned i=0;i<segments;i++){
+		for(Count i=0;i<segments;i++){
 			const Coord x=p.x+r*cos(th);
 			const Coord y=p.y+r*sin(th);
 			dot(dsp,x,y,1);
@@ -576,17 +576,17 @@ private:
 		return o;
 	}
 	static auto check_collision_bounding_circles(Object&o1,Object&o2)->bool{
-		const float r1=o1.bounding_radius();
-		const float r2=o2.bounding_radius();
+		const Scalar r1=o1.bounding_radius();
+		const Scalar r2=o2.bounding_radius();
 		const Point2D p1=o1.phy().pos;
 		const Point2D p2=o2.phy().pos;
 
 		// check if: sqrt(dx*dx+dy*dy)<=r1+r2
-		const float dist2=r1*r1+2*r1*r2+r2*r2; // distance^2
+		const Real dist2=r1*r1+2*r1*r2+r2*r2; // distance^2
 		Vector2D v{p2.x-p1.x,p2.y-p1.y};
 		v.x*=v.x;
 		v.y*=v.y;
-		const float d2=v.x+v.y;
+		const Real d2=v.x+v.y;
 //		const float diff=d2-dist2;
 //		out.pos({0,1}).p_hex_32b(static_cast<unsigned>(diff));
 		if(d2>dist2)

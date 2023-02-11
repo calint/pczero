@@ -102,11 +102,11 @@ public:
 	inline constexpr auto inc_y(const T&dy){y_+=dy;}
 	inline constexpr auto inc_by(const CoordsT<T>&delta){x_+=delta.x_;y_+=delta.y_;}
 };
-
+using Real=float;
 using CoordPx=int;
 using CoordsPx=CoordsT<CoordPx>;
 
-using Coord=float;
+using Coord=Real;
 using Coords=CoordsT<Coord>;
 
 template<typename T>

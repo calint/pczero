@@ -90,7 +90,7 @@ public:
 class Ship final:public Object{
 	static constexpr Scale scale=4;
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
-	float fire_t_s=0;
+	Real fire_t_s=0;
 public:
 	Ship():
 		// type bits 0b1 check collision with:
@@ -120,7 +120,7 @@ public:
 	}
 
 	auto fire(){
-		const float dt=world::time_s-fire_t_s;
+		const Real dt=world::time_s-fire_t_s;
 		if(dt<.2f)
 			return;
 		fire_t_s=world::time_s;
@@ -168,7 +168,7 @@ public:
 
 class OscaGame{
 	auto create_scene(){
-		for(float i=30;i<300;i+=20){
+		for(Real i=30;i<300;i+=20){
 			Enemy*e=new Enemy({i,60},deg_to_rad(i));
 			e->phy().dagl=deg_to_rad(10);
 			e->phy().dpos={0,2};
@@ -419,7 +419,7 @@ public:
 		if(deg>360)
 			deg-=360;
 		deg+=5;
-		const float rotation=deg_to_rad(deg);
+		const Angle rotation=deg_to_rad(deg);
 	//		shp3->set_angle(rotation);
 		R.set_transform(5,rotation,{160,100});
 		// dot axis
