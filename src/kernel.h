@@ -89,6 +89,7 @@ namespace osca{
 		}
 		static auto free(void*ptr){
 //			err.p_hex_32b(reinterpret_cast<unsigned>(ptr)).spc();
+			// find the allocated memory in the used list
 			HeapEntry*hep=entry_used_start_;
 			while(hep<entry_used_next_){
 				if(hep->ptr==ptr){
@@ -113,7 +114,8 @@ namespace osca{
 				}
 				hep++;
 			}
-			err.p("Heap.free: 1");
+			// did not find the allocated memory. probably a double delete
+			err.p("Heap.free: 2");
 			osca_halt();
 		}
 		static auto clear_buffer(const unsigned char b=0){d_.clear(b);}
