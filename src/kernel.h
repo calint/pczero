@@ -20,8 +20,8 @@ namespace osca{
 		inline static char*ptr_{nullptr}; // pointer to free memory
 		inline static char*ptr_lim_{nullptr}; // limit of buffer
 		inline static HeapEntry*entry_used_start_{nullptr}; // beginning of vector containing used memory info
-		inline static HeapEntry*entry_used_next_{nullptr};
-		inline static HeapEntry*entry_used_lim_{nullptr};
+		inline static HeapEntry*entry_used_next_{nullptr}; // next available slot
+		inline static HeapEntry*entry_used_lim_{nullptr}; // limit of used entries memory
 		inline static HeapEntry*entry_free_start_{nullptr}; // beginning of vector containing freed memory info
 		inline static HeapEntry*entry_free_next_{nullptr};
 		inline static HeapEntry*entry_free_lim_{nullptr};
