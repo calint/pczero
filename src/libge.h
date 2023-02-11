@@ -3,9 +3,9 @@
 
 namespace osca{
 
-using Point=Vector;
+using Point=Vector; // a point in 2D
 
-using PointIx=short;
+using PointIx=short; // index into a list of points
 
 class ObjectDef final{
 public:
@@ -23,10 +23,10 @@ public:
 		nmls=new Vector[static_cast<unsigned>(nbnd)];
 		const PointIx n=nbnd-1;
 		for(PointIx i=0;i<n;i++){
-			const Vector d=pts[bnd[i+1]]-pts[bnd[i]];
+			const Vector d{pts[bnd[i+1]]-pts[bnd[i]]};
 			nmls[i]=d.normal().normalize();
 		}
-		const Vector d=pts[bnd[0]]-pts[bnd[nbnd-1]];
+		const Vector d{pts[bnd[0]]-pts[bnd[nbnd-1]]};
 		nmls[nbnd-1]=d.normal().normalize();
 	}
 };
@@ -39,9 +39,9 @@ static constexpr void dot(const Bitmap&bmp,const Real x,const Real y,const Color
 
 namespace metrics{
 	constexpr static bool enabled{true};
-	static unsigned short matrix_set_transforms{0};
-	static unsigned short collisions_checks{0};
-	static unsigned short collisions_checks_bounding_shapes{0};
+	static Count matrix_set_transforms{0};
+	static Count collisions_checks{0};
+	static Count collisions_checks_bounding_shapes{0};
 	static auto reset(){
 		matrix_set_transforms=0;
 		collisions_checks=0;
@@ -503,7 +503,6 @@ public:
 				world::deleted_add(o);
 			}
 		}
-//		world::deleted_commit();
 	}
 	static auto render_all(Bitmap&dsp){
 		for(SlotIx i=0;i<used_ixes_i;i++){
@@ -564,7 +563,6 @@ public:
 				}
 			}
 		}
-//		world::deleted_commit();
 	}
 
 private:
