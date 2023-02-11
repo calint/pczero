@@ -43,7 +43,7 @@ inline void pz_memcpy(Address to,Address from,SizeBytes n){
 }
 
 //inline void pz_memset(Address to,unsigned char v,SizeBytes n){
-inline void pz_memset(Address to,unsigned char v,SizeBytes n){
+inline void pz_memset(Address to,char v,SizeBytes n){
 	asm("mov %0,%%edi;"
 		"mov %1,%%al;"
 		"mov %2,%%ecx;"
@@ -83,7 +83,7 @@ public:
 	inline constexpr auto pointer()const->Pointer{return{a_};}
 	inline auto to(const Data&d)const{pz_memcpy(d.address(),a_,s_);} // ? bounds check
 	inline auto to(const Data&d,const SizeBytes sb)const{pz_memcpy(d.address(),a_,sb);} // ? bounds check
-	inline auto clear(unsigned char byte=0)const{pz_memset(a_,byte,s_);}
+	inline auto clear(char byte=0)const{pz_memset(a_,byte,s_);}
 	inline constexpr auto limit()const->Address{return static_cast<char*>(a_)+s_;}
 };
 
@@ -121,7 +121,7 @@ public:
 
 using SizePx=int;
 using DimensionPx=DimensionT<SizePx>;
-using Color8b=unsigned char;
+using Color8b=char;
 
 class Bitmap{
 	DimensionPx d_;

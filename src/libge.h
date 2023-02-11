@@ -5,7 +5,7 @@ namespace osca{
 
 using Point=Vector;
 
-using PointIx=unsigned short;
+using PointIx=short;
 
 class ObjectDef final{
 public:
@@ -24,7 +24,7 @@ public:
 		const PointIx n=nbnd-1;
 		for(PointIx i=0;i<n;i++){
 			const Vector d=pts[bnd[i+1]]-pts[bnd[i]];
-			nmls[i]={-d.y,d.x}; // normal to the line d
+			nmls[i]=d.normal();
 			nmls[i].normalize();
 		}
 		const Vector d=pts[bnd[0]]-pts[bnd[nbnd-1]];
@@ -152,7 +152,7 @@ public:
 			ptr++;
 		}
 	}
-	static auto clear_buffer(unsigned char b=0){
+	static auto clear_buffer(char b=0){
 		const Address from=Address(mem_start);
 		const SizeBytes n=reinterpret_cast<SizeBytes>(mem_limit)-reinterpret_cast<SizeBytes>(mem_start);
 		pz_memset(from,b,n);

@@ -118,8 +118,8 @@ namespace osca{
 			err.p("Heap.free: 2");
 			osca_halt();
 		}
-		static auto clear_buffer(const unsigned char b=0){d_.clear(b);}
-		static auto clear_heap_entries(unsigned char free_area=0,unsigned char used_area=0){
+		static auto clear_buffer(const char b=0){d_.clear(b);}
+		static auto clear_heap_entries(char free_area=0,char used_area=0){
 			const SizeBytes hes=SizeBytes(sizeof(HeapEntry));
 			pz_memset(entry_free_start_,free_area,nentries_max_*hes);
 			pz_memset(entry_used_start_,used_area,nentries_max_*hes);
