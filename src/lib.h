@@ -121,6 +121,7 @@ public:
 
 using SizePx=int;
 using DimensionPx=DimensionT<SizePx>;
+using Color8b=unsigned char;
 
 class Bitmap{
 	DimensionPx d_;
@@ -131,8 +132,8 @@ public:
 	inline constexpr auto data()const->const Data&{return dt_;}
 	inline constexpr auto pointer_offset(const CoordsPx p)const->Pointer{return dt_.pointer().offset(p.y()*d_.width()+p.x());}
 	constexpr auto to(const Bitmap&dst,const CoordsPx&c)const{
-		char*si=static_cast<char*>(dt_.address());
-		char*di=static_cast<char*>(dst.dt_.address());
+		Color8b*si=static_cast<Color8b*>(dt_.address());
+		Color8b*di=static_cast<Color8b*>(dst.dt_.address());
 		di+=c.y()*dst.dim().width()+c.x();
 		const SizePx ln=dst.dim().width()-d_.width();
 		const SizePx h=d_.height();
@@ -321,7 +322,6 @@ static const unsigned int table_ascii_to_font[]{
 };
 
 using CoordsChar=CoordsT<int>;
-using Color8b=unsigned char;
 class PrinterToBitmap{
 	Color8b*di_; // current pixel in bitmap
 	Color8b*dil_; // beginning of current line
@@ -333,7 +333,7 @@ class PrinterToBitmap{
 	Color8b fg_;
 	Color8b bg_;
 	bool transparent_; // ? implement
-	char padding1=0;
+	char padding1{0};
 public:
 	constexpr PrinterToBitmap(Bitmap&b):
 		di_{static_cast<Color8b*>(b.data().address())},

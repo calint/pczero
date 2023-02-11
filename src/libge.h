@@ -9,11 +9,11 @@ using PointIx=unsigned short;
 
 class ObjectDef final{
 public:
-	PointIx npts=0; // number of points in pts
-	PointIx nbnd=0; // number of indexes in bnd
-	Point*pts=nullptr; // array of points used for rendering and bounding shape
-	PointIx*bnd=nullptr; // indexes in pts that defines the bounding shape as a convex polygon CCW
-	Vector*nmls=nullptr; // normals to the lines defined by bnd (calculated by init_normals())
+	PointIx npts{0}; // number of points in pts
+	PointIx nbnd{0}; // number of indexes in bnd
+	Point*pts{nullptr}; // array of points used for rendering and bounding shape
+	PointIx*bnd{nullptr}; // indexes in pts that defines the bounding shape as a convex polygon CCW
+	Vector*nmls{nullptr}; // normals to the lines defined by bnd (calculated by init_normals())
 
 	auto init_normals(){
 		if(nbnd<2){
@@ -187,15 +187,15 @@ protected:
 	Scale scl_; // scale that is used in transform from model to world coordinates
 	const ObjectDef&def_; // contains the model definition
 	Point*pts_wld_; // transformed model to world points cache
-	Vector*nmls_wld_; // normals of bounding shape rotated to the world coordinates (not normalized if scale!=1)
+	Vector*nmls_wld_; // normals of boundingunsigned shape rotated to the world coordinates (not normalized if scale!=1)
 	Matrix2D Mmw_; // model to world transform
 	Point Mmw_pos_; // current position used in transform matrix
 	AngleRad Mmw_agl_; // current angle used in transform matrix
 	Scale Mmw_scl_;  // current scale used in transform matrix
 	Scalar br_; // bounding radius
-	SlotIx used_ix_=0; // index in used_ixes array. used at new and delete
-	Color8b color_=1;
-	unsigned char bits_=0; // flags, bit 1:dead
+	SlotIx used_ix_; // index in used_ixes array. used at new and delete
+	Color8b color_;
+	unsigned char bits_; // flags, bit 1:dead
 public:
 //	constexpr Object()=delete;
 	constexpr Object(const Object&)=delete; // copy ctor
@@ -215,7 +215,9 @@ public:
 		Mmw_agl_{0},
 		Mmw_scl_{0},
 		br_{bounding_radius},
-		color_{color}
+		used_ix_{0},
+		color_{color},
+		bits_{0}
 	{
 		// initiate physics state
 		*phy_=PhysicsState{};
@@ -276,7 +278,7 @@ public:
 		refresh_wld_points();
 		if(enable::draw_dots){
 			const Point*pt=pts_wld_;
-			for(unsigned i=0;i<def_.npts;i++){
+			for(PointIx i=0;i<def_.npts;i++){
 //				dot(dsp,pt->x,pt->y,color_);
 				dot(dsp,pt->x,pt->y,4);
 				pt++;
@@ -512,8 +514,8 @@ public:
 		}
 	}
 	static auto check_collisions(){
-		for(unsigned i=0;i<used_ixes_i-1u;i++){
-			for(unsigned j=i+1;j<used_ixes_i;j++){
+		for(SlotIx i=0;i<used_ixes_i-1u;i++){
+			for(SlotIx j=i+1;j<used_ixes_i;j++){
 				Object*o1=used_ixes[i].obj;
 				Object*o2=used_ixes[j].obj;
 				// check if objects are interested in collision check
@@ -609,7 +611,7 @@ private:
 		if(nbnd2<3) // ? check if points equal? with floats?
 			return false;
 		const PointIx*bndptr1=o1.def_.bnd; // bounding point index of o1
-		for(unsigned i=0;i<nbnd1;i++){
+		for(PointIx i=0;i<nbnd1;i++){
 			// reference pts_pts_wld_[bnd[i]]
 			const Point&p1=o1.pts_wld_[*bndptr1++];
 			// for each normal in o2
