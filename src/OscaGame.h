@@ -463,7 +463,7 @@ public:
 		}
 	}
 
-	static auto draw_axis(Bitmap&dsp){
+	static auto draw_axis(Bitmap8b&dsp){
 		static AngleDeg deg=0;
 		static Matrix2D R;
 		if(deg>360)

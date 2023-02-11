@@ -31,7 +31,7 @@ public:
 	}
 };
 
-static constexpr void dot(const Bitmap&bmp,const Real x,const Real y,const Color8b color){
+static constexpr void dot(const Bitmap8b&bmp,const Real x,const Real y,const Color8b color){
 	const int xi=static_cast<int>(x);
 	const int yi=static_cast<int>(y);
 	bmp.pointer_offset({xi,yi}).write(color);
@@ -272,7 +272,7 @@ public:
 	}
 	// returns false if object is to be deleted
 	virtual auto update()->bool{return true;}
-	virtual auto render(Bitmap&dsp)->void{
+	virtual auto render(Bitmap8b&dsp)->void{
 		refresh_wld_points();
 		if(enable::draw_dots){
 			const Point*pt=pts_wld_;
@@ -300,7 +300,7 @@ public:
 			draw_bounding_circle(dsp);
 		}
 	}
-	constexpr auto draw_bounding_circle(Bitmap&dsp)->void{
+	constexpr auto draw_bounding_circle(Bitmap8b&dsp)->void{
 		Point p=phy().pos;
 		Scalar r=bounding_radius();
 		const Count segments=static_cast<Count>(5.f*scale());
@@ -313,7 +313,7 @@ public:
 			th+=dth;
 		}
 	}
-	constexpr auto draw_polygon(Bitmap&dsp,const Point pts[],const PointIx npoly_ixs,const PointIx ix[],const Color8b color)->void{
+	constexpr auto draw_polygon(Bitmap8b&dsp,const Point pts[],const PointIx npoly_ixs,const PointIx ix[],const Color8b color)->void{
 //		const PointIx*pi=ix;
 //		for(PointIx i=0;i<npoly_ixs;i++){
 //			const Point2D&p=pts[*pi++];
@@ -504,7 +504,7 @@ public:
 			}
 		}
 	}
-	static auto render_all(Bitmap&dsp){
+	static auto render_all(Bitmap8b&dsp){
 		for(SlotIx i=0;i<used_ixes_i;i++){
 			Object*o=object_for_used_slot(i);
 			o->render(dsp);

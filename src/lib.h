@@ -123,15 +123,15 @@ using SizePx=int;
 using DimensionPx=DimensionT<SizePx>;
 using Color8b=char;
 
-class Bitmap{
+class Bitmap8b{
 	DimensionPx d_;
 	Data dt_;
 public:
-	constexpr Bitmap(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()}{}
+	constexpr Bitmap8b(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()}{}
 	inline constexpr auto dim()const->const DimensionPx&{return d_;}
 	inline constexpr auto data()const->const Data&{return dt_;}
 	inline constexpr auto pointer_offset(const CoordsPx p)const->Pointer{return dt_.pointer().offset(p.y()*d_.width()+p.x());}
-	constexpr auto to(const Bitmap&dst,const CoordsPx&c)const{
+	constexpr auto to(const Bitmap8b&dst,const CoordsPx&c)const{
 		Color8b*si=static_cast<Color8b*>(dt_.address());
 		Color8b*di=static_cast<Color8b*>(dst.dt_.address());
 		di+=c.y()*dst.dim().width()+c.x();
@@ -325,7 +325,7 @@ using CoordsChar=CoordsT<int>;
 class PrinterToBitmap{
 	Color8b*di_; // current pixel in bitmap
 	Color8b*dil_; // beginning of current line
-	Bitmap&b_;
+	Bitmap8b&b_;
 	SizePx bmp_wi_;
 	SizePx font_wi_;
 	SizePx font_hi_;
@@ -335,7 +335,7 @@ class PrinterToBitmap{
 	bool transparent_; // ? implement
 	char padding1{0};
 public:
-	constexpr PrinterToBitmap(Bitmap&b):
+	constexpr PrinterToBitmap(Bitmap8b&b):
 		di_{static_cast<Color8b*>(b.data().address())},
 		dil_{di_},
 		b_{b},
@@ -478,11 +478,11 @@ private:
 };
 
 class Vga13h{
-	Bitmap b_;
+	Bitmap8b b_;
 
 public:
 	Vga13h():b_{Address(0xa0000),DimensionPx{320,200}}{}
-	inline constexpr auto bmp()->Bitmap&{return b_;}
+	inline constexpr auto bmp()->Bitmap8b&{return b_;}
 };
 
 // the vga 13h bitmap
