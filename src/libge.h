@@ -605,8 +605,8 @@ private:
 		// if behind every normal then within the convex bounding shape thus collision
 
 		// for each point in o1 bounding shape
-		const unsigned short nbnd1=o1.def_.nbnd;
-		const unsigned short nbnd2=o2.def_.nbnd;
+		const PointIx nbnd1=o1.def_.nbnd;
+		const PointIx nbnd2=o2.def_.nbnd;
 		// if o2 has no bounding shape (at least 3 points) return false
 		if(nbnd2<3) // ? check if points equal? with floats?
 			return false;
@@ -618,7 +618,7 @@ private:
 			const PointIx*bndptr2=o2.def_.bnd;  // bounding point index
 			const Vector*nlptr=o2.nmls_wld_; // normals
 			bool is_collision=true; // assume is collision
-			for(unsigned j=0;j<nbnd2;j++){
+			for(PointIx j=0;j<nbnd2;j++){
 				// reference vector_pts_wld_[bnd[j]]
 				const Vector&p2=o2.pts_wld_[*bndptr2++];
 				if(enable::draw_collision_check){
