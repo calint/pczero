@@ -11,7 +11,7 @@
 [o]   ObjectDef: polygons with indexes into the definition points
 [x]     step 1. use bounding shape polygon
 [ ]       review
-[ ]     step 2. define {color,npts,wld_pt_index[]}
+[ ]     step 2. define {color,npts,pts_ix[]}
 [x]   render lines. polygon outline.
 [ ] multiple bounding shapes per object to allow non convex shape
 [o] input text
