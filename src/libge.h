@@ -20,7 +20,7 @@ public:
 			nmls=nullptr;
 			return;
 		}
-		nmls=new Vector[nbnd];
+		nmls=new Vector[static_cast<unsigned>(nbnd)];
 		const PointIx n=nbnd-1;
 		for(PointIx i=0;i<n;i++){
 			const Vector d=pts[bnd[i+1]]-pts[bnd[i]];
@@ -206,8 +206,8 @@ public:
 		phy_{PhysicsState::alloc()},
 		scl_{scl},
 		def_{def},
-		pts_wld_{new Point[def.npts]},
-		nmls_wld_{new Vector[def.nbnd]},
+		pts_wld_{new Point[static_cast<unsigned>(def.npts)]},
+		nmls_wld_{new Vector[static_cast<unsigned>(def.nbnd)]},
 		Mmw_{},
 		Mmw_pos_{0,0},
 		Mmw_agl_{0},
