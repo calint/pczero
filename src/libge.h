@@ -369,8 +369,7 @@ public:
 				if(dy_lft!=0){
 					dxdy_lft=(x_nxt_lft-x_lft)/dy_lft;
 				}else{
-//					err.p("dy0l");
-					dxdy_lft=0;
+					dxdy_lft=x_nxt_lft-x_lft;
 				}
 			}
 			if(adv_rht){
@@ -385,8 +384,7 @@ public:
 				if(dy_rht!=0){
 					dxdy_rht=(x_nxt_rht-x_rht)/dy_rht;
 				}else{
-//					err.p("dy0r");
-					dxdy_rht=0;
+					dxdy_rht=x_nxt_rht-x_rht;
 				}
 			}
 			CoordPx scan_lines_until_next_turn=0;
@@ -407,18 +405,18 @@ public:
 					break;
 //				Color8b*p=pline+static_cast<CoordPx>(x_lft+.5555f);
 //				Color8b*p_rht=pline+static_cast<CoordPx>(x_rht+.5555f);
-				Color8b*p=pline+static_cast<CoordPx>(x_lft);
+				Color8b*p_lft=pline+static_cast<CoordPx>(x_lft);
 				Color8b*p_rht=pline+static_cast<CoordPx>(x_rht);
-				if(p>p_rht) // ? can happen?
+				if(p_lft>p_rht) // ? can happen?
 					break;
 				scan_lines_until_next_turn--;
-				CoordPx npx=static_cast<CoordPx>(p_rht-p);
+				CoordPx npx=static_cast<CoordPx>(p_rht-p_lft);
 				if(enable::draw_polygons_fill){
-					pz_memset(p,color,npx);
+					pz_memset(p_lft,color,npx);
 				}
 				if(enable::draw_polygons_edges){
-					*p=color;
-					*(p+npx)=color;
+					*p_lft=color;
+					*(p_lft+npx)=color;
 				}
 				y+=1;
 				pline+=wi;
