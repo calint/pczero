@@ -172,8 +172,8 @@ namespace enable{
 using SlotIx=unsigned short; // index in Object::freeSlots[]
 // info that together with ~Object maintains usedSlots[]
 struct SlotInfo{
-	Object**oix=nullptr; // pointer to element in Object::all[]
-	Object*obj=nullptr; // object owning this slot
+	Object**oix{nullptr}; // pointer to element in Object::all[]
+	Object*obj{nullptr}; // object owning this slot
 };
 
 using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types.
