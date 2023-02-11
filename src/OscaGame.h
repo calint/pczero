@@ -244,7 +244,7 @@ public:
 			new Point2D[]{
 				{0,0},
 			},
-			new PointIx[]{0} // bounding convex polygon CCW
+			new PointIx[]{0} // bounding points and convex polygon CCW
 		};
 		bullet_def.init_normals();
 

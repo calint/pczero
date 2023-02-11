@@ -602,14 +602,13 @@ private:
 		// for each point in o1 check if behind every normal of o2
 		// if behind every normal then within the convex bounding shape thus collision
 
-		// if o2 has no bounding shape (at least 3 points) return false
-		if(o2.def_.nbnd<3) // ? check if points equal? with floats?
-			return false;
-
 		// for each point in o1 bounding shape
-		const PointIx*bndptr1=o1.def_.bnd; // bounding point index
 		const unsigned short nbnd1=o1.def_.nbnd;
 		const unsigned short nbnd2=o2.def_.nbnd;
+		// if o2 has no bounding shape (at least 3 points) return false
+		if(nbnd2<3) // ? check if points equal? with floats?
+			return false;
+		const PointIx*bndptr1=o1.def_.bnd; // bounding point index of o1
 		for(unsigned i=0;i<nbnd1;i++){
 			// reference pts_pts_wld_[bnd[i]]
 			const Point2D&p1=o1.pts_wld_[*bndptr1++];
