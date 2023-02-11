@@ -16,8 +16,10 @@ public:
 	Vector2D*nmls=nullptr; // normals to the lines defined by bnd
 
 	auto init_normals(){
-		if(nbnd==0)
+		if(nbnd<2){
+			nmls=nullptr;
 			return;
+		}
 		nmls=new Vector2D[nbnd];
 		const unsigned n=nbnd-1;
 		for(unsigned i=0;i<n;i++){
