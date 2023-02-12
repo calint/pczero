@@ -121,7 +121,7 @@ public:
 
 using SizePx=int;
 using DimensionPx=DimensionT<SizePx>;
-using Color8b=unsigned char;
+using Color8b=char;
 
 class Bitmap8b{
 	DimensionPx d_;
