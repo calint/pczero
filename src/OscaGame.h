@@ -353,22 +353,22 @@ public:
 		world::init();
 		// start task
 		while(true){
-			metrics::reset();
+			pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
+
 			world::tick();
 
 //			Bitmap8b bmp{Address(0x10'0000),{100,100}};
 //			bmp.to(vga13h.bmp(),{100,1});
 
 			// copy heap to screen
-			pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
 //			err.pos({0,2});
 			out.pos({0,1});//.p("                                                            ").pos({0,1});
 
-			Object::render_all(vga13h.bmp());
-			PhysicsState::update_physics_states();
-			Object::update_all();
-			Object::check_collisions();
-			world::deleted_commit();
+//			Object::render_all(vga13h.bmp());
+//			PhysicsState::update_physics_states();
+//			Object::update_all();
+//			Object::check_collisions();
+//			world::deleted_commit();
 
 			//		out.pos({0,2}).p("                                              ").pos({0,2});
 			out.pos({12,2}).fg(2);
