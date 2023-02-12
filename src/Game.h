@@ -273,7 +273,7 @@ private:
 	// aim and shoot at targets' expected location
 	auto attack_target_expected_location(const Object&target,const bool draw_trajectory=false)->void{
 		constexpr Real margin_of_error_t=Real(0.25);
-		Vector v_aim=find_aim_vector_for_moving_target(target,10,margin_of_error_t,margin_of_error_t);
+		Vector v_aim=find_aim_vector_for_moving_target(target,10,Real(.2),margin_of_error_t);
 		if(v_aim.x==0&&v_aim.y==0){
 			// did not find aim vector
 			turn_still();
