@@ -503,12 +503,14 @@ private:
 	//----------------------------------------------------------------
 	// statics
 	//----------------------------------------------------------------
-public:
 	inline static Object*all[World::nobjects_max]; // array of pointers to allocated objects
 	inline static Object**free_ixes[World::nobjects_max]; // free indexes in all[]
 	inline static SlotIx free_ixes_i{0}; // index in freeSlots[] of next free slot
 	inline static SlotInfo used_ixes[World::nobjects_max]; // free indexes in all[]
 	inline static SlotIx used_ixes_i{0}; // index in freeSlots[] of next free slot
+public:
+	static auto free_slots_count()->SlotIx{return free_ixes_i;}
+	static auto used_slots_count()->SlotIx{return used_ixes_i;}
 //	static inline auto hasFreeSlot()->bool{return free_ixes_i!=0;}
 	static auto init_statics(){
 		const SlotIx n=sizeof(free_ixes)/sizeof(Object**);

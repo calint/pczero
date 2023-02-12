@@ -573,8 +573,8 @@ auto Game::create_boss(){
 		out.p("m=").p_hex_8b(static_cast<unsigned char>(metrics::matrix_set_transforms)).spc();
 		out.p("c=").p_hex_8b(static_cast<unsigned char>(metrics::collisions_checks)).spc();
 		out.p("b=").p_hex_8b(static_cast<unsigned char>(metrics::collisions_checks_bounding_shapes)).spc();
-		out.p("f=").p_hex_8b(static_cast<unsigned char>(Object::free_ixes_i)).spc();
-		out.p("u=").p_hex_8b(static_cast<unsigned char>(Object::used_ixes_i)).spc();
+		out.p("f=").p_hex_8b(static_cast<unsigned char>(Object::free_slots_count())).spc();
+		out.p("u=").p_hex_8b(static_cast<unsigned char>(Object::used_slots_count())).spc();
 		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_t)).spc();
 		out.p("s=").p_hex_8b(static_cast<unsigned char>(World::time_s)).spc();
 		out.p("d=").p_hex_8b(static_cast<unsigned char>(World::time_dt_s*1000)).spc();
