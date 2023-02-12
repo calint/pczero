@@ -171,6 +171,8 @@ public:
 	virtual auto on_collision(Object&other)->bool override{
 		return false;
 	}
+
+	inline static constexpr Real speed=40;
 };
 
 class Ship final:public Object{
@@ -218,27 +220,8 @@ public:
 		}
 		if(!Game::boss)
 			return true;
-
-		// aim and shoot at boss
-		constexpr Real margin_of_error=Real(0.01);
-		Vector v_tgt=Game::boss->phy().pos-phy().pos;
-		v_tgt.normalize();
-		Vector v_fwd=forward_vector();
-		// draw trajectory of bullet
-		Vector v_bullet=v_fwd;
-		v_bullet.scale(bullet_speed);
-		Game::draw_trajectory(vga13h.bmp(),phy().pos,v_bullet,5,.5);
-
-		Vector n_fwd=v_fwd.normal();
-		Real dot=v_tgt.dot(n_fwd);
-		if(abs(dot)<margin_of_error){
-			turn_still();
-			fire();
-		}else if(dot<0){
-			turn_left();
-		}else if(dot>0){
-			turn_right();
-		}
+//		attack_target_current_location(*Game::boss,true);
+		attack_target_expected_location(*Game::boss,true);
 		return true;
 	}
 
@@ -257,11 +240,57 @@ public:
 		Vector v=forward_vector().scale(Real(1.1));
 		v.scale(scl_); // place bullet in front of ship
 		b->phy().pos=phy().pos+v;
-		b->phy().vel=v.normalize().scale(bullet_speed);
+		b->phy().vel=v.normalize().scale(Bullet::speed);
 		b->phy().agl=phy().agl;
 	}
+private:
+	auto attack_target_current_location(const Object&target,const bool draw_trajectory=false)->void{
+		// aim and shoot at boss
+		constexpr Real margin_of_error=Real(0.01);
+		Vector v_tgt=target.phy_ro().pos-phy_ro().pos;
+		v_tgt.normalize();
+		Vector v_fwd=forward_vector();
+		// draw trajectory of bullet
+		Vector v_bullet=v_fwd;
+		v_bullet.scale(Bullet::speed);
+		if(draw_trajectory){
+			Game::draw_trajectory(vga13h.bmp(),phy().pos,v_bullet,5,.5);
+		}
+		Vector n_fwd=v_fwd.normal();
+		Real dot=v_tgt.dot(n_fwd);
+		if(abs(dot)<margin_of_error){
+			turn_still();
+			fire();
+		}else if(dot<0){
+			turn_left();
+		}else if(dot>0){
+			turn_right();
+		}
+	}
 
-	inline static constexpr Real bullet_speed=40;
+	auto attack_target_expected_location(const Object&target,const bool draw_trajectory=false)->void{
+		// aim and shoot at boss
+		constexpr Real margin_of_error=Real(0.01);
+		Vector v_tgt=target.phy_ro().pos-phy_ro().pos;
+		v_tgt.normalize();
+		Vector v_fwd=forward_vector();
+		// draw trajectory of bullet
+		Vector v_bullet=v_fwd;
+		v_bullet.scale(Bullet::speed);
+		if(draw_trajectory){
+			Game::draw_trajectory(vga13h.bmp(),phy().pos,v_bullet,5,.5);
+		}
+		Vector n_fwd=v_fwd.normal();
+		Real dot=v_tgt.dot(n_fwd);
+		if(abs(dot)<margin_of_error){
+			turn_still();
+			fire();
+		}else if(dot<0){
+			turn_left();
+		}else if(dot>0){
+			turn_right();
+		}
+	}
 };
 
 
