@@ -418,12 +418,12 @@ public:
 					*p_lft=color;
 					*(p_lft+npx)=color;
 				}
-				y+=1;
+//				y+=1;
 				pline+=wi;
 				x_lft+=dxdy_lft;
 				x_rht+=dxdy_rht;
 			}
-			if(ix_lft==ix_rht)
+			if(ix_lft==ix_rht) // ? render dot or line?
 				break;
 			if(adv_lft){
 				x_lft=x_nxt_lft;

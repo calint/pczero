@@ -184,8 +184,10 @@ public:
 	// 'missiles'0b01'0000
 	// 'bosses'  0b10'0000
 	Boss():
-		Object{0b10'0000,0b01'0010,boss_def,scale,bounding_radius,{0,0},0,4}
-	{}
+		Object{0b10'0000,0b01'0010,boss_def,scale,bounding_radius,{0,0},0,0xe}
+	{
+		phy_->dagl=deg_to_rad(5);
+	}
 	virtual auto update()->bool override{
 		Object::update();
 		if(game::player){

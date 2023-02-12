@@ -8,8 +8,8 @@ using AngleDeg=Angle;
 using Scale=Real;
 using Scalar=Real;
 
-inline auto sin(const AngleRad radians)->float{
-	float v;
+inline auto sin(const AngleRad radians)->Real{
+	Real v;
 	asm("fsin"
 		:"=t"(v) // "t": first (top of stack) floating point register
 		:"0"(radians)
@@ -17,8 +17,8 @@ inline auto sin(const AngleRad radians)->float{
 	return v;
 }
 
-inline auto cos(const AngleRad radians)->float{
-	float v;
+inline auto cos(const AngleRad radians)->Real{
+	Real v;
 	asm("fcos"
 		:"=t"(v) // "t": first (top of stack) floating point register
 		:"0"(radians)
@@ -27,15 +27,15 @@ inline auto cos(const AngleRad radians)->float{
 }
 
 // puts sin and cos value of 'radians' in 'fsin' and 'fcos'
-inline auto sin_and_cos(const AngleRad radians,float&fsin,float&fcos){
+inline auto sin_and_cos(const AngleRad radians,Real&fsin,Real&fcos){
 	asm("fsincos"
 		:"=t"(fcos),"=u"(fsin) // "u" : Second floating point register
 		:"0"(radians)
 	);
 }
 
-inline auto sqrt(const float s)->float{
-	float v;
+inline auto sqrt(const Real s)->Real{
+	Real v;
 	asm("fsqrt"
 		:"=t"(v) // "t": first (top of stack) floating point register
 		:"0"(s)
@@ -70,7 +70,7 @@ public:
 		x+=v.x;
 		y+=v.y;
 	}
-	inline constexpr auto inc_by(const Vector&v,const float dt_s){
+	inline constexpr auto inc_by(const Vector&v,const Real dt_s){
 		x+=v.x*dt_s;
 		y+=v.y*dt_s;
 	}
@@ -104,7 +104,7 @@ class Matrix2D{
 	Real ux=0,uy=0,id=1;
 public:
 	auto set_transform(const Scale scale,const AngleRad rotation,const Vector&translation){
-		float fcos,fsin;
+		Real fcos,fsin;
 		sin_and_cos(rotation,fsin,fcos);
 		const Real cs=scale*fcos;
 		const Real sn=scale*fsin;
