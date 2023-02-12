@@ -101,16 +101,16 @@ public:
 
 	static constexpr auto is_in_play_area(Object&o)->bool{
 		const Scale bounding_radius=o.bounding_radius();
-		if(o.phy().pos.x>Coord(Game::play_area_top_left.x()+Game::play_area_dim.width())-bounding_radius){
+		if(o.phy().pos.x>=Coord(Game::play_area_top_left.x()+Game::play_area_dim.width())-bounding_radius){
 			return false;
 		}
-		if(o.phy().pos.x<Coord(Game::play_area_top_left.x())+bounding_radius){
+		if(o.phy().pos.x<=Coord(Game::play_area_top_left.x())+bounding_radius){
 			return false;
 		}
-		if(o.phy().pos.y>Coord(Game::play_area_top_left.y()+Game::play_area_dim.height())-bounding_radius){
+		if(o.phy().pos.y>=Coord(Game::play_area_top_left.y()+Game::play_area_dim.height())-bounding_radius){
 			return false;
 		}
-		if(o.phy().pos.y<Coord(Game::play_area_top_left.y())+bounding_radius){
+		if(o.phy().pos.y<=Coord(Game::play_area_top_left.y())+bounding_radius){
 			return false;
 		}
 		return true;
