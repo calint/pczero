@@ -7,6 +7,9 @@
 namespace osca{
 
 class Game{
+	inline static CoordsPx play_area_top_left{0,50};
+	inline static DimensionPx play_area_dim{320,100};
+
 	static auto create_scene();
 	static auto create_scene2();
 	static auto create_scene3();
@@ -45,10 +48,14 @@ class Game{
 		const Vector yaxis=R.axis_y().normalize().scale(7);
 		world::draw_dot(dsp,yaxis.x+160,yaxis.y+100,2);
 	}
-	inline static CoordsPx play_area_top_left{0,50};
-	inline static DimensionPx play_area_dim{320,100};
-
 public:
+	inline static ObjectDef enemy_def;
+	inline static ObjectDef ship_def;
+	inline static ObjectDef bullet_def;
+	inline static ObjectDef wall_def;
+	inline static ObjectDef missile_def;
+	inline static ObjectDef boss_def;
+
 	inline static Object*player{nullptr};
 	inline static Object*boss{nullptr};
 	inline static Count enemies_alive{0};
@@ -111,13 +118,6 @@ public:
 	[[noreturn]] static auto start()->void;
 };
 
-static ObjectDef enemy_def;
-static ObjectDef ship_def;
-static ObjectDef bullet_def;
-static ObjectDef wall_def;
-static ObjectDef missile_def;
-static ObjectDef boss_def;
-
 class Enemy final:public Object{
 	static constexpr Scale scale=5;
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
@@ -129,7 +129,7 @@ public:
 	// 'missiles'0b01'0000
 	// 'bosses'  0b10'0000
 	Enemy(const Point&pos,const AngleRad agl):
-		Object{0b100,0b01'0010,enemy_def,scale,bounding_radius,pos,agl,3}
+		Object{0b100,0b01'0010,Game::enemy_def,scale,bounding_radius,pos,agl,3}
 	{
 		Game::enemies_alive++;
 	}
@@ -161,7 +161,7 @@ public:
 		// 'walls'   0b00'1000
 		// 'missiles'0b01'0000
 		// 'bosses'  0b10'0000
-		Object{0b10,0b11'1101,bullet_def,scale,bounding_radius,{0,0},0,4}
+		Object{0b10,0b11'1101,Game::bullet_def,scale,bounding_radius,{0,0},0,4}
 	{}
 	virtual auto update()->bool override{
 		Object::update();
@@ -187,7 +187,7 @@ public:
 		// 'walls'   0b00'1000
 		// 'missiles'0b01'0000
 		// 'bosses'  0b10'0000
-		Object{0b1,0b11'1111,ship_def,scale,bounding_radius,{0,0},0,2}
+		Object{0b1,0b11'1111,Game::ship_def,scale,bounding_radius,{0,0},0,2}
 	{
 		Game::player=this;
 	}
@@ -268,7 +268,7 @@ public:
 class Wall final:public Object{
 public:
 	Wall(const Scale scl,const Point&pos,const AngleRad agl):
-		Object{0b00'1000,0,wall_def,scl,scl*sqrt_of_2,pos,agl,3}
+		Object{0b00'1000,0,Game::wall_def,scl,scl*sqrt_of_2,pos,agl,3}
 	{}
 };
 
@@ -284,7 +284,7 @@ public:
 	// 'missiles'0b01'0000
 	// 'bosses'  0b10'0000
 	Missile():
-		Object{0b01'0000,0b11'1111,missile_def,scale,bounding_radius,{0,0},0,4}
+		Object{0b01'0000,0b11'1111,Game::missile_def,scale,bounding_radius,{0,0},0,4}
 	{}
 	virtual auto update()->bool override{
 		Object::update();
@@ -308,7 +308,7 @@ public:
 	// 'missiles'0b01'0000
 	// 'bosses'  0b10'0000
 	Boss():
-		Object{0b10'0000,0b01'0010,boss_def,scale,bounding_radius,{0,0},0,0xe}
+		Object{0b10'0000,0b01'0010,Game::boss_def,scale,bounding_radius,{0,0},0,0xe}
 	{
 		phy_->dagl=deg_to_rad(5);
 		phy_->vel.x=10;
