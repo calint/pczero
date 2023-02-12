@@ -123,17 +123,18 @@ using SizePx=int;
 using DimensionPx=DimensionT<SizePx>;
 using Color8b=char;
 
-class Bitmap8b{
+template<typename T>
+class Bitmap{
 	DimensionPx d_;
 	Data dt_;
 public:
-	constexpr Bitmap8b(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()}{}
+	constexpr Bitmap(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()*Size(sizeof(T))}{}
 	inline constexpr auto dim()const->const DimensionPx&{return d_;}
 	inline constexpr auto data()const->const Data&{return dt_;}
-	inline constexpr auto pointer_offset(const CoordsPx p)const->Pointer{return dt_.pointer().offset(p.y()*d_.width()+p.x());}
-	constexpr auto to(const Bitmap8b&dst,const CoordsPx&c)const{
-		Color8b*si=static_cast<Color8b*>(dt_.address());
-		Color8b*di=static_cast<Color8b*>(dst.dt_.address());
+	inline constexpr auto pointer_offset(const CoordsPx p)const->Pointer{return dt_.pointer().offset(p.y()*d_.width()*Size(sizeof(T))+p.x()*Size(sizeof(T)));}
+	constexpr auto to(const Bitmap<T>&dst,const CoordsPx&c)const{
+		T*si=static_cast<T*>(dt_.address());
+		T*di=static_cast<T*>(dst.dt_.address());
 		di+=c.y()*dst.dim().width()+c.x();
 		const SizePx ln=dst.dim().width()-d_.width();
 		const SizePx h=d_.height();
@@ -148,6 +149,34 @@ public:
 		}
 	}
 };
+
+using Bitmap8b=Bitmap<Color8b>;
+//
+//class Bitmap8b{
+//	DimensionPx d_;
+//	Data dt_;
+//public:
+//	constexpr Bitmap8b(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()}{}
+//	inline constexpr auto dim()const->const DimensionPx&{return d_;}
+//	inline constexpr auto data()const->const Data&{return dt_;}
+//	inline constexpr auto pointer_offset(const CoordsPx p)const->Pointer{return dt_.pointer().offset(p.y()*d_.width()+p.x());}
+//	constexpr auto to(const Bitmap8b&dst,const CoordsPx&c)const{
+//		Color8b*si=static_cast<Color8b*>(dt_.address());
+//		Color8b*di=static_cast<Color8b*>(dst.dt_.address());
+//		di+=c.y()*dst.dim().width()+c.x();
+//		const SizePx ln=dst.dim().width()-d_.width();
+//		const SizePx h=d_.height();
+//		const SizePx w=d_.width();
+//		for(SizePx y=0;y<h;y++){
+//			for(SizePx x=0;x<w;x++){
+//				*di=*si;
+//				si++;
+//				di++;
+//			}
+//			di+=ln;
+//		}
+//	}
+//};
 
 static const unsigned int table_hex_to_font[]{
 		0b01100'10010'10010'10010'01100'00000'00, // 0
