@@ -9,6 +9,7 @@ namespace osca{
 namespace game{
 //	static bool player_alive{true};
 	static Object*player{nullptr};
+	static Object*boss{nullptr};
 	static Count enemies_alive{0};
 }
 
@@ -21,6 +22,22 @@ static ObjectDef boss_def;
 
 static CoordsPx play_area_top_left{0,50};
 static DimensionPx play_area_dim{320,100};
+
+static constexpr auto pos_within_play_area(const Real x,const Real y)->bool{
+	if(x>Coord(play_area_top_left.x()+play_area_dim.width())){
+		return false;
+	}
+	if(x<Coord(play_area_top_left.x())){
+		return false;
+	}
+	if(y>Coord(play_area_top_left.y()+play_area_dim.height())){
+		return false;
+	}
+	if(y<Coord(play_area_top_left.y())){
+		return false;
+	}
+	return true;
+}
 
 static constexpr auto object_within_play_area(Object&o)->bool{
 	const Scale bounding_radius=o.bounding_radius();
@@ -107,7 +124,9 @@ public:
 		// 'missiles'0b01'0000
 		// 'bosses'  0b10'0000
 		Object{0b1,0b11'1111,ship_def,scale,bounding_radius,{0,0},0,2}
-	{}
+	{
+		game::player=this;
+	}
 	~Ship()override{
 		game::player=nullptr;
 	}
@@ -187,6 +206,10 @@ public:
 		Object{0b10'0000,0b01'0010,boss_def,scale,bounding_radius,{0,0},0,0xe}
 	{
 		phy_->dagl=deg_to_rad(5);
+		game::boss=this;
+	}
+	~Boss()override{
+		game::boss=nullptr;
 	}
 	virtual auto update()->bool override{
 		Object::update();
@@ -195,7 +218,9 @@ public:
 			v.normalize().scale(5);
 			phy().vel=v;
 		}else{
-			phy().vel={0,0};
+			Vector v=Vector{160,60}-phy().pos;
+			v.normalize().scale(5);
+			phy().vel=v;
 		}
 		return object_within_play_area(*this);
 	}
@@ -241,6 +266,28 @@ class OscaGame{
 			ix[i]=i;
 		}
 		return ix;
+	}
+
+	static constexpr void dot2(const Bitmap8b&bmp,const Real x,const Real y,const Color8b color){
+		if(!pos_within_play_area(x,y))
+			return;
+		const CoordPx xi=CoordPx(x);
+		const CoordPx yi=CoordPx(y);
+		bmp.pointer_offset({xi,yi}).write(color);
+	}
+
+	auto render_trajectory(Bitmap8b&dsp,Object&o,const Real t_s,const Real t_inc_s)->void{
+		Real t=0;
+		Vector vel=o.phy().vel;
+		while(true){
+			t+=t_inc_s;
+			Vector v=vel;
+			v.scale(t);
+			v.inc_by(o.phy().pos);
+			dot2(dsp,v.x,v.y,0xe);
+			if(t>t_s)
+				return;
+		}
 	}
 public:
 	OscaGame(){
@@ -335,7 +382,6 @@ public:
 		constexpr Scalar ship_speed=20;
 		Ship*shp=new Ship;
 		shp->phy().pos={160,130};
-		game::player=shp;
 //		shp->phy().pos={160,100};
 		create_scene();
 //		create_scene2();
@@ -385,6 +431,11 @@ public:
 
 			if(!game::player)
 				shp=nullptr;
+
+//			if(game::player)
+//				render_trajectory(vga13h.bmp(),*game::player,5,.5);
+//			if(game::boss)
+//				render_trajectory(vga13h.bmp(),*game::boss,5,.5);
 
 			if(shp){
 				while(const unsigned kc=osca_keyb.get_next_scan_code()){
@@ -454,8 +505,6 @@ public:
 					break;
 				shp=new Ship;
 				shp->phy().pos={160,130};
-//					shp->phy().agl=deg_to_rad(180);
-				game::player=shp;
 				break;
 			default:
 				break;

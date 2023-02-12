@@ -34,11 +34,20 @@ inline auto sin_and_cos(const AngleRad radians,Real&fsin,Real&fcos){
 	);
 }
 
-inline auto sqrt(const Real s)->Real{
+inline auto sqrt(const Real in)->Real{
 	Real v;
 	asm("fsqrt"
 		:"=t"(v) // "t": first (top of stack) floating point register
-		:"0"(s)
+		:"0"(in)
+	);
+	return v;
+}
+
+inline auto abs(const Real in)->Real{
+	Real v;
+	asm("fabs"
+		:"=t"(v) // "t": first (top of stack) floating point register
+		:"0"(in)
 	);
 	return v;
 }
@@ -66,13 +75,15 @@ public:
 		y*=s;
 		return*this;
 	}
+	// increases this vector by v
 	inline constexpr auto inc_by(const Vector&v){
 		x+=v.x;
 		y+=v.y;
 	}
-	inline constexpr auto inc_by(const Vector&v,const Real dt_s){
-		x+=v.x*dt_s;
-		y+=v.y*dt_s;
+	// increases this vector by v*scl
+	inline constexpr auto inc_by(const Vector&v,const Real scl){
+		x+=v.x*scl;
+		y+=v.y*scl;
 	}
 	// negates this vector
 	inline constexpr auto negate()->Vector&{
@@ -80,9 +91,16 @@ public:
 		y=-y;
 		return*this;
 	}
+	// sets this vector to absolute value of itself
+	inline auto absolute()->Vector&{
+		x=abs(x);
+		y=abs(y);
+		return*this;
+	}
 	inline constexpr auto dot(const Vector&v)const->Real{
 		return x*v.x+y*v.y;
 	}
+	// returns the normal of this vector
 	inline constexpr auto normal()const->Vector{
 		return{-y,x};
 	}
@@ -91,9 +109,9 @@ public:
 	constexpr inline auto operator-(const Vector&other)const->Vector{return{x-other.x,y-other.y};}
 	constexpr inline auto operator+(const Vector&other)const->Vector{return{x+other.x,y+other.y};}
 
-	inline static constexpr auto from_to(const Vector&from,const Vector&to)->Vector{
-		return to-from;
-	}
+//	inline static constexpr auto from_to(const Vector&from,const Vector&to)->Vector{
+//		return to-from;
+//	}
 };
 
 using Count=Size;
