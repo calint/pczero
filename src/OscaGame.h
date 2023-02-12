@@ -114,6 +114,8 @@ public:
 class Ship final:public Object{
 	static constexpr Scale scale=4;
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
+	static constexpr AngleRad dagl=90;
+	static constexpr Scalar speed=20;
 	Real fire_t_s=0;
 public:
 	Ship():
@@ -131,11 +133,43 @@ public:
 		game::player=nullptr;
 	}
 
+	auto turn_left()->void{
+		phy().dagl=-deg_to_rad(dagl);
+	}
+	auto turn_right()->void{
+		phy().dagl=deg_to_rad(dagl);
+	}
+	auto turn_still()->void{
+		phy().dagl=0;
+	}
+	auto thrust_fwd()->void{
+		phy().vel=forward_vector().scale(speed);
+	}
+	auto thrust_rev()->void{
+		phy().vel=forward_vector().negate().scale(speed);
+	}
+
 	virtual auto update()->bool override{
 		Object::update();
 		if(!object_within_play_area(*this)){
 			phy().vel={0,0};
 		}
+		if(!game::boss)
+			return true;
+		Vector v_tgt=game::boss->phy().pos-phy().pos;
+		v_tgt.normalize();
+		Vector v_fwd=forward_vector();
+		Vector n_fwd=v_fwd.normal();
+		Real dot=v_tgt.dot(n_fwd);
+		if(dot<0){
+			turn_left();
+		}else if(dot>0){
+			turn_right();
+		}else{
+			turn_still();
+		}
+
+
 		return true;
 	}
 
@@ -206,6 +240,7 @@ public:
 		Object{0b10'0000,0b01'0010,boss_def,scale,bounding_radius,{0,0},0,0xe}
 	{
 		phy_->dagl=deg_to_rad(5);
+		phy_->vel.x=5;
 		game::boss=this;
 	}
 	~Boss()override{
@@ -213,16 +248,20 @@ public:
 	}
 	virtual auto update()->bool override{
 		Object::update();
-		if(game::player){
-			Vector v=game::player->phy().pos-phy().pos;
-			v.normalize().scale(5);
-			phy().vel=v;
-		}else{
-			Vector v=Vector{160,60}-phy().pos;
-			v.normalize().scale(5);
-			phy().vel=v;
+//		if(game::player){
+//			Vector v=game::player->phy().pos-phy().pos;
+//			v.normalize().scale(5);
+//			phy().vel=v;
+//		}else{
+//			Vector v=Vector{160,60}-phy().pos;
+//			v.normalize().scale(5);
+//			phy().vel=v;
+//		}
+//		return object_within_play_area(*this);
+		if(!object_within_play_area(*this)){
+			phy_->vel.x=-phy_->vel.x;
 		}
-		return object_within_play_area(*this);
+		return true;
 	}
 	// returns false if object is to be deleted
 	virtual auto on_collision(Object&other)->bool override{
@@ -250,6 +289,10 @@ class OscaGame{
 	auto create_scene3(){
 		new Enemy({160,100},0);
 	}
+	auto create_scene4(){
+		Object*o=new Boss;
+		o->phy().pos={20,60};
+	}
 	auto create_circle(const Count segments)->Point*{
 		Point*pts=new Point[unsigned(segments)];
 		AngleRad th=0;
@@ -276,15 +319,15 @@ class OscaGame{
 		bmp.pointer_offset({xi,yi}).write(color);
 	}
 
-	auto render_trajectory(Bitmap8b&dsp,Object&o,const Real t_s,const Real t_inc_s)->void{
+	auto render_trajectory(Bitmap8b&dsp,const Point&p0,const Vector&vel,const Real t_s,const Real t_inc_s)->void{
 		Real t=0;
-		Vector vel=o.phy().vel;
+		Color8b c=0xe;
 		while(true){
 			t+=t_inc_s;
 			Vector v=vel;
 			v.scale(t);
-			v.inc_by(o.phy().pos);
-			dot2(dsp,v.x,v.y,0xe);
+			v.inc_by(p0);
+			dot2(dsp,v.x,v.y,c);
 			if(t>t_s)
 				return;
 		}
@@ -378,13 +421,11 @@ public:
 		const Address heap_disp_at_addr=vga13h.bmp().data().pointer().offset(50*320).address();
 		const SizeBytes heap_disp_size=320*100;
 
-		constexpr AngleRad ship_dagl=90;
-		constexpr Scalar ship_speed=20;
 		Ship*shp=new Ship;
 		shp->phy().pos={160,130};
 //		shp->phy().pos={160,100};
-		create_scene();
-//		create_scene2();
+//		create_scene();
+		create_scene4();
 
 //		Ship*shp=nullptr;
 	//	out.p_hex_16b(static_cast<unsigned short>(sizeof(Object))).pos({1,2});
@@ -432,10 +473,10 @@ public:
 			if(!game::player)
 				shp=nullptr;
 
-//			if(game::player)
-//				render_trajectory(vga13h.bmp(),*game::player,5,.5);
-//			if(game::boss)
-//				render_trajectory(vga13h.bmp(),*game::boss,5,.5);
+			if(game::player)
+				render_trajectory(vga13h.bmp(),game::player->phy().pos,game::player->phy().vel,10,.5);
+			if(game::boss)
+				render_trajectory(vga13h.bmp(),game::boss->phy().pos,game::boss->phy().vel,10,.5);
 
 			if(shp){
 				while(const unsigned kc=osca_keyb.get_next_scan_code()){
@@ -475,19 +516,19 @@ public:
 					}
 				}
 				if(keyboard[key_w])
-					shp->phy().vel=shp->forward_vector().scale(ship_speed);
+					shp->thrust_fwd();
 
 				if(keyboard[key_a])
-					shp->phy().dagl=-deg_to_rad(ship_dagl);
+					shp->turn_left();
 
 				if(keyboard[key_s])
-					shp->phy().vel=shp->forward_vector().negate().scale(ship_speed);
+					shp->thrust_rev();
 
 				if(keyboard[key_d])
-					shp->phy().dagl=deg_to_rad(ship_dagl);
+					shp->turn_right();
 
 				if(!keyboard[key_a]&&!keyboard[key_d])
-					shp->phy().dagl=0;
+					shp->turn_still();
 
 				if(!keyboard[key_w]&&!keyboard[key_s])
 					shp->phy().vel={0,0};
