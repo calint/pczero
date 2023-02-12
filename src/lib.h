@@ -103,7 +103,7 @@ public:
 	inline constexpr auto inc_by(const CoordsT<T>&delta){x_+=delta.x_;y_+=delta.y_;}
 };
 using Real=float;
-using CoordPx=int;
+using CoordPx=short;
 using CoordsPx=CoordsT<CoordPx>;
 
 using Coord=Real;
@@ -119,7 +119,7 @@ public:
 	inline constexpr auto height()const->const T&{return h_;}
 };
 
-using SizePx=int;
+using SizePx=short;
 using DimensionPx=DimensionT<SizePx>;
 using Color8b=char;
 
@@ -342,7 +342,7 @@ public:
 		bmp_wi_{b.dim().width()},
 		font_wi_{5},
 		font_hi_{6},
-		ln_{bmp_wi_-font_wi_},
+		ln_{CoordPx(bmp_wi_-font_wi_)},
 		fg_{2},
 		bg_{0},
 		transparent_{false}
@@ -412,7 +412,7 @@ public:
 		return*this;
 	}
 	auto p(const char ch)->PrinterToBitmap&{
-		draw(table_ascii_to_font[static_cast<int>(ch)]);
+		draw(table_ascii_to_font[unsigned(ch)]);
 		return*this;
 	}
 	constexpr auto p(const char*s)->PrinterToBitmap&{

@@ -20,7 +20,7 @@ public:
 			nmls=nullptr;
 			return;
 		}
-		nmls=new Vector[static_cast<unsigned>(nbnd)];
+		nmls=new Vector[unsigned(nbnd)];
 		const PointIx n=nbnd-1;
 		for(PointIx i=0;i<n;i++){
 			const Vector d{pts[bnd[i+1]]-pts[bnd[i]]};
@@ -32,8 +32,8 @@ public:
 };
 
 static constexpr void dot(const Bitmap8b&bmp,const Real x,const Real y,const Color8b color){
-	const int xi=static_cast<int>(x);
-	const int yi=static_cast<int>(y);
+	const CoordPx xi=CoordPx(x);
+	const CoordPx yi=CoordPx(y);
 	bmp.pointer_offset({xi,yi}).write(color);
 }
 
@@ -61,13 +61,13 @@ namespace world{
 	static Real time_dt_s{0};
 	static Real time_prv_s{0};
 	static auto init(){
-		time_s=static_cast<Real>(osca_t)*sec_per_tick;
+		time_s=Real(osca_t)*sec_per_tick;
 		// set previous time to a reasonable value so that dt does not
 		// become huge at first frame
 		time_prv_s=time_s-sec_per_tick;
 	}
 	static auto tick(){
-		time_s=static_cast<Real>(osca_t)*sec_per_tick;
+		time_s=Real(osca_t)*sec_per_tick;
 		time_dt_s=time_s-time_prv_s;
 		time_prv_s=time_s;
 	}
@@ -206,8 +206,8 @@ public:
 		phy_{PhysicsState::alloc()},
 		scl_{scl},
 		def_{def},
-		pts_wld_{new Point[static_cast<unsigned>(def.npts)]},
-		nmls_wld_{new Vector[static_cast<unsigned>(def.nbnd)]},
+		pts_wld_{new Point[unsigned(def.npts)]},
+		nmls_wld_{new Vector[unsigned(def.nbnd)]},
 		Mmw_{},
 		Mmw_pos_{0,0},
 		Mmw_agl_{0},
@@ -303,9 +303,9 @@ public:
 	constexpr auto draw_bounding_circle(Bitmap8b&dsp)->void{
 		Point p=phy().pos;
 		Scalar r=bounding_radius();
-		const Count segments=static_cast<Count>(5*scale());
+		const Count segments=Count(5*scale());
 		AngleRad th=0;
-		AngleRad dth=2*PI/static_cast<AngleRad>(segments);
+		AngleRad dth=2*PI/AngleRad(segments);
 		for(Count i=0;i<segments;i++){
 			const Coord x=p.x+r*cos(th);
 			const Coord y=p.y+r*sin(th);
@@ -352,8 +352,9 @@ public:
 		Coord dy_rht=0;
 		Coord dy_lft=0;
 		Coord y=topy;
-		CoordPx wi=dsp.dim().width();
-		CoordPx y_scr=static_cast<CoordPx>(y);
+//		CoordPx wi=CoordPx(dsp.dim().width());
+		CoordPx wi=CoordPx(dsp.dim().width());
+		CoordPx y_scr=CoordPx(y);
 		Color8b*pline=static_cast<Color8b*>(dsp.data().address())+y_scr*wi;
 		PointIx last_elem_ix=npoly_ixs-1;
 		while(true){
@@ -388,15 +389,15 @@ public:
 				}
 			}
 			CoordPx scan_lines_until_next_turn=0;
-			const CoordPx yscr=static_cast<CoordPx>(y);
+			const CoordPx yscr=CoordPx(y);
 			if(y_nxt_lft>y_nxt_rht){
 //				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_rht-y);
-				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_rht)-yscr;
+				scan_lines_until_next_turn=CoordPx(y_nxt_rht)-yscr;
 				adv_lft=false;
 				adv_rht=true;
 			}else{
 //				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_lft-y); // this generates more artifacts
-				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_lft)-yscr;
+				scan_lines_until_next_turn=CoordPx(y_nxt_lft)-yscr;
 				adv_lft=true;
 				adv_rht=false;
 			}
@@ -405,12 +406,12 @@ public:
 					break;
 //				Color8b*p_lft=pline+static_cast<CoordPx>(x_lft+.5555f);
 //				Color8b*p_rht=pline+static_cast<CoordPx>(x_rht+.5555f);
-				Color8b*p_lft=pline+static_cast<CoordPx>(x_lft);
-				Color8b*p_rht=pline+static_cast<CoordPx>(x_rht);
+				Color8b*p_lft=pline+CoordPx(x_lft);
+				Color8b*p_rht=pline+CoordPx(x_rht);
 				if(p_lft>p_rht) // ? can happen?
 					break;
 				scan_lines_until_next_turn--;
-				CoordPx npx=static_cast<CoordPx>(p_rht-p_lft);
+				CoordPx npx=CoordPx(p_rht-p_lft);
 				if(enable::draw_polygons_fill){
 					pz_memset(p_lft,color,npx);
 				}

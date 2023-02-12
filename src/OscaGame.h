@@ -24,16 +24,16 @@ static DimensionPx play_area_dim{320,100};
 
 static constexpr auto object_within_play_area(Object&o)->bool{
 	const Scale bounding_radius=o.bounding_radius();
-	if(o.phy().pos.x>static_cast<Coord>(play_area_top_left.x()+play_area_dim.width())-bounding_radius){
+	if(o.phy().pos.x>Coord(play_area_top_left.x()+play_area_dim.width())-bounding_radius){
 		return false;
 	}
-	if(o.phy().pos.x<static_cast<Coord>(play_area_top_left.x())+bounding_radius){
+	if(o.phy().pos.x<Coord(play_area_top_left.x())+bounding_radius){
 		return false;
 	}
-	if(o.phy().pos.y>static_cast<Coord>(play_area_top_left.y()+play_area_dim.height())-bounding_radius){
+	if(o.phy().pos.y>Coord(play_area_top_left.y()+play_area_dim.height())-bounding_radius){
 		return false;
 	}
-	if(o.phy().pos.y<static_cast<Coord>(play_area_top_left.y())+bounding_radius){
+	if(o.phy().pos.y<Coord(play_area_top_left.y())+bounding_radius){
 		return false;
 	}
 	return true;
@@ -226,9 +226,9 @@ class OscaGame{
 		new Enemy({160,100},0);
 	}
 	auto create_circle(const Count segments)->Point*{
-		Point*pts=new Point[static_cast<unsigned>(segments)];
+		Point*pts=new Point[unsigned(segments)];
 		AngleRad th=0;
-		AngleRad dth=2*PI/static_cast<AngleRad>(segments);
+		AngleRad dth=2*PI/AngleRad(segments);
 		for(Count i=0;i<segments;i++){
 			pts[i]={cos(th),-sin(th)}; // CCW
 			th+=dth;
@@ -236,7 +236,7 @@ class OscaGame{
 		return pts;
 	}
 	auto create_circle_ix(const Count segments)->PointIx*{
-		PointIx*ix=new PointIx[static_cast<unsigned>(segments)];
+		PointIx*ix=new PointIx[unsigned(segments)];
 		for(PointIx i=0;i<segments;i++){
 			ix[i]=i;
 		}
