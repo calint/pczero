@@ -119,7 +119,7 @@ public:
 	inline constexpr auto height()const->const T&{return h_;}
 };
 
-using SizePx=short;
+using SizePx=int;
 using DimensionPx=DimensionT<SizePx>;
 using Color8b=char;
 
