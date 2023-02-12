@@ -4,7 +4,6 @@
 namespace osca{
 
 using Point=Vector; // a point in 2D
-
 using PointIx=short; // index into a list of points
 
 class ObjectDef final{
