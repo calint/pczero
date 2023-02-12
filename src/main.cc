@@ -84,11 +84,9 @@ extern "C" [[noreturn]] void tsk3(){
 	}
 }
 
-#include"OscaGame.h"
+#include"Game.h"
 extern "C" void tsk4(){
-	using namespace osca;
-	OscaGame game;
-	game.start();
+	osca::Game::start();
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
