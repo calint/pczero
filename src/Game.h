@@ -42,11 +42,11 @@ class Game{
 	//		shp3->set_angle(rotation);
 		R.set_transform(5,rotation,{160,100});
 		// dot axis
-		world::draw_dot(dsp,160,100,0xf);
+		World::draw_dot(dsp,160,100,0xf);
 		const Vector xaxis=R.axis_x().normalize().scale(7);
-		world::draw_dot(dsp,xaxis.x+160,xaxis.y+100,4);
+		World::draw_dot(dsp,xaxis.x+160,xaxis.y+100,4);
 		const Vector yaxis=R.axis_y().normalize().scale(7);
-		world::draw_dot(dsp,yaxis.x+160,yaxis.y+100,2);
+		World::draw_dot(dsp,yaxis.x+160,yaxis.y+100,2);
 	}
 public:
 	inline static ObjectDef enemy_def;
@@ -234,10 +234,10 @@ public:
 	}
 
 	auto fire()->void{
-		const Real dt=world::time_s-fire_t_s;
+		const Real dt=World::time_s-fire_t_s;
 		if(dt<Real(.2))
 			return;
-		fire_t_s=world::time_s;
+		fire_t_s=World::time_s;
 		Bullet*b=new Bullet;
 		Vector v=forward_vector().scale(Real(1.1));
 		v.scale(scl_); // place bullet in front of ship
@@ -527,6 +527,8 @@ auto Game::create_boss(){
 	const Address heap_disp_at_addr=vga13h.bmp().data().pointer().offset(50*320).address();
 	const SizeBytes heap_disp_size=320*100;
 
+	World::init_statics();
+
 	Ship*shp=new Ship;
 	shp->phy().pos={160,130};
 //		shp->phy().pos={160,100};
@@ -543,12 +545,11 @@ auto Game::create_boss(){
 	constexpr unsigned char key_spc=4;
 	bool keyboard[]{false,false,false,false,false}; // wasd and space pressed status
 
-	world::init();
 	// start task
 	while(true){
 		pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
 
-		world::tick();
+		World::tick();
 
 		if(!Game::boss)
 			create_boss();
@@ -575,8 +576,8 @@ auto Game::create_boss(){
 		out.p("f=").p_hex_8b(static_cast<unsigned char>(Object::free_ixes_i)).spc();
 		out.p("u=").p_hex_8b(static_cast<unsigned char>(Object::used_ixes_i)).spc();
 		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_t)).spc();
-		out.p("s=").p_hex_8b(static_cast<unsigned char>(world::time_s)).spc();
-		out.p("d=").p_hex_8b(static_cast<unsigned char>(world::time_dt_s*1000)).spc();
+		out.p("s=").p_hex_8b(static_cast<unsigned char>(World::time_s)).spc();
+		out.p("d=").p_hex_8b(static_cast<unsigned char>(World::time_dt_s*1000)).spc();
 
 		if(!Game::player)
 			shp=nullptr;

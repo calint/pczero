@@ -46,14 +46,20 @@ class Object;
 
 // update_all() and check_collisions() generate lists of objects to be deleted.
 // the delete happens when deleted_commit() is called
-namespace world{
-	constexpr static Real sec_per_tick{1/Real(18.2)}; // the default 18.2 Hz clock
+class World{
+public:
 	constexpr static Size nobjects_max{256}; // maximum number of objects
+private:
+	inline static Object*deleted[nobjects_max]; // ? todo improve with lesser memory footprint
+	inline static int deleted_ix{0};
+public:
+	constexpr static Real sec_per_tick{1/Real(18.2)}; // the default 18.2 Hz clock
 
-	static Real time_s{0};
-	static Real time_dt_s{0};
-	static Real time_prv_s{0};
-	static auto init(){
+	inline static Real time_s{0};
+	inline static Real time_dt_s{0};
+	inline static Real time_prv_s{0};
+
+	static auto init_statics(){
 		time_s=Real(osca_t)*sec_per_tick;
 		// set previous time to a reasonable value so that dt does not
 		// become huge at first frame
@@ -72,7 +78,7 @@ namespace world{
 			return;
 		bmp.pointer_offset({xi,yi}).write(color);
 	}
-}
+};
 
 // physics states are kept in their own buffer for better CPU cache utilization at update
 using Velocity=Vector;
@@ -98,9 +104,9 @@ public:
 //	inline constexpr auto set_angle(const Angle rad){agl_=rad;}
 //	inline constexpr auto set_dangle(const Angle rad){dagl_=rad;}
 	inline auto update(){
-		vel.inc_by(acc,world::time_dt_s);
-		pos.inc_by(vel,world::time_dt_s);
-		agl+=dagl*world::time_dt_s;
+		vel.inc_by(acc,World::time_dt_s);
+		pos.inc_by(vel,World::time_dt_s);
+		agl+=dagl*World::time_dt_s;
 	}
 
 	//-----------------------------------------------------------
@@ -111,9 +117,9 @@ public:
 	inline static PhysicsState*next_free{nullptr};
 	inline static PhysicsState*mem_limit{nullptr};
 	static auto init_statics(){
-		mem_start=new PhysicsState[world::nobjects_max];
+		mem_start=new PhysicsState[World::nobjects_max];
 		next_free=mem_start;
-		mem_limit=reinterpret_cast<PhysicsState*>(mem_start+world::nobjects_max);
+		mem_limit=reinterpret_cast<PhysicsState*>(mem_start+World::nobjects_max);
 	}
 	static auto alloc()->PhysicsState*{
 		// check buffer overrun
@@ -280,7 +286,7 @@ public:
 			const Point*pt=pts_wld_;
 			for(PointIx i=0;i<def_.npts;i++){
 //				dot(dsp,pt->x,pt->y,color_);
-				world::draw_dot(dsp,pt->x,pt->y,4);
+				World::draw_dot(dsp,pt->x,pt->y,4);
 				pt++;
 			}
 		}
@@ -294,7 +300,7 @@ public:
 				v.normalize().scale(3);
 				Point p=pts_wld_[def_.bnd[i]];
 				Vector v1{p.x+nml->x,p.y+nml->y};
-				world::draw_dot(dsp,v1.x,v1.y,0xf);
+				World::draw_dot(dsp,v1.x,v1.y,0xf);
 				nml++;
 			}
 		}
@@ -311,7 +317,7 @@ public:
 		for(Count i=0;i<segments;i++){
 			const Coord x=p.x+r*cos(th);
 			const Coord y=p.y+r*sin(th);
-			world::draw_dot(dsp,x,y,1);
+			World::draw_dot(dsp,x,y,1);
 			th+=dth;
 		}
 	}
@@ -322,7 +328,7 @@ public:
 //			dot(dsp,p.x,p.y,4);
 //		}
 		if(npoly_ixs<2){ // ? what if 0, 2 is a line
-			world::draw_dot(dsp,pts[0].x,pts[0].y,color);
+			World::draw_dot(dsp,pts[0].x,pts[0].y,color);
 			return;
 		}
 		PointIx topy_ix=0;
@@ -497,10 +503,10 @@ private:
 	// statics
 	//----------------------------------------------------------------
 public:
-	inline static Object*all[world::nobjects_max]; // array of pointers to allocated objects
-	inline static Object**free_ixes[world::nobjects_max]; // free indexes in all[]
+	inline static Object*all[World::nobjects_max]; // array of pointers to allocated objects
+	inline static Object**free_ixes[World::nobjects_max]; // free indexes in all[]
 	inline static SlotIx free_ixes_i{0}; // index in freeSlots[] of next free slot
-	inline static SlotInfo used_ixes[world::nobjects_max]; // free indexes in all[]
+	inline static SlotInfo used_ixes[World::nobjects_max]; // free indexes in all[]
 	inline static SlotIx used_ixes_i{0}; // index in freeSlots[] of next free slot
 //	static inline auto hasFreeSlot()->bool{return free_ixes_i!=0;}
 	static auto init_statics(){
@@ -508,13 +514,13 @@ public:
 		for(SlotIx i=0;i<n;i++){
 			free_ixes[i]=&all[i];
 		}
-		free_ixes_i=world::nobjects_max-1;
+		free_ixes_i=World::nobjects_max-1;
 	}
 	static auto update_all(){
 		for(SlotIx i=0;i<used_ixes_i;i++){
 			Object*o=object_for_used_slot(i);
 			if(!o->update()){
-				world::deleted_add(o);
+				World::deleted_add(o);
 			}
 		}
 	}
@@ -551,13 +557,13 @@ public:
 					if(o1_check_col_with_o2){
 						// o1 type wants to handle collisions with o2 type
 						if(!o1->on_collision(*o2)){
-							world::deleted_add(o1);
+							World::deleted_add(o1);
 						}
 					}
 					if(o2_check_col_with_o1){
 						// o2 type wants to handle collisions with o1 type
 						if(!o2->on_collision(*o1)){
-							world::deleted_add(o2);
+							World::deleted_add(o2);
 						}
 					}
 					continue;
@@ -566,12 +572,12 @@ public:
 				if(Object::is_in_collision(*o2,*o1)){
 					if(o1_check_col_with_o2){
 						if(!o1->on_collision(*o2)){
-							world::deleted_add(o1);
+							World::deleted_add(o1);
 						}
 					}
 					if(o2_check_col_with_o1){
 						if(!o2->on_collision(*o1)){
-							world::deleted_add(o2);
+							World::deleted_add(o2);
 						}
 					}
 				}
@@ -632,7 +638,7 @@ private:
 				// reference vector_pts_wld_[bnd[j]]
 				const Vector&p2=o2.pts_wld_[*bndptr2++];
 				if(enable::draw_collision_check){
-					world::draw_dot(vga13h.bmp(),p2.x,p2.y,5);
+					World::draw_dot(vga13h.bmp(),p2.x,p2.y,5);
 				}
 				const Vector v=p1-p2; // vector from line point to point to check
 				if(v.dot(*nlptr++)>0){ // use abs(v)<0.0001f (example)?
@@ -649,40 +655,36 @@ private:
 	}
 };
 
-namespace world{
-	static Object*deleted[world::nobjects_max]; // ? todo improve with lesser memory footprint
-	static int deleted_ix{0};
-	static auto deleted_add(Object*o)->void{ // ! this might be called several times for the same object
+auto World::deleted_add(Object*o)->void{ // ! this might be called several times for the same object
 //		if(!o->is_alive()){
 //			err.p("world::deleted_add:1");
 //			osca_halt();
 //		}
-		if(!o->is_alive()) // check if object already deleted
-			return;
-		o->set_is_alive(false);
-		deleted[deleted_ix]=o;
-		deleted_ix++;
+	if(!o->is_alive()) // check if object already deleted
+		return;
+	o->set_is_alive(false);
+	deleted[deleted_ix]=o;
+	deleted_ix++;
+}
+auto World::deleted_commit()->void{
+	for(int i=0;i<deleted_ix;i++){
+		delete deleted[i];
 	}
-	static auto deleted_commit()->void{
-		for(int i=0;i<deleted_ix;i++){
-			delete deleted[i];
-		}
-		deleted_ix=0;
-	}
+	deleted_ix=0;
+}
 
-	static auto tick()->void{
-		metrics::reset();
+auto World::tick()->void{
+	metrics::reset();
 
-		time_prv_s=time_s;
-		time_s=Real(osca_t)*sec_per_tick;
-		time_dt_s=time_s-time_prv_s;
+	time_prv_s=time_s;
+	time_s=Real(osca_t)*sec_per_tick;
+	time_dt_s=time_s-time_prv_s;
 
-		Object::render_all(vga13h.bmp());
-		PhysicsState::update_physics_states();
-		Object::update_all();
-		Object::check_collisions();
-		world::deleted_commit();
-	}
+	Object::render_all(vga13h.bmp());
+	PhysicsState::update_physics_states();
+	Object::update_all();
+	Object::check_collisions();
+	World::deleted_commit();
 }
 
 }// end namespace
