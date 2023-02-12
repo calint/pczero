@@ -132,7 +132,7 @@ public:
 	inline constexpr auto dim()const->const DimensionPx&{return d_;}
 	inline constexpr auto data()const->const Data&{return dt_;}
 	inline constexpr auto pointer_offset(const CoordsPx p)const->Pointer{return dt_.pointer().offset(p.y()*d_.width()*Size(sizeof(T))+p.x()*Size(sizeof(T)));}
-	constexpr auto to(const Bitmap<T>&dst,const CoordsPx&c)const{
+	constexpr auto to(const Bitmap&dst,const CoordsPx&c)const{
 		T*si=static_cast<T*>(dt_.address());
 		T*di=static_cast<T*>(dst.dt_.address());
 		di+=c.y()*dst.dim().width()+c.x();
@@ -148,7 +148,7 @@ public:
 			di+=ln;
 		}
 	}
-	constexpr auto to_transparent(const Bitmap<T>&dst,const CoordsPx&c)const{
+	constexpr auto to_transparent(const Bitmap&dst,const CoordsPx&c)const{
 		T*si=static_cast<T*>(dt_.address());
 		T*di=static_cast<T*>(dst.dt_.address());
 		di+=c.y()*dst.dim().width()+c.x();
