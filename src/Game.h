@@ -78,23 +78,22 @@ public:
 		return true;
 	}
 
-	static constexpr void draw_dot(const Bitmap8b&bmp,const Point&p,const Color8b color){
+	static constexpr void draw_dot(const Point&p,const Color8b color){
 		if(!is_within_play_area(p))
 			return;
 		const CoordPx xi=CoordPx(p.x);
 		const CoordPx yi=CoordPx(p.y);
-		bmp.pointer_offset({xi,yi}).write(color);
+		vga13h.bmp().pointer_offset({xi,yi}).write(color);
 	}
 
-	static auto draw_trajectory(Bitmap8b&dsp,const Point&p0,const Vector&vel,const Real t_s,const Real t_inc_s,const Color8b color)->void{
+	static auto draw_trajectory(const Point&p0,const Vector&vel,const Real t_s,const Real t_inc_s,const Color8b color)->void{
 		Real t=0;
 		while(true){
 			t+=t_inc_s;
 			Vector v=vel;
 			v.scale(t);
 			v.inc_by(p0);
-			draw_dot(dsp,v,color);
-//			world::draw_dot(dsp,v.x,v.y,c);
+			draw_dot(v,color);
 			if(t>t_s)
 				return;
 		}
@@ -257,7 +256,7 @@ private:
 		Vector v_bullet=v_fwd;
 		v_bullet.scale(Bullet::speed);
 		if(draw_trajectory){
-			Game::draw_trajectory(vga13h.bmp(),phy().pos,v_bullet,5,.5,0xe);
+			Game::draw_trajectory(phy().pos,v_bullet,5,.5,0xe);
 		}
 		Vector n_fwd=v_fwd.normal();
 		Real dot=v_tgt.dot(n_fwd);
@@ -273,28 +272,17 @@ private:
 
 	// aim and shoot at targets' expected location
 	auto attack_target_expected_location(const Object&target,const bool draw_trajectory=false)->void{
-		constexpr Real margin_of_error_t=Real(0.5);
-		Vector v_aim=find_aim_vector_for_moving_target(target,10,Real(.5),margin_of_error_t);
+		constexpr Real margin_of_error_t=Real(0.25);
+		Vector v_aim=find_aim_vector_for_moving_target(target,10,margin_of_error_t,margin_of_error_t);
 		if(v_aim.x==0&&v_aim.y==0){
 			// did not find aim vector
 			turn_still();
 			return;
 		}
-		//		v_aim.normalize().scale(Bullet::speed);
-//		if(draw_trajectory){
-//			Game::draw_trajectory(vga13h.bmp(),phy().pos,v_aim,5,.5,0xf);
-//		}
-		Vector v_fwd=forward_vector();
-		// draw trajectory of bullet
-//		Vector v_bullet=v_fwd;
-//		v_bullet.scale(Bullet::speed);
-//		if(draw_trajectory){
-//			Game::draw_trajectory(vga13h.bmp(),phy().pos,v_bullet,5,.5,0xe);
-//		}
-		Vector n_fwd=v_fwd.normal();
 		v_aim.normalize();
-		n_fwd.normalize();
-		Real dot=v_aim.dot(n_fwd);
+		const Vector v_fwd=forward_vector();
+		const Vector n_fwd=v_fwd.normal();
+		const Real dot=v_aim.dot(n_fwd);
 		constexpr Real margin_of_error_aim=Real(0.01);
 		if(abs(dot)<margin_of_error_aim){
 			turn_still();
@@ -306,43 +294,48 @@ private:
 		}
 	}
 
-	auto find_aim_vector_for_moving_target(const Object&tgt,const Real t_span,const Real dt_span,const Real error_margin_t)->Vector{
+	auto find_aim_vector_for_moving_target(const Object&tgt,const Real t_eval_span,const Real dt,const Real error_margin_t)->Vector{
 		Real t=0;
 		const Point p_tgt=tgt.phy_ro().pos;
 		const Vector v_tgt=tgt.phy_ro().vel;
-//		v_tgt.normalize();
-		Vector v_best_aim;
-		Real t_best_aim=0;
 		while(true){
-			t+=dt_span;
-			if(t>t_span)
+			t+=dt;
+			if(t>t_eval_span)
 				break;
 			// get expected position of target at 't'
 			Vector v=v_tgt;
 			v.scale(t);
 			Point p{p_tgt};
 			p.inc_by(v);
-			Game::draw_dot(vga13h.bmp(),p,2);
+
+			// draw target position at 't'
+			Game::draw_dot(p,2);
+
 			// aim vector to the expected location
 			const Vector v_aim=p-phy_ro().pos;
 			// get magnitude of aim vector
 			const Real mgn=v_aim.magnitude();
 			// get t for bullet to reach expected location
 			const Real t_bullet=mgn/Bullet::speed;
+
+			// draw evaluated aim vector
 //			Vector v2=v_aim;
 //			v2.normalize().scale(Bullet::speed);
-//			Game::draw_trajectory(vga13h.bmp(),phy_ro().pos,v2,t_bullet,Real(.1),0xe);
+//			Game::draw_trajectory(phy_ro().pos,v2,t_bullet,Real(.1),0xe);
+
 			// if t within error margin return aim vector
 			const Real t_aim=abs(t_bullet-t);
 			if(t_aim<error_margin_t){
+				// draw aim vector
 				Vector v3=v_aim;
 				v3.normalize().scale(Bullet::speed);
-				Game::draw_trajectory(vga13h.bmp(),phy_ro().pos,v3,t_bullet,Real(.5),2);
-				err.pos({1,1}).p_hex_32b(unsigned(t_aim*100));
+				Game::draw_trajectory(phy_ro().pos,v3,t_bullet,Real(.2),2);
+//				err.pos({1,1}).p_hex_32b(unsigned(t_aim*100));
 				return v_aim;
 			}
 		}
-		return {0,0};
+		// no aim vector found for evaluated time span
+		return{0,0};
 	}
 };
 
@@ -379,9 +372,9 @@ public:
 };
 
 class Boss final:public Object{
-	static constexpr Scale scale=6;
+	static constexpr Scale scale=3;
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
-	Count health{10};
+	Count health{5};
 public:
 	// 'ships'   0b00'0001
 	// 'bullets' 0b00'0010
@@ -444,7 +437,7 @@ auto Game::create_boss(){
 	o->phy().pos=boss_pos;
 	o->phy().vel=Game::boss_vel;
 	boss_vel.inc_by({5,2});
-	o->phy().dagl=deg_to_rad(5);
+	o->phy().dagl=deg_to_rad(25);
 	Game::boss=o;
 }
 
