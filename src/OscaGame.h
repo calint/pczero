@@ -186,7 +186,7 @@ public:
 		// draw trajectory of bullet
 		Vector v_bullet=v_fwd;
 		v_bullet.scale(bullet_speed);
-		game::render_trajectory(vga13h.bmp(),phy().pos,v_bullet,10,.5);
+		game::render_trajectory(vga13h.bmp(),phy().pos,v_bullet,5,.5);
 
 		Vector n_fwd=v_fwd.normal();
 		Real dot=v_tgt.dot(n_fwd);
