@@ -178,6 +178,7 @@ public:
 		if(!game::boss)
 			return true;
 
+		// aim and shoot at boss
 		constexpr Real margin_of_error=Real(0.01);
 		Vector v_tgt=game::boss->phy().pos-phy().pos;
 		v_tgt.normalize();
@@ -191,6 +192,7 @@ public:
 		Real dot=v_tgt.dot(n_fwd);
 		if(abs(dot)<margin_of_error){
 			turn_still();
+			fire();
 		}else if(dot<0){
 			turn_left();
 		}else if(dot>0){
@@ -205,7 +207,7 @@ public:
 		return false;
 	}
 
-	auto fire(){
+	auto fire()->void{
 		const Real dt=world::time_s-fire_t_s;
 		if(dt<Real(.2))
 			return;
