@@ -172,7 +172,7 @@ namespace osca{
 			s&=sizeof(buf)-1;// roll
 			return ch;
 		}
-	}osca_keyb;
+	}keyboard;
 } // end namespace
 
 // called by osca from the keyboard interrupt
@@ -181,7 +181,7 @@ extern "C" void osca_keyb_ev(){
 	*reinterpret_cast<int*>(0xa0000+4)=osca_key;
 
 	// to keyboard handler
-	osca::osca_keyb.on_key(osca_key);
+	osca::keyboard.on_key(osca_key);
 
 //	static unsigned char*p=reinterpret_cast<unsigned char*>(0xa0000+320*49+100);
 //	*p++=osca_key;

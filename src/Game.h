@@ -32,7 +32,7 @@ class Game{
 		return ix;
 	}
 
-	static auto draw_axis(Bitmap8b&dsp){
+	static auto draw_axis(){
 		static AngleDeg deg=0;
 		static Matrix2D R;
 		if(deg>360)
@@ -42,11 +42,11 @@ class Game{
 	//		shp3->set_angle(rotation);
 		R.set_transform(5,rotation,{160,100});
 		// dot axis
-		World::draw_dot(dsp,160,100,0xf);
+		World::draw_dot({160,100},0xf);
 		const Vector xaxis=R.axis_x().normalize().scale(7);
-		World::draw_dot(dsp,xaxis.x+160,xaxis.y+100,4);
+		World::draw_dot({xaxis.x+160,xaxis.y+100},4);
 		const Vector yaxis=R.axis_y().normalize().scale(7);
-		World::draw_dot(dsp,yaxis.x+160,yaxis.y+100,2);
+		World::draw_dot({yaxis.x+160,yaxis.y+100},2);
 	}
 public:
 	inline static ObjectDef enemy_def;
@@ -62,7 +62,7 @@ public:
 	inline static Point boss_pos{20,60};
 	inline static Vector boss_vel{10,0};
 
-	static constexpr auto is_within_play_area(const Point&p)->bool{
+	static constexpr auto is_in_play_area(const Point&p)->bool{
 		if(p.x>=Coord(play_area_top_left.x()+play_area_dim.width())){
 			return false;
 		}
@@ -79,7 +79,7 @@ public:
 	}
 
 	static constexpr void draw_dot(const Point&p,const Color8b color){
-		if(!is_within_play_area(p))
+		if(!is_in_play_area(p))
 			return;
 		const CoordPx xi=CoordPx(p.x);
 		const CoordPx yi=CoordPx(p.y);
@@ -99,7 +99,7 @@ public:
 		}
 	}
 
-	static constexpr auto is_within_play_area(Object&o)->bool{
+	static constexpr auto is_in_play_area(Object&o)->bool{
 		const Scale bounding_radius=o.bounding_radius();
 		if(o.phy().pos.x>Coord(Game::play_area_top_left.x()+Game::play_area_dim.width())-bounding_radius){
 			return false;
@@ -138,7 +138,7 @@ public:
 	}
 
 	virtual auto update()->bool override{
-		if(!Game::is_within_play_area(*this)){
+		if(!Game::is_in_play_area(*this)){
 			phy().vel.y=-phy().vel.y;
 		}
 		return true;
@@ -165,7 +165,7 @@ public:
 	{}
 	virtual auto update()->bool override{
 		Object::update();
-		return Game::is_within_play_area(*this);
+		return Game::is_in_play_area(*this);
 	}
 	// returns false if object is to be deleted
 	virtual auto on_collision(Object&other)->bool override{
@@ -215,7 +215,7 @@ public:
 
 	virtual auto update()->bool override{
 		Object::update();
-		if(!Game::is_within_play_area(*this)){
+		if(!Game::is_in_play_area(*this)){
 			phy().vel={0,0};
 		}
 		if(!Game::boss){
@@ -363,7 +363,7 @@ public:
 	{}
 	virtual auto update()->bool override{
 		Object::update();
-		return Game::is_within_play_area(*this);
+		return Game::is_in_play_area(*this);
 	}
 	// returns false if object is to be deleted
 	virtual auto on_collision(Object&other)->bool override{
@@ -402,7 +402,7 @@ public:
 //			phy().vel=v;
 //		}
 //		return object_within_play_area(*this);
-		if(!Game::is_within_play_area(*this)){
+		if(!Game::is_in_play_area(*this)){
 			phy_->pos=Game::boss_pos;
 		}
 		return true;
@@ -588,7 +588,7 @@ auto Game::create_boss(){
 //			Game::draw_trajectory(vga13h.bmp(),Game::boss->phy().pos,Game::boss->phy().vel,10,.5,0xe);
 
 		if(shp){
-			while(const unsigned kc=osca_keyb.get_next_scan_code()){
+			while(const unsigned kc=keyboard.get_next_scan_code()){
 				switch(kc){
 				case 0x11: // w pressed
 					keyboard[key_w]=true;

@@ -35,7 +35,7 @@ extern "C" [[noreturn]] void tsk0(){
 	while(true){
 		// handle keyboard events
 		while(true){
-			const unsigned char sc=osca_keyb.get_next_scan_code();
+			const unsigned char sc=keyboard.get_next_scan_code();
 			if(!sc)
 				break;
 			if(sc==0xe){ // backspace
