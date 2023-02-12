@@ -543,7 +543,7 @@ auto Game::create_boss(){
 	constexpr unsigned char key_s=2;
 	constexpr unsigned char key_d=3;
 	constexpr unsigned char key_spc=4;
-	bool keyboard[]{false,false,false,false,false}; // wasd and space pressed status
+	bool keyb[]{false,false,false,false,false}; // wasd and space pressed status
 
 	// start task
 	while(true){
@@ -588,49 +588,49 @@ auto Game::create_boss(){
 //			Game::draw_trajectory(vga13h.bmp(),Game::boss->phy().pos,Game::boss->phy().vel,10,.5,0xe);
 
 		if(shp){
-			while(const unsigned kc=keyboard.get_next_scan_code()){
+			while(const unsigned char kc=keyboard.get_next_scan_code()){
 				switch(kc){
 				case 0x11: // w pressed
-					keyboard[key_w]=true;
+					keyb[key_w]=true;
 					break;
 				case 0x91: // w released
-					keyboard[key_w]=false;
+					keyb[key_w]=false;
 					break;
 				case 0x1e: // a pressed
-					keyboard[key_a]=true;
+					keyb[key_a]=true;
 					break;
 				case 0x9e: // a released
-					keyboard[key_a]=false;
+					keyb[key_a]=false;
 					break;
 				case 0x1f: // s pressed
-					keyboard[key_s]=true;
+					keyb[key_s]=true;
 					break;
 				case 0x9f: // s released
-					keyboard[key_s]=false;
+					keyb[key_s]=false;
 					break;
 				case 0x20: // d pressed
-					keyboard[key_d]=true;
+					keyb[key_d]=true;
 					break;
 				case 0xa0: // d released
-					keyboard[key_d]=false;
+					keyb[key_d]=false;
 					break;
 				case 0x39: // space pressed
-					keyboard[key_spc]=true;
+					keyb[key_spc]=true;
 					break;
 				case 0xb9: // space released
-					keyboard[key_spc]=false;
+					keyb[key_spc]=false;
 					break;
 				default:
 					break;
 				}
 			}
-			if(keyboard[key_w])
+			if(keyb[key_w])
 				shp->thrust_fwd();
 
 //				if(keyboard[key_a])
 //					shp->turn_left();
 
-			if(keyboard[key_s])
+			if(keyb[key_s])
 				shp->thrust_rev();
 
 //				if(keyboard[key_d])
@@ -639,10 +639,10 @@ auto Game::create_boss(){
 //				if(!keyboard[key_a]&&!keyboard[key_d])
 //					shp->turn_still();
 
-			if(!keyboard[key_w]&&!keyboard[key_s])
+			if(!keyb[key_w]&&!keyb[key_s])
 				shp->phy().vel={0,0};
 
-			if(keyboard[key_spc])
+			if(keyb[key_spc])
 				shp->fire();
 		}
 		switch(table_scancode_to_ascii[osca_key]){

@@ -67,7 +67,7 @@ public:
 	}
 	static auto tick()->void;
 	static auto deleted_add(Object*o)->void;
-	static auto deleted_commit()->void;
+	static auto commit_deleted()->void;
 
 	static constexpr void draw_dot(const Point&p,const Color8b color){
 		const CoordPx xi=CoordPx(p.x);
@@ -149,7 +149,7 @@ public:
 		pz_memset(next_free,3,sizeof(PhysicsState)); // ? debugging
 		return o;
 	}
-	static auto update_physics_states(){
+	static auto update_all(){
 		PhysicsState*ptr=mem_start;
 		while(ptr<next_free){
 			ptr->update();
@@ -281,7 +281,7 @@ public:
 	}
 	// returns false if object is to be deleted
 	virtual auto update()->bool{return true;}
-	virtual auto render(Bitmap8b&dsp)->void{
+	virtual auto draw(Bitmap8b&dsp)->void{
 		refresh_wld_points();
 		if(enable::draw_dots){
 			const Point*pt=pts_wld_;
@@ -525,10 +525,10 @@ public:
 			}
 		}
 	}
-	static auto render_all(Bitmap8b&dsp){
+	static auto draw_all(Bitmap8b&dsp){
 		for(SlotIx i=0;i<used_ixes_i;i++){
 			Object*o=object_for_used_slot(i);
-			o->render(dsp);
+			o->draw(dsp);
 		}
 	}
 	static auto check_collisions(){
@@ -667,7 +667,7 @@ auto World::deleted_add(Object*o)->void{ // ! this might be called several times
 	deleted[deleted_ix]=o;
 	deleted_ix++;
 }
-auto World::deleted_commit()->void{
+auto World::commit_deleted()->void{
 	for(int i=0;i<deleted_ix;i++){
 		delete deleted[i];
 	}
@@ -681,11 +681,11 @@ auto World::tick()->void{
 	time_s=Real(osca_t)*sec_per_tick;
 	time_dt_s=time_s-time_prv_s;
 
-	Object::render_all(vga13h.bmp());
-	PhysicsState::update_physics_states();
+	Object::draw_all(vga13h.bmp());
+	PhysicsState::update_all();
 	Object::update_all();
 	Object::check_collisions();
-	World::deleted_commit();
+	World::commit_deleted();
 }
 
 }// end namespace
