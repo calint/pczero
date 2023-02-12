@@ -14,31 +14,31 @@ namespace game{
 	static CoordsPx play_area_top_left{0,50};
 	static DimensionPx play_area_dim{320,100};
 
-	static constexpr auto pos_within_play_area(const Real x,const Real y)->bool{
-		if(x>Coord(play_area_top_left.x()+play_area_dim.width())){
+	static constexpr auto is_within_play_area(const Point&p)->bool{
+		if(p.x>Coord(play_area_top_left.x()+play_area_dim.width())){
 			return false;
 		}
-		if(x<Coord(play_area_top_left.x())){
+		if(p.x<Coord(play_area_top_left.x())){
 			return false;
 		}
-		if(y>Coord(play_area_top_left.y()+play_area_dim.height())){
+		if(p.y>Coord(play_area_top_left.y()+play_area_dim.height())){
 			return false;
 		}
-		if(y<Coord(play_area_top_left.y())){
+		if(p.y<Coord(play_area_top_left.y())){
 			return false;
 		}
 		return true;
 	}
 
-	static constexpr void dot2(const Bitmap8b&bmp,const Real x,const Real y,const Color8b color){
-		if(!pos_within_play_area(x,y))
+	static constexpr void draw_dot(const Bitmap8b&bmp,const Point&p,const Color8b color){
+		if(!is_within_play_area(p))
 			return;
-		const CoordPx xi=CoordPx(x);
-		const CoordPx yi=CoordPx(y);
+		const CoordPx xi=CoordPx(p.x);
+		const CoordPx yi=CoordPx(p.y);
 		bmp.pointer_offset({xi,yi}).write(color);
 	}
 
-	static auto render_trajectory(Bitmap8b&dsp,const Point&p0,const Vector&vel,const Real t_s,const Real t_inc_s)->void{
+	static auto draw_trajectory(Bitmap8b&dsp,const Point&p0,const Vector&vel,const Real t_s,const Real t_inc_s)->void{
 		Real t=0;
 		Color8b c=0xe;
 		while(true){
@@ -46,7 +46,8 @@ namespace game{
 			Vector v=vel;
 			v.scale(t);
 			v.inc_by(p0);
-			dot2(dsp,v.x,v.y,c);
+			draw_dot(dsp,v,c);
+//			world::draw_dot(dsp,v.x,v.y,c);
 			if(t>t_s)
 				return;
 		}
@@ -186,7 +187,7 @@ public:
 		// draw trajectory of bullet
 		Vector v_bullet=v_fwd;
 		v_bullet.scale(bullet_speed);
-		game::render_trajectory(vga13h.bmp(),phy().pos,v_bullet,5,.5);
+		game::draw_trajectory(vga13h.bmp(),phy().pos,v_bullet,5,.5);
 
 		Vector n_fwd=v_fwd.normal();
 		Real dot=v_tgt.dot(n_fwd);
@@ -323,7 +324,7 @@ class OscaGame{
 		Object*o=new Boss;
 		o->phy().pos={20,60};
 	}
-	auto create_circle(const Count segments)->Point*{
+	static auto create_circle(const Count segments)->Point*{
 		Point*pts=new Point[unsigned(segments)];
 		AngleRad th=0;
 		AngleRad dth=2*PI/AngleRad(segments);
@@ -333,12 +334,29 @@ class OscaGame{
 		}
 		return pts;
 	}
-	auto create_circle_ix(const Count segments)->PointIx*{
+	static auto create_circle_ix(const Count segments)->PointIx*{
 		PointIx*ix=new PointIx[unsigned(segments)];
 		for(PointIx i=0;i<segments;i++){
 			ix[i]=i;
 		}
 		return ix;
+	}
+
+	static auto draw_axis(Bitmap8b&dsp){
+		static AngleDeg deg=0;
+		static Matrix2D R;
+		if(deg>360)
+			deg-=360;
+		deg+=5;
+		const AngleRad rotation=deg_to_rad(deg);
+	//		shp3->set_angle(rotation);
+		R.set_transform(5,rotation,{160,100});
+		// dot axis
+		world::draw_dot(dsp,160,100,0xf);
+		const Vector xaxis=R.axis_x().normalize().scale(7);
+		world::draw_dot(dsp,xaxis.x+160,xaxis.y+100,4);
+		const Vector yaxis=R.axis_y().normalize().scale(7);
+		world::draw_dot(dsp,yaxis.x+160,yaxis.y+100,2);
 	}
 
 public:
@@ -483,9 +501,9 @@ public:
 				shp=nullptr;
 
 			if(game::player)
-				game::render_trajectory(vga13h.bmp(),game::player->phy().pos,game::player->phy().vel,10,.5);
+				game::draw_trajectory(vga13h.bmp(),game::player->phy().pos,game::player->phy().vel,10,.5);
 			if(game::boss)
-				game::render_trajectory(vga13h.bmp(),game::boss->phy().pos,game::boss->phy().vel,10,.5);
+				game::draw_trajectory(vga13h.bmp(),game::boss->phy().pos,game::boss->phy().vel,10,.5);
 
 			if(shp){
 				while(const unsigned kc=osca_keyb.get_next_scan_code()){
@@ -564,23 +582,6 @@ public:
 
 			osca_yield();
 		}
-	}
-
-	static auto draw_axis(Bitmap8b&dsp){
-		static AngleDeg deg=0;
-		static Matrix2D R;
-		if(deg>360)
-			deg-=360;
-		deg+=5;
-		const AngleRad rotation=deg_to_rad(deg);
-	//		shp3->set_angle(rotation);
-		R.set_transform(5,rotation,{160,100});
-		// dot axis
-		dot(dsp,160,100,0xf);
-		const Vector xaxis=R.axis_x().normalize().scale(7);
-		dot(dsp,xaxis.x+160,xaxis.y+100,4);
-		const Vector yaxis=R.axis_y().normalize().scale(7);
-		dot(dsp,yaxis.x+160,yaxis.y+100,2);
 	}
 };
 

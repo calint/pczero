@@ -30,12 +30,6 @@ public:
 	}
 };
 
-static constexpr void dot(const Bitmap8b&bmp,const Real x,const Real y,const Color8b color){
-	const CoordPx xi=CoordPx(x);
-	const CoordPx yi=CoordPx(y);
-	bmp.pointer_offset({xi,yi}).write(color);
-}
-
 namespace metrics{
 	constexpr static bool enabled{true};
 	static Count matrix_set_transforms{0};
@@ -68,6 +62,16 @@ namespace world{
 	static auto tick()->void;
 	static auto deleted_add(Object*o)->void;
 	static auto deleted_commit()->void;
+
+	static constexpr void draw_dot(const Bitmap8b&bmp,const Real x,const Real y,const Color8b color){
+		const CoordPx xi=CoordPx(x);
+		const CoordPx yi=CoordPx(y);
+		if(xi>bmp.dim().width())
+			return;
+		if(yi>bmp.dim().width())
+			return;
+		bmp.pointer_offset({xi,yi}).write(color);
+	}
 }
 
 // physics states are kept in their own buffer for better CPU cache utilization at update
@@ -274,7 +278,7 @@ public:
 			const Point*pt=pts_wld_;
 			for(PointIx i=0;i<def_.npts;i++){
 //				dot(dsp,pt->x,pt->y,color_);
-				dot(dsp,pt->x,pt->y,4);
+				world::draw_dot(dsp,pt->x,pt->y,4);
 				pt++;
 			}
 		}
@@ -288,7 +292,7 @@ public:
 				v.normalize().scale(3);
 				Point p=pts_wld_[def_.bnd[i]];
 				Vector v1{p.x+nml->x,p.y+nml->y};
-				dot(dsp,v1.x,v1.y,0xf);
+				world::draw_dot(dsp,v1.x,v1.y,0xf);
 				nml++;
 			}
 		}
@@ -305,7 +309,7 @@ public:
 		for(Count i=0;i<segments;i++){
 			const Coord x=p.x+r*cos(th);
 			const Coord y=p.y+r*sin(th);
-			dot(dsp,x,y,1);
+			world::draw_dot(dsp,x,y,1);
 			th+=dth;
 		}
 	}
@@ -316,7 +320,7 @@ public:
 //			dot(dsp,p.x,p.y,4);
 //		}
 		if(npoly_ixs<2){ // ? what if 0, 2 is a line
-			dot(dsp,pts[0].x,pts[0].y,color);
+			world::draw_dot(dsp,pts[0].x,pts[0].y,color);
 			return;
 		}
 		PointIx topy_ix=0;
@@ -626,7 +630,7 @@ private:
 				// reference vector_pts_wld_[bnd[j]]
 				const Vector&p2=o2.pts_wld_[*bndptr2++];
 				if(enable::draw_collision_check){
-					dot(vga13h.bmp(),p2.x,p2.y,5);
+					world::draw_dot(vga13h.bmp(),p2.x,p2.y,5);
 				}
 				const Vector v=p1-p2; // vector from line point to point to check
 				if(v.dot(*nlptr++)>0){ // use abs(v)<0.0001f (example)?
