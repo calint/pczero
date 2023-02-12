@@ -11,6 +11,46 @@ namespace game{
 	static Object*player{nullptr};
 	static Object*boss{nullptr};
 	static Count enemies_alive{0};
+	static CoordsPx play_area_top_left{0,50};
+	static DimensionPx play_area_dim{320,100};
+
+	static constexpr auto pos_within_play_area(const Real x,const Real y)->bool{
+		if(x>Coord(play_area_top_left.x()+play_area_dim.width())){
+			return false;
+		}
+		if(x<Coord(play_area_top_left.x())){
+			return false;
+		}
+		if(y>Coord(play_area_top_left.y()+play_area_dim.height())){
+			return false;
+		}
+		if(y<Coord(play_area_top_left.y())){
+			return false;
+		}
+		return true;
+	}
+
+	static constexpr void dot2(const Bitmap8b&bmp,const Real x,const Real y,const Color8b color){
+		if(!pos_within_play_area(x,y))
+			return;
+		const CoordPx xi=CoordPx(x);
+		const CoordPx yi=CoordPx(y);
+		bmp.pointer_offset({xi,yi}).write(color);
+	}
+
+	static auto render_trajectory(Bitmap8b&dsp,const Point&p0,const Vector&vel,const Real t_s,const Real t_inc_s)->void{
+		Real t=0;
+		Color8b c=0xe;
+		while(true){
+			t+=t_inc_s;
+			Vector v=vel;
+			v.scale(t);
+			v.inc_by(p0);
+			dot2(dsp,v.x,v.y,c);
+			if(t>t_s)
+				return;
+		}
+	}
 }
 
 static ObjectDef enemy_def;
@@ -20,37 +60,18 @@ static ObjectDef wall_def;
 static ObjectDef missile_def;
 static ObjectDef boss_def;
 
-static CoordsPx play_area_top_left{0,50};
-static DimensionPx play_area_dim{320,100};
-
-static constexpr auto pos_within_play_area(const Real x,const Real y)->bool{
-	if(x>Coord(play_area_top_left.x()+play_area_dim.width())){
-		return false;
-	}
-	if(x<Coord(play_area_top_left.x())){
-		return false;
-	}
-	if(y>Coord(play_area_top_left.y()+play_area_dim.height())){
-		return false;
-	}
-	if(y<Coord(play_area_top_left.y())){
-		return false;
-	}
-	return true;
-}
-
 static constexpr auto object_within_play_area(Object&o)->bool{
 	const Scale bounding_radius=o.bounding_radius();
-	if(o.phy().pos.x>Coord(play_area_top_left.x()+play_area_dim.width())-bounding_radius){
+	if(o.phy().pos.x>Coord(game::play_area_top_left.x()+game::play_area_dim.width())-bounding_radius){
 		return false;
 	}
-	if(o.phy().pos.x<Coord(play_area_top_left.x())+bounding_radius){
+	if(o.phy().pos.x<Coord(game::play_area_top_left.x())+bounding_radius){
 		return false;
 	}
-	if(o.phy().pos.y>Coord(play_area_top_left.y()+play_area_dim.height())-bounding_radius){
+	if(o.phy().pos.y>Coord(game::play_area_top_left.y()+game::play_area_dim.height())-bounding_radius){
 		return false;
 	}
-	if(o.phy().pos.y<Coord(play_area_top_left.y())+bounding_radius){
+	if(o.phy().pos.y<Coord(game::play_area_top_left.y())+bounding_radius){
 		return false;
 	}
 	return true;
@@ -156,20 +177,25 @@ public:
 		}
 		if(!game::boss)
 			return true;
+
+		constexpr Real margin_of_error=Real(0.01);
 		Vector v_tgt=game::boss->phy().pos-phy().pos;
 		v_tgt.normalize();
 		Vector v_fwd=forward_vector();
+		// draw trajectory of bullet
+		Vector v_bullet=v_fwd;
+		v_bullet.scale(bullet_speed);
+		game::render_trajectory(vga13h.bmp(),phy().pos,v_bullet,10,.5);
+
 		Vector n_fwd=v_fwd.normal();
 		Real dot=v_tgt.dot(n_fwd);
-		if(dot<0){
+		if(abs(dot)<margin_of_error){
+			turn_still();
+		}else if(dot<0){
 			turn_left();
 		}else if(dot>0){
 			turn_right();
-		}else{
-			turn_still();
 		}
-
-
 		return true;
 	}
 
@@ -188,9 +214,11 @@ public:
 		Vector v=forward_vector().scale(Real(1.1));
 		v.scale(scl_); // place bullet in front of ship
 		b->phy().pos=phy().pos+v;
-		b->phy().vel=v.normalize().scale(40);
+		b->phy().vel=v.normalize().scale(bullet_speed);
 		b->phy().agl=phy().agl;
 	}
+
+	inline static constexpr Real bullet_speed=40;
 };
 
 
@@ -240,7 +268,7 @@ public:
 		Object{0b10'0000,0b01'0010,boss_def,scale,bounding_radius,{0,0},0,0xe}
 	{
 		phy_->dagl=deg_to_rad(5);
-		phy_->vel.x=5;
+		phy_->vel.x=10;
 		game::boss=this;
 	}
 	~Boss()override{
@@ -311,27 +339,6 @@ class OscaGame{
 		return ix;
 	}
 
-	static constexpr void dot2(const Bitmap8b&bmp,const Real x,const Real y,const Color8b color){
-		if(!pos_within_play_area(x,y))
-			return;
-		const CoordPx xi=CoordPx(x);
-		const CoordPx yi=CoordPx(y);
-		bmp.pointer_offset({xi,yi}).write(color);
-	}
-
-	auto render_trajectory(Bitmap8b&dsp,const Point&p0,const Vector&vel,const Real t_s,const Real t_inc_s)->void{
-		Real t=0;
-		Color8b c=0xe;
-		while(true){
-			t+=t_inc_s;
-			Vector v=vel;
-			v.scale(t);
-			v.inc_by(p0);
-			dot2(dsp,v.x,v.y,c);
-			if(t>t_s)
-				return;
-		}
-	}
 public:
 	OscaGame(){
 		//----------------------------------------------------------
@@ -474,9 +481,9 @@ public:
 				shp=nullptr;
 
 			if(game::player)
-				render_trajectory(vga13h.bmp(),game::player->phy().pos,game::player->phy().vel,10,.5);
+				game::render_trajectory(vga13h.bmp(),game::player->phy().pos,game::player->phy().vel,10,.5);
 			if(game::boss)
-				render_trajectory(vga13h.bmp(),game::boss->phy().pos,game::boss->phy().vel,10,.5);
+				game::render_trajectory(vga13h.bmp(),game::boss->phy().pos,game::boss->phy().vel,10,.5);
 
 			if(shp){
 				while(const unsigned kc=osca_keyb.get_next_scan_code()){
@@ -518,17 +525,17 @@ public:
 				if(keyboard[key_w])
 					shp->thrust_fwd();
 
-				if(keyboard[key_a])
-					shp->turn_left();
+//				if(keyboard[key_a])
+//					shp->turn_left();
 
 				if(keyboard[key_s])
 					shp->thrust_rev();
 
-				if(keyboard[key_d])
-					shp->turn_right();
+//				if(keyboard[key_d])
+//					shp->turn_right();
 
-				if(!keyboard[key_a]&&!keyboard[key_d])
-					shp->turn_still();
+//				if(!keyboard[key_a]&&!keyboard[key_d])
+//					shp->turn_still();
 
 				if(!keyboard[key_w]&&!keyboard[key_s])
 					shp->phy().vel={0,0};
