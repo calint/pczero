@@ -190,7 +190,7 @@ protected:
 	Point Mmw_pos_; // current position used in transform matrix
 	AngleRad Mmw_agl_; // current angle used in transform matrix
 	Scale Mmw_scl_;  // current scale used in transform matrix
-	Scalar br_; // bounding radius
+	Scalar br_; // bounding radius scl_*sqrt(2)
 	SlotIx used_ix_; // index in used_ixes array. used at new and delete
 	Color8b color_;
 	unsigned char bits_; // flags, bit 1:dead
