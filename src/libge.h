@@ -264,7 +264,7 @@ public:
 	inline constexpr auto type_bits()const->TypeBits{return tb_;}	// returns false if object is to be deleted
 	inline constexpr auto type_bits_collision_mask()const->TypeBits{return colchk_tb_;}	// returns false if object is to be deleted
 	inline constexpr auto phy()->PhysicsState&{return*phy_;}
-	inline constexpr auto phy_ro()const->PhysicsState&{return*phy_;}
+	inline constexpr auto phy_ro()const->const PhysicsState&{return*phy_;}
 	inline constexpr auto scale()const->Scale{return scl_;}
 	inline constexpr auto def()const->const ObjectDef&{return def_;}
 	auto forward_vector()->Vector{

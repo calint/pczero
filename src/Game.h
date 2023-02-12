@@ -13,7 +13,7 @@ class Game{
 	static auto create_scene();
 	static auto create_scene2();
 	static auto create_scene3();
-	static auto create_scene4();
+	static auto create_boss();
 	static auto create_circle(const Count segments)->Point*{
 		Point*pts=new Point[unsigned(segments)];
 		AngleRad th=0;
@@ -59,18 +59,20 @@ public:
 	inline static Object*player{nullptr};
 	inline static Object*boss{nullptr};
 	inline static Count enemies_alive{0};
+	inline static Point boss_pos{20,60};
+	inline static Vector boss_vel{10,0};
 
 	static constexpr auto is_within_play_area(const Point&p)->bool{
-		if(p.x>Coord(play_area_top_left.x()+play_area_dim.width())){
+		if(p.x>=Coord(play_area_top_left.x()+play_area_dim.width())){
 			return false;
 		}
-		if(p.x<Coord(play_area_top_left.x())){
+		if(p.x<=Coord(play_area_top_left.x())){
 			return false;
 		}
-		if(p.y>Coord(play_area_top_left.y()+play_area_dim.height())){
+		if(p.y>=Coord(play_area_top_left.y()+play_area_dim.height())){
 			return false;
 		}
-		if(p.y<Coord(play_area_top_left.y())){
+		if(p.y<=Coord(play_area_top_left.y())){
 			return false;
 		}
 		return true;
@@ -84,15 +86,14 @@ public:
 		bmp.pointer_offset({xi,yi}).write(color);
 	}
 
-	static auto draw_trajectory(Bitmap8b&dsp,const Point&p0,const Vector&vel,const Real t_s,const Real t_inc_s)->void{
+	static auto draw_trajectory(Bitmap8b&dsp,const Point&p0,const Vector&vel,const Real t_s,const Real t_inc_s,const Color8b color)->void{
 		Real t=0;
-		Color8b c=0xe;
 		while(true){
 			t+=t_inc_s;
 			Vector v=vel;
 			v.scale(t);
 			v.inc_by(p0);
-			draw_dot(dsp,v,c);
+			draw_dot(dsp,v,color);
 //			world::draw_dot(dsp,v.x,v.y,c);
 			if(t>t_s)
 				return;
@@ -218,8 +219,10 @@ public:
 		if(!Game::is_within_play_area(*this)){
 			phy().vel={0,0};
 		}
-		if(!Game::boss)
+		if(!Game::boss){
+			turn_still();
 			return true;
+		}
 //		attack_target_current_location(*Game::boss,true);
 		attack_target_expected_location(*Game::boss,true);
 		return true;
@@ -245,7 +248,7 @@ public:
 	}
 private:
 	auto attack_target_current_location(const Object&target,const bool draw_trajectory=false)->void{
-		// aim and shoot at boss
+		// aim and shoot at targets' current location
 		constexpr Real margin_of_error=Real(0.01);
 		Vector v_tgt=target.phy_ro().pos-phy_ro().pos;
 		v_tgt.normalize();
@@ -254,7 +257,7 @@ private:
 		Vector v_bullet=v_fwd;
 		v_bullet.scale(Bullet::speed);
 		if(draw_trajectory){
-			Game::draw_trajectory(vga13h.bmp(),phy().pos,v_bullet,5,.5);
+			Game::draw_trajectory(vga13h.bmp(),phy().pos,v_bullet,5,.5,0xe);
 		}
 		Vector n_fwd=v_fwd.normal();
 		Real dot=v_tgt.dot(n_fwd);
@@ -268,21 +271,32 @@ private:
 		}
 	}
 
+	// aim and shoot at targets' expected location
 	auto attack_target_expected_location(const Object&target,const bool draw_trajectory=false)->void{
-		// aim and shoot at boss
-		constexpr Real margin_of_error=Real(0.01);
-		Vector v_tgt=target.phy_ro().pos-phy_ro().pos;
-		v_tgt.normalize();
+		constexpr Real margin_of_error_t=Real(0.5);
+		Vector v_aim=find_aim_vector_for_moving_target(target,10,Real(.5),margin_of_error_t);
+		if(v_aim.x==0&&v_aim.y==0){
+			// did not find aim vector
+			turn_still();
+			return;
+		}
+		//		v_aim.normalize().scale(Bullet::speed);
+//		if(draw_trajectory){
+//			Game::draw_trajectory(vga13h.bmp(),phy().pos,v_aim,5,.5,0xf);
+//		}
 		Vector v_fwd=forward_vector();
 		// draw trajectory of bullet
-		Vector v_bullet=v_fwd;
-		v_bullet.scale(Bullet::speed);
-		if(draw_trajectory){
-			Game::draw_trajectory(vga13h.bmp(),phy().pos,v_bullet,5,.5);
-		}
+//		Vector v_bullet=v_fwd;
+//		v_bullet.scale(Bullet::speed);
+//		if(draw_trajectory){
+//			Game::draw_trajectory(vga13h.bmp(),phy().pos,v_bullet,5,.5,0xe);
+//		}
 		Vector n_fwd=v_fwd.normal();
-		Real dot=v_tgt.dot(n_fwd);
-		if(abs(dot)<margin_of_error){
+		v_aim.normalize();
+		n_fwd.normalize();
+		Real dot=v_aim.dot(n_fwd);
+		constexpr Real margin_of_error_aim=Real(0.01);
+		if(abs(dot)<margin_of_error_aim){
 			turn_still();
 			fire();
 		}else if(dot<0){
@@ -290,6 +304,45 @@ private:
 		}else if(dot>0){
 			turn_right();
 		}
+	}
+
+	auto find_aim_vector_for_moving_target(const Object&tgt,const Real t_span,const Real dt_span,const Real error_margin_t)->Vector{
+		Real t=0;
+		const Point p_tgt=tgt.phy_ro().pos;
+		const Vector v_tgt=tgt.phy_ro().vel;
+//		v_tgt.normalize();
+		Vector v_best_aim;
+		Real t_best_aim=0;
+		while(true){
+			t+=dt_span;
+			if(t>t_span)
+				break;
+			// get expected position of target at 't'
+			Vector v=v_tgt;
+			v.scale(t);
+			Point p{p_tgt};
+			p.inc_by(v);
+			Game::draw_dot(vga13h.bmp(),p,2);
+			// aim vector to the expected location
+			const Vector v_aim=p-phy_ro().pos;
+			// get magnitude of aim vector
+			const Real mgn=v_aim.magnitude();
+			// get t for bullet to reach expected location
+			const Real t_bullet=mgn/Bullet::speed;
+//			Vector v2=v_aim;
+//			v2.normalize().scale(Bullet::speed);
+//			Game::draw_trajectory(vga13h.bmp(),phy_ro().pos,v2,t_bullet,Real(.1),0xe);
+			// if t within error margin return aim vector
+			const Real t_aim=abs(t_bullet-t);
+			if(t_aim<error_margin_t){
+				Vector v3=v_aim;
+				v3.normalize().scale(Bullet::speed);
+				Game::draw_trajectory(vga13h.bmp(),phy_ro().pos,v3,t_bullet,Real(.5),2);
+				err.pos({1,1}).p_hex_32b(unsigned(t_aim*100));
+				return v_aim;
+			}
+		}
+		return {0,0};
 	}
 };
 
@@ -339,8 +392,6 @@ public:
 	Boss():
 		Object{0b10'0000,0b01'0010,Game::boss_def,scale,bounding_radius,{0,0},0,0xe}
 	{
-		phy_->dagl=deg_to_rad(5);
-		phy_->vel.x=10;
 		Game::boss=this;
 	}
 	~Boss()override{
@@ -359,7 +410,7 @@ public:
 //		}
 //		return object_within_play_area(*this);
 		if(!Game::is_within_play_area(*this)){
-			phy_->vel.x=-phy_->vel.x;
+			phy_->pos=Game::boss_pos;
 		}
 		return true;
 	}
@@ -388,9 +439,13 @@ auto Game::create_scene2(){
 auto Game::create_scene3(){
 	new Enemy({160,100},0);
 }
-auto Game::create_scene4(){
+auto Game::create_boss(){
 	Object*o=new Boss;
-	o->phy().pos={20,60};
+	o->phy().pos=boss_pos;
+	o->phy().vel=Game::boss_vel;
+	boss_vel.inc_by({5,2});
+	o->phy().dagl=deg_to_rad(5);
+	Game::boss=o;
 }
 
 [[noreturn]] auto Game::start()->void{
@@ -483,7 +538,7 @@ auto Game::create_scene4(){
 	shp->phy().pos={160,130};
 //		shp->phy().pos={160,100};
 //		create_scene();
-	create_scene4();
+	create_boss();
 
 //		Ship*shp=nullptr;
 //	out.p_hex_16b(static_cast<unsigned short>(sizeof(Object))).pos({1,2});
@@ -502,6 +557,8 @@ auto Game::create_scene4(){
 
 		world::tick();
 
+		if(!Game::boss)
+			create_boss();
 //			Bitmap8b bmp{Address(0x10'0000),{100,100}};
 //			bmp.to(vga13h.bmp(),{100,1});
 
@@ -531,10 +588,10 @@ auto Game::create_scene4(){
 		if(!Game::player)
 			shp=nullptr;
 
-		if(Game::player)
-			Game::draw_trajectory(vga13h.bmp(),Game::player->phy().pos,Game::player->phy().vel,10,.5);
-		if(Game::boss)
-			Game::draw_trajectory(vga13h.bmp(),Game::boss->phy().pos,Game::boss->phy().vel,10,.5);
+//		if(Game::player)
+//			Game::draw_trajectory(vga13h.bmp(),Game::player->phy().pos,Game::player->phy().vel,10,.5,0xe);
+//		if(Game::boss)
+//			Game::draw_trajectory(vga13h.bmp(),Game::boss->phy().pos,Game::boss->phy().vel,10,.5,0xe);
 
 		if(shp){
 			while(const unsigned kc=osca_keyb.get_next_scan_code()){

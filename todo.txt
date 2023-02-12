@@ -1,5 +1,6 @@
 [ ] review 'using' Scale Coord Angle etc terminology
 [ ] move draw_x into Bitmap?
+[ ] Osca::Game multiple instances
 [ ] libge: handle objects with null bounding points indexes, no normals
 [ ] better clock, higher resolution than the default 18.2 Hz
 [o] heap
