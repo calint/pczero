@@ -148,6 +148,24 @@ public:
 			di+=ln;
 		}
 	}
+	constexpr auto to_transparent(const Bitmap<T>&dst,const CoordsPx&c)const{
+		T*si=static_cast<T*>(dt_.address());
+		T*di=static_cast<T*>(dst.dt_.address());
+		di+=c.y()*dst.dim().width()+c.x();
+		const SizePx ln=dst.dim().width()-d_.width();
+		const SizePx h=d_.height();
+		const SizePx w=d_.width();
+		for(SizePx y=0;y<h;y++){
+			for(SizePx x=0;x<w;x++){
+				T v=*si;
+				if(v)
+					*di=v;
+				si++;
+				di++;
+			}
+			di+=ln;
+		}
+	}
 };
 
 using Bitmap8b=Bitmap<Color8b>;
