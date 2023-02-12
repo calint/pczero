@@ -331,7 +331,6 @@ public:
 		const Address heap_disp_at_addr=vga13h.bmp().data().pointer().offset(50*320).address();
 		const SizeBytes heap_disp_size=320*100;
 
-
 		constexpr AngleRad ship_dagl=90;
 		constexpr Scalar ship_speed=20;
 		Ship*shp=new Ship;
@@ -365,8 +364,8 @@ public:
 //			err.pos({0,2});
 			out.pos({0,1});//.p("                                                            ").pos({0,1});
 
-			PhysicsState::update_physics_states();
 			Object::render_all(vga13h.bmp());
+			PhysicsState::update_physics_states();
 			Object::update_all();
 			Object::check_collisions();
 			world::deleted_commit();

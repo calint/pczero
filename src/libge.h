@@ -192,7 +192,7 @@ protected:
 	Scalar br_; // bounding radius scl_*sqrt(2)
 	SlotIx used_ix_; // index in used_ixes array. used at new and delete
 	Color8b color_;
-	unsigned char bits_; // flags, bit 1:dead
+	unsigned char bits_; // flags, bit 1:dead, bit 2:pts_wld_ need refresh
 public:
 //	constexpr Object()=delete;
 	constexpr Object(const Object&)=delete; // copy ctor
@@ -460,8 +460,20 @@ public:
 	constexpr inline auto bounding_radius()const->Scalar{return br_;}
 
 private:
+	constexpr inline auto is_wld_pts_need_refresh()const->bool{return!(bits_&2);}
+
+	// used by 'world' to avoid deleting same object more than once
+	constexpr inline auto set_wld_pts_need_refresh(const bool v){
+		if(v){ // refresh_wld_pts bit is 0
+			bits_&=0xff-2;
+		}else{ // refresh_wld_pts bit is 1
+			bits_|=2;
+		}
+	}
+
 	constexpr auto refresh_wld_points()->void{
-		if(!refresh_Mmw_if_invalid())
+		refresh_Mmw_if_invalid();
+		if(!is_wld_pts_need_refresh())
 			return;
 		if(metrics::enabled)
 			metrics::matrix_set_transforms++;
@@ -469,15 +481,16 @@ private:
 		Mmw_.transform(def_.pts,pts_wld_,def_.npts);
 		if(def_.nmls)
 			Mmw_.rotate(def_.nmls,nmls_wld_,def_.nbnd);
+		set_wld_pts_need_refresh(false);
 	}
-	constexpr auto refresh_Mmw_if_invalid()->bool{
+	constexpr auto refresh_Mmw_if_invalid()->void{
 		if(phy().agl==Mmw_agl_&&phy().pos==Mmw_pos_&&scl_==Mmw_scl_)
-			return false;
+			return;
+		set_wld_pts_need_refresh(true);
 		Mmw_.set_transform(scl_,phy().agl,phy().pos);
 		Mmw_scl_=scl_;
 		Mmw_agl_=phy().agl;
 		Mmw_pos_=phy().pos;
-		return true;
 	}
 	//----------------------------------------------------------------
 	// statics
