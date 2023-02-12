@@ -294,13 +294,13 @@ private:
 		}
 	}
 
-	auto find_aim_vector_for_moving_target(const Object&tgt,const Real t_eval_span,const Real dt,const Real error_margin_t)->Vector{
+	auto find_aim_vector_for_moving_target(const Object&tgt,const Real eval_t,const Real eval_dt,const Real error_margin_t)->Vector{
 		Real t=0;
 		const Point p_tgt=tgt.phy_ro().pos;
 		const Vector v_tgt=tgt.phy_ro().vel;
 		while(true){
-			t+=dt;
-			if(t>t_eval_span)
+			t+=eval_dt;
+			if(t>eval_t)
 				break;
 			// get expected position of target at 't'
 			Vector v=v_tgt;
