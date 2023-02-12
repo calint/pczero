@@ -412,7 +412,7 @@ public:
 				scan_lines_until_next_turn--;
 				CoordPx npx=CoordPx(p_rht-p_lft);
 				if(enable::draw_polygons_fill){
-					pz_memset(p_lft,color,npx);
+					pz_memset(p_lft,char(color),npx);
 				}
 				if(enable::draw_polygons_edges){
 					*p_lft=color;
