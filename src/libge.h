@@ -54,7 +54,7 @@ class Object;
 // update_all() and check_collisions() generate lists of objects to be deleted.
 // the delete happens when deleted_commit() is called
 namespace world{
-	constexpr static Real sec_per_tick{1/18.2f}; // the default 18.2 Hz clock
+	constexpr static Real sec_per_tick{1/Real(18.2)}; // the default 18.2 Hz clock
 	constexpr static Size nobjects_max{256}; // maximum number of objects
 
 	static Real time_s{0};
@@ -175,7 +175,7 @@ struct SlotInfo{
 };
 
 using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types.
-constexpr Scale sqrt_of_2=1.414213562f;
+constexpr Scale sqrt_of_2=Real(1.414213562);
 class Object{
 protected:
 	TypeBits tb_; // object type that is usually a bit (32 object types supported)
@@ -303,7 +303,7 @@ public:
 	constexpr auto draw_bounding_circle(Bitmap8b&dsp)->void{
 		Point p=phy().pos;
 		Scalar r=bounding_radius();
-		const Count segments=static_cast<Count>(5.f*scale());
+		const Count segments=static_cast<Count>(5*scale());
 		AngleRad th=0;
 		AngleRad dth=2*PI/static_cast<AngleRad>(segments);
 		for(Count i=0;i<segments;i++){

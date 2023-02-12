@@ -43,10 +43,10 @@ inline auto sqrt(const Real s)->Real{
 	return v;
 }
 
-constexpr Real PI=3.141592653589793f;
+constexpr Real PI=Real(3.141592653589793);
 
 constexpr auto deg_to_rad(const AngleDeg deg)->AngleRad{
-	constexpr Real deg_to_rad=PI/180.f;
+	constexpr Real deg_to_rad=PI/180;
 	return deg*deg_to_rad;
 }
 

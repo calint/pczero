@@ -128,11 +128,11 @@ public:
 
 	auto fire(){
 		const Real dt=world::time_s-fire_t_s;
-		if(dt<.2f)
+		if(dt<Real(.2))
 			return;
 		fire_t_s=world::time_s;
 		Bullet*b=new Bullet;
-		Vector v=forward_vector().scale(1.1f);
+		Vector v=forward_vector().scale(Real(1.1));
 		v.scale(scl_); // place bullet in front of ship
 		b->phy().pos=phy().pos+v;
 		b->phy().vel=v.normalize().scale(40);
@@ -250,10 +250,10 @@ public:
 		enemy_def={5,4,
 			new Point[]{ // points in model coordinates, negative Y is "forward"
 				{ 0,0},
-				{-1,-.5f},
-				{-1, .5f},
-				{ 1, .5f},
-				{ 1,-.5f},
+				{-1,-.5},
+				{-1, .5},
+				{ 1, .5},
+				{ 1,-.5},
 			},
 			new PointIx[]{1,2,3,4} // bounding convex polygon CCW
 		};
