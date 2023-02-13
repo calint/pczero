@@ -43,7 +43,7 @@ namespace metrics{
 }
 
 class Object;
-
+using Time=Real;
 // update_all() and check_collisions() generate lists of objects to be deleted.
 // the delete happens when deleted_commit() is called
 class World{
@@ -55,9 +55,9 @@ private:
 public:
 	constexpr static Real sec_per_tick{1/Real(18.2)}; // the default 18.2 Hz clock
 
-	inline static Real time_s{0};
-	inline static Real time_dt_s{0};
-	inline static Real time_prv_s{0};
+	inline static Time time_s{0};
+	inline static Time time_dt_s{0};
+	inline static Time time_prv_s{0};
 
 	static auto init_statics(){
 		time_s=Real(osca_t)*sec_per_tick;

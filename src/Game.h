@@ -61,8 +61,8 @@ public:
 	inline static Count enemies_alive{0};
 	inline static Point boss_pos{20,60};
 	inline static Vector boss_vel{10,0};
-	inline static Real boss_t=0;
-	inline static Real boss_live_t=5;
+	inline static Time boss_t=0;
+	inline static Time boss_live_t=5;
 
 	static constexpr auto is_in_play_area(const Point&p)->bool{
 		if(p.x>=Coord(play_area_top_left.x()+play_area_dim.width())){
@@ -182,7 +182,7 @@ class Ship final:public Object{
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 	static constexpr AngleRad dagl=90;
 	static constexpr Scalar speed=20;
-	Real fire_t_s=0;
+	Time fire_t_s=0;
 public:
 	Ship():
 		// 'ships'   0b00'0001
@@ -236,7 +236,7 @@ public:
 	}
 
 	auto fire()->void{
-		const Real dt=World::time_s-fire_t_s;
+		const Time dt=World::time_s-fire_t_s;
 		if(dt<Real(.2))
 			return;
 		fire_t_s=World::time_s;
@@ -275,7 +275,7 @@ private:
 	// aim and shoot at targets' expected location
 	auto attack_target_expected_location(const Object&target,const bool draw_trajectory=false)->void{
 		constexpr Real margin_of_error_t=Real(0.25);
-		Vector v_aim=find_aim_vector_for_moving_target(target,5,Real(.2),margin_of_error_t);
+		Vector v_aim=find_aim_vector_for_moving_target(target,5,Real(.2),margin_of_error_t,draw_trajectory);
 		if(v_aim.x==0&&v_aim.y==0){
 			// did not find aim vector
 			turn_still();
@@ -296,7 +296,7 @@ private:
 		}
 	}
 
-	auto find_aim_vector_for_moving_target(const Object&tgt,const Real eval_t,const Real eval_dt,const Real error_margin_t)->Vector{
+	auto find_aim_vector_for_moving_target(const Object&tgt,const Real eval_t,const Real eval_dt,const Real error_margin_t,const bool draw_trajectory=false)->Vector{
 		Real t=0;
 		const Point p_tgt=tgt.phy_ro().pos;
 		const Vector v_tgt=tgt.phy_ro().vel;
@@ -310,8 +310,10 @@ private:
 			Point p{p_tgt};
 			p.inc_by(v);
 
-			// draw target position at 't'
-			Game::draw_dot(p,2);
+			if(draw_trajectory){
+				// draw target position at 't'
+				Game::draw_dot(p,2);
+			}
 
 			// aim vector to the expected location
 			const Vector v_aim=p-phy_ro().pos;
@@ -328,11 +330,13 @@ private:
 			// if t within error margin return aim vector
 			const Real t_aim=abs(t_bullet-t);
 			if(t_aim<error_margin_t){
-				// draw aim vector
-				Vector v3=v_aim;
-				v3.normalize().scale(Bullet::speed);
-				Game::draw_trajectory(phy_ro().pos,v3,t_bullet,Real(.2),2);
-//				err.pos({1,1}).p_hex_32b(unsigned(t_aim*100));
+				if(draw_trajectory){
+					// draw aim vector
+					Vector v3=v_aim;
+					v3.normalize().scale(Bullet::speed);
+					Game::draw_trajectory(phy_ro().pos,v3,t_bullet,Real(.2),2);
+//					err.pos({1,1}).p_hex_32b(unsigned(t_aim*100));
+				}
 				return v_aim;
 			}
 		}
