@@ -61,6 +61,8 @@ public:
 	inline static Count enemies_alive{0};
 	inline static Point boss_pos{20,60};
 	inline static Vector boss_vel{10,0};
+	inline static Real boss_t=0;
+	inline static Real boss_live_t=5;
 
 	static constexpr auto is_in_play_area(const Point&p)->bool{
 		if(p.x>=Coord(play_area_top_left.x()+play_area_dim.width())){
@@ -273,7 +275,7 @@ private:
 	// aim and shoot at targets' expected location
 	auto attack_target_expected_location(const Object&target,const bool draw_trajectory=false)->void{
 		constexpr Real margin_of_error_t=Real(0.25);
-		Vector v_aim=find_aim_vector_for_moving_target(target,10,Real(.2),margin_of_error_t);
+		Vector v_aim=find_aim_vector_for_moving_target(target,5,Real(.2),margin_of_error_t);
 		if(v_aim.x==0&&v_aim.y==0){
 			// did not find aim vector
 			turn_still();
@@ -403,7 +405,8 @@ public:
 //		}
 //		return object_within_play_area(*this);
 		if(!Game::is_in_play_area(*this)){
-			phy_->pos=Game::boss_pos;
+//			phy_->pos=Game::boss_pos;
+			return false;
 		}
 		return true;
 	}
@@ -434,9 +437,23 @@ auto Game::create_scene3(){
 }
 auto Game::create_boss(){
 	Object*o=new Boss;
+	Game::boss_t=World::time_s;
+	if(Game::boss_vel.y>20){
+		if(Game::boss_vel.x>0){
+			Game::boss_pos={300,60};
+			Game::boss_vel={-10,0};
+		}else{
+			Game::boss_pos={20,60};
+			Game::boss_vel={10,0};
+		}
+	}
+	if(boss_vel.x>0){
+		boss_vel.inc_by({5,2});
+	}else{
+		boss_vel.inc_by({-5,2});
+	}
 	o->phy().pos=boss_pos;
 	o->phy().vel=Game::boss_vel;
-	boss_vel.inc_by({5,2});
 	o->phy().dagl=deg_to_rad(25);
 	Game::boss=o;
 }
@@ -551,8 +568,14 @@ auto Game::create_boss(){
 
 		World::tick();
 
-		if(!Game::boss)
+		if(!Game::boss){
 			create_boss();
+		}
+		if((World::time_s-Game::boss_t)>Game::boss_live_t){
+			World::deleted_add(boss);
+			Game::boss=nullptr;
+		}
+
 //			Bitmap8b bmp{Address(0x10'0000),{100,100}};
 //			bmp.to(vga13h.bmp(),{100,1});
 
