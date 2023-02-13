@@ -44,6 +44,7 @@ namespace metrics{
 
 class Object;
 using Time=Real;
+using TimeSec=Time;
 // update_all() and check_collisions() generate lists of objects to be deleted.
 // the delete happens when deleted_commit() is called
 class World{
@@ -55,15 +56,15 @@ private:
 public:
 	constexpr static Real sec_per_tick{1/Real(18.2)}; // the default 18.2 Hz clock
 
-	inline static Time time_s{0};
-	inline static Time time_dt_s{0};
-	inline static Time time_prv_s{0};
+	inline static TimeSec time{0};
+	inline static TimeSec time_dt{0};
+	inline static TimeSec time_prv{0};
 
 	static auto init_statics(){
-		time_s=Real(osca_t)*sec_per_tick;
+		time=TimeSec(osca_t)*sec_per_tick;
 		// set previous time to a reasonable value so that dt does not
 		// become huge at first frame
-		time_prv_s=time_s-sec_per_tick;
+		time_prv=time-sec_per_tick;
 	}
 	static auto tick()->void;
 	static auto deleted_add(Object*o)->void;
@@ -105,9 +106,9 @@ public:
 //	inline constexpr auto set_angle(const Angle rad){agl_=rad;}
 //	inline constexpr auto set_dangle(const Angle rad){dagl_=rad;}
 	inline auto update(){
-		vel.inc_by(acc,World::time_dt_s);
-		pos.inc_by(vel,World::time_dt_s);
-		agl+=dagl*World::time_dt_s;
+		vel.inc_by(acc,World::time_dt);
+		pos.inc_by(vel,World::time_dt);
+		agl+=dagl*World::time_dt;
 	}
 
 	//-----------------------------------------------------------
@@ -679,9 +680,9 @@ auto World::commit_deleted()->void{
 auto World::tick()->void{
 	metrics::reset();
 
-	time_prv_s=time_s;
-	time_s=Real(osca_t)*sec_per_tick;
-	time_dt_s=time_s-time_prv_s;
+	time_prv=time;
+	time=Real(osca_t)*sec_per_tick;
+	time_dt=time-time_prv;
 
 	Object::draw_all(vga13h.bmp());
 	PhysicsState::update_all();
