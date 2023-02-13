@@ -395,6 +395,8 @@ public:
 		transparent_{false}
 	{}
 	PrinterToBitmap&operator=(const PrinterToBitmap&o){
+		if(this==&o)
+			return*this;
 		di_=o.di_;
 		dil_=o.dil_;
 		b_=o.b_;
