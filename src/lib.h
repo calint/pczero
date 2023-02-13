@@ -394,6 +394,20 @@ public:
 		bg_{0},
 		transparent_{false}
 	{}
+	PrinterToBitmap&operator=(const PrinterToBitmap&o){
+		di_=o.di_;
+		dil_=o.dil_;
+		b_=o.b_;
+		bmp_wi_=o.bmp_wi_;
+		font_wi_=o.font_wi_;
+		font_hi_=o.font_hi_;
+		ln_=o.ln_;
+		fg_=o.fg_;
+		bg_=o.bg_;
+		transparent_=o.transparent_;
+		padding1=o.padding1;
+		return*this;
+	}
 
 	constexpr auto pos(const CoordsChar p)->PrinterToBitmap&{
 		di_=static_cast<Color8b*>(b_.data().address());
@@ -476,20 +490,6 @@ public:
 		return*this;
 	}
 	auto spc()->PrinterToBitmap&{p(' ');return*this;}
-	constexpr PrinterToBitmap&operator=(const PrinterToBitmap&o){
-		di_=o.di_;
-		dil_=o.dil_;
-		b_=o.b_;
-		bmp_wi_=o.bmp_wi_;
-		font_wi_=o.font_wi_;
-		font_hi_=o.font_hi_;
-		ln_=o.ln_;
-		fg_=o.fg_;
-		bg_=o.bg_;
-		transparent_=o.transparent_;
-		padding1=o.padding1;
-		return*this;
-	}
 private:
 	constexpr auto draw_with_bg(unsigned int bmp_5x6)->PrinterToBitmap&{ // make inline assembler?
 		const unsigned int mask=1u<<31;

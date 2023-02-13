@@ -61,8 +61,8 @@ public:
 	inline static Count enemies_alive{0};
 	inline static Point boss_pos{20,60};
 	inline static Vector boss_vel{10,0};
-	inline static TimeSec boss_t=0;
-	inline static TimeSec boss_live_t=5;
+	inline static TimeSec boss_t{0};
+	inline static TimeSec boss_live_t{10};
 
 	static constexpr auto is_in_play_area(const Point&p)->bool{
 		if(p.x>=Coord(play_area_top_left.x()+play_area_dim.width())){
@@ -182,8 +182,12 @@ class Ship final:public Object{
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 	static constexpr AngleRad dagl=90;
 	static constexpr Scalar speed=20;
-	TimeSec fire_t=0;
+	TimeSec fire_t{0};
 public:
+	bool auto_aim_at_boss{false};
+	char padding1{0};
+	char padding2{0};
+	char padding3{0};
 	Ship():
 		// 'ships'   0b00'0001
 		// 'bullets' 0b00'0010
@@ -220,6 +224,8 @@ public:
 		if(!Game::is_in_play_area(*this)){
 			phy().vel={0,0};
 		}
+		if(!auto_aim_at_boss)
+			return true;
 		if(!Game::boss){
 			turn_still();
 			return true;
@@ -429,8 +435,8 @@ auto Game::create_scene(){
 		e->phy().dagl=deg_to_rad(10);
 		e->phy().vel={0,2};
 	}
-	Object*o=new Boss;
-	o->phy().pos={160,60};
+//	Object*o=new Boss;
+//	o->phy().pos={160,60};
 }
 auto Game::create_scene2(){
 	Object*o=new Wall(20,{160,100},0);
@@ -552,8 +558,7 @@ auto Game::create_boss(){
 
 	Ship*shp=new Ship;
 	shp->phy().pos={160,130};
-//		shp->phy().pos={160,100};
-//		create_scene();
+	create_scene();
 	create_boss();
 
 //		Ship*shp=nullptr;
@@ -568,6 +573,7 @@ auto Game::create_boss(){
 
 	// start task
 	while(true){
+		// clear game area
 		pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
 
 		World::tick();
@@ -580,20 +586,7 @@ auto Game::create_boss(){
 			Game::boss=nullptr;
 		}
 
-//			Bitmap8b bmp{Address(0x10'0000),{100,100}};
-//			bmp.to(vga13h.bmp(),{100,1});
-
-		// copy heap to screen
-//			err.pos({0,2});
-		out.pos({0,1});//.p("                                                            ").pos({0,1});
-
-//			Object::render_all(vga13h.bmp());
-//			PhysicsState::update_physics_states();
-//			Object::update_all();
-//			Object::check_collisions();
-//			world::deleted_commit();
-
-		//		out.pos({0,2}).p("                                              ").pos({0,2});
+		out.pos({12,1}).fg(6).p("keys: w a s d [space] and F1");
 		out.pos({12,2}).fg(2);
 		out.p("k=").p_hex_8b(static_cast<unsigned char>(osca_key)).spc();
 		out.p("e=").p_hex_8b(static_cast<unsigned char>(Game::enemies_alive)).spc();
@@ -608,11 +601,6 @@ auto Game::create_boss(){
 
 		if(!Game::player)
 			shp=nullptr;
-
-//		if(Game::player)
-//			Game::draw_trajectory(vga13h.bmp(),Game::player->phy().pos,Game::player->phy().vel,10,.5,0xe);
-//		if(Game::boss)
-//			Game::draw_trajectory(vga13h.bmp(),Game::boss->phy().pos,Game::boss->phy().vel,10,.5,0xe);
 
 		if(shp){
 			while(const unsigned char kc=keyboard.get_next_scan_code()){
@@ -647,6 +635,9 @@ auto Game::create_boss(){
 				case 0xb9: // space released
 					keyb[key_spc]=false;
 					break;
+				case 0xbb: // F1 released
+					shp->auto_aim_at_boss=!shp->auto_aim_at_boss;
+					break;
 				default:
 					break;
 				}
@@ -654,18 +645,19 @@ auto Game::create_boss(){
 			if(keyb[key_w])
 				shp->thrust_fwd();
 
-//				if(keyboard[key_a])
-//					shp->turn_left();
-
 			if(keyb[key_s])
 				shp->thrust_rev();
 
-//				if(keyboard[key_d])
-//					shp->turn_right();
+			if(!shp->auto_aim_at_boss){
+				if(keyb[key_a])
+					shp->turn_left();
 
-//				if(!keyboard[key_a]&&!keyboard[key_d])
-//					shp->turn_still();
+				if(keyb[key_d])
+					shp->turn_right();
 
+				if(!keyb[key_a]&&!keyb[key_d])
+					shp->turn_still();
+			}
 			if(!keyb[key_w]&&!keyb[key_s])
 				shp->phy().vel={0,0};
 
