@@ -237,7 +237,7 @@ public:
 
 	auto fire()->void{
 		const Time dt=World::time_s-fire_t_s;
-		if(dt<Real(.2))
+		if(dt<Time(.2))
 			return;
 		fire_t_s=World::time_s;
 		Bullet*b=new Bullet;
