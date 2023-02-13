@@ -7,9 +7,9 @@
 [ ] libge: handle objects with null bounding points indexes, no normals
 [ ] better clock, higher resolution than the default 18.2 Hz
 [o] heap
-[x]   step 1. a vector of [*ptr,size] elements pointing to freed memory. O(n) free O(n) alloc
+[x]   step 1. a vector of [*ptr,size] elements pointing to freed memory. O(n) free, O(n) alloc
 [ ]   step 2. hash table on size with vectors [*ptr,size]. O(n/x)
-[ ]   step 3. libge heap optimized for Object. O(1) free and nearly O(1) alloc
+[ ]   step 3. libge heap optimized for Object. O(1) free, O(n/x) alloc
 [ ]      [*heptr,*obj] heap entry pointer to used slot, pointer object that is updated when the slot is moved
 [o] render convex polygons
 [o]   ObjectDef: polygons with indexes into the definition points
