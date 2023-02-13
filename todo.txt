@@ -12,7 +12,7 @@
 [ ]   step 3. libge heap optimized for Object. O(1) free, O(n/x) alloc
 [ ]      [*heptr,*obj] heap entry pointer to used slot, pointer object that is updated when the slot is moved
 [o] render convex polygons
-[o]   ObjectDef: polygons with indexes into the definition points
+[o]   ObjectDef: polygons with indexes to definition points
 [x]     step 1. use bounding shape polygon
 [ ]       review
 [ ]     step 2. define {color,npts,pts_ix[]}
