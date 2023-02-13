@@ -155,7 +155,11 @@ public:
 class Bullet final:public Object{
 	static constexpr Scale scale=1;
 	static constexpr Scale bounding_radius=scale*sqrt_of_2;
+	TimeSec created_time;
 public:
+	static constexpr Scalar speed=40;
+	static constexpr TimeSec lifetime=10;
+
 	Bullet():
 		// 'ships'   0b00'0001
 		// 'bullets' 0b00'0010
@@ -163,18 +167,19 @@ public:
 		// 'walls'   0b00'1000
 		// 'missiles'0b01'0000
 		// 'bosses'  0b10'0000
-		Object{0b10,0b11'1101,Game::bullet_def,scale,bounding_radius,{0,0},0,4}
+		Object{0b10,0b11'1101,Game::bullet_def,scale,bounding_radius,{0,0},0,4},
+		created_time{World::time}
 	{}
 	virtual auto update()->bool override{
 		Object::update();
+		if(lifetime<World::time-created_time)
+			return false;
 		return Game::is_in_play_area(*this);
 	}
 	// returns false if object is to be deleted
 	virtual auto on_collision(Object&other)->bool override{
 		return false;
 	}
-
-	inline static constexpr Real speed=40;
 };
 
 class Ship final:public Object{
@@ -281,7 +286,7 @@ private:
 	// aim and shoot at targets' expected location
 	auto attack_target_expected_location(const Object&target,const bool draw_trajectory=false)->void{
 		constexpr Real margin_of_error_t=Real(0.25);
-		Vector v_aim=find_aim_vector_for_moving_target(target,5,Real(.2),margin_of_error_t,draw_trajectory);
+		Vector v_aim=find_aim_vector_for_moving_target(target,Bullet::lifetime,Real(.2),margin_of_error_t,draw_trajectory);
 		if(v_aim.x==0&&v_aim.y==0){
 			// did not find aim vector
 			turn_still();
@@ -571,7 +576,7 @@ auto Game::create_boss(){
 	constexpr unsigned char key_spc=4;
 	bool keyb[]{false,false,false,false,false}; // wasd and space pressed status
 
-	out.pos({12,1}).fg(6).p("keys: w a s d [space] and F1");
+	out.pos({12,1}).fg(6).p("keys: w a s d [space] F1 x c");
 
 	// start task
 	while(true){
