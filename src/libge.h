@@ -11,9 +11,16 @@ public:
 	PointIx npts{0}; // number of points in pts
 	PointIx nbnd{0}; // number of indexes in bnd
 	Point*pts{nullptr}; // array of points used for rendering and bounding shape
-	PointIx*bnd{nullptr}; // indexes in pts that defines the bounding shape as a convex polygon CCW
-	Vector*nmls{nullptr}; // normals to the lines defined by bnd (calculated by init_normals())
-
+	PointIx*bnd{nullptr}; // array of indexes in pts that defines the bounding shape as a convex polygon CCW
+	Vector*nmls{nullptr}; // array of normals to the lines defined by bnd (calculated by init_normals())
+//	~ObjectDef(){
+//		if(pts)
+//			delete[]pts;
+//		if(bnd)
+//			delete[]bnd;
+//		if(nmls)
+//			delete[]nmls;
+//	}
 	auto init_normals(){
 		if(nbnd<2){
 			nmls=nullptr;
