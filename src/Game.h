@@ -571,6 +571,8 @@ auto Game::create_boss(){
 	constexpr unsigned char key_spc=4;
 	bool keyb[]{false,false,false,false,false}; // wasd and space pressed status
 
+	out.pos({12,1}).fg(6).p("keys: w a s d [space] and F1");
+
 	// start task
 	while(true){
 		// clear game area
@@ -586,7 +588,6 @@ auto Game::create_boss(){
 			Game::boss=nullptr;
 		}
 
-		out.pos({12,1}).fg(6).p("keys: w a s d [space] and F1");
 		out.pos({12,2}).fg(2);
 		out.p("k=").p_hex_8b(static_cast<unsigned char>(osca_key)).spc();
 		out.p("e=").p_hex_8b(static_cast<unsigned char>(Game::enemies_alive)).spc();
