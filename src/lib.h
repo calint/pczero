@@ -522,7 +522,6 @@ private:
 
 class Vga13h{
 	Bitmap8b b_;
-
 public:
 	Vga13h():b_{Address(0xa0000),DimensionPx{320,200}}{}
 	inline constexpr auto bmp()->Bitmap8b&{return b_;}
