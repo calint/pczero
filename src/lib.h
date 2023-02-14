@@ -56,7 +56,7 @@ inline auto pz_memset(Address to,char v,SizeBytes n)->void{
 
 using OffsetBytes=int;
 
-class Pointer{
+class Pointer{ // ? can/should be removed
 	Address a_;
 public:
 	inline constexpr Pointer(const Address a):a_{a}{}
