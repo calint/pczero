@@ -196,7 +196,7 @@ using Bitmap8b=Bitmap<Color8b>;
 //	}
 //};
 
-static constexpr unsigned int table_hex_to_font[]{
+static constexpr unsigned table_hex_to_font[]{
 		0b01100'10010'10010'10010'01100'00000'00, // 0
 		0b00100'01100'00100'00100'01110'00000'00, // 1
 		0b01100'10010'00100'01000'11110'00000'00, // 2
@@ -252,7 +252,7 @@ static constexpr char table_scancode_to_ascii[256]{
 // 0e - backspace
 // 1c - return
 
-static constexpr unsigned int table_ascii_to_font[]{
+static constexpr unsigned table_ascii_to_font[]{
 		0,0,0,0,0,0,0,0,0,0,
 		0,0,0,0,0,0,0,0,0,0,
 		0,0,0,0,0,0,0,0,0,0,
@@ -487,7 +487,7 @@ public:
 	}
 	auto spc()->PrinterToBitmap&{p(' ');return*this;}
 private:
-	constexpr auto draw_with_bg(unsigned int bmp_5x6)->PrinterToBitmap&{ // make inline assembler?
+	constexpr auto draw_with_bg(unsigned bmp_5x6)->PrinterToBitmap&{ // make inline assembler?
 		constexpr unsigned mask=1u<<31;
 		for(SizePx y=0;y<font_hi_;y++){
 			for(SizePx x=0;x<font_wi_;x++){
@@ -501,7 +501,7 @@ private:
 		di_=di_-bmp_wi_*font_hi_+font_wi_;
 		return*this;
 	}
-	constexpr auto draw_transparent(unsigned int bmp_5x6)->PrinterToBitmap&{ // make inline assembler?
+	constexpr auto draw_transparent(unsigned bmp_5x6)->PrinterToBitmap&{ // make inline assembler?
 		constexpr unsigned mask=1u<<31;
 		for(SizePx y=0;y<font_hi_;y++){
 			for(SizePx x=0;x<font_wi_;x++){
