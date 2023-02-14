@@ -97,6 +97,7 @@ public:
 		y=abs(y);
 		return*this;
 	}
+	// returns dot product of this vector and v
 	inline constexpr auto dot(const Vector&v)const->Real{
 		return x*v.x+y*v.y;
 	}

@@ -139,7 +139,7 @@ public:
 		Game::enemies_alive--;
 	}
 
-	virtual auto update()->bool override{
+	auto update()->bool override{
 		if(!Game::is_in_play_area(*this)){
 			phy().vel.y=-phy().vel.y;
 		}
@@ -147,7 +147,7 @@ public:
 	}
 
 	// returns false if object is to be deleted
-	virtual auto on_collision(Object&other)->bool override{
+	auto on_collision(Object&other)->bool override{
 		return false; // collision with type 'bullet'
 	}
 };
@@ -170,14 +170,14 @@ public:
 		Object{0b10,0b11'1101,Game::bullet_def,scale,bounding_radius,{0,0},0,4},
 		created_time{World::time}
 	{}
-	virtual auto update()->bool override{
+	auto update()->bool override{
 		Object::update();
 		if(lifetime<World::time-created_time)
 			return false;
 		return Game::is_in_play_area(*this);
 	}
 	// returns false if object is to be deleted
-	virtual auto on_collision(Object&other)->bool override{
+	auto on_collision(Object&other)->bool override{
 		return false;
 	}
 };
@@ -224,7 +224,7 @@ public:
 		phy().vel=forward_vector().negate().scale(speed);
 	}
 
-	virtual auto update()->bool override{
+	auto update()->bool override{
 		Object::update();
 		if(!Game::is_in_play_area(*this)){
 			phy().vel={0,0};
@@ -241,7 +241,7 @@ public:
 	}
 
 	// returns false if object is to be deleted
-	virtual auto on_collision(Object&other)->bool override{
+	auto on_collision(Object&other)->bool override{
 		// collision with 'wall'
 		return false;
 	}
@@ -378,12 +378,12 @@ public:
 	Missile():
 		Object{0b01'0000,0b11'1111,Game::missile_def,scale,bounding_radius,{0,0},0,4}
 	{}
-	virtual auto update()->bool override{
+	auto update()->bool override{
 		Object::update();
 		return Game::is_in_play_area(*this);
 	}
 	// returns false if object is to be deleted
-	virtual auto on_collision(Object&other)->bool override{
+	auto on_collision(Object&other)->bool override{
 		return false;
 	}
 };
@@ -407,7 +407,7 @@ public:
 	~Boss()override{
 		Game::boss=nullptr;
 	}
-	virtual auto update()->bool override{
+	auto update()->bool override{
 		Object::update();
 //		if(game::player){
 //			Vector v=game::player->phy().pos-phy().pos;
@@ -426,7 +426,7 @@ public:
 		return true;
 	}
 	// returns false if object is to be deleted
-	virtual auto on_collision(Object&other)->bool override{
+	auto on_collision(Object&other)->bool override{
 		health--;
 		if(health<=0)
 			return false;
