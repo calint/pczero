@@ -407,7 +407,7 @@ public:
 		fg_=o.fg_;
 		bg_=o.bg_;
 		transparent_=o.transparent_;
-		padding1=o.padding1;
+//		padding1=o.padding1;
 		return*this;
 	}
 
