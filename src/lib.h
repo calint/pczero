@@ -540,7 +540,7 @@ Vga13h vga13h;
 
 class PrinterToVga:public PrinterToBitmap{
 public:
-	PrinterToVga():
+	constexpr PrinterToVga():
 		PrinterToBitmap{vga13h.bmp()}
 	{
 		pos({1,1}).fg(4);
