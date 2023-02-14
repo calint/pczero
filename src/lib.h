@@ -425,7 +425,7 @@ public:
 		return*this;
 	}
 	constexpr auto p_hex(const int hex_number_4b)->PrinterToBitmap&{
-		draw(table_hex_to_font[hex_number_4b&0xf]);
+		draw(table_hex_to_font[hex_number_4b&0xf]); // ? error if &0xf not 0
 		return*this;
 	}
 	constexpr auto p_hex_8b(unsigned char v)->PrinterToBitmap&{
