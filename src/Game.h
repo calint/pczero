@@ -346,9 +346,9 @@ private:
 
 			// if t within error margin return aim vector
 			const Real t_aim=abs(t_bullet-t);
-//			const Real t_aim=abs(t_bullet2-t*t);
+//			const Real t_aim2=abs(t_bullet2-t*t);
 			if(t_aim<error_margin_t){
-//			if(t_aim<error_margin_t2){
+//			if(t_aim2<error_margin_t2){
 				if(draw_trajectory){
 					// draw aim vector
 					Vector v3=v_aim;
