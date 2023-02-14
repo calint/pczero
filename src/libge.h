@@ -281,6 +281,7 @@ public:
 	// returns physics state as const (read only)
 	inline constexpr auto phy_ro()const->const PhysicsState&{return*phy_;}
 	inline constexpr auto scale()const->Scale{return scl_;}
+	inline constexpr auto set_scale(const Scale s)->void{scl_=s;}
 	inline constexpr auto def()const->const ObjectDef&{return def_;}
 	auto forward_vector()->Vector{
 		refresh_Mmw_if_invalid();
