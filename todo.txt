@@ -14,7 +14,7 @@
 [ ]   step 2. hash table on size with vectors [*ptr,size]. O(n/x)
 [ ]   step 3. libge heap optimized for Object. O(1) free, O(n/x) alloc
 [ ]      override 'void* operator new(size_t s)' and 'void operator delete(void*)'
-[ ]      [*heptr,*obj] heap entry pointer to used slot, pointer object that is updated when the slot is moved
+[ ]      [*heptr,*obj] heap entry pointer to used slot, pointer to object that is updated when the slot is moved
 [o] render convex polygons
 [o]   ObjectDef: polygons with indexes to definition points
 [x]     step 1. use bounding shape polygon
@@ -32,7 +32,7 @@
 [ ]   const Bitmap&dbmp=dsp.bmp(); then mutate data in const dbmp
 [ ] lib: PrinterToBitmap pos in pixels
 [ ] lib: PrinterToConsole pos in characters
-[ ] osca: time_ms
+[x] osca: time_ms -> implemented in World
 [x] extract boot.cc to boot.S
 [x] use link.ld to build binary? ok.
 [x] inline assembler for pz_memcpy
