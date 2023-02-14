@@ -309,6 +309,7 @@ private:
 
 	auto find_aim_vector_for_moving_target(const Object&tgt,const Real eval_t,const Real eval_dt,const Real error_margin_t,const bool draw_trajectory=false)->Vector{
 		Real t=0;
+//		const Real error_margin_t2=error_margin_t*error_margin_t;
 		const Point p_tgt=tgt.phy_ro().pos;
 		const Vector v_tgt=tgt.phy_ro().vel;
 		while(true){
@@ -328,9 +329,9 @@ private:
 
 			// aim vector to the expected location
 			const Vector v_aim=p-phy_ro().pos;
-			// get magnitude of aim vector
-			const Real mgn=v_aim.magnitude(); // ? optimize away the sqrt with magnitude2()
-			// get t for bullet to reach expected location
+//			// get magnitude of aim vector
+			const Real mgn=v_aim.magnitude(); // ? optimize away the sqrt() in magnitude
+//			// get t for bullet to reach expected location
 			const Real t_bullet=mgn/Bullet::speed; // ? find t_bullet by solving for x or y?
 
 			// draw evaluated aim vector
@@ -338,14 +339,22 @@ private:
 //			v2.normalize().scale(Bullet::speed);
 //			Game::draw_trajectory(phy_ro().pos,v2,t_bullet,Real(.1),0xe);
 
+			// get magnitude² of aim vector
+//			const Real mgn2=v_aim.magnitude2();
+			// get t² for bullet to reach expected location
+//			const Real t_bullet2=mgn2/(Bullet::speed*Bullet::speed);
+
 			// if t within error margin return aim vector
 			const Real t_aim=abs(t_bullet-t);
+//			const Real t_aim=abs(t_bullet2-t*t);
 			if(t_aim<error_margin_t){
+//			if(t_aim<error_margin_t2){
 				if(draw_trajectory){
 					// draw aim vector
 					Vector v3=v_aim;
 					v3.normalize().scale(Bullet::speed);
 					Game::draw_trajectory(phy_ro().pos,v3,t_bullet,Real(.2),2);
+//					Game::draw_trajectory(phy_ro().pos,v3,sqrt(t_bullet2),Real(.2),2);
 //					err.pos({1,1}).p_hex_32b(unsigned(t_aim*100));
 				}
 				return v_aim;

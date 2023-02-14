@@ -178,7 +178,7 @@ namespace enable{
 	constexpr static bool draw_polygons_edges{true};
 	constexpr static bool draw_normals{false};
 	constexpr static bool draw_collision_check{false};
-	constexpr static bool draw_bounding_circle{true};
+	constexpr static bool draw_bounding_circle{false};
 }
 
 using SlotIx=short; // index in Object::freeSlots[]
