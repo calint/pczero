@@ -178,7 +178,7 @@ namespace enable{
 	constexpr static bool draw_polygons_edges{true};
 	constexpr static bool draw_normals{false};
 	constexpr static bool draw_collision_check{false};
-	constexpr static bool draw_bounding_circle{false};
+	constexpr static bool draw_bounding_circle{true};
 }
 
 using SlotIx=short; // index in Object::freeSlots[]
@@ -612,14 +612,16 @@ private:
 		const Point p2=o2.phy().pos;
 
 		// check if: sqrt(dx*dx+dy*dy)<=r1+r2
-		const Real dist2=r1*r1+2*r1*r2+r2*r2; // distance^2
-		Vector v{p2.x-p1.x,p2.y-p1.y};
+		//                dx*dx+dy*dy <=(r1+r2)²
+		const Real dist_check=r1+r2;
+		const Real dist2_check=dist_check*dist_check; // (r1+r2)²
+		Vector v{p2.x-p1.x,p2.y-p1.y}; // dx,dy
 		v.x*=v.x;
 		v.y*=v.y;
-		const Real d2=v.x+v.y;
+		const Real dist2=v.x+v.y;
 //		const float diff=d2-dist2;
 //		out.pos({0,1}).p_hex_32b(static_cast<unsigned>(diff));
-		if(d2>dist2)
+		if(dist2>dist2_check)
 			return false;
 //		out.p("bounds ");
 		return true;
