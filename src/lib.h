@@ -12,17 +12,17 @@ extern "C" void memcpy(void*to,void*from,unsigned n){
 		:"%esi","%edi","%ecx" // ? clobbers memory?
 	);
 }
-extern "C" void*memset(void*s,unsigned char c,unsigned n);
-extern "C" void*memset(void*s,unsigned char c,unsigned n){
+extern "C" void*memset(void*to,unsigned char c,unsigned n);
+extern "C" void*memset(void*to,unsigned char c,unsigned n){
 	asm("mov %0,%%edi;"
 		"mov %1,%%al;"
 		"mov %2,%%ecx;"
 		"rep stosb;"
 		:
-		:"r"(s),"r"(c),"r"(n)
+		:"r"(to),"r"(c),"r"(n)
 		:"%edi","%al","%ecx" // ? clobbers memory?
 	);
-	return s;
+	return to;
 }
 
 namespace osca{
@@ -76,7 +76,6 @@ class Data{
 	Address a_;
 	SizeBytes s_;
 public:
-//	inline constexpr Data():a_{nullptr},s_{0}{}
 	inline constexpr Data(const Address a,const SizeBytes n):a_{a},s_{n}{}
 	inline constexpr auto address()const->Address{return a_;}
 	inline constexpr auto size()const->SizeBytes{return s_;}
