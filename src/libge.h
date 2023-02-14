@@ -166,7 +166,7 @@ public:
 	}
 	static auto clear_buffer(char b=0)->void{
 		const Address from=Address(mem_start);
-		const SizeBytes n=reinterpret_cast<SizeBytes>(mem_limit)-reinterpret_cast<SizeBytes>(mem_start);
+		const SizeBytes n=SizeBytes(mem_limit)-SizeBytes(mem_start); // ? may break if pointer is bigger than 2G
 		pz_memset(from,b,n);
 	}
 };
