@@ -352,7 +352,7 @@ class PrinterToBitmap{
 	Color8b fg_{2};
 	Color8b bg_{0};
 	bool transparent_{false};
-	char padding1{0};
+	const char padding1{0};
 	static constexpr SizePx font_wi_{5};
 	static constexpr SizePx font_hi_{6};
 	static constexpr SizePx line_padding_{2};

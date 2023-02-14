@@ -190,9 +190,9 @@ class Ship final:public Object{
 	TimeSec fire_t{0};
 public:
 	bool auto_aim_at_boss{false};
-	char padding1{0};
-	char padding2{0};
-	char padding3{0};
+	const char padding1{0};
+	const char padding2{0};
+	const char padding3{0};
 	Ship():
 		// 'ships'   0b00'0001
 		// 'bullets' 0b00'0010
