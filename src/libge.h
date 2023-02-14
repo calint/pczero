@@ -619,8 +619,8 @@ private:
 		v.x*=v.x;
 		v.y*=v.y;
 		const Real dist2=v.x+v.y;
-//		const float diff=d2-dist2;
-//		out.pos({0,1}).p_hex_32b(static_cast<unsigned>(diff));
+//		const float diff=dist2-dist2_check;
+//		err.pos({0,1}).p_hex_32b(static_cast<unsigned>(diff));
 		if(dist2>dist2_check)
 			return false;
 //		out.p("bounds ");
