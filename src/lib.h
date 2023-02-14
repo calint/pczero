@@ -88,7 +88,7 @@ public:
 };
 
 template<typename T>
-class CoordsT{
+class CoordsT{ // ? guideline C.131: Avoid trivial getters and setters
 	T x_;
 	T y_;
 public:
