@@ -173,6 +173,7 @@ namespace osca{
 			return ch;
 		}
 	};
+	extern Keyboard keyboard;
 	Keyboard keyboard;
 } // end namespace
 
