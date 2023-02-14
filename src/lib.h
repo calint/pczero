@@ -88,7 +88,7 @@ public:
 };
 
 template<typename T>
-class CoordsT{ // ? guideline C.131: Avoid trivial getters and setters
+class CoordsT{ // ? guideline C.131
 	T x_;
 	T y_;
 public:
@@ -110,7 +110,7 @@ using Coord=Real;
 using Coords=CoordsT<Coord>;
 
 template<typename T>
-class DimensionT{
+class DimensionT{ // ? guideline C.131
 	T w_;
 	T h_;
 public:
