@@ -8,8 +8,8 @@ using PointIx=short; // index into a list of points
 
 class ObjectDef final{
 public:
-	PointIx npts{0}; // number of points in pts
-	PointIx nbnd{0}; // number of indexes in bnd
+	PointIx npts{0}; // number of points in pts // ? implement span
+	PointIx nbnd{0}; // number of indexes in bnd // ? implement span
 	Point*pts{nullptr}; // array of points used for rendering and bounding shape
 	PointIx*bnd{nullptr}; // array of indexes in pts that defines the bounding shape as a convex polygon CCW
 	Vector*nmls{nullptr}; // array of normals to the lines defined by bnd (calculated by init_normals())
