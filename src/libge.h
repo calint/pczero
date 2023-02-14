@@ -330,6 +330,7 @@ public:
 			th+=dth;
 		}
 	}
+	// ? move rendering code to other class
 	constexpr auto draw_polygon(Bitmap8b&dsp,const Point pts[],const PointIx npoly_ixs,const PointIx ix[],const Color8b color)->void{
 //		const PointIx*pi=ix;
 //		for(PointIx i=0;i<npoly_ixs;i++){
@@ -430,7 +431,7 @@ public:
 				scan_lines_until_next_turn--;
 				CoordPx npx=CoordPx(p_rht-p_lft);
 				if(enable::draw_polygons_fill){
-					pz_memset(p_lft,char(color),npx);
+					pz_memset(p_lft,char(color),npx); // ? npx+1?
 				}
 				if(enable::draw_polygons_edges){
 					*p_lft=color;
