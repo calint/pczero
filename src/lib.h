@@ -381,6 +381,7 @@ class PrinterToBitmap{
 	Color8b bg_{0};
 	bool transparent_{false};
 	char padding1{0};
+	static constexpr SizePx line_padding_{2};
 public:
 	constexpr PrinterToBitmap(Bitmap8b&b):
 		di_{static_cast<Color8b*>(b.data().address())},
@@ -406,11 +407,11 @@ public:
 
 	constexpr auto pos(const CoordsChar p)->PrinterToBitmap&{
 		di_=static_cast<Color8b*>(b_.data().address());
-		di_+=bmp_wi_*p.y()*font_hi_+p.x()*font_wi_;
+		di_+=bmp_wi_*p.y()*(font_hi_+line_padding_)+p.x()*font_wi_;
 		dil_=di_;
 		return*this;
 	}
-	inline constexpr auto nl()->PrinterToBitmap&{di_=dil_+bmp_wi_*(font_hi_+2);dil_=di_;return*this;}
+	inline constexpr auto nl()->PrinterToBitmap&{di_=dil_+bmp_wi_*(font_hi_+line_padding_);dil_=di_;return*this;}
 	inline constexpr auto cr()->PrinterToBitmap&{di_=dil_;return*this;}
 	inline constexpr auto fg(const Color8b c)->PrinterToBitmap&{fg_=c;return*this;}
 	inline constexpr auto bg(const Color8b c)->PrinterToBitmap&{bg_=c;return*this;}
