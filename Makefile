@@ -1,6 +1,8 @@
-# GNU assembler (GNU Binutils for Ubuntu) 2.39
-# g++ (Ubuntu 12.2.0-3ubuntu1) 12.2.0
-# GNU ld (GNU Binutils for Ubuntu) 2.39
+# tools used:
+#   as       GNU assembler (GNU Binutils for Ubuntu) 2.39
+#   g++      (Ubuntu 12.2.0-3ubuntu1) 12.2.0
+#   clang++  Ubuntu clang version 15.0.6
+#   ld       GNU ld (GNU Binutils for Ubuntu) 2.39
 
 # resulting bootable image
 IMAGE=pczero.img
