@@ -28,7 +28,7 @@
 [ ]   step 2. "osca_keyb_task" pointer to function that should read keyboard
 [ ]   step 3. a way to switch keyboard focus to other tasks
 [x] investigate why any -O other than -O0,-O1,-Og breaks osca_keyb.next_scan_code(). see comment in function.
-[ ] review const correctness regarding const bmp.data.begin.address then write to pointer
+[ ] review const correctness regarding const bmp().data().address() then write to pointer
 [ ]   const Bitmap&dbmp=dsp.bmp(); then mutate data in const dbmp
 [ ] lib: PrinterToBitmap pos in pixels
 [ ] lib: PrinterToConsole pos in characters
