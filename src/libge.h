@@ -191,7 +191,6 @@ struct SlotInfo{
 using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types.
 constexpr Scale sqrt_of_2=Real(1.414213562);
 class Object{
-protected:
 	TypeBits tb_; // object type that is usually a bit (32 object types supported)
 	TypeBits colchk_tb_; // bits used to logical and with other object's type_bits and if true then collision detection is done
 	PhysicsState*phy_; // kept in own buffer of states for better CPU cache utilization at update

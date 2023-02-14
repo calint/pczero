@@ -121,8 +121,8 @@ public:
 };
 
 class Enemy final:public Object{
-	static constexpr Scale scale=5;
-	static constexpr Scale bounding_radius=scale*sqrt_of_2;
+	static constexpr Scale scl=5;
+	static constexpr Scale bounding_radius=scl*sqrt_of_2;
 public:
 	// 'ships'   0b00'0001
 	// 'bullets' 0b00'0010
@@ -131,7 +131,7 @@ public:
 	// 'missiles'0b01'0000
 	// 'bosses'  0b10'0000
 	Enemy(const Point&pos,const AngleRad agl):
-		Object{0b100,0b01'0010,Game::enemy_def,scale,bounding_radius,pos,agl,3}
+		Object{0b100,0b01'0010,Game::enemy_def,scl,bounding_radius,pos,agl,3}
 	{
 		Game::enemies_alive++;
 	}
@@ -153,8 +153,8 @@ public:
 };
 
 class Bullet final:public Object{
-	static constexpr Scale scale=1;
-	static constexpr Scale bounding_radius=scale*sqrt_of_2;
+	static constexpr Scale scl=1;
+	static constexpr Scale bounding_radius=scl*sqrt_of_2;
 	TimeSec created_time;
 public:
 	static constexpr Scalar speed=40;
@@ -167,7 +167,7 @@ public:
 		// 'walls'   0b00'1000
 		// 'missiles'0b01'0000
 		// 'bosses'  0b10'0000
-		Object{0b10,0b11'1101,Game::bullet_def,scale,bounding_radius,{0,0},0,4},
+		Object{0b10,0b11'1101,Game::bullet_def,scl,bounding_radius,{0,0},0,4},
 		created_time{World::time}
 	{}
 	auto update()->bool override{
@@ -183,8 +183,8 @@ public:
 };
 
 class Ship final:public Object{
-	static constexpr Scale scale=4;
-	static constexpr Scale bounding_radius=scale*sqrt_of_2;
+	static constexpr Scale scl=4;
+	static constexpr Scale bounding_radius=scl*sqrt_of_2;
 	static constexpr AngleRad dagl=90;
 	static constexpr Scalar speed=20;
 	TimeSec fire_t{0};
@@ -200,7 +200,7 @@ public:
 		// 'walls'   0b00'1000
 		// 'missiles'0b01'0000
 		// 'bosses'  0b10'0000
-		Object{0b1,0b11'1111,Game::ship_def,scale,bounding_radius,{0,0},0,2}
+		Object{0b1,0b11'1111,Game::ship_def,scl,bounding_radius,{0,0},0,2}
 	{
 		Game::player=this;
 	}
@@ -253,7 +253,7 @@ public:
 		fire_t=World::time;
 		Bullet*b=new Bullet;
 		Vector v=forward_vector().scale(Real(1.1));
-		v.scale(scl_); // place bullet in front of ship
+		v.scale(scale()); // place bullet in front of ship
 		b->phy().pos=phy().pos+v;
 		b->phy().vel=v.normalize().scale(Bullet::speed);
 		b->phy().agl=phy().agl;
@@ -366,8 +366,8 @@ public:
 
 
 class Missile final:public Object{
-	static constexpr Scale scale=2;
-	static constexpr Scale bounding_radius=scale*sqrt_of_2;
+	static constexpr Scale scl=2;
+	static constexpr Scale bounding_radius=scl*sqrt_of_2;
 public:
 	// 'ships'   0b00'0001
 	// 'bullets' 0b00'0010
@@ -376,7 +376,7 @@ public:
 	// 'missiles'0b01'0000
 	// 'bosses'  0b10'0000
 	Missile():
-		Object{0b01'0000,0b11'1111,Game::missile_def,scale,bounding_radius,{0,0},0,4}
+		Object{0b01'0000,0b11'1111,Game::missile_def,scl,bounding_radius,{0,0},0,4}
 	{}
 	auto update()->bool override{
 		Object::update();
@@ -389,8 +389,8 @@ public:
 };
 
 class Boss final:public Object{
-	static constexpr Scale scale=3;
-	static constexpr Scale bounding_radius=scale*sqrt_of_2;
+	static constexpr Scale scl=3;
+	static constexpr Scale bounding_radius=scl*sqrt_of_2;
 	Count health{5};
 public:
 	// 'ships'   0b00'0001
@@ -400,7 +400,7 @@ public:
 	// 'missiles'0b01'0000
 	// 'bosses'  0b10'0000
 	Boss():
-		Object{0b10'0000,0b01'0010,Game::boss_def,scale,bounding_radius,{0,0},0,0xe}
+		Object{0b10'0000,0b01'0010,Game::boss_def,scl,bounding_radius,{0,0},0,0xe}
 	{
 		Game::boss=this;
 	}
