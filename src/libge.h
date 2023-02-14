@@ -21,6 +21,8 @@ public:
 //		if(nmls)
 //			delete[]nmls;
 //	}
+	void operator delete(void*)=delete;
+
 	constexpr auto init_normals()->void{
 		if(nbnd<2){
 			nmls=nullptr;
