@@ -329,9 +329,9 @@ private:
 			// aim vector to the expected location
 			const Vector v_aim=p-phy_ro().pos;
 			// get magnitude of aim vector
-			const Real mgn=v_aim.magnitude(); // ? optimize away the sqrt() in magnitude -> loss of precision when aiming at far targets
+			const Real mgn=v_aim.magnitude();
 			// get t for bullet to reach expected location
-			const Real t_bullet=mgn/Bullet::speed; // ? find t_bullet by solving for x or y?
+			const Real t_bullet=mgn/Bullet::speed;
 			// difference between target and bullet intersection t
 			const Real t_aim=abs(t_bullet-t);
 
