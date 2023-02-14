@@ -107,7 +107,7 @@ public:
 	inline auto magnitude()const->Real{return sqrt(x*x+y*y);}
 	inline constexpr auto magnitude2()const->Real{return x*x+y*y;}
 //	auto operator<=>(const Vector2D&)const=default; // ? does not compile in clang++ without includes from std
-	inline constexpr auto operator==(const Vector&)const->bool=default;
+	inline constexpr auto operator==(const Vector&)const->bool=default; // bitwise equality relevant
 	inline constexpr auto operator-(const Vector&other)const->Vector{return{x-other.x,y-other.y};}
 	inline constexpr auto operator+(const Vector&other)const->Vector{return{x+other.x,y+other.y};}
 
