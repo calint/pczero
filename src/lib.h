@@ -379,7 +379,7 @@ class PrinterToBitmap{
 	SizePx ln_;
 	Color8b fg_;
 	Color8b bg_;
-	bool transparent_; // ? implement
+	bool transparent_;
 	char padding1{0};
 public:
 	constexpr PrinterToBitmap(Bitmap8b&b):
