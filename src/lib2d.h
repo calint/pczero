@@ -27,7 +27,7 @@ inline auto cos(const AngleRad radians)->Real{
 }
 
 // puts sin and cos value of 'radians' in 'fsin' and 'fcos'
-inline auto sin_and_cos(const AngleRad radians,Real&fsin,Real&fcos){
+inline auto sin_and_cos(const AngleRad radians,Real&fsin,Real&fcos)->void{
 	asm("fsincos"
 		:"=t"(fcos),"=u"(fsin) // "u" : Second floating point register
 		:"0"(radians)
@@ -76,12 +76,12 @@ public:
 		return*this;
 	}
 	// increases this vector by v
-	inline constexpr auto inc_by(const Vector&v){
+	inline constexpr auto inc_by(const Vector&v)->void{
 		x+=v.x;
 		y+=v.y;
 	}
 	// increases this vector by v*scl
-	inline constexpr auto inc_by(const Vector&v,const Real scl){
+	inline constexpr auto inc_by(const Vector&v,const Real scl)->void{
 		x+=v.x*scl;
 		y+=v.y*scl;
 	}
@@ -123,7 +123,7 @@ class Matrix2D{
 	Real yx=0,yy=1,yt=0;
 	Real ux=0,uy=0,id=1;
 public:
-	auto set_transform(const Scale scale,const AngleRad rotation,const Vector&translation){
+	auto set_transform(const Scale scale,const AngleRad rotation,const Vector&translation)->void{
 		Real fcos,fsin;
 		sin_and_cos(rotation,fsin,fcos);
 		const Real cs=scale*fcos;
@@ -132,7 +132,7 @@ public:
 		yx=sn;yy= cs;yt=translation.y;
 		ux= 0;uy=  0;id=1;
 	}
-	constexpr auto transform(const Vector src[],Vector dst[],const Count n)const{
+	constexpr auto transform(const Vector src[],Vector dst[],const Count n)const->void{
 		for(Count i=0;i<n;i++){
 			dst->x=xx*src->x+xy*src->y+xt;
 			dst->y=yx*src->x+yy*src->y+yt;
@@ -141,7 +141,7 @@ public:
 		}
 	}
 	// does the rotation part of the transform
-	constexpr auto rotate(const Vector src[],Vector dst[],const Count n)const{
+	constexpr auto rotate(const Vector src[],Vector dst[],const Count n)const->void{
 		for(Count i=0;i<n;i++){
 			dst->x=xx*src->x+xy*src->y;
 			dst->y=yx*src->x+yy*src->y;

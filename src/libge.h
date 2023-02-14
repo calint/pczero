@@ -21,7 +21,7 @@ public:
 //		if(nmls)
 //			delete[]nmls;
 //	}
-	auto init_normals(){
+	auto init_normals()->void{
 		if(nbnd<2){
 			nmls=nullptr;
 			return;
@@ -42,7 +42,7 @@ namespace metrics{
 	static Count matrix_set_transforms{0};
 	static Count collisions_checks{0};
 	static Count collisions_checks_bounding_shapes{0};
-	static auto reset(){
+	static auto reset()->void{
 		matrix_set_transforms=0;
 		collisions_checks=0;
 		collisions_checks_bounding_shapes=0;
@@ -67,7 +67,7 @@ public:
 	inline static TimeSec time_dt{0};
 	inline static TimeSec time_prv{0};
 
-	static auto init_statics(){
+	static auto init_statics()->void{
 		time=TimeSec(osca_t)*sec_per_tick;
 		// set previous time to a reasonable value so that dt does not
 		// become huge at first frame
@@ -77,7 +77,7 @@ public:
 	static auto deleted_add(Object*o)->void;
 	static auto commit_deleted()->void;
 
-	static constexpr void draw_dot(const Point&p,const Color8b color){
+	static constexpr auto draw_dot(const Point&p,const Color8b color)->void{
 		const CoordPx xi=CoordPx(p.x);
 		const CoordPx yi=CoordPx(p.y);
 		const Bitmap8b bmp=vga13h.bmp();
@@ -112,7 +112,7 @@ public:
 //	inline constexpr auto set_ddpos(const Point2D&p){ddpos_=p;}
 //	inline constexpr auto set_angle(const Angle rad){agl_=rad;}
 //	inline constexpr auto set_dangle(const Angle rad){dagl_=rad;}
-	inline auto update(){
+	inline auto update()->void{
 		vel.inc_by(acc,World::time_dt);
 		pos.inc_by(vel,World::time_dt);
 		agl+=dagl*World::time_dt;
@@ -125,7 +125,7 @@ public:
 	inline static PhysicsState*mem_start{nullptr};
 	inline static PhysicsState*next_free{nullptr};
 	inline static PhysicsState*mem_limit{nullptr};
-	static auto init_statics(){
+	static auto init_statics()->void{
 		mem_start=new PhysicsState[World::nobjects_max];
 		next_free=mem_start;
 		mem_limit=reinterpret_cast<PhysicsState*>(mem_start+World::nobjects_max);
@@ -157,14 +157,14 @@ public:
 		pz_memset(next_free,3,sizeof(PhysicsState)); // ? debugging
 		return o;
 	}
-	static auto update_all(){
+	static auto update_all()->void{
 		PhysicsState*ptr=mem_start;
 		while(ptr<next_free){
 			ptr->update();
 			ptr++;
 		}
 	}
-	static auto clear_buffer(char b=0){
+	static auto clear_buffer(char b=0)->void{
 		const Address from=Address(mem_start);
 		const SizeBytes n=reinterpret_cast<SizeBytes>(mem_limit)-reinterpret_cast<SizeBytes>(mem_start);
 		pz_memset(from,b,n);
@@ -467,7 +467,7 @@ public:
 	inline constexpr auto is_alive()const->bool{return!(bits_&1);}
 
 	// used by 'world' to avoid deleting same object more than once
-	inline constexpr auto set_is_alive(const bool v){
+	inline constexpr auto set_is_alive(const bool v)->void{
 		if(v){ // alive bit is 0
 			bits_&=0xff-1;
 		}else{ // not alive bit is 1
@@ -479,7 +479,7 @@ public:
 
 private:
 	inline constexpr auto is_wld_pts_need_update()const->bool{return!(bits_&2);}
-	inline constexpr auto set_wld_pts_need_update(const bool v){
+	inline constexpr auto set_wld_pts_need_update(const bool v)->void{
 		if(v){ // refresh_wld_pts bit is 0
 			bits_&=0xff-2;
 		}else{ // refresh_wld_pts bit is 1
@@ -520,14 +520,14 @@ public:
 	static auto free_slots_count()->SlotIx{return free_ixes_i;}
 	static auto used_slots_count()->SlotIx{return used_ixes_i;}
 //	static inline auto hasFreeSlot()->bool{return free_ixes_i!=0;}
-	static auto init_statics(){
+	static auto init_statics()->void{
 		const SlotIx n=sizeof(free_ixes)/sizeof(Object**);
 		for(SlotIx i=0;i<n;i++){
 			free_ixes[i]=&all[i];
 		}
 		free_ixes_i=World::nobjects_max-1;
 	}
-	static auto update_all(){
+	static auto update_all()->void{
 		for(SlotIx i=0;i<used_ixes_i;i++){
 			Object*o=object_for_used_slot(i);
 			if(!o->update()){
@@ -535,13 +535,13 @@ public:
 			}
 		}
 	}
-	static auto draw_all(Bitmap8b&dsp){
+	static auto draw_all(Bitmap8b&dsp)->void{
 		for(SlotIx i=0;i<used_ixes_i;i++){
 			Object*o=object_for_used_slot(i);
 			o->draw(dsp);
 		}
 	}
-	static auto check_collisions(){
+	static auto check_collisions()->void{
 		for(SlotIx i=0;i<used_ixes_i-1;i++){
 			for(SlotIx j=i+1;j<used_ixes_i;j++){
 				Object*o1=used_ixes[i].obj;

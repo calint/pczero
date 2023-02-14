@@ -31,7 +31,7 @@ using Address=void*;
 using Size=int;
 using SizeBytes=Size;
 
-inline void pz_memcpy(Address to,Address from,SizeBytes n){
+inline auto pz_memcpy(Address to,Address from,SizeBytes n)->void{
 	asm("mov %0,%%esi;"
 		"mov %1,%%edi;"
 		"mov %2,%%ecx;"
@@ -43,7 +43,7 @@ inline void pz_memcpy(Address to,Address from,SizeBytes n){
 }
 
 //inline void pz_memset(Address to,unsigned char v,SizeBytes n){
-inline void pz_memset(Address to,char v,SizeBytes n){
+inline auto pz_memset(Address to,char v,SizeBytes n)->void{
 	asm("mov %0,%%edi;"
 		"mov %1,%%al;"
 		"mov %2,%%ecx;"
@@ -62,14 +62,14 @@ public:
 	inline constexpr Pointer(const Address a):a_{a}{}
 	inline constexpr auto address()const->Address{return a_;}
 	inline constexpr auto offset(const OffsetBytes ob)const->Pointer{return Pointer{static_cast<char*>(a_)+ob};}
-	inline constexpr auto write(const char v){*static_cast<char*>(a_)=v;}
-	inline constexpr auto write(const unsigned char v){*static_cast<unsigned char*>(a_)=v;}
-	inline constexpr auto write(const short v){*static_cast<short*>(a_)=v;}
-	inline constexpr auto write(const unsigned short v){*static_cast<unsigned short*>(a_)=v;}
-	inline constexpr auto write(const int v){*static_cast<int*>(a_)=v;}
-	inline constexpr auto write(const unsigned v){*static_cast<unsigned*>(a_)=v;}
-	inline constexpr auto write(const long v){*static_cast<long*>(a_)=v;}
-	inline constexpr auto write(const unsigned long v){*static_cast<unsigned long*>(a_)=v;}
+	inline constexpr auto write(const char v)->void{*static_cast<char*>(a_)=v;}
+	inline constexpr auto write(const unsigned char v)->void{*static_cast<unsigned char*>(a_)=v;}
+	inline constexpr auto write(const short v)->void{*static_cast<short*>(a_)=v;}
+	inline constexpr auto write(const unsigned short v)->void{*static_cast<unsigned short*>(a_)=v;}
+	inline constexpr auto write(const int v)->void{*static_cast<int*>(a_)=v;}
+	inline constexpr auto write(const unsigned v)->void{*static_cast<unsigned*>(a_)=v;}
+	inline constexpr auto write(const long v)->void{*static_cast<long*>(a_)=v;}
+	inline constexpr auto write(const unsigned long v)->void{*static_cast<unsigned long*>(a_)=v;}
 };
 
 class Data{
@@ -81,9 +81,9 @@ public:
 	inline constexpr auto address()const->Address{return a_;}
 	inline constexpr auto size()const->SizeBytes{return s_;}
 	inline constexpr auto pointer()const->Pointer{return{a_};}
-	inline auto to(const Data&d)const{pz_memcpy(d.address(),a_,s_);} // ? bounds check
-	inline auto to(const Data&d,const SizeBytes sb)const{pz_memcpy(d.address(),a_,sb);} // ? bounds check
-	inline auto clear(char byte=0)const{pz_memset(a_,byte,s_);}
+	inline auto to(const Data&d)const->void{pz_memcpy(d.address(),a_,s_);} // ? bounds check
+	inline auto to(const Data&d,const SizeBytes sb)const->void{pz_memcpy(d.address(),a_,sb);} // ? bounds check
+	inline auto clear(char byte=0)const->void{pz_memset(a_,byte,s_);}
 	inline constexpr auto limit()const->Address{return static_cast<char*>(a_)+s_;}
 };
 
@@ -95,12 +95,12 @@ public:
 	inline constexpr CoordsT(const T&x,const T&y):x_{x},y_{y}{}
 	inline constexpr auto x()const->const T&{return x_;}
 	inline constexpr auto y()const->const T&{return y_;}
-	inline constexpr auto set_x(const T&x){x_=x;}
-	inline constexpr auto set_y(const T&y){y_=y;}
-	inline constexpr auto set(const T&x,const T&y){set_x(x);set_y(y);}
-	inline constexpr auto inc_x(const T&dx){x_+=dx;}
-	inline constexpr auto inc_y(const T&dy){y_+=dy;}
-	inline constexpr auto inc_by(const CoordsT<T>&delta){x_+=delta.x_;y_+=delta.y_;}
+	inline constexpr auto set_x(const T&x)->void{x_=x;}
+	inline constexpr auto set_y(const T&y)->void{y_=y;}
+	inline constexpr auto set(const T&x,const T&y)->void{set_x(x);set_y(y);}
+	inline constexpr auto inc_x(const T&dx)->void{x_+=dx;}
+	inline constexpr auto inc_y(const T&dy)->void{y_+=dy;}
+	inline constexpr auto inc_by(const CoordsT<T>&delta)->void{x_+=delta.x_;y_+=delta.y_;}
 };
 using Real=float;
 using CoordPx=short;
@@ -132,7 +132,7 @@ public:
 	inline constexpr auto dim()const->const DimensionPx&{return d_;}
 	inline constexpr auto data()const->const Data&{return dt_;}
 	inline constexpr auto pointer_offset(const CoordsPx p)const->Pointer{return dt_.pointer().offset(p.y()*d_.width()*Size(sizeof(T))+p.x()*Size(sizeof(T)));}
-	constexpr auto to(const Bitmap&dst,const CoordsPx&c)const{
+	constexpr auto to(const Bitmap&dst,const CoordsPx&c)const->void{
 		T*si=static_cast<T*>(dt_.address());
 		T*di=static_cast<T*>(dst.dt_.address());
 		di+=c.y()*dst.dim().width()+c.x();
@@ -148,7 +148,7 @@ public:
 			di+=ln;
 		}
 	}
-	constexpr auto to_transparent(const Bitmap&dst,const CoordsPx&c)const{
+	constexpr auto to_transparent(const Bitmap&dst,const CoordsPx&c)const->void{
 		T*si=static_cast<T*>(dt_.address());
 		T*di=static_cast<T*>(dst.dt_.address());
 		di+=c.y()*dst.dim().width()+c.x();
@@ -394,7 +394,7 @@ public:
 		bg_{0},
 		transparent_{false}
 	{}
-	constexpr PrinterToBitmap&operator=(const PrinterToBitmap&o){
+	constexpr auto operator=(const PrinterToBitmap&o)->PrinterToBitmap&{
 		if(this==&o)
 			return*this;
 		di_=o.di_;
