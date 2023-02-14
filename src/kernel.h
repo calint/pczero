@@ -152,8 +152,8 @@ void operator delete[](void*ptr,unsigned size)noexcept{
 namespace osca{
 	class Keyboard{
 		unsigned char buf[2<<4]; // minimum size 2 and a power of 2, max size 256
-		unsigned char s; // next event index
-		unsigned char e; // last event index +1 & roll
+		unsigned char s{0}; // next event index
+		unsigned char e{0}; // last event index +1 & roll
 	public:
 		// called by osca_keyb_ev
 		constexpr auto on_key(unsigned char ch){
