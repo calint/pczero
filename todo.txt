@@ -8,6 +8,7 @@
 [ ]   Game instance
 [ ] libge: handle objects with null bounding points indexes, no normals
 [ ] better clock, higher resolution than the default 18.2 Hz
+[ ] implement a unique_ptr<T>
 [o] heap
 [x]   step 1. a vector of [*ptr,size] elements pointing to freed memory. O(n) free, O(n) alloc
 [ ]   step 2. hash table on size with vectors [*ptr,size]. O(n/x)
