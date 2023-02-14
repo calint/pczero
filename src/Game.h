@@ -329,9 +329,9 @@ private:
 			// aim vector to the expected location
 			const Vector v_aim=p-phy_ro().pos;
 			// get magnitude of aim vector
-			const Real mgn=v_aim.magnitude();
+			const Real mgn=v_aim.magnitude(); // ? optimize away the sqrt with magnitude2()?
 			// get t for bullet to reach expected location
-			const Real t_bullet=mgn/Bullet::speed;
+			const Real t_bullet=mgn/Bullet::speed; // ? find t_bullet by solving for x and y?
 
 			// draw evaluated aim vector
 //			Vector v2=v_aim;
