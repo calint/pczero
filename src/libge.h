@@ -210,7 +210,7 @@ protected:
 	unsigned char bits_; // bit 1: is not alive
 	                     // bit 2: pts_wls_ don't need update
 public:
-//	constexpr Object()=delete;
+	constexpr Object()=delete;
 	constexpr Object(const Object&)=delete; // copy constructor
 	constexpr Object&operator=(const Object&)=delete; // copy assignment
 	constexpr Object(Object&&)=delete; // move constructor
