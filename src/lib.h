@@ -494,10 +494,10 @@ public:
 	auto spc()->PrinterToBitmap&{p(' ');return*this;}
 private:
 	constexpr auto draw_with_bg(unsigned int bmp_5x6)->PrinterToBitmap&{ // make inline assembler?
-		const unsigned int mask=1u<<31;
-		for(int y=0;y<font_hi_;y++){
-			for(int x=0;x<font_wi_;x++){
-				const bool px=bmp_5x6&mask;
+		const unsigned mask=1u<<31;
+		for(SizePx y=0;y<font_hi_;y++){
+			for(SizePx x=0;x<font_wi_;x++){
+				const bool px=bmp_5x6&mask; // ? !=0
 				bmp_5x6<<=1;
 				*di_=px?fg_:bg_;
 				di_++;
