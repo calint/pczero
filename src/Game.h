@@ -564,6 +564,7 @@ auto Game::create_boss()->void{
 
 	Ship*shp=new Ship;
 	shp->phy().pos={160,130};
+//	create_scene3();
 	create_scene();
 	create_boss();
 

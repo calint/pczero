@@ -102,9 +102,7 @@ public:
 		return x*v.x+y*v.y;
 	}
 	// returns the normal of this vector
-	inline constexpr auto normal()const->Vector{
-		return{-y,x};
-	}
+	inline constexpr auto normal()const->Vector{return{-y,x};}
 	inline auto magnitude()const->Real{return sqrt(x*x+y*y);}
 	inline constexpr auto magnitude2()const->Real{return x*x+y*y;}
 //	auto operator<=>(const Vector2D&)const=default; // ? does not compile in clang++ without includes from std

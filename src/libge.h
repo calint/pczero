@@ -24,10 +24,8 @@ public:
 	void operator delete(void*)=delete;
 
 	constexpr auto init_normals()->void{
-		if(nbnd<2){
-			nmls=nullptr;
+		if(nbnd<2) // not enough points for a line
 			return;
-		}
 		nmls=new Vector[unsigned(nbnd)];
 		const PointIx n=nbnd-1;
 		for(PointIx i=0;i<n;i++){
@@ -636,41 +634,43 @@ private:
 		// for each point in o1 check if behind every normal of o2
 		// if behind every normal then within the convex bounding shape thus collision
 
-		// for each point in o1 bounding shape
-		const PointIx nbnd1=o1.def_.nbnd;
-		const PointIx nbnd2=o2.def_.nbnd;
 		// if o2 has no bounding shape (at least 3 points) return false
-		if(nbnd2<3) // ? check if points equal? with floats?
+		if(o2.def_.nbnd<3) // ? check if points equal? with floats?
 			return false;
-		const PointIx*bndptr1=o1.def_.bnd; // bounding point index of o1
-		for(PointIx i=0;i<nbnd1;i++){
+
+		// for each point in o1 bounding shape
+		const PointIx nbnd=o1.def_.nbnd;
+		const PointIx*bndptr=o1.def_.bnd; // bounding point index of o1
+		for(PointIx i=0;i<nbnd;i++){
 			// reference pts_pts_wld_[bnd[i]]
-			const Point&p1=o1.pts_wld_[*bndptr1];
-			bndptr1++;
-			// for each normal in o2
-			const PointIx*bndptr2=o2.def_.bnd;  // bounding point index
-			const Vector*nlptr=o2.nmls_wld_; // normals
-			bool is_collision=true; // assume is collision
-			for(PointIx j=0;j<nbnd2;j++){
-				// reference vector_pts_wld_[bnd[j]]
-				const Vector&p2=o2.pts_wld_[*bndptr2];
-				bndptr2++;
-				if(enable::draw_collision_check){
-					World::draw_dot(p2,5);
-				}
-				const Vector v=p1-p2; // vector from line point to point to check
-				if(v.dot(*nlptr)>0){ // use abs(v)<0.0001f (example)?
-					// p "in front" of v, cannot be collision
-					is_collision=false;
-					break;
-				}
-				nlptr++;
-			}
-			// if point within all lines then p1 is within o2 bounding shape
-			if(is_collision)
+			const Point&p1=o1.pts_wld_[*bndptr];
+			bndptr++;
+			if(is_point_in_bounding_shape(p1,o2))
 				return true;
 		}
 		return false;
+	}
+	inline static auto is_point_in_bounding_shape(const Point&p0,const Object&o)->bool{
+		const PointIx nbnd{o.def_.nbnd};
+		const PointIx*bnd_ix_ptr{o.def_.bnd}; // bounding point index
+		const Vector*nml_ptr{o.nmls_wld_}; // normals
+		for(PointIx j=0;j<nbnd;j++){
+			const Vector&p{o.pts_wld_[*bnd_ix_ptr]};
+			bnd_ix_ptr++;
+			if(enable::draw_collision_check){
+				World::draw_dot(p,5);
+			}
+			const Vector v{p0-p}; // vector from point on line to point to check
+			if(v.dot(*nml_ptr)>0){ // use abs(v)<0.0001f (example)?
+				// p "in front" of line, cannot be collision
+				return false;
+			}
+			nml_ptr++;
+			if(enable::draw_collision_check){
+				World::draw_dot(p,0xe);
+			}
+		}
+		return true;
 	}
 };
 
