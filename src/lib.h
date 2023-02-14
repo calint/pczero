@@ -389,7 +389,7 @@ public:
 		bmp_wi_{b.dim().width()},
 		font_wi_{5},
 		font_hi_{6},
-		ln_{CoordPx(bmp_wi_-font_wi_)},
+		ln_{SizePx(bmp_wi_-font_wi_)},
 		fg_{2},
 		bg_{0},
 		transparent_{false}
