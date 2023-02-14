@@ -329,7 +329,7 @@ private:
 			// aim vector to the expected location
 			const Vector v_aim=p-phy_ro().pos;
 			// get magnitude of aim vector
-			const Real mgn=v_aim.magnitude(); // ? optimize away the sqrt() in magnitude
+			const Real mgn=v_aim.magnitude(); // ? optimize away the sqrt() in magnitude -> loss of precision when aiming at far targets
 			// get t for bullet to reach expected location
 			const Real t_bullet=mgn/Bullet::speed; // ? find t_bullet by solving for x or y?
 			// difference between target and bullet intersection t
@@ -340,13 +340,6 @@ private:
 //			v2.normalize().scale(Bullet::speed);
 //			Game::draw_trajectory(phy_ro().pos,v2,t_bullet,Real(.1),0xe);
 
-//			 get magnitude² of aim vector
-//			const Real mgn2=v_aim.magnitude2();
-////			 get t² for bullet to reach expected location
-//			const Real t_bullet2=mgn2/(Bullet::speed*Bullet::speed);
-//			const Real t_aim2=abs(t_bullet2-t*t);
-//			if(t_aim2<error_margin_t){
-
 			// if t within error margin return aim vector
 			if(t_aim<error_margin_t){
 				if(draw_trajectory){
@@ -354,7 +347,6 @@ private:
 					Vector v3=v_aim;
 					v3.normalize().scale(Bullet::speed);
 					Game::draw_trajectory(phy_ro().pos,v3,t_bullet,Real(.2),2);
-//					Game::draw_trajectory(phy_ro().pos,v3,sqrt(t_bullet2),Real(.2),2);
 //					err.pos({1,1}).p_hex_32b(unsigned(t_aim*100));
 				}
 				return v_aim;

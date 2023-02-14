@@ -196,7 +196,7 @@ using Bitmap8b=Bitmap<Color8b>;
 //	}
 //};
 
-static const unsigned int table_hex_to_font[]{
+static constexpr unsigned int table_hex_to_font[]{
 		0b01100'10010'10010'10010'01100'00000'00, // 0
 		0b00100'01100'00100'00100'01110'00000'00, // 1
 		0b01100'10010'00100'01000'11110'00000'00, // 2
@@ -216,7 +216,7 @@ static const unsigned int table_hex_to_font[]{
 };
 
 // from https://stackoverflow.com/questions/61124564/convert-scancodes-to-ascii
-static const char table_scancode_to_ascii[256]{
+static constexpr char table_scancode_to_ascii[256]{
 		0,27,'1','2','3','4','5','6','7','8','9','0','-','=','\b',
 		'\t', /* <-- Tab */
 		'q','w','e','r','t','y','u','i','o','p','[',']','\n',
@@ -252,7 +252,7 @@ static const char table_scancode_to_ascii[256]{
 // 0e - backspace
 // 1c - return
 
-static const unsigned int table_ascii_to_font[]{
+static constexpr unsigned int table_ascii_to_font[]{
 		0,0,0,0,0,0,0,0,0,0,
 		0,0,0,0,0,0,0,0,0,0,
 		0,0,0,0,0,0,0,0,0,0,
@@ -394,7 +394,7 @@ public:
 		bg_{0},
 		transparent_{false}
 	{}
-	PrinterToBitmap&operator=(const PrinterToBitmap&o){
+	constexpr PrinterToBitmap&operator=(const PrinterToBitmap&o){
 		if(this==&o)
 			return*this;
 		di_=o.di_;
@@ -422,7 +422,7 @@ public:
 	inline constexpr auto fg(const Color8b c)->PrinterToBitmap&{fg_=c;return*this;}
 	inline constexpr auto bg(const Color8b c)->PrinterToBitmap&{bg_=c;return*this;}
 	inline constexpr auto transparent(const bool b)->PrinterToBitmap&{transparent_=b;return*this;}
-	auto draw(unsigned int bmp_5x6)->PrinterToBitmap&{
+	constexpr auto draw(unsigned int bmp_5x6)->PrinterToBitmap&{
 		if(transparent_){
 			draw_transparent(bmp_5x6);
 		}else{
@@ -430,18 +430,18 @@ public:
 		}
 		return*this;
 	}
-	auto p_hex(const int hex_number_4b)->PrinterToBitmap&{
+	constexpr auto p_hex(const int hex_number_4b)->PrinterToBitmap&{
 		draw(table_hex_to_font[hex_number_4b&0xf]);
 		return*this;
 	}
-	auto p_hex_8b(unsigned char v)->PrinterToBitmap&{
+	constexpr auto p_hex_8b(unsigned char v)->PrinterToBitmap&{
 		const int ch1=v&0xf;
 		const int ch2=(v>>4)&0xf;
 		p_hex(ch2);
 		p_hex(ch1);
 		return*this;
 	}
-	auto p_hex_16b(unsigned short v)->PrinterToBitmap&{
+	constexpr auto p_hex_16b(unsigned short v)->PrinterToBitmap&{
 		// ? ugly code. remake
 		const int ch1=v&0xf;v>>=4;
 		const int ch2=v&0xf;v>>=4;
@@ -453,7 +453,7 @@ public:
 		p_hex(ch1);
 		return*this;
 	}
-	auto p_hex_32b(unsigned v)->PrinterToBitmap&{
+	constexpr auto p_hex_32b(unsigned v)->PrinterToBitmap&{
 		// ? ugly code. remake
 		const int ch1=v&0xf;v>>=4;
 		const int ch2=v&0xf;v>>=4;
@@ -474,7 +474,7 @@ public:
 		p_hex(ch1);
 		return*this;
 	}
-	auto p(const char ch)->PrinterToBitmap&{
+	constexpr auto p(const char ch)->PrinterToBitmap&{
 		draw(table_ascii_to_font[unsigned(ch)]);
 		return*this;
 	}
@@ -485,7 +485,7 @@ public:
 		}
 		return*this;
 	}
-	auto backspace()->PrinterToBitmap&{
+	constexpr auto backspace()->PrinterToBitmap&{
 		di_-=font_wi_;
 		p(' ');
 		di_-=font_wi_;
