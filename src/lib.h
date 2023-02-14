@@ -365,8 +365,8 @@ public:
 		ln_{SizePx(bmp_wi_-font_wi_)}
 	{}
 	constexpr auto operator=(const PrinterToBitmap&o)->PrinterToBitmap&{
-		if(this==&o)
-			return*this;
+//		if(this==&o)
+//			return*this;
 		di_=o.di_;
 		dil_=o.dil_;
 		b_=o.b_;
