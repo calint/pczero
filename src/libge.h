@@ -464,10 +464,10 @@ public:
 	// returns false if object is to be deleted
 	virtual auto on_collision(Object&other)->bool{return true;}
 
-	constexpr inline auto is_alive()const->bool{return!(bits_&1);}
+	inline constexpr auto is_alive()const->bool{return!(bits_&1);}
 
 	// used by 'world' to avoid deleting same object more than once
-	constexpr inline auto set_is_alive(const bool v){
+	inline constexpr auto set_is_alive(const bool v){
 		if(v){ // alive bit is 0
 			bits_&=0xff-1;
 		}else{ // not alive bit is 1
@@ -475,11 +475,11 @@ public:
 		}
 	}
 
-	constexpr inline auto bounding_radius()const->Scalar{return br_;}
+	inline constexpr auto bounding_radius()const->Scalar{return br_;}
 
 private:
-	constexpr inline auto is_wld_pts_need_update()const->bool{return!(bits_&2);}
-	constexpr inline auto set_wld_pts_need_update(const bool v){
+	inline constexpr auto is_wld_pts_need_update()const->bool{return!(bits_&2);}
+	inline constexpr auto set_wld_pts_need_update(const bool v){
 		if(v){ // refresh_wld_pts bit is 0
 			bits_&=0xff-2;
 		}else{ // refresh_wld_pts bit is 1
