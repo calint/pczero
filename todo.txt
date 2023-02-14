@@ -1,4 +1,6 @@
 [ ] review 'using' Scale Coord Angle etc terminology
+[ ] struct TaskInfo{eip,eflags,bits,eax,ebx...}
+[ ]   enable/disable task
 [ ] move draw_x into Bitmap?
 [ ] Osca::Game multiple instances
 [ ]   PhyicsStates instance
