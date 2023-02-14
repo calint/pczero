@@ -374,12 +374,12 @@ class PrinterToBitmap{
 	Color8b*dil_; // beginning of current line
 	Bitmap8b&b_;
 	SizePx bmp_wi_;
-	SizePx font_wi_;
-	SizePx font_hi_;
+	const SizePx font_wi_{5};
+	const SizePx font_hi_{6};
 	SizePx ln_;
-	Color8b fg_;
-	Color8b bg_;
-	bool transparent_;
+	Color8b fg_{2};
+	Color8b bg_{0};
+	bool transparent_{false};
 	char padding1{0};
 public:
 	constexpr PrinterToBitmap(Bitmap8b&b):
@@ -387,12 +387,7 @@ public:
 		dil_{di_},
 		b_{b},
 		bmp_wi_{b.dim().width()},
-		font_wi_{5},
-		font_hi_{6},
-		ln_{SizePx(bmp_wi_-font_wi_)},
-		fg_{2},
-		bg_{0},
-		transparent_{false}
+		ln_{SizePx(bmp_wi_-font_wi_)}
 	{}
 	constexpr auto operator=(const PrinterToBitmap&o)->PrinterToBitmap&{
 		if(this==&o)
@@ -401,8 +396,6 @@ public:
 		dil_=o.dil_;
 		b_=o.b_;
 		bmp_wi_=o.bmp_wi_;
-		font_wi_=o.font_wi_;
-		font_hi_=o.font_hi_;
 		ln_=o.ln_;
 		fg_=o.fg_;
 		bg_=o.bg_;
