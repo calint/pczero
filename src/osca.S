@@ -74,7 +74,7 @@ int $0x10
 # enable access to odd megs
 # enabled by default on non ancient pc?
 #movw $0x0404,%es:0x104
-in $0x92,%al # enable a20 line (odd megs)
+in $0x92,%al
 or $2,%al
 out %al,$0x92
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 32b
