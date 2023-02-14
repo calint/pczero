@@ -261,7 +261,7 @@ public:
 
 		// get slot info for this object
 		SlotInfo this_slot=used_ixes[used_ix_]; // ? this lookup can be optimized with a **Object in a field. speed vs space
-		*this_slot.oix=nullptr;
+		*this_slot.oix=nullptr; // ? this is unnecessary
 		// add slot to free slots
 		free_ixes_i++;
 		free_ixes[free_ixes_i]=this_slot.oix;
