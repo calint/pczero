@@ -422,7 +422,7 @@ public:
 	inline constexpr auto fg(const Color8b c)->PrinterToBitmap&{fg_=c;return*this;}
 	inline constexpr auto bg(const Color8b c)->PrinterToBitmap&{bg_=c;return*this;}
 	inline constexpr auto transparent(const bool b)->PrinterToBitmap&{transparent_=b;return*this;}
-	constexpr auto draw(unsigned int bmp_5x6)->PrinterToBitmap&{
+	constexpr auto draw(unsigned bmp_5x6)->PrinterToBitmap&{
 		if(transparent_){
 			draw_transparent(bmp_5x6);
 		}else{
