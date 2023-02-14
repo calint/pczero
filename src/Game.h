@@ -10,10 +10,10 @@ class Game{
 	inline static CoordsPx play_area_top_left{0,50};
 	inline static DimensionPx play_area_dim{320,100};
 
-	static auto create_scene();
-	static auto create_scene2();
-	static auto create_scene3();
-	static auto create_boss();
+	static auto create_scene()->void;
+	static auto create_scene2()->void;
+	static auto create_scene3()->void;
+	static auto create_boss()->void;
 	static auto create_circle(const Count segments)->Point*{
 		Point*pts=new Point[unsigned(segments)];
 		AngleRad th=0;
@@ -32,7 +32,7 @@ class Game{
 		return ix;
 	}
 
-	static auto draw_axis(){
+	static auto draw_axis()->void{
 		static AngleDeg deg=0;
 		static Matrix2D R;
 		if(deg>360)
@@ -80,7 +80,7 @@ public:
 		return true;
 	}
 
-	static constexpr void draw_dot(const Point&p,const Color8b color){
+	static constexpr auto draw_dot(const Point&p,const Color8b color)->void{
 		if(!is_in_play_area(p))
 			return;
 		const CoordPx xi=CoordPx(p.x);
@@ -434,7 +434,7 @@ public:
 	}
 };
 
-auto Game::create_scene(){
+auto Game::create_scene()->void{
 	for(Real i=30;i<300;i+=20){
 		Enemy*e=new Enemy({i,60},deg_to_rad(i));
 		e->phy().dagl=deg_to_rad(10);
@@ -443,14 +443,14 @@ auto Game::create_scene(){
 //	Object*o=new Boss;
 //	o->phy().pos={160,60};
 }
-auto Game::create_scene2(){
+auto Game::create_scene2()->void{
 	Object*o=new Wall(20,{160,100},0);
 	o->phy().dagl=deg_to_rad(1);
 }
-auto Game::create_scene3(){
+auto Game::create_scene3()->void{
 	new Enemy({160,100},0);
 }
-auto Game::create_boss(){
+auto Game::create_boss()->void{
 	Object*o=new Boss;
 	Game::boss_t=World::time;
 	if(Game::boss_vel.y>20){
