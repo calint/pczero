@@ -645,23 +645,26 @@ private:
 		const PointIx*bndptr1=o1.def_.bnd; // bounding point index of o1
 		for(PointIx i=0;i<nbnd1;i++){
 			// reference pts_pts_wld_[bnd[i]]
-			const Point&p1=o1.pts_wld_[*bndptr1++];
+			const Point&p1=o1.pts_wld_[*bndptr1];
+			bndptr1++;
 			// for each normal in o2
 			const PointIx*bndptr2=o2.def_.bnd;  // bounding point index
 			const Vector*nlptr=o2.nmls_wld_; // normals
 			bool is_collision=true; // assume is collision
 			for(PointIx j=0;j<nbnd2;j++){
 				// reference vector_pts_wld_[bnd[j]]
-				const Vector&p2=o2.pts_wld_[*bndptr2++];
+				const Vector&p2=o2.pts_wld_[*bndptr2];
+				bndptr2++;
 				if(enable::draw_collision_check){
 					World::draw_dot(p2,5);
 				}
 				const Vector v=p1-p2; // vector from line point to point to check
-				if(v.dot(*nlptr++)>0){ // use abs(v)<0.0001f (example)?
+				if(v.dot(*nlptr)>0){ // use abs(v)<0.0001f (example)?
 					// p "in front" of v, cannot be collision
 					is_collision=false;
 					break;
 				}
+				nlptr++;
 			}
 			// if point within all lines then p1 is within o2 bounding shape
 			if(is_collision)
