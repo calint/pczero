@@ -215,9 +215,9 @@ public:
 //	constexpr Object(Object&&)=delete; // move constructor
 	constexpr Object&operator=(const Object&)=delete; // copy assignment
 //	Object&operator=(Object&&)=delete; // move assignment
-	Object(const TypeBits tb,const TypeBits colchk_tb,const ObjectDef&def,const Scale scl,const Scalar bounding_radius,const Point&pos,const AngleRad rad,const Color8b color):
+	Object(const TypeBits tb,const TypeBits collision_check_tb,const ObjectDef&def,const Scale scl,const Scalar bounding_radius,const Point&pos,const AngleRad rad,const Color8b color):
 		tb_{tb},
-		colchk_tb_{colchk_tb},
+		colchk_tb_{collision_check_tb},
 		phy_{PhysicsState::alloc()},
 		scl_{scl},
 		def_{def},
