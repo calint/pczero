@@ -19,7 +19,7 @@
 [o]   ObjectDef: polygons with indexes to definition points
 [x]     step 1. use bounding shape polygon
 [ ]       review
-[ ]     step 2. define {color,npts,pts_ix[]}
+[ ]     step 2. define {color,{npts,pts_ix[]}}
 [ ]   clip to viewport
 [x]   render lines -> polygon outline.
 [ ] multiple bounding shapes per object to allow non-convex shape
