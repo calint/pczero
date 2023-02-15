@@ -160,7 +160,7 @@ in $0x70,%al
 or $0x80,%al
 out %al,$0x70
 in $0x71,%al
-# enable RTC 1024 Hz timer on irq 8
+# enable RTC 1024 Hz timer on IRQ 8
 # https://wiki.osdev.org/RTC
 mov $0x8b,%al
 out %al,$0x70
