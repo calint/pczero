@@ -555,7 +555,7 @@ public:
 //				out.p("chk ").p_hex_8b(static_cast<unsigned char>(tb1)).p(' ').p_hex_8b(static_cast<unsigned char>(tb2)).p(' ');
 				if(metrics::enabled)
 					metrics::collisions_checks++;
-				if(!Object::check_collision_bounding_circles(*o1,*o2))
+				if(!Object::is_bounding_circles_in_collision(*o1,*o2))
 					continue;
 				if(metrics::enabled)
 					metrics::collisions_checks_bounding_shapes++;
@@ -606,7 +606,7 @@ private:
 		}
 		return o;
 	}
-	static auto check_collision_bounding_circles(Object&o1,Object&o2)->bool{
+	static auto is_bounding_circles_in_collision(Object&o1,Object&o2)->bool{
 		const Scalar r1=o1.bounding_radius();
 		const Scalar r2=o2.bounding_radius();
 		const Point p1=o1.phy().pos;
@@ -616,21 +616,16 @@ private:
 		//                dx*dx+dy*dy <=(r1+r2)²
 		const Real dist_check=r1+r2;
 		const Real dist2_check=dist_check*dist_check; // (r1+r2)²
-		Vector v{p2.x-p1.x,p2.y-p1.y}; // dx,dy
+		Vector v{p2-p1}; // dx,dy
 		v.x*=v.x;
 		v.y*=v.y;
 		const Real dist2=v.x+v.y;
-//		const float diff=dist2-dist2_check;
-//		err.pos({0,1}).p_hex_32b(static_cast<unsigned>(diff));
 		if(dist2>dist2_check)
 			return false;
-//		out.p("bounds ");
 		return true;
 	}
 	// checks if any o1 points are in o2 bounding shape
 	static auto is_in_collision(Object&o1,Object&o2)->bool{
-//		o1.refresh_wld_points();
-//		o2.refresh_wld_points();
 		// for each point in o1 check if behind every normal of o2
 		// if behind every normal then within the convex bounding shape thus collision
 
