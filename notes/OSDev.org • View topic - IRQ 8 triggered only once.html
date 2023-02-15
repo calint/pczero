@@ -1,0 +1,779 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" xml:lang="en-gb" lang="en-gb"><head>
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="content-language" content="en-gb">
+<meta http-equiv="content-style-type" content="text/css">
+<meta http-equiv="imagetoolbar" content="no">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="copyright" content="2000, 2002, 2005, 2007 phpBB Group">
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
+
+<title>OSDev.org • View topic - IRQ 8 triggered only once</title>
+
+<link rel="alternate" type="application/atom+xml" title="Feed - OSDev.org" href="https://forum.osdev.org/feed.php"><link rel="alternate" type="application/atom+xml" title="Feed - News" href="https://forum.osdev.org/feed.php?mode=news"><link rel="alternate" type="application/atom+xml" title="Feed - All forums" href="https://forum.osdev.org/feed.php?mode=forums"><link rel="alternate" type="application/atom+xml" title="Feed - New Topics" href="https://forum.osdev.org/feed.php?mode=topics"><link rel="alternate" type="application/atom+xml" title="Feed - Active Topics" href="https://forum.osdev.org/feed.php?mode=topics_active"><link rel="alternate" type="application/atom+xml" title="Feed - Forum - OS Development" href="https://forum.osdev.org/feed.php?f=1"><link rel="alternate" type="application/atom+xml" title="Feed - Topic - IRQ 8 triggered only once" href="https://forum.osdev.org/feed.php?f=1&amp;t=15526">
+
+<link rel="stylesheet" href="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/stylesheet.css" type="text/css">
+
+<script type="text/javascript">
+// <![CDATA[
+
+
+function popup(url, width, height, name)
+{
+	if (!name)
+	{
+		name = '_popup';
+	}
+
+	window.open(url.replace(/&amp;/g, '&'), name, 'height=' + height + ',resizable=yes,scrollbars=yes,width=' + width);
+	return false;
+}
+
+function jumpto()
+{
+	var page = prompt('Enter the page number you wish to go to:', '1');
+	var per_page = '';
+	var base_url = '';
+
+	if (page !== null && !isNaN(page) && page == Math.floor(page) && page > 0)
+	{
+		if (base_url.indexOf('?') == -1)
+		{
+			document.location.href = base_url + '?start=' + ((page - 1) * per_page);
+		}
+		else
+		{
+			document.location.href = base_url.replace(/&amp;/g, '&') + '&start=' + ((page - 1) * per_page);
+		}
+	}
+}
+
+/**
+* Find a member
+*/
+function find_username(url)
+{
+	popup(url, 760, 570, '_usersearch');
+	return false;
+}
+
+/**
+* Mark/unmark checklist
+* id = ID of parent container, name = name prefix, state = state [true/false]
+*/
+function marklist(id, name, state)
+{
+	var parent = document.getElementById(id);
+	if (!parent)
+	{
+		eval('parent = document.' + id);
+	}
+
+	if (!parent)
+	{
+		return;
+	}
+
+	var rb = parent.getElementsByTagName('input');
+	
+	for (var r = 0; r < rb.length; r++)
+	{
+		if (rb[r].name.substr(0, name.length) == name)
+		{
+			rb[r].checked = state;
+		}
+	}
+}
+
+
+
+// ]]>
+</script>
+</head>
+<body class="ltr">
+
+<a name="top"></a>
+
+<div id="wrapheader">
+
+	<div id="logodesc">
+		<table width="100%" cellspacing="0">
+		<tbody><tr>
+			<td><a href="https://forum.osdev.org/index.php?sid=1c84fff78d3e4396f9d860f577876c59"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/osdev.png" alt="" title="" width="120" height="100"></a></td>
+			<td width="100%" align="center"><h1>OSDev.org</h1><span class="gen">The Place to Start for Operating System Developers</span></td>
+		</tr>
+		</tbody></table>
+	</div>
+
+	<div id="menubar">
+		<table width="100%" cellspacing="0">
+		<tbody><tr>
+			<td class="genmed">
+				<a href="https://forum.osdev.org/ucp.php?mode=login&amp;sid=1c84fff78d3e4396f9d860f577876c59"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_mini_login.gif" alt="*" width="12" height="13"> Login</a>&nbsp; &nbsp;<a href="https://forum.osdev.org/ucp.php?mode=register&amp;sid=1c84fff78d3e4396f9d860f577876c59"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_mini_register.gif" alt="*" width="12" height="13"> Register</a>
+					
+			</td>
+			<td class="genmed" align="right">
+<a href="http://wiki.osdev.org/" style="font-size: 125%; font-weight: bold;">The OSDev.org Wiki - Got a question? Search this first!</a>
+				<a href="https://forum.osdev.org/faq.php?sid=1c84fff78d3e4396f9d860f577876c59"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_mini_faq.gif" alt="*" width="12" height="13"> FAQ</a>
+				&nbsp; &nbsp;<a href="https://forum.osdev.org/search.php?sid=1c84fff78d3e4396f9d860f577876c59"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_mini_search.gif" alt="*" width="12" height="13"> Search</a>
+			</td>
+		</tr>
+		</tbody></table>
+	</div>
+
+	<div id="datebar">
+		<table width="100%" cellspacing="0">
+		<tbody><tr>
+			<td class="gensmall"></td>
+			<td class="gensmall" align="right">It is currently Wed Feb 15, 2023 2:27 pm<br></td>
+		</tr>
+		</tbody></table>
+	</div>
+
+</div>
+
+<div id="wrapcentre">
+
+	
+	<p class="searchbar">
+		<span style="float: left;"><a href="https://forum.osdev.org/search.php?search_id=unanswered&amp;sid=1c84fff78d3e4396f9d860f577876c59">View unanswered posts</a> | <a href="https://forum.osdev.org/search.php?search_id=active_topics&amp;sid=1c84fff78d3e4396f9d860f577876c59">View active topics</a></span>
+		
+	</p>
+	
+
+	<br style="clear: both;">
+
+	<table class="tablebg" style="margin-top: 5px;" width="100%" cellspacing="1" cellpadding="0">
+	<tbody><tr>
+		<td class="row1">
+			<p class="breadcrumbs"><a href="https://forum.osdev.org/index.php?sid=1c84fff78d3e4396f9d860f577876c59">Board index</a> » <a href="https://forum.osdev.org/viewforum.php?f=16&amp;sid=1c84fff78d3e4396f9d860f577876c59">Operating System Development</a> » <a href="https://forum.osdev.org/viewforum.php?f=1&amp;sid=1c84fff78d3e4396f9d860f577876c59">OS Development</a></p>
+			<p class="datetime">All times are UTC - 6 hours </p>
+		</td>
+	</tr>
+	</tbody></table>
+
+	<br>
+
+<div id="pageheader">
+	<h2><a class="titles" href="https://forum.osdev.org/viewtopic.php?f=1&amp;t=15526&amp;start=0&amp;sid=1c84fff78d3e4396f9d860f577876c59">IRQ 8 triggered only once</a></h2>
+
+
+	<p class="moderators">Moderators: <a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=1950&amp;sid=1c84fff78d3e4396f9d860f577876c59">AJ</a>, <a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=3731&amp;sid=1c84fff78d3e4396f9d860f577876c59">01000101</a>, <a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=155&amp;sid=1c84fff78d3e4396f9d860f577876c59">carbonBased</a>, <a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=1902&amp;sid=1c84fff78d3e4396f9d860f577876c59">Candy</a>, <a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=2477&amp;sid=1c84fff78d3e4396f9d860f577876c59">pcmattman</a>, <a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=67&amp;sid=1c84fff78d3e4396f9d860f577876c59">JAAman</a>, <a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=14234&amp;sid=1c84fff78d3e4396f9d860f577876c59">Octocontrabass</a>, <a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=11616&amp;sid=1c84fff78d3e4396f9d860f577876c59">klange</a>, <a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=12891&amp;sid=1c84fff78d3e4396f9d860f577876c59">sortie</a>, <a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=117&amp;sid=1c84fff78d3e4396f9d860f577876c59">kmcguire</a>, <a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=4287&amp;sid=1c84fff78d3e4396f9d860f577876c59">thepowersgang</a>, <a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=2&amp;sid=1c84fff78d3e4396f9d860f577876c59">chase</a>, <a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=1906&amp;sid=1c84fff78d3e4396f9d860f577876c59">Combuster</a>, <a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=4866&amp;sid=1c84fff78d3e4396f9d860f577876c59">Owen</a></p>
+
+</div>
+
+<br clear="all"><br>
+
+<div id="pagecontent">
+
+	<table width="100%" cellspacing="1">
+	<tbody><tr>
+		<td valign="middle" nowrap="nowrap" align="left">
+		<a href="https://forum.osdev.org/posting.php?mode=post&amp;f=1&amp;sid=1c84fff78d3e4396f9d860f577876c59"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/button_topic_new.gif" alt="Post new topic" title="Post new topic"></a>&nbsp;<a href="https://forum.osdev.org/posting.php?mode=reply&amp;f=1&amp;t=15526&amp;sid=1c84fff78d3e4396f9d860f577876c59"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/button_topic_reply.gif" alt="Reply to topic" title="Reply to topic"></a>
+		</td>
+		
+			<td class="nav" valign="middle" nowrap="nowrap">&nbsp;Page <strong>1</strong> of <strong>1</strong><br></td>
+			<td class="gensmall" nowrap="nowrap">&nbsp;[ 5 posts ]&nbsp;</td>
+			<td class="gensmall" width="100%" nowrap="nowrap" align="right"></td>
+		
+	</tr>
+	</tbody></table>
+
+	<table class="tablebg" width="100%" cellspacing="1">
+	<tbody><tr>
+		<td class="cat">
+			<table width="100%" cellspacing="0">
+			<tbody><tr>
+				<td class="nav" nowrap="nowrap">&nbsp;
+				<a href="https://forum.osdev.org/viewtopic.php?f=1&amp;t=15526&amp;start=0&amp;sid=1c84fff78d3e4396f9d860f577876c59&amp;view=print" title="Print view">Print view</a>
+				</td>
+				<td class="nav" nowrap="nowrap" align="right"><a href="https://forum.osdev.org/viewtopic.php?f=1&amp;t=15526&amp;view=previous&amp;sid=1c84fff78d3e4396f9d860f577876c59">Previous topic</a> | <a href="https://forum.osdev.org/viewtopic.php?f=1&amp;t=15526&amp;view=next&amp;sid=1c84fff78d3e4396f9d860f577876c59">Next topic</a>&nbsp;</td>
+			</tr>
+			</tbody></table>
+		</td>
+	</tr>
+
+	</tbody></table>
+
+
+	<table class="tablebg" width="100%" cellspacing="1">
+	
+		<tbody><tr>
+			<th>Author</th>
+			<th>Message</th>
+		</tr>
+	<tr class="row1">
+
+			<td valign="middle" align="center">
+				<a name="p111583"></a>
+				<b class="postauthor">Dandee Yuyo</b>
+			</td>
+			<td width="100%" height="25">
+				<table width="100%" cellspacing="0">
+				<tbody><tr>
+				
+					<td class="gensmall" width="100%"><div style="float: left;">&nbsp;<b>Post subject:</b> IRQ 8 triggered only once</div><div style="float: right;"><a href="https://forum.osdev.org/viewtopic.php?p=111583&amp;sid=1c84fff78d3e4396f9d860f577876c59#p111583"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_post_target.gif" alt="Post" title="Post" width="12" height="9"></a><b>Posted:</b> Tue Nov 27, 2007 6:02 pm&nbsp;</div></td>
+				</tr>
+				</tbody></table>
+			</td>
+		</tr>
+
+		<tr class="row1">
+
+			<td class="profile" valign="top">
+				<table width="150" cellspacing="4" align="center">
+			
+				<tbody><tr>
+					<td><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_user_offline.gif" alt="Offline" title="Offline"></td>
+				</tr>
+			
+				<tr>
+					<td class="postdetails">Member</td>
+				</tr>
+			
+				<tr>
+					<td><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/1.gif" alt="Member" title="Member"></td>
+				</tr>
+			
+				<tr>
+					<td><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/4145.png" alt="User avatar" width="80" height="80"></td>
+				</tr>
+			
+				</tbody></table>
+
+				<span class="postdetails">
+					<br><b>Joined:</b> Fri Nov 09, 2007 6:46 pm<br><b>Posts:</b> 47<br><b>Location:</b> Argentina
+				</span>
+
+			</td>
+			<td valign="top">
+				<table width="100%" cellspacing="5">
+				<tbody><tr>
+					<td>
+					
+
+						<div class="postbody">This must be very basic, but I cannot make it work  <img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_cry.gif" alt=":cry:" title="Crying or Very sad"> 
+<br>
+<br>I get only one interrupt after enabling it.
+<br>
+<br>This is what I'm doing:
+<br>
+<br>Enable PIE bit on the MC146818A chip:
+<br>
+<br><div class="quotetitle"><b>Quote:</b></div><div class="quotecontent">// ! assumes interrupts are disabled<br>	outportb(0x70, 0x0b);			// choose RTC register 11<br>	int regB = inportb(0x71);<br>	outportb(0x70, 0x0b);<br>	outportb(0x71, regB | 0x40);	// enable PIE bit</div><br><br>Enable cascade (IRQ2) and IRQ8 on the 8259:<br><br><div class="quotetitle"><b>Quote:</b></div><div class="quotecontent">// enable IRQ0 (timer) IRQ1 (keyboard) and IRQ2 (cascade) on primary PIC<br>	outportb(0x21, ~0x07);	<br>	// enable IRQ8 on secondary PIC<br>	outportb(0xA1, ~0x01);</div>
+<br>
+<br>I have read here <!-- m --><a class="postlink" href="http://www.compuphase.com/int70.txt">http://www.compuphase.com/int70.txt</a><!-- m --> that I have to read register C in my ISR so IRQ8 continues triggering...
+<br>
+<br>So I did (in my ISR):
+<br>
+<br><div class="codetitle"><b>Code:</b></div><div class="codecontent">outportb(0x70, 0x0c);&nbsp; &nbsp;// select RTC status register C<br>int val = inportb(0x71);<br>if(val &amp; 0x40)<br>{<br>&nbsp; &nbsp; ++rtc_ticks;<br>}</div>
+<br>
+<br>but even so is not working... (bah, working but one shot only)
+<br>
+<br>I tried reenabling the PI bit but that didn't work neither. Do I 
+always need to disable NMI's during reads/writes to ports 0x70/0x71?
+<br>
+<br>Help someone?  <img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_confused.gif" alt=":?" title="Confused"></div>
+
+					
+						<span class="postbody"><br>_________________<br>NaN - Not a Nerd
+<br>Working on: Physical Memory Management with a 5-lod mipmap XD</span>
+					<br clear="all"><br>
+
+						<table width="100%" cellspacing="0">
+						<tbody><tr valign="middle">
+							<td class="gensmall" align="right">
+							
+							</td>
+						</tr>
+						</tbody></table>
+					</td>
+				</tr>
+				</tbody></table>
+			</td>
+		</tr>
+
+		<tr class="row1">
+
+			<td class="profile"><strong><a href="#wrapheader">Top</a></strong></td>
+			<td><div class="gensmall" style="float: left;">&nbsp;<a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=4145&amp;sid=1c84fff78d3e4396f9d860f577876c59"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_user_profile.gif" alt="Profile" title="Profile"></a> &nbsp;</div> <div class="gensmall" style="float: right;">&nbsp;</div></td>
+	
+		</tr>
+
+	<tr>
+		<td class="spacer" colspan="2" height="1"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/spacer.gif" alt="" width="1" height="1"></td>
+	</tr>
+	</tbody></table>
+
+	<table class="tablebg" width="100%" cellspacing="1">
+	<tbody><tr class="row2">
+
+			<td valign="middle" align="center">
+				<a name="p111587"></a>
+				<b class="postauthor">Dandee Yuyo</b>
+			</td>
+			<td width="100%" height="25">
+				<table width="100%" cellspacing="0">
+				<tbody><tr>
+				
+					<td class="gensmall" width="100%"><div style="float: left;">&nbsp;<b>Post subject:</b> </div><div style="float: right;"><a href="https://forum.osdev.org/viewtopic.php?p=111587&amp;sid=1c84fff78d3e4396f9d860f577876c59#p111587"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_post_target.gif" alt="Post" title="Post" width="12" height="9"></a><b>Posted:</b> Tue Nov 27, 2007 7:02 pm&nbsp;</div></td>
+				</tr>
+				</tbody></table>
+			</td>
+		</tr>
+
+		<tr class="row2">
+
+			<td class="profile" valign="top">
+				<table width="150" cellspacing="4" align="center">
+			
+				<tbody><tr>
+					<td><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_user_offline.gif" alt="Offline" title="Offline"></td>
+				</tr>
+			
+				<tr>
+					<td class="postdetails">Member</td>
+				</tr>
+			
+				<tr>
+					<td><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/1.gif" alt="Member" title="Member"></td>
+				</tr>
+			
+				<tr>
+					<td><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/4145.png" alt="User avatar" width="80" height="80"></td>
+				</tr>
+			
+				</tbody></table>
+
+				<span class="postdetails">
+					<br><b>Joined:</b> Fri Nov 09, 2007 6:46 pm<br><b>Posts:</b> 47<br><b>Location:</b> Argentina
+				</span>
+
+			</td>
+			<td valign="top">
+				<table width="100%" cellspacing="5">
+				<tbody><tr>
+					<td>
+					
+
+						<div class="postbody">Solved!
+<br>
+<br><div class="codetitle"><b>Code:</b></div><div class="codecontent">outportb(0xa0, 0x20); // EOI, PIC1<br>outportb(0x20, 0x20); // EOI, PIC0 </div>
+<br>
+<br>Cannot wait to go 'tickless' now  <img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_lol.gif" alt=":lol:" title="Laughing"></div>
+
+					
+						<span class="postbody"><br>_________________<br>NaN - Not a Nerd
+<br>Working on: Physical Memory Management with a 5-lod mipmap XD</span>
+					<br clear="all"><br>
+
+						<table width="100%" cellspacing="0">
+						<tbody><tr valign="middle">
+							<td class="gensmall" align="right">
+							
+							</td>
+						</tr>
+						</tbody></table>
+					</td>
+				</tr>
+				</tbody></table>
+			</td>
+		</tr>
+
+		<tr class="row2">
+
+			<td class="profile"><strong><a href="#wrapheader">Top</a></strong></td>
+			<td><div class="gensmall" style="float: left;">&nbsp;<a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=4145&amp;sid=1c84fff78d3e4396f9d860f577876c59"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_user_profile.gif" alt="Profile" title="Profile"></a> &nbsp;</div> <div class="gensmall" style="float: right;">&nbsp;</div></td>
+	
+		</tr>
+
+	<tr>
+		<td class="spacer" colspan="2" height="1"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/spacer.gif" alt="" width="1" height="1"></td>
+	</tr>
+	</tbody></table>
+
+	<table class="tablebg" width="100%" cellspacing="1">
+	<tbody><tr class="row1">
+
+			<td valign="middle" align="center">
+				<a name="p111602"></a>
+				<b class="postauthor">JamesM</b>
+			</td>
+			<td width="100%" height="25">
+				<table width="100%" cellspacing="0">
+				<tbody><tr>
+				
+					<td class="gensmall" width="100%"><div style="float: left;">&nbsp;<b>Post subject:</b> </div><div style="float: right;"><a href="https://forum.osdev.org/viewtopic.php?p=111602&amp;sid=1c84fff78d3e4396f9d860f577876c59#p111602"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_post_target.gif" alt="Post" title="Post" width="12" height="9"></a><b>Posted:</b> Wed Nov 28, 2007 2:33 am&nbsp;</div></td>
+				</tr>
+				</tbody></table>
+			</td>
+		</tr>
+
+		<tr class="row1">
+
+			<td class="profile" valign="top">
+				<table width="150" cellspacing="4" align="center">
+			
+				<tbody><tr>
+					<td><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_user_offline.gif" alt="Offline" title="Offline"></td>
+				</tr>
+			
+				<tr>
+					<td class="postdetails">Member</td>
+				</tr>
+			
+				<tr>
+					<td><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/5.gif" alt="Member" title="Member"></td>
+				</tr>
+			
+				<tr>
+					<td><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/3781.jpg" alt="User avatar" width="60" height="80"></td>
+				</tr>
+			
+				</tbody></table>
+
+				<span class="postdetails">
+					<br><b>Joined:</b> Tue Jul 10, 2007 5:27 am<br><b>Posts:</b> 2935<br><b>Location:</b> York, United Kingdom
+				</span>
+
+			</td>
+			<td valign="top">
+				<table width="100%" cellspacing="5">
+				<tbody><tr>
+					<td>
+					
+
+						<div class="postbody">'tickless'?</div>
+
+					
+						<span class="postbody"><br>_________________<br><span style="font-weight: bold"><a href="http://www.quokforge.org/projects/horizon" class="postlink">Horizon - a framework and language for SAS-OS development</a></span><br><a href="http://www.pedigree-project.org/" class="postlink">Project 'Pedigree'</a><br><a href="http://www.jamesmolloy.co.uk/" class="postlink">Practical x86 OSDev tutorials</a></span>
+					<br clear="all"><br>
+
+						<table width="100%" cellspacing="0">
+						<tbody><tr valign="middle">
+							<td class="gensmall" align="right">
+							
+							</td>
+						</tr>
+						</tbody></table>
+					</td>
+				</tr>
+				</tbody></table>
+			</td>
+		</tr>
+
+		<tr class="row1">
+
+			<td class="profile"><strong><a href="#wrapheader">Top</a></strong></td>
+			<td><div class="gensmall" style="float: left;">&nbsp;<a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=3781&amp;sid=1c84fff78d3e4396f9d860f577876c59"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_user_profile.gif" alt="Profile" title="Profile"></a> &nbsp;</div> <div class="gensmall" style="float: right;">&nbsp;</div></td>
+	
+		</tr>
+
+	<tr>
+		<td class="spacer" colspan="2" height="1"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/spacer.gif" alt="" width="1" height="1"></td>
+	</tr>
+	</tbody></table>
+
+	<table class="tablebg" width="100%" cellspacing="1">
+	<tbody><tr class="row2">
+
+			<td valign="middle" align="center">
+				<a name="p111612"></a>
+				<b class="postauthor">Dandee Yuyo</b>
+			</td>
+			<td width="100%" height="25">
+				<table width="100%" cellspacing="0">
+				<tbody><tr>
+				
+					<td class="gensmall" width="100%"><div style="float: left;">&nbsp;<b>Post subject:</b> </div><div style="float: right;"><a href="https://forum.osdev.org/viewtopic.php?p=111612&amp;sid=1c84fff78d3e4396f9d860f577876c59#p111612"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_post_target.gif" alt="Post" title="Post" width="12" height="9"></a><b>Posted:</b> Wed Nov 28, 2007 6:53 am&nbsp;</div></td>
+				</tr>
+				</tbody></table>
+			</td>
+		</tr>
+
+		<tr class="row2">
+
+			<td class="profile" valign="top">
+				<table width="150" cellspacing="4" align="center">
+			
+				<tbody><tr>
+					<td><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_user_offline.gif" alt="Offline" title="Offline"></td>
+				</tr>
+			
+				<tr>
+					<td class="postdetails">Member</td>
+				</tr>
+			
+				<tr>
+					<td><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/1.gif" alt="Member" title="Member"></td>
+				</tr>
+			
+				<tr>
+					<td><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/4145.png" alt="User avatar" width="80" height="80"></td>
+				</tr>
+			
+				</tbody></table>
+
+				<span class="postdetails">
+					<br><b>Joined:</b> Fri Nov 09, 2007 6:46 pm<br><b>Posts:</b> 47<br><b>Location:</b> Argentina
+				</span>
+
+			</td>
+			<td valign="top">
+				<table width="100%" cellspacing="5">
+				<tbody><tr>
+					<td>
+					
+
+						<div class="postbody">Yes, it's what one of my partners with more experience than me on OSes adviced me:
+<br>
+<br>"...another detail to consider is that nowadays operating systems 
+tend towards the 'tickless' model, that means, no more periodic timer 
+interrupt."
+<br>
+<br>"You program the motorola RTC so it triggers when you know you will 
+do the next context-switch... By doing this you eliminate a lot of 
+overhead, you consume less energy and the laptop batteries last longer."
+<br>
+<br>I'm just wondering how I can mix that with keeping time accurately...</div>
+
+					
+						<span class="postbody"><br>_________________<br>NaN - Not a Nerd
+<br>Working on: Physical Memory Management with a 5-lod mipmap XD</span>
+					<br clear="all"><br>
+
+						<table width="100%" cellspacing="0">
+						<tbody><tr valign="middle">
+							<td class="gensmall" align="right">
+							
+							</td>
+						</tr>
+						</tbody></table>
+					</td>
+				</tr>
+				</tbody></table>
+			</td>
+		</tr>
+
+		<tr class="row2">
+
+			<td class="profile"><strong><a href="#wrapheader">Top</a></strong></td>
+			<td><div class="gensmall" style="float: left;">&nbsp;<a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=4145&amp;sid=1c84fff78d3e4396f9d860f577876c59"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_user_profile.gif" alt="Profile" title="Profile"></a> &nbsp;</div> <div class="gensmall" style="float: right;">&nbsp;</div></td>
+	
+		</tr>
+
+	<tr>
+		<td class="spacer" colspan="2" height="1"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/spacer.gif" alt="" width="1" height="1"></td>
+	</tr>
+	</tbody></table>
+
+	<table class="tablebg" width="100%" cellspacing="1">
+	<tbody><tr class="row1">
+
+			<td valign="middle" align="center">
+				<a name="p111629"></a>
+				<b class="postauthor">jal</b>
+			</td>
+			<td width="100%" height="25">
+				<table width="100%" cellspacing="0">
+				<tbody><tr>
+				
+					<td class="gensmall" width="100%"><div style="float: left;">&nbsp;<b>Post subject:</b> </div><div style="float: right;"><a href="https://forum.osdev.org/viewtopic.php?p=111629&amp;sid=1c84fff78d3e4396f9d860f577876c59#p111629"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_post_target.gif" alt="Post" title="Post" width="12" height="9"></a><b>Posted:</b> Wed Nov 28, 2007 10:36 am&nbsp;</div></td>
+				</tr>
+				</tbody></table>
+			</td>
+		</tr>
+
+		<tr class="row1">
+
+			<td class="profile" valign="top">
+				<table width="150" cellspacing="4" align="center">
+			
+				<tbody><tr>
+					<td><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_user_offline.gif" alt="Offline" title="Offline"></td>
+				</tr>
+			
+				<tr>
+					<td class="postdetails">Member</td>
+				</tr>
+			
+				<tr>
+					<td><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/5.gif" alt="Member" title="Member"></td>
+				</tr>
+			
+				</tbody></table>
+
+				<span class="postdetails">
+					<br><b>Joined:</b> Wed Oct 31, 2007 9:09 am<br><b>Posts:</b> 1385
+				</span>
+
+			</td>
+			<td valign="top">
+				<table width="100%" cellspacing="5">
+				<tbody><tr>
+					<td>
+					
+
+						<div class="postbody"><div class="quotetitle">Dandee Yuyo wrote:</div><div class="quotecontent">I'm just wondering how I can mix that with keeping time accurately...</div>
+<br>
+<br>You use the RTC for keeping time. Well, time of day at least. And 
+use some other timer (if there is one) for keeping track of profiling 
+times.
+<br>
+<br>
+<br>JAL</div>
+
+					<br clear="all"><br>
+
+						<table width="100%" cellspacing="0">
+						<tbody><tr valign="middle">
+							<td class="gensmall" align="right">
+							
+							</td>
+						</tr>
+						</tbody></table>
+					</td>
+				</tr>
+				</tbody></table>
+			</td>
+		</tr>
+
+		<tr class="row1">
+
+			<td class="profile"><strong><a href="#wrapheader">Top</a></strong></td>
+			<td><div class="gensmall" style="float: left;">&nbsp;<a href="https://forum.osdev.org/memberlist.php?mode=viewprofile&amp;u=4106&amp;sid=1c84fff78d3e4396f9d860f577876c59"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/icon_user_profile.gif" alt="Profile" title="Profile"></a> &nbsp;</div> <div class="gensmall" style="float: right;">&nbsp;</div></td>
+	
+		</tr>
+
+	<tr>
+		<td class="spacer" colspan="2" height="1"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/spacer.gif" alt="" width="1" height="1"></td>
+	</tr>
+	</tbody></table>
+
+	<table class="tablebg" width="100%" cellspacing="1">
+	<tbody><tr align="center">
+		<td class="cat"><form name="viewtopic" method="post" action="./viewtopic.php?f=1&amp;t=15526&amp;start=0&amp;sid=1c84fff78d3e4396f9d860f577876c59"><span class="gensmall">Display posts from previous:</span> <select name="st" id="st"><option value="0" selected="selected">All posts</option><option value="1">1 day</option><option value="7">7 days</option><option value="14">2 weeks</option><option value="30">1 month</option><option value="90">3 months</option><option value="180">6 months</option><option value="365">1 year</option></select>&nbsp;<span class="gensmall">Sort by</span> <select name="sk" id="sk"><option value="a">Author</option><option value="t" selected="selected">Post time</option><option value="s">Subject</option></select> <select name="sd" id="sd"><option value="a" selected="selected">Ascending</option><option value="d">Descending</option></select>&nbsp;<input class="btnlite" type="submit" value="Go" name="sort"></form></td>
+	</tr>
+	</tbody></table>
+	
+
+	<table width="100%" cellspacing="1">
+	<tbody><tr>
+		<td valign="middle" nowrap="nowrap" align="left">
+		<a href="https://forum.osdev.org/posting.php?mode=post&amp;f=1&amp;sid=1c84fff78d3e4396f9d860f577876c59"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/button_topic_new.gif" alt="Post new topic" title="Post new topic"></a>&nbsp;<a href="https://forum.osdev.org/posting.php?mode=reply&amp;f=1&amp;t=15526&amp;sid=1c84fff78d3e4396f9d860f577876c59"><img src="OSDev.org%20%E2%80%A2%20View%20topic%20-%20IRQ%208%20triggered%20only%20once_files/button_topic_reply.gif" alt="Reply to topic" title="Reply to topic"></a>
+		</td>
+		
+			<td class="nav" valign="middle" nowrap="nowrap">&nbsp;Page <strong>1</strong> of <strong>1</strong><br></td>
+			<td class="gensmall" nowrap="nowrap">&nbsp;[ 5 posts ]&nbsp;</td>
+			<td class="gensmall" width="100%" nowrap="nowrap" align="right"></td>
+		
+	</tr>
+	</tbody></table>
+
+</div>
+
+<div id="pagefooter"></div>
+
+<br clear="all">
+<table class="tablebg" style="margin-top: 5px;" width="100%" cellspacing="1" cellpadding="0">
+	<tbody><tr>
+		<td class="row1">
+			<p class="breadcrumbs"><a href="https://forum.osdev.org/index.php?sid=1c84fff78d3e4396f9d860f577876c59">Board index</a> » <a href="https://forum.osdev.org/viewforum.php?f=16&amp;sid=1c84fff78d3e4396f9d860f577876c59">Operating System Development</a> » <a href="https://forum.osdev.org/viewforum.php?f=1&amp;sid=1c84fff78d3e4396f9d860f577876c59">OS Development</a></p>
+			<p class="datetime">All times are UTC - 6 hours </p>
+		</td>
+	</tr>
+	</tbody></table>
+	<br clear="all">
+
+	<table class="tablebg" width="100%" cellspacing="1">
+	<tbody><tr>
+		<td class="cat"><h4>Who is online</h4></td>
+	</tr>
+	<tr>
+		<td class="row1"><p class="gensmall">Users browsing this forum: <span style="color: #9E8DA7;" class="username-coloured">SemrushBot [Bot]</span> and 8 guests</p></td>
+	</tr>
+	</tbody></table>
+
+
+<br clear="all">
+
+<table width="100%" cellspacing="1">
+<tbody><tr>
+	<td width="40%" valign="top" nowrap="nowrap" align="left"></td>
+	<td valign="top" nowrap="nowrap" align="right"><span class="gensmall">You <strong>cannot</strong> post new topics in this forum<br>You <strong>cannot</strong> reply to topics in this forum<br>You <strong>cannot</strong> edit your posts in this forum<br>You <strong>cannot</strong> delete your posts in this forum<br>You <strong>cannot</strong> post attachments in this forum<br></span></td>
+</tr>
+</tbody></table>
+
+<br clear="all">
+
+<table width="100%" cellspacing="0">
+<tbody><tr>
+	<td><form method="post" name="search" action="./search.php?t=15526&amp;sid=1c84fff78d3e4396f9d860f577876c59"><span class="gensmall">Search for:</span> <input class="post" type="text" name="keywords" size="20"> <input class="btnlite" type="submit" value="Go"></form></td>
+	<td align="right">
+	<form method="post" name="jumpbox" action="./viewforum.php?sid=1c84fff78d3e4396f9d860f577876c59" onsubmit="if(document.jumpbox.f.value == -1){return false;}">
+
+	<table cellspacing="0" cellpadding="0" border="0">
+	<tbody><tr>
+		<td nowrap="nowrap"><span class="gensmall">Jump to:</span>&nbsp;<select name="f" onchange="if(this.options[this.selectedIndex].value != -1){ document.forms['jumpbox'].submit() }">
+
+		
+			<option value="-1">Select a forum</option>
+		<option value="-1">------------------</option>
+			<option value="16">Operating System Development</option>
+		
+			<option value="1" selected="selected">&nbsp; &nbsp;OS Development</option>
+		
+			<option value="15">&nbsp; &nbsp;OS Design &amp; Theory</option>
+		
+			<option value="2">&nbsp; &nbsp;Announcements, Test Requests, &amp; Job openings</option>
+		
+			<option value="17">Everything Else</option>
+		
+			<option value="13">&nbsp; &nbsp;General Programming</option>
+		
+			<option value="11">&nbsp; &nbsp;General Ramblings</option>
+		
+			<option value="7">&nbsp; &nbsp;Auto-Delete Forum</option>
+		
+			<option value="18">OSDev.org</option>
+		
+			<option value="8">&nbsp; &nbsp;OSDev Wiki</option>
+		
+			<option value="6">&nbsp; &nbsp;About this site</option>
+		
+
+		</select>&nbsp;<input class="btnlite" type="submit" value="Go"></td>
+	</tr>
+	</tbody></table>
+
+	</form>
+</td>
+</tr>
+</tbody></table>
+
+
+</div>
+
+<!--
+	We request you retain the full copyright notice below including the link to www.phpbb.com.
+	This not only gives respect to the large amount of time given freely by the developers
+	but also helps build interest, traffic and use of phpBB3. If you (honestly) cannot retain
+	the full copyright we ask you at least leave in place the "Powered by phpBB" line, with
+	"phpBB" linked to www.phpbb.com. If you refuse to include even this then support on our
+	forums may be affected.
+
+	The phpBB Group : 2006
+//-->
+
+<div id="wrapfooter">
+	
+	<span class="copyright">Powered by <a href="http://www.phpbb.com/">phpBB</a> © 2000, 2002, 2005, 2007 phpBB Group
+	</span>
+</div>
+
+
+</body></html>
