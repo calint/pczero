@@ -223,7 +223,7 @@ public:
 		scl_{scl},
 		def_{def},
 		pts_wld_{new Point[unsigned(def.npts)]},
-		nmls_wld_{new Vector[unsigned(def.nbnd)]},
+		nmls_wld_{new Vector[unsigned(def.nbnd)]}, // ? nbnd might be <3 -> no bounding shape
 		Mmw_{},
 		Mmw_pos_{0,0},
 		Mmw_agl_{0},
