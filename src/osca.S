@@ -135,7 +135,7 @@ lidt idtr
 call osca_init
 mov osca_tsk_a,%ebx # ebx points to active task record
 # potential bug? because eflags not restored and registers in unknown state?)
-mov 4(%ebx),%esp # restore stack pointer (only?)
+mov 4(%ebx),%esp # restore stack pointer
 sti # enable interrupts (racing?)
 jmp *(%ebx) # jmp to first task
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - vars
