@@ -231,14 +231,11 @@ osca_key:.byte 0x00 # last key event
 isr_tmr:
   cli # disable interrupts
   incl 0xa0000+320-12
-#  incl 0xa0000+160
-  incl osca_tmr_lo    # increase lower 32 bits ticker
-  adcl $0,osca_tmr_hi # add carry to upper 32 bits
-
-  push %eax            # don't switch task
-  mov osca_tmr_lo,%eax # at every tick
+  incl osca_tmr_lo     # increase lower 32 bits ticker
+  adcl $0,osca_tmr_hi  # add carry to upper 32 bits
+  push %eax            # don't switch task at every tick
+  mov osca_tmr_lo,%eax #
   and $0x1,%eax        # 1024/2 Hz (running at 1024 Hz hangs Asus Zenbook)
-#  mov %eax,0xa0000+160+320
   pop %eax             #
   jz switch_task       #
     push %ax      # save ax
@@ -251,7 +248,6 @@ isr_tmr:
     pop %ax       # restore ax
     sti           # enable interrupts
     iret
-
 switch_task:
   # start task switching
   mov %eax,isr_tck_eax # save eax,ebx
@@ -263,7 +259,6 @@ switch_task:
   mov %eax,8(%ebx) # save to task.eflags
   mov %esp,%eax # adjust esp to value before irq
   add $12,%eax # skip eip,cs,eflags
-#  add $16,%eax # skip error code,eip,cs,eflags
   mov %eax,4(%ebx) # save to task.esp
   mov %ebx,%esp # save gprs by preparing esp and then pusha
   add $48,%esp # move to end of task record
@@ -299,8 +294,8 @@ switch_task:
   in $0x71,%al  #  irq 8
 
   mov $0x20,%al # acknowledge interrupt (EOI) to
-  out %al,$0xa0 # second controller PIC1
-  out %al,$0x20 # main controller PIC0
+  out %al,$0xa0 #  second controller PIC1
+  out %al,$0x20 #  main controller PIC0
 
   pop %ax # restore %ax
   sti # enable interrupts
