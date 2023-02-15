@@ -610,7 +610,7 @@ auto Game::create_boss()->void{
 		out.p("b=").p_hex_8b(static_cast<unsigned char>(metrics::collisions_checks_bounding_shapes)).spc();
 		out.p("f=").p_hex_8b(static_cast<unsigned char>(Object::free_slots_count())).spc();
 		out.p("u=").p_hex_8b(static_cast<unsigned char>(Object::used_slots_count())).spc();
-		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_t)).spc();
+		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_tmr_lo)).spc();
 		out.p("s=").p_hex_8b(static_cast<unsigned char>(World::time)).spc();
 		out.p("d=").p_hex_8b(static_cast<unsigned char>(World::time_dt*1000)).spc();
 
@@ -695,8 +695,7 @@ auto Game::create_boss()->void{
 		}
 
 //			draw_axis(vga13h.bmp());
-
-		osca_yield();
+//		osca_yield();
 	}
 }
 

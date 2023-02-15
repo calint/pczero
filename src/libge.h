@@ -63,14 +63,14 @@ private:
 	inline static Object*deleted[nobjects_max]; // ? todo improve with lesser memory footprint
 	inline static int deleted_ix{0};
 public:
-	constexpr static Real sec_per_tick{1/Real(18.2)}; // the default 18.2 Hz clock
-
+//	constexpr static Real sec_per_tick{1/Real(18.2)}; // the default 18.2 Hz clock
+	constexpr static Real sec_per_tick{Real(1)/Real(1024)}; // the 1024 Hz clock
 	inline static TimeSec time{0};
 	inline static TimeSec time_dt{0};
 	inline static TimeSec time_prv{0};
 
 	static auto init_statics()->void{
-		time=TimeSec(osca_t)*sec_per_tick;
+		time=TimeSec(osca_tmr_lo)*sec_per_tick;
 		// set previous time to a reasonable value so that dt does not
 		// become huge at first frame
 		time_prv=time-sec_per_tick;
@@ -698,7 +698,8 @@ auto World::tick()->void{
 	metrics::reset();
 
 	time_prv=time;
-	time=Real(osca_t)*sec_per_tick;
+	time=Real(osca_tmr_lo)*sec_per_tick;
+//	time=Real(osca_t)*sec_per_tick;
 	time_dt=time-time_prv;
 
 	Object::draw_all(vga13h.bmp());

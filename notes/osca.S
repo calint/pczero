@@ -227,38 +227,19 @@ osca_key:.byte 0x00 # last key event
 #
 #—Intel Software Developer Manual
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- irq 8 timer
-.align 16,0x90
 isr_tmr:
   cli # disable interrupts
   incl 0xa0000+320-16
-#  incl 0xa0000+160
-  incl osca_tmr_lo    # increase lower 32 bits ticker
+  incl osca_tmr_lo    # increase 64b ticker
   adcl $0,osca_tmr_hi # add carry to upper 32 bits
 
-  push %eax            # don't switch task
-  mov osca_tmr_lo,%eax # at every tick
-  and $0x1,%eax        # 1024/2 Hz (running at 1024 Hz hangs Asus Zenbook)
-#  mov %eax,0xa0000+160+320
-  pop %eax             #
-  jz switch_task       #
-  # enable this to run first task only
-    incl 0xa0000+180
-    push %ax      # save ax
-    mov $0x0c,%al # read register C in ISR
-    out %al,$0x70 #  to keep getting
-    in $0x71,%al  #  irq 8
-    mov $0x20,%al # acknowledge interrupt (EOI) to
-    out %al,$0xa0 # second controller PIC1
-    out %al,$0x20 # main controller PIC0
-    pop %ax       # restore ax
-    sti           # enable interrupts
-    iret
-
-
-switch_task:
   # start task switching
   mov %eax,isr_tck_eax # save eax,ebx
   mov %ebx,isr_tck_ebx # eax,ebx will be used as scratch
+#  incl osca_t # increase 64b ticker
+#  adcl $0,osca_th # add carry to upper 32 bits
+#  mov osca_t,%eax # on screen
+#  mov %eax,0xa0130
   mov osca_tsk_a,%ebx # point ebx to active task
   mov (%esp),%eax # get eip before irq from stack
   mov %eax,(%ebx) # save to task.eip
@@ -358,6 +339,7 @@ tsk: # eip,  esp,       eflags,     bits,       edi        esi        ebp       
   .long tsk3 ,0x000af280,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
   .long tsk4 ,0x000af000,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
 tsk_eot:
+#tsk_eot:
 #  .long tsk5 ,0x000aed80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
 #  .long tsk6 ,0x000aeb00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
 #  .long tsk7 ,0x000ae880,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000

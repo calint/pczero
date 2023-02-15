@@ -60,8 +60,8 @@ extern "C" [[noreturn]] void tsk0(){
 asm(".global tsk1");
 asm(".align 16");
 asm("tsk1:");
-asm("  incl 0xa0044");
-asm("  hlt");
+asm("  incl 0xa0000+100");
+//asm("  hlt");
 asm("  jmp tsk1");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] void tsk2(){
@@ -72,15 +72,15 @@ extern "C" [[noreturn]] void tsk2(){
 		Data src=Data(Address(0x7c00),kernel_size); // kernel binary
 		Data dst=Data(Address(0xa'0000+320*150),kernel_size); // on screen
 		src.to(dst);
-		osca_yield();
+//		osca_yield();
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] void tsk3(){
 	using namespace osca;
 	while(true){
-		vga13h.bmp().data().pointer().offset(8).write(osca_t);
-		osca_yield(); // ? without this dot on screen is optimized away
+		vga13h.bmp().data().pointer().offset(160).write(osca_tmr_lo);
+		osca_yield(); // ? without this the line above is optimized away by the compiler
 	}
 }
 
