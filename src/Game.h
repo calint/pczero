@@ -515,7 +515,7 @@ auto Game::create_boss()->void{
 	};
 	ship_def.init_normals();
 
-	bullet_def={1,1, // ? why not 0 nbnd and nullptr bnd
+	bullet_def={1,1, // at least one bounding point for collision detection
 		new Point[]{
 			{0,0},
 		},
