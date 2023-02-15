@@ -133,8 +133,7 @@ movw $isr_kbd,IDT+(32+1)*8 # IRQ 1: timer 18.2Hz
 movw $isr_tmr,IDT+(32+8)*8 # IRQ 8: timer 1024Hz
 lidt idtr
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - map irqs
-# reprogram the PIC (8259's) to map IRQ0-15 to IDT mapping 32 to 47
-# http://www.osdever.net/bkerndev/Docs/irqs.htm
+# reprogram the PIC (8259's) to map IRQ 0-15 to IDT mapping 32 to 47
 # https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interrupt_Controller
 mov $0x11,%al
 out %al,$0x20 # restart PIC1
@@ -153,10 +152,6 @@ out %al,$0xa1
 mov $0x01,%al
 out %al,$0x21
 out %al,$0xa1 # done
-
-#mov $0x00,%al
-#out %al,$0x21
-#out %al,$0xa1
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
 # disable the Non-Maskable Interrupt (NMI) before programming RTC
 in $0x70,%al
