@@ -501,7 +501,7 @@ private:
 			metrics::matrix_set_transforms++;
 		// matrix has been updated, update cached points
 		Mmw_.transform(def_.pts,pts_wld_,def_.npts);
-		if(def_.nmls)
+		if(def_.nmls) // ? if def_.nbnd<3 then there are no meaningful normals
 			Mmw_.rotate(def_.nmls,nmls_wld_,def_.nbnd);
 		set_wld_pts_need_update(false);
 	}
