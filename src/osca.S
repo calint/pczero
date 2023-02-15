@@ -274,9 +274,9 @@ switch_task:
   mov %eax,32(%ebx) # to task.ebx
   add $48,%ebx # next task
   cmp $tsk_eot,%ebx # if last
-  jl 7f
+  jl lbl4
     mov $tsk,%ebx # roll
-  7:
+  lbl4:
   mov %ebx,osca_tsk_a # save pointer to task record
   mov 4(%ebx),%esp # restore esp
   mov %esp,isr_tck_esp # save esp, will be used as scratch
