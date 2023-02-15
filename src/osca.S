@@ -316,13 +316,13 @@ isr_kbd:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - itck
 .align 16,0x90
 isr_tck:
-  cli # disable interrupts while switching task
+  cli # disable interrupts
   incl 0xa0000+320-4 # on screen, top right corner
   push %ax # ack irq
   mov $0x20,%al
   out %al,$0x20
   pop %ax
-  sti
+  sti # enable interrupts
   iret
 .space sector2+512-.,0X90
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - tasks
