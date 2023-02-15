@@ -137,36 +137,28 @@ lidt idtr
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
 # reprogram the PIC (8259's) to map IRQ0-15 to IDT mapping 32 to 47
 # http://www.osdever.net/bkerndev/Docs/irqs.htm
-#  outportb(0x20, 0x11);
+# https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interrupt_Controller
 mov $0x11,%al
-out %al,$0x20
-#  outportb(0xA0, 0x11);
-mov $0x11,%al
-out %al,$0xa0
-#   outportb(0x21, 0x20);
+out %al,$0x20 # restart PIC1
+out %al,$0xa0 # restart PIC2
+
 mov $0x20,%al
-out %al,$0x21
-#   outportb(0xA1, 0x28);
+out %al,$0x21 # PIC1 now starts at 32
 mov $0x28,%al
-out %al,$0xa1
-#   outportb(0x21, 0x04);
+out %al,$0xa1 # PIC2 now starts at 40
+
 mov $0x04,%al
 out %al,$0x21
-#   outportb(0xA1, 0x02);
-mov $0x02,%al
+mov $0x02,%al # setup cascading
 out %al,$0xa1
-#   outportb(0x21, 0x01);
+
 mov $0x01,%al
 out %al,$0x21
-#   outportb(0xA1, 0x01);
-mov $0x01,%al
-out %al,$0xa1
-#   outportb(0x21, 0x0);
-mov $0x00,%al
-out %al,$0x21
-#    outportb(0xA1, 0x0);
-mov $0x00,%al
-out %al,$0xa1
+out %al,$0xa1 # done
+
+#mov $0x00,%al
+#out %al,$0x21
+#out %al,$0xa1
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
 # disable the Non-Maskable Interrupt (NMI) before programming RTC
 in $0x70,%al
@@ -204,14 +196,14 @@ osca_drv_b:.byte 0x00 # boot drive
 .word 0xaa55 # pc boot sector signature
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - interrupts
 sector2: # 0x7e00
-osca_tmr_lo:.long 0x00000000 # 1024Hz tick lower
-osca_tmr_hi:.long 0x00000000 # 1024Hz tick higher
+osca_tmr_lo:.long 0x00000000 # 1024 Hz tick lower
+osca_tmr_hi:.long 0x00000000 # 1024 Hz tick higher
 osca_tsk_a:.long tsk # pointer to first task record (tsk0)
-isr_tck_eax:.long 0x00000000 # used in isr_tck
-isr_tck_ebx:.long 0x00000000 # ...
-isr_tck_esp:.long 0x00000000 # ...
-isr_tck_eip:.long 0x00000000 # ...
-isr_tck_eflags:.long 0x00000000 #...
+isr_tmr_eax:.long 0x00000000 # used in isr_tck
+isr_tmr_ebx:.long 0x00000000 # ...
+isr_tmr_esp:.long 0x00000000 # ...
+isr_tmr_eip:.long 0x00000000 # ...
+isr_tmr_eflags:.long 0x00000000 #...
 osca_key:.byte 0x00 # last key event
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - interrupts
 # "*NOTE* Because IA-32 tasks are not re-entrant, an interrupt-handler
@@ -246,8 +238,8 @@ isr_tmr:
     iret
 switch_task:
   # start task switching
-  mov %eax,isr_tck_eax # save eax,ebx
-  mov %ebx,isr_tck_ebx # eax,ebx will be used as scratch
+  mov %eax,isr_tmr_eax # save eax,ebx
+  mov %ebx,isr_tmr_ebx # eax,ebx will be used as scratch
   mov osca_tsk_a,%ebx # point ebx to active task
   mov (%esp),%eax # get eip before irq from stack
   mov %eax,(%ebx) # save to task.eip
@@ -259,9 +251,9 @@ switch_task:
   mov %ebx,%esp # save gprs by preparing esp and then pusha
   add $48,%esp # move to end of task record
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
-  mov isr_tck_eax,%eax # save proper eax,ebx
+  mov isr_tmr_eax,%eax # save proper eax,ebx
   mov %eax,44(%ebx) # to task.eax
-  mov isr_tck_ebx,%eax # save proper ebx
+  mov isr_tmr_ebx,%eax # save proper ebx
   mov %eax,32(%ebx) # to task.ebx
   add $48,%ebx # next task
   cmp $tsk_eot,%ebx # if last
@@ -270,17 +262,17 @@ switch_task:
   lbl4:
   mov %ebx,osca_tsk_a # save pointer to task record
   mov 4(%ebx),%esp # restore esp
-  mov %esp,isr_tck_esp # save esp, will be used as scratch
+  mov %esp,isr_tmr_esp # save esp, will be used as scratch
   mov (%ebx),%esp # restore eip
-  mov %esp,isr_tck_eip # save for jump
+  mov %esp,isr_tmr_eip # save for jump
   mov 8(%ebx),%esp # get eflags
-  mov %esp,isr_tck_eflags # save to restore later
+  mov %esp,isr_tmr_eflags # save to restore later
   mov %ebx,%esp # restore gprs
   add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  push isr_tck_eflags # restore eflags
+  push isr_tmr_eflags # restore eflags
   popf # restore eflags. no calculations done to alter it before resuming task.
-  mov isr_tck_esp,%esp # restore task esp
+  mov isr_tmr_esp,%esp # restore task esp
 
   # acknowledge interrupt and jmp
   push %ax # save to be clobbered %ax
@@ -295,7 +287,7 @@ switch_task:
 
   pop %ax # restore %ax
   sti # enable interrupts
-  jmp *isr_tck_eip # jmp to restored eip. racing?
+  jmp *isr_tmr_eip # jmp to restored eip. racing?
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ierr
 .align 16,0x90
 isr_err:
