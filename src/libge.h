@@ -606,6 +606,7 @@ private:
 		}
 		return o;
 	}
+
 	static auto is_bounding_circles_in_collision(Object&o1,Object&o2)->bool{
 		const Scalar r1=o1.bounding_radius();
 		const Scalar r2=o2.bounding_radius();
@@ -624,7 +625,7 @@ private:
 			return false;
 		return true;
 	}
-	// checks if any o1 points are in o2 bounding shape
+	// checks if any o1 bounding points are in o2 bounding shape
 	static auto is_in_collision(Object&o1,Object&o2)->bool{
 		// for each point in o1 check if behind every normal of o2
 		// if behind every normal then within the convex bounding shape thus collision
