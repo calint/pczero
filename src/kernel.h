@@ -199,11 +199,12 @@ extern "C" void osca_init(){
 	pz_memset(Address(0x10'0000),0x11,0x1'0000);
 
 	// initiate statics
-	vga13h=Vga13h();
-	err=PrinterToVga();
+	vga13h=Vga13h{};
+	err=PrinterToVga{};
 	err.pos({1,1}).fg(4);
-	out=PrinterToVga();
+	out=PrinterToVga{};
 	out.pos({1,2}).fg(2);
+	keyboard=Keyboard{};
 	Heap::init_statics({Address(0x10'0000),320*100},World::nobjects_max);
 	Heap::clear_buffer(0x12);
 	Heap::clear_heap_entries(3,5);
