@@ -23,12 +23,12 @@ https://stackoverflow.com/questions/3645803/bios-int-13h-with-ah-2-can-only-read
 
 
 
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
 # disable PIC
 mov $0xff,%al
 out %al,$0xa1
 out %al,$0x21
 
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
 # enable 1024Hz timer
 mov $0x8b,%al
 out %al,$0x70
