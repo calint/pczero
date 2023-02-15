@@ -223,7 +223,8 @@ public:
 		scl_{scl},
 		def_{def},
 		pts_wld_{new Point[unsigned(def.npts)]},
-		nmls_wld_{def.nbnd>2?new Vector[unsigned(def.nbnd)]:nullptr}, // nbnd might be <3 -> no bounding shape
+		 // def might be a dot or a line and not have normals -> no bounding shape
+		nmls_wld_{def.nmls?new Vector[unsigned(def.nbnd)]:nullptr},
 		Mmw_{},
 		Mmw_pos_{0,0},
 		Mmw_agl_{0},
@@ -501,7 +502,7 @@ private:
 			metrics::matrix_set_transforms++;
 		// matrix has been updated, update cached points
 		Mmw_.transform(def_.pts,pts_wld_,def_.npts);
-		if(nmls_wld_) // check if there are any meaningful normals
+		if(def_.nmls) // check if there are any meaningful normals
 			Mmw_.rotate(def_.nmls,nmls_wld_,def_.nbnd);
 		set_wld_pts_need_update(false);
 	}
