@@ -87,7 +87,7 @@ jmp $8,$protected_mode # jmp and flush
 .align 16,0x90
 gdt:.quad 0x0000000000000000 #0x00:
     .quad 0x00cf9a000000ffff #0x08: 32b code 4g pl0 rx
-	 .quad 0x00cf92000000ffff #0x10: 32b data 4g pl0 rw
+    .quad 0x00cf92000000ffff #0x10: 32b data 4g pl0 rw
     .quad 0x009f9a000000ffff #0x18: 16b code 1m rx
     .quad 0x009f92000000ffff #0x20: 16b data 1m rw
 gdtr:.word gdtr-gdt-1,gdt,0,0
