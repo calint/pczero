@@ -16,11 +16,9 @@
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - intro
 .set IDT,0x600 # interrupt descriptor table address
 .global osca_key # last pressed key
-.global osca_t # lower ticker value
-.global osca_th # high ticker value
-.global _start # export entry point
 .global osca_tmr_lo # 1024Hz timer low bits
 .global osca_tmr_hi # 1024Hz timer high bits
+.global _start # export entry point
 #.text
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - bpb
 .code16 # boot in 16 bit mode
@@ -208,8 +206,6 @@ osca_drv_b:.byte 0x00 # boot drive
 sector2: # 0x7e00
 osca_tmr_lo:.long 0x00000000 # 1024Hz tick lower
 osca_tmr_hi:.long 0x00000000 # 1024Hz tick higher
-osca_t:.long 0x00000000 # tick lower
-osca_th:.long 0x00000000 # tick higher
 osca_tsk_a:.long tsk # pointer to first task record (tsk0)
 isr_tck_eax:.long 0x00000000 # used in isr_tck
 isr_tck_ebx:.long 0x00000000 # ...
@@ -330,8 +326,6 @@ isr_kbd:
 isr_tck:
   cli # disable interrupts while switching task
   incl 0xa0000+320-4 # on screen, top right corner
-#  incl osca_t # increase 64b ticker
-#  adcl $0,osca_th # add carry to upper 32 bits
   push %ax # ack irq
   mov $0x20,%al
   out %al,$0x20
