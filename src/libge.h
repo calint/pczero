@@ -184,7 +184,7 @@ namespace enable{
 	constexpr static bool draw_polygons_edges{true};
 	constexpr static bool draw_normals{true};
 	constexpr static bool draw_collision_check{false};
-	constexpr static bool draw_bounding_circle{false};
+	constexpr static bool draw_bounding_circle{true};
 }
 
 using SlotIx=short; // index in Object::freeSlots[]
@@ -197,6 +197,7 @@ struct SlotInfo{
 using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types.
 constexpr Scale sqrt_of_2=Real(1.414213562);
 class Object{
+	friend World;
 	TypeBits tb_; // object type that is usually a bit (32 object types supported)
 	TypeBits colchk_tb_; // bits used to logical and with other object's type_bits and if true then collision detection is done
 	PhysicsState*phy_; // kept in own buffer of states for better CPU cache utilization at update
@@ -324,13 +325,60 @@ public:
 			}
 		}
 		if(enable::draw_bounding_circle){
-			draw_bounding_circle(dsp);
+			draw_bounding_circle(dsp,phy_ro().pos,bounding_radius());
 		}
 	}
-	constexpr auto draw_bounding_circle(Bitmap8b&dsp)->void{
-		Point p=phy().pos;
-		Scalar r=bounding_radius();
-		const Count segments=Count(5*scale());
+
+	// returns false if object is to be deleted
+	virtual auto on_collision(Object&other)->bool{return true;}
+
+	inline constexpr auto is_alive()const->bool{return!(bits_&1);}
+
+	inline constexpr auto bounding_radius()const->Scalar{return br_;}
+
+private:
+	// used by 'world' to avoid deleting same object more than once
+	inline constexpr auto set_is_alive(const bool v)->void{
+		if(v){ // alive bit is 0
+			bits_&=0xff-1;
+		}else{ // not alive bit is 1
+			bits_|=1;
+		}
+	}
+
+	inline constexpr auto is_wld_pts_need_update()const->bool{return!(bits_&2);}
+	inline constexpr auto set_wld_pts_need_update(const bool v)->void{
+		if(v){ // refresh_wld_pts bit is 0
+			bits_&=0xff-2;
+		}else{ // refresh_wld_pts bit is 1
+			bits_|=2;
+		}
+	}
+
+	constexpr auto refresh_wld_points()->void{
+		refresh_Mmw_if_invalid();
+		if(!is_wld_pts_need_update())
+			return;
+		if(metrics::enabled)
+			metrics::matrix_set_transforms++;
+		// matrix has been updated, update cached points
+		Mmw_.transform(def_.pts,pts_wld_,def_.npts);
+		if(def_.nmls) // check if there are any meaningful normals
+			Mmw_.rotate(def_.nmls,nmls_wld_,def_.nbnd);
+		set_wld_pts_need_update(false);
+	}
+	constexpr auto refresh_Mmw_if_invalid()->void{
+		if(phy().agl==Mmw_agl_&&phy().pos==Mmw_pos_&&scl_==Mmw_scl_)
+			return;
+		set_wld_pts_need_update(true);
+		Mmw_.set_transform(scl_,phy().agl,phy().pos);
+		Mmw_scl_=scl_;
+		Mmw_agl_=phy().agl;
+		Mmw_pos_=phy().pos;
+	}
+	// ? move rendering code to other class
+	constexpr static auto draw_bounding_circle(Bitmap8b&dsp,const Point&p,const Scale r)->void{
+		const Count segments=Count(5*r);
 		AngleRad th=0;
 		AngleRad dth=2*PI/AngleRad(segments);
 		for(Count i=0;i<segments;i++){
@@ -341,7 +389,7 @@ public:
 		}
 	}
 	// ? move rendering code to other class
-	constexpr auto draw_polygon(Bitmap8b&dsp,const Point pts[],const PointIx npoly_ixs,const PointIx ix[],const Color8b color)->void{
+	constexpr static auto draw_polygon(Bitmap8b&dsp,const Point pts[],const PointIx npoly_ixs,const PointIx ix[],const Color8b color)->void{
 //		const PointIx*pi=ix;
 //		for(PointIx i=0;i<npoly_ixs;i++){
 //			const Point2D&p=pts[*pi++];
@@ -472,53 +520,6 @@ public:
 //		}
 	}
 
-	// returns false if object is to be deleted
-	virtual auto on_collision(Object&other)->bool{return true;}
-
-	inline constexpr auto is_alive()const->bool{return!(bits_&1);}
-
-	// used by 'world' to avoid deleting same object more than once
-	inline constexpr auto set_is_alive(const bool v)->void{
-		if(v){ // alive bit is 0
-			bits_&=0xff-1;
-		}else{ // not alive bit is 1
-			bits_|=1;
-		}
-	}
-
-	inline constexpr auto bounding_radius()const->Scalar{return br_;}
-
-private:
-	inline constexpr auto is_wld_pts_need_update()const->bool{return!(bits_&2);}
-	inline constexpr auto set_wld_pts_need_update(const bool v)->void{
-		if(v){ // refresh_wld_pts bit is 0
-			bits_&=0xff-2;
-		}else{ // refresh_wld_pts bit is 1
-			bits_|=2;
-		}
-	}
-
-	constexpr auto refresh_wld_points()->void{
-		refresh_Mmw_if_invalid();
-		if(!is_wld_pts_need_update())
-			return;
-		if(metrics::enabled)
-			metrics::matrix_set_transforms++;
-		// matrix has been updated, update cached points
-		Mmw_.transform(def_.pts,pts_wld_,def_.npts);
-		if(def_.nmls) // check if there are any meaningful normals
-			Mmw_.rotate(def_.nmls,nmls_wld_,def_.nbnd);
-		set_wld_pts_need_update(false);
-	}
-	constexpr auto refresh_Mmw_if_invalid()->void{
-		if(phy().agl==Mmw_agl_&&phy().pos==Mmw_pos_&&scl_==Mmw_scl_)
-			return;
-		set_wld_pts_need_update(true);
-		Mmw_.set_transform(scl_,phy().agl,phy().pos);
-		Mmw_scl_=scl_;
-		Mmw_agl_=phy().agl;
-		Mmw_pos_=phy().pos;
-	}
 	//----------------------------------------------------------------
 	// statics
 	//----------------------------------------------------------------
