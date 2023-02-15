@@ -24,8 +24,8 @@ public:
 	void operator delete(void*)=delete;
 
 	constexpr auto init_normals()->void{
-		if(nbnd<2){ // not enough points for a line
-			// ? create a {0,0} normal if nbnd==1
+		if(nbnd<3){ // not enough points for a shape
+			// don't define normals
 			return;
 		}
 		nmls=new Vector[unsigned(nbnd)];
@@ -178,7 +178,7 @@ namespace enable{
 	constexpr static bool draw_polygons{true};
 	constexpr static bool draw_polygons_fill{false};
 	constexpr static bool draw_polygons_edges{true};
-	constexpr static bool draw_normals{false};
+	constexpr static bool draw_normals{true};
 	constexpr static bool draw_collision_check{false};
 	constexpr static bool draw_bounding_circle{false};
 }
@@ -223,7 +223,7 @@ public:
 		scl_{scl},
 		def_{def},
 		pts_wld_{new Point[unsigned(def.npts)]},
-		nmls_wld_{new Vector[unsigned(def.nbnd)]}, // ? nbnd might be <3 -> no bounding shape
+		nmls_wld_{def.nbnd>2?new Vector[unsigned(def.nbnd)]:nullptr}, // nbnd might be <3 -> no bounding shape
 		Mmw_{},
 		Mmw_pos_{0,0},
 		Mmw_agl_{0},
@@ -298,7 +298,7 @@ public:
 			const Point*pt=pts_wld_;
 			for(PointIx i=0;i<def_.npts;i++){
 //				dot(dsp,pt->x,pt->y,color_);
-				World::draw_dot(*pt,4);
+				World::draw_dot(*pt,0xe); // yellow dot
 				pt++;
 			}
 		}
@@ -306,7 +306,7 @@ public:
 			draw_polygon(dsp, pts_wld_,def_.nbnd,def_.bnd,color_);
 		}
 		if(enable::draw_normals){
-			if(nmls_wld_){
+			if(nmls_wld_){ // check if there are any normals defined
 				const Point*nml=nmls_wld_;
 				for(PointIx i=0;i<def_.nbnd;i++){
 					Vector v=*nml;
@@ -501,7 +501,7 @@ private:
 			metrics::matrix_set_transforms++;
 		// matrix has been updated, update cached points
 		Mmw_.transform(def_.pts,pts_wld_,def_.npts);
-		if(def_.nmls) // ? if def_.nbnd<3 then there are no meaningful normals
+		if(nmls_wld_) // check if there are any meaningful normals
 			Mmw_.rotate(def_.nmls,nmls_wld_,def_.nbnd);
 		set_wld_pts_need_update(false);
 	}
@@ -636,7 +636,7 @@ private:
 		// if behind every normal then within the convex bounding shape thus collision
 
 		// if o2 has no bounding shape (at least 3 points) return false
-		if(o2.def_.nbnd<3) // ? check if points equal? with floats?
+		if(!o2.def_.nmls) // ? check if points equal? with floats?
 			return false;
 
 		// for each point in o1 bounding shape
