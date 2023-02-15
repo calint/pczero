@@ -7,7 +7,7 @@
 [ ]   World instance
 [ ]   Game instance
 [ ] libge: handle objects with null bounding points indexes, no normals
-[ ] better clock, higher resolution than the default 18.2 Hz
+[x] better clock, higher resolution than the default 18.2 Hz -> 1024 Hz RTC
 [ ] implement a unique_ptr<T>
 [o] heap
 [x]   step 1. a vector of [*ptr,size] elements pointing to freed memory. O(n) free, O(n) alloc
