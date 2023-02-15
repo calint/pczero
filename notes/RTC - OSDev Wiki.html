@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<!-- saved from url=(0043)https://wiki.osdev.org/RTC#Turning_on_IRQ_8 -->
+<html lang="en" dir="ltr" class="client-js"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>RTC - OSDev Wiki</title>
+
+<meta name="generator" content="MediaWiki 1.18.0">
+<link rel="shortcut icon" href="https://wiki.osdev.org/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="https://wiki.osdev.org/opensearch_desc.php" title="OSDev Wiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.osdev.org/api.php?action=rsd">
+<link rel="alternate" type="application/atom+xml" title="OSDev Wiki Atom feed" href="https://wiki.osdev.org/index.php?title=Special:RecentChanges&amp;feed=atom">
+<link rel="stylesheet" href="./RTC - OSDev Wiki_files/load.php">
+<style type="text/css" media="all">.mw-collapsible-toggle{float:right} li .mw-collapsible-toggle{float:none} .mw-collapsible-toggle-li{list-style:none}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:4250852ed2349a0d4d0fc6509a3e7d4c */
+</style><style type="text/css" media="all">.js-messagebox{margin:1em 5%;padding:0.5em 2.5%;border:1px solid #ccc;background-color:#fcfcfc;font-size:0.8em}.js-messagebox .js-messagebox-group{margin:1px;padding:0.5em 2.5%;border-bottom:1px solid #ddd}.js-messagebox .js-messagebox-group:last-child{border-bottom:thin none transparent}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:8b08bdc91c52a9ffba396dccfb5b473c */
+</style><meta name="ResourceLoaderDynamicStyles" content="">
+<link rel="stylesheet" href="./RTC - OSDev Wiki_files/load(1).php">
+<style>a:lang(ar),a:lang(ckb),a:lang(fa),a:lang(kk-arab),a:lang(mzn),a:lang(ps),a:lang(ur){text-decoration:none}a.new,#quickbar a.new{color:#ba0000}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:c88e2bcd56513749bec09a7e29cb3ffa */
+</style>
+<script src="./RTC - OSDev Wiki_files/load(2).php"></script><script src="./RTC - OSDev Wiki_files/load(3).php"></script>
+<script>if(window.mw){
+	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "RTC", "wgTitle": "RTC", "wgCurRevisionId": 27484, "wgArticleId": 2503, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["Common Devices", "Interrupts", "Time"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
+}
+</script><script>if(window.mw){
+	mw.loader.load(["mediawiki.page.startup"]);
+}
+</script><script type="text/javascript" src="./RTC - OSDev Wiki_files/load(4).php"></script>
+<style type="text/css">/*<![CDATA[*/
+.source-c {line-height: normal;}
+.source-c li, .source-c pre {
+	line-height: normal; border: 0px none white;
+}
+/**
+ * GeSHi Dynamically Generated Stylesheet
+ * --------------------------------------
+ * Dynamically generated stylesheet for c
+ * CSS class: source-c, CSS id: 
+ * GeSHi (C) 2004 - 2007 Nigel McNie, 2007 - 2008 Benny Baumann
+ * (http://qbnz.com/highlighter/ and http://geshi.org/)
+ * --------------------------------------
+ */
+.c.source-c .de1, .c.source-c .de2 {font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;}
+.c.source-c  {font-family:monospace;}
+.c.source-c .imp {font-weight: bold; color: red;}
+.c.source-c li, .c.source-c .li1 {font-weight: normal; vertical-align:top;}
+.c.source-c .ln {width:1px;text-align:right;margin:0;padding:0 2px;vertical-align:top;}
+.c.source-c .li2 {font-weight: bold; vertical-align:top;}
+.c.source-c .kw1 {color: #b1b100;}
+.c.source-c .kw2 {color: #000000; font-weight: bold;}
+.c.source-c .kw3 {color: #000066;}
+.c.source-c .kw4 {color: #993333;}
+.c.source-c .co1 {color: #666666; font-style: italic;}
+.c.source-c .co2 {color: #339933;}
+.c.source-c .coMULTI {color: #808080; font-style: italic;}
+.c.source-c .es0 {color: #000099; font-weight: bold;}
+.c.source-c .es1 {color: #000099; font-weight: bold;}
+.c.source-c .es2 {color: #660099; font-weight: bold;}
+.c.source-c .es3 {color: #660099; font-weight: bold;}
+.c.source-c .es4 {color: #660099; font-weight: bold;}
+.c.source-c .es5 {color: #006699; font-weight: bold;}
+.c.source-c .br0 {color: #009900;}
+.c.source-c .sy0 {color: #339933;}
+.c.source-c .st0 {color: #ff0000;}
+.c.source-c .nu0 {color: #0000dd;}
+.c.source-c .nu6 {color: #208080;}
+.c.source-c .nu8 {color: #208080;}
+.c.source-c .nu12 {color: #208080;}
+.c.source-c .nu16 {color:#800080;}
+.c.source-c .nu17 {color:#800080;}
+.c.source-c .nu18 {color:#800080;}
+.c.source-c .nu19 {color:#800080;}
+.c.source-c .me1 {color: #202020;}
+.c.source-c .me2 {color: #202020;}
+.c.source-c .ln-xtra, .c.source-c li.ln-xtra, .c.source-c div.ln-xtra {background-color: #ffc;}
+.c.source-c span.xtra { display:block; }
+
+/*]]>*/
+</style>
+<style type="text/css">/*<![CDATA[*/
+@import "/index.php?title=MediaWiki:Geshi.css&usemsgcache=yes&action=raw&ctype=text/css&smaxage=18000";
+/*]]>*/
+</style><!--[if lt IE 7]><style type="text/css">body{behavior:url("/skins/vector/csshover.min.htc")}</style><![endif]--></head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-RTC action-view skin-vector">
+		<div id="mw-page-base" class="noprint"></div>
+		<div id="mw-head-base" class="noprint"></div>
+		<!-- content -->
+		<div id="content">
+			<a id="top"></a>
+			<div id="mw-js-message" style="display:none;" class="js-messagebox"></div>
+						<!-- firstHeading -->
+			<h1 id="firstHeading" class="firstHeading">RTC</h1>
+			<!-- /firstHeading -->
+			<!-- bodyContent -->
+			<div id="bodyContent">
+								<!-- tagline -->
+				<div id="siteSub">From OSDev Wiki</div>
+				<!-- /tagline -->
+								<!-- subtitle -->
+				<div id="contentSub"></div>
+				<!-- /subtitle -->
+																<!-- jumpto -->
+				<div id="jump-to-nav">
+					Jump to: <a href="https://wiki.osdev.org/RTC#mw-head">navigation</a>,
+					<a href="https://wiki.osdev.org/RTC#p-search">search</a>
+				</div>
+				<!-- /jumpto -->
+								<!-- bodycontent -->
+				<div lang="en" dir="ltr" class="mw-content-ltr"><table id="toc" class="toc"><tbody><tr><td><div id="toctitle"><h2>Contents</h2><span class="toctoggle">&nbsp;[<a href="https://wiki.osdev.org/RTC#" class="internal" id="togglelink">hide</a>]&nbsp;</span></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="https://wiki.osdev.org/RTC#Introduction"><span class="tocnumber">1</span> <span class="toctext">Introduction</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="https://wiki.osdev.org/RTC#Capabilities"><span class="tocnumber">2</span> <span class="toctext">Capabilities</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="https://wiki.osdev.org/RTC#Programming_the_RTC"><span class="tocnumber">3</span> <span class="toctext">Programming the RTC</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="https://wiki.osdev.org/RTC#Avoiding_NMI_and_Other_Interrupts_While_Programming"><span class="tocnumber">3.1</span> <span class="toctext">Avoiding NMI and Other Interrupts While Programming</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="https://wiki.osdev.org/RTC#Setting_the_Registers"><span class="tocnumber">3.2</span> <span class="toctext">Setting the Registers</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="https://wiki.osdev.org/RTC#IRQ_Danger"><span class="tocnumber">3.3</span> <span class="toctext">IRQ Danger</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="https://wiki.osdev.org/RTC#Turning_on_IRQ_8"><span class="tocnumber">3.4</span> <span class="toctext">Turning on IRQ 8</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="https://wiki.osdev.org/RTC#Changing_Interrupt_Rate"><span class="tocnumber">3.5</span> <span class="toctext">Changing Interrupt Rate</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="https://wiki.osdev.org/RTC#Interrupts_and_Register_C"><span class="tocnumber">3.6</span> <span class="toctext">Interrupts and Register C</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="https://wiki.osdev.org/RTC#Problems.3F"><span class="tocnumber">4</span> <span class="toctext">Problems?</span></a></li>
+<li class="toclevel-1 tocsection-11"><a href="https://wiki.osdev.org/RTC#See_Also"><span class="tocnumber">5</span> <span class="toctext">See Also</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12"><a href="https://wiki.osdev.org/RTC#External_Links"><span class="tocnumber">5.1</span> <span class="toctext">External Links</span></a></li>
+</ul>
+</li>
+</ul>
+</td></tr></tbody></table>
+<h2> <span class="mw-headline" id="Introduction">Introduction</span></h2>
+<p>A typical OS will use the <a href="https://wiki.osdev.org/APIC" title="APIC">APIC</a> or <a href="https://wiki.osdev.org/PIT" title="PIT" class="mw-redirect">PIT</a> for timing purposes. However, the RTC works just as well. RTC stands for
+Real Time Clock. It is the chip that keeps your computer's clock up-to-date. Within the chip is also the 64 bytes of <a href="https://wiki.osdev.org/CMOS" title="CMOS">CMOS</a> RAM. 
+</p><p>If you simply want information about reading the date/time from the RTC, then please see the <a href="https://wiki.osdev.org/CMOS#Getting_Current_Date_and_Time_from_RTC" title="CMOS">CMOS</a> article. The rest of this article covers the use of RTC interrupts.
+</p><p><br>
+</p>
+<h2> <span class="mw-headline" id="Capabilities">Capabilities</span></h2>
+<p>The RTC is capable of multiple frequencies. The base frequency is pre-programmed at 32.768 kHz. It is possible to change
+this value, but this is the only base frequency that will keep proper time. For this reason, it is strongly recommended
+that you NOT change the base frequency. The chip also has a "divider" register that will generate other frequencies from
+the base frequency. The output (interrupt) divider frequency is by default set so that there is an interrupt rate of 1024 Hz.
+If you need an interrupt frequency other than 1024 Hz, the RTC can theoretically generate 15 interrupt rates between 2 Hz
+and 32768 Hz. On most machines however, the RTC interrupt rate can not go higher than 8 kHz.
+</p>
+<h2> <span class="mw-headline" id="Programming_the_RTC">Programming the RTC</span></h2>
+<p>RTC interrupts are disabled by default. If you turn on the RTC interrupts, the RTC will periodically generate IRQ 8.
+</p>
+<h3> <span class="mw-headline" id="Avoiding_NMI_and_Other_Interrupts_While_Programming">Avoiding NMI and Other Interrupts While Programming</span></h3>
+<p>When programming the RTC, it is <b>extremely imperative</b> that the <a href="https://wiki.osdev.org/NMI" title="NMI" class="mw-redirect">NMI</a> (non-maskable-interrupt) and other interrupts are disabled.
+This is because if an interrupt happens, the RTC may be left in an "undefined" (non functional) state.
+This would usually not be too big a deal, except for two things. The RTC is never initialized by BIOS, and it is backed
+up with a battery. So even a cold reboot may not be enough to get the RTC out of an undefined state!
+See the <a href="https://wiki.osdev.org/NMI" title="NMI" class="mw-redirect">NMI</a> page for more information about disabling and enabling it, and the effects of it.
+</p>
+<h3> <span class="mw-headline" id="Setting_the_Registers">Setting the Registers</span></h3>
+<p>The 2 IO ports used for the RTC and <a href="https://wiki.osdev.org/CMOS" title="CMOS">CMOS</a> are 0x70 and 0x71. Port 0x70 is used to specify an index or "register number",
+and to disable NMI. Port 0x71 is used to read or write from/to that byte of CMOS configuration space. Only three bytes of
+CMOS RAM are used to control the RTC periodic interrupt function. They are called RTC Status Register A, B, and C. They are
+at offset 0xA, 0xB, and 0xC in the CMOS RAM. To write 0x20 to Status Register A you would do this:
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">disable_ints<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>		<span class="co1">// important that no interrupts happen (perform a CLI)</span>
+outportb<span class="br0">(</span><span class="nu12">0x70</span><span class="sy0">,</span> <span class="nu12">0x8A</span><span class="br0">)</span><span class="sy0">;</span>	<span class="co1">// select Status Register A, and disable NMI (by setting the 0x80 bit)</span>
+outportb<span class="br0">(</span><span class="nu12">0x71</span><span class="sy0">,</span> <span class="nu12">0x20</span><span class="br0">)</span><span class="sy0">;</span>	<span class="co1">// write to CMOS/RTC RAM</span>
+enable_ints<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>		<span class="co1">// (perform an STI) and reenable NMI if you wish</span></pre></div></div>
+<p>Other bytes of the CMOS RAM are used by the RTC for other functions, or by the <a href="https://wiki.osdev.org/BIOS" title="BIOS">BIOS</a> and other such services.
+</p>
+<h3> <span class="mw-headline" id="IRQ_Danger">IRQ Danger</span></h3>
+<p>Since the <a href="https://wiki.osdev.org/IRQ" title="IRQ" class="mw-redirect">IRQ</a> number is 8, it has a lower priority in the <a href="https://wiki.osdev.org/PIC" title="PIC" class="mw-redirect">PIC</a> than the IRQs with lower numbers. While those other interrupts are being
+handled (until your OS sends an <a href="https://wiki.osdev.org/PIC#End_of_Interrupt" title="PIC" class="mw-redirect">EOI</a> and STI), your OS will not receive any clock ticks. Any IRQ handlers that depend on clock
+ticks may fail for that reason, because an IRQ of higher number will not preempt an IRQ of lower number.
+</p>
+<h3> <span class="mw-headline" id="Turning_on_IRQ_8">Turning on IRQ 8</span></h3>
+<p>To turn on the periodic interrupt, all you have to do is:
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">disable_ints<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>			<span class="co1">// disable interrupts</span>
+outportb<span class="br0">(</span><span class="nu12">0x70</span><span class="sy0">,</span> <span class="nu12">0x8B</span><span class="br0">)</span><span class="sy0">;</span>		<span class="co1">// select register B, and disable NMI</span>
+<span class="kw4">char</span> prev<span class="sy0">=</span>inportb<span class="br0">(</span><span class="nu12">0x71</span><span class="br0">)</span><span class="sy0">;</span>	<span class="co1">// read the current value of register B</span>
+outportb<span class="br0">(</span><span class="nu12">0x70</span><span class="sy0">,</span> <span class="nu12">0x8B</span><span class="br0">)</span><span class="sy0">;</span>		<span class="co1">// set the index again (a read will reset the index to register D)</span>
+outportb<span class="br0">(</span><span class="nu12">0x71</span><span class="sy0">,</span> prev <span class="sy0">|</span> <span class="nu12">0x40</span><span class="br0">)</span><span class="sy0">;</span>	<span class="co1">// write the previous value ORed with 0x40. This turns on bit 6 of register B</span>
+enable_ints<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span></pre></div></div>
+<p>This will turn on the IRQ with the default 1024 Hz rate. Be sure that you install the IRQ handler before you enable the RTC
+IRQ. The interrupt will happen almost immediately.
+</p>
+<h3> <span class="mw-headline" id="Changing_Interrupt_Rate">Changing Interrupt Rate</span></h3>
+<p>Changing the output divider changes the interrupt rate, <i>without</i> interfering with the RTC's ability to keep proper time.
+The lower 4 bits of register A is the divider value. The default is 0110b, or 6. The setting must be a value from 1 to 15.
+A value of 0 disables the interrupt. To calculate a new frequency:
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">frequency <span class="sy0">=</span>  <span class="nu0">32768</span> <span class="sy0">&gt;&gt;</span> <span class="br0">(</span>rate<span class="sy0">-</span><span class="nu0">1</span><span class="br0">)</span><span class="sy0">;</span></pre></div></div>
+<p>"Rate" is the divider setting. If you select a rate of 1 or 2, the RTC will have problems and "roll over" so that it
+generates interrupts of .81 mS and 3.91 mS, rather than the expected interrupts of 61.0 uS or 30.5 uS. So, the fastest
+rate you can select is 3. This will generate interrupts of 8 kHz or 122 uS. To change the rate:
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">rate <span class="sy0">&amp;=</span> <span class="nu12">0x0F</span><span class="sy0">;</span>			<span class="co1">// rate must be above 2 and not over 15</span>
+disable_ints<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+outportb<span class="br0">(</span><span class="nu12">0x70</span><span class="sy0">,</span> <span class="nu12">0x8A</span><span class="br0">)</span><span class="sy0">;</span>		<span class="co1">// set index to register A, disable NMI</span>
+<span class="kw4">char</span> prev<span class="sy0">=</span>inportb<span class="br0">(</span><span class="nu12">0x71</span><span class="br0">)</span><span class="sy0">;</span>	<span class="co1">// get initial value of register A</span>
+outportb<span class="br0">(</span><span class="nu12">0x70</span><span class="sy0">,</span> <span class="nu12">0x8A</span><span class="br0">)</span><span class="sy0">;</span>		<span class="co1">// reset index to A</span>
+outportb<span class="br0">(</span><span class="nu12">0x71</span><span class="sy0">,</span> <span class="br0">(</span>prev <span class="sy0">&amp;</span> <span class="nu12">0xF0</span><span class="br0">)</span> <span class="sy0">|</span> rate<span class="br0">)</span><span class="sy0">;</span> <span class="co1">//write only our rate to A. Note, rate is the bottom 4 bits.</span>
+enable_ints<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span></pre></div></div>
+<h3> <span class="mw-headline" id="Interrupts_and_Register_C">Interrupts and Register C</span></h3>
+<p>It is important to know that upon a IRQ 8, Status Register C will contain a bitmask telling which interrupt happened.
+The RTC is capable of producing a periodic interrupt (what this article describes), an update ended interrupt, and an alarm interrupt. If you are only using the RTC as a simple timer this is not important.
+<b>What is important is that if register C is not read after an IRQ 8, then the interrupt will not happen again.</b> So, even if you don't care about what type of interrupt
+it is, just attach this code to the bottom of your IRQ handler to be sure you get another interrupt. If you're using Bochs, it is also recommended to read Status Register C after initialising the RTC, to make sure any RTC interrupts that were pending before/while the RTC was initialised are acknowledged (not doing this has lead to the RTC timer not sending any interrupts after rebooting in at least one case, observed on Bochs 2.6.6, <a rel="nofollow" class="external text" href="http://forum.osdev.org/viewtopic.php?f=1&amp;t=30091">see this thread</a>).
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">outportb<span class="br0">(</span><span class="nu12">0x70</span><span class="sy0">,</span> <span class="nu12">0x0C</span><span class="br0">)</span><span class="sy0">;</span>	<span class="co1">// select register C</span>
+inportb<span class="br0">(</span><span class="nu12">0x71</span><span class="br0">)</span><span class="sy0">;</span>		<span class="co1">// just throw away contents</span></pre></div></div> 
+<h2> <span class="mw-headline" id="Problems.3F">Problems?</span></h2>
+<p>Some RTC timer code may not work on some real machines. I have only found about one out of 5 computers that does not work right. The observed problem is a timer tick happened about once
+every second. I'm not sure why this is, and am trying to find a solution. The machine I observed
+this on was a 2005 or so Dell (which also has issues USB booting...)
+</p><p><br>
+</p>
+<h2> <span class="mw-headline" id="See_Also">See Also</span></h2>
+<ul><li><a href="https://wiki.osdev.org/CMOS" title="CMOS">CMOS</a>
+</li></ul>
+<h3> <span class="mw-headline" id="External_Links">External Links</span></h3>
+<ul><li> <a rel="nofollow" class="external text" href="http://www.compuphase.com/int70.txt">Periodic Interrupts with the Real Time Clock</a>
+</li><li> <a rel="nofollow" class="external text" href="http://www.ousob.com/ng/interrupts_and_ports/ng9116b.php">CMOS Ram Data Register</a>
+</li><li> <a rel="nofollow" class="external text" href="https://web.archive.org/web/20150514074601/http://www.nondot.org/sabre/os/files/MiscHW/CMOSTimer.html">Using the 1024 HZ Timer Interrupt</a>
+</li><li> <a rel="nofollow" class="external text" href="https://web.archive.org/web/20150514082645/http://www.nondot.org/sabre/os/files/MiscHW/RealtimeClockFAQ.txt">Real Time Clock / CMOS Setup Reference</a>
+</li><li> <a rel="nofollow" class="external text" href="http://bos.asmhackers.net/docs/timer/docs/cmos.pdf">Accessing the CMOS Chip</a>
+</li></ul>
+
+<!-- 
+NewPP limit report
+Preprocessor node count: 128/1000000
+Post-expand include size: 0/2097152 bytes
+Template argument size: 0/2097152 bytes
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key wikidb:pcache:idhash:2503-0!*!0!!en!*!* and timestamp 20230215182327 -->
+</div>				<!-- /bodycontent -->
+								<!-- printfooter -->
+				<div class="printfooter">
+				Retrieved from "<a href="https://wiki.osdev.org/index.php?title=RTC&amp;oldid=27484">https://wiki.osdev.org/index.php?title=RTC&amp;oldid=27484</a>"				</div>
+				<!-- /printfooter -->
+												<!-- catlinks -->
+				<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks"><a href="https://wiki.osdev.org/Special:Categories" title="Special:Categories">Categories</a>: <ul><li><a href="https://wiki.osdev.org/Category:Common_Devices" title="Category:Common Devices">Common Devices</a></li><li><a href="https://wiki.osdev.org/Category:Interrupts" title="Category:Interrupts">Interrupts</a></li><li><a href="https://wiki.osdev.org/Category:Time" title="Category:Time">Time</a></li></ul></div></div>				<!-- /catlinks -->
+												<div class="visualClear"></div>
+				<!-- debughtml -->
+								<!-- /debughtml -->
+			</div>
+			<!-- /bodyContent -->
+		</div>
+		<!-- /content -->
+		<!-- header -->
+		<div id="mw-head" class="noprint">
+			
+<!-- 0 -->
+<div id="p-personal" class="">
+	<h5>Personal tools</h5>
+	<ul>
+		<li id="pt-login"><a href="https://wiki.osdev.org/index.php?title=Special:UserLogin&amp;returnto=RTC" title="You are encouraged to log in; however, it is not mandatory [alt-o]" accesskey="o">Log in</a></li>
+	</ul>
+</div>
+
+<!-- /0 -->
+			<div id="left-navigation">
+				
+<!-- 0 -->
+<div id="p-namespaces" class="vectorTabs">
+	<h5>Namespaces</h5>
+	<ul>
+					<li id="ca-nstab-main" class="selected"><span><a href="https://wiki.osdev.org/RTC" title="View the content page [alt-c]" accesskey="c">Page</a></span></li>
+					<li id="ca-talk"><span><a href="https://wiki.osdev.org/Talk:RTC" title="Discussion about the content page [alt-t]" accesskey="t">Discussion</a></span></li>
+			</ul>
+</div>
+
+<!-- /0 -->
+
+<!-- 1 -->
+<div id="p-variants" class="vectorMenu emptyPortlet">
+		<h5><span>Variants</span><a href="https://wiki.osdev.org/RTC#"></a></h5>
+	<div class="menu">
+		<ul>
+					</ul>
+	</div>
+</div>
+
+<!-- /1 -->
+			</div>
+			<div id="right-navigation">
+				
+<!-- 0 -->
+<div id="p-views" class="vectorTabs">
+	<h5>Views</h5>
+	<ul>
+					<li id="ca-view" class="selected"><span><a href="https://wiki.osdev.org/RTC">Read</a></span></li>
+					<li id="ca-viewsource"><span><a href="https://wiki.osdev.org/index.php?title=RTC&amp;action=edit" title="This page is protected.
+You can view its source [alt-e]" accesskey="e">View source</a></span></li>
+					<li id="ca-history" class="collapsible"><span><a href="https://wiki.osdev.org/index.php?title=RTC&amp;action=history" title="Past revisions of this page [alt-h]" accesskey="h">View history</a></span></li>
+			</ul>
+</div>
+
+<!-- /0 -->
+
+<!-- 1 -->
+<div id="p-cactions" class="vectorMenu emptyPortlet">
+	<h5><span>Actions</span><a href="https://wiki.osdev.org/RTC#"></a></h5>
+	<div class="menu">
+		<ul>
+					</ul>
+	</div>
+</div>
+
+<!-- /1 -->
+
+<!-- 2 -->
+<div id="p-search">
+	<h5><label for="searchInput">Search</label></h5>
+	<form action="https://wiki.osdev.org/index.php" id="searchform">
+		<input type="hidden" name="title" value="Special:Search">
+				<input type="search" name="search" title="Search OSDev Wiki [alt-f]" accesskey="f" id="searchInput">		<input type="submit" name="go" value="Go" title="Go to a page with this exact name if exists" id="searchGoButton" class="searchButton">		<input type="submit" name="fulltext" value="Search" title="Search the pages for this text" id="mw-searchButton" class="searchButton">			</form>
+</div>
+
+<!-- /2 -->
+			</div>
+		</div>
+		<!-- /header -->
+		<!-- panel -->
+			<div id="mw-panel" class="noprint">
+				<!-- logo -->
+					<div id="p-logo"><a style="background-image: url(/skins/common/images/osdev.png);" href="https://wiki.osdev.org/Main_Page" title="Visit the main page"></a></div>
+				<!-- /logo -->
+				
+<!-- navigation -->
+<div class="portal" id="p-navigation">
+	<h5>Navigation</h5>
+	<div class="body">
+		<ul>
+			<li id="n-mainpage"><a href="https://wiki.osdev.org/Main_Page" title="Visit the main page [alt-z]" accesskey="z">Main Page</a></li>
+			<li id="n-portal"><a href="http://forum.osdev.org/" rel="nofollow" title="About the project, what you can do, where to find things">Forums</a></li>
+			<li id="n-FAQ"><a href="https://wiki.osdev.org/Category:FAQ">FAQ</a></li>
+			<li id="n-OS-Projects"><a href="https://wiki.osdev.org/Projects">OS Projects</a></li>
+			<li id="n-randompage"><a href="https://wiki.osdev.org/Special:Random" title="Load a random page [alt-x]" accesskey="x">Random page</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /navigation -->
+
+<!-- about -->
+<div class="portal" id="p-about">
+	<h5>About</h5>
+	<div class="body">
+		<ul>
+			<li id="n-This-site"><a href="https://wiki.osdev.org/OSDevWiki:About">This site</a></li>
+			<li id="n-Joining"><a href="https://wiki.osdev.org/OSDevWiki:Joining">Joining</a></li>
+			<li id="n-Editing-help"><a href="https://wiki.osdev.org/OSDevWiki:Editing">Editing help</a></li>
+			<li id="n-recentchanges"><a href="https://wiki.osdev.org/Special:RecentChanges" title="A list of recent changes in the wiki [alt-r]" accesskey="r">Recent changes</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /about -->
+
+<!-- SEARCH -->
+
+<!-- /SEARCH -->
+
+<!-- TOOLBOX -->
+<div class="portal" id="p-tb">
+	<h5>Toolbox</h5>
+	<div class="body">
+		<ul>
+			<li id="t-whatlinkshere"><a href="https://wiki.osdev.org/Special:WhatLinksHere/RTC" title="A list of all wiki pages that link here [alt-j]" accesskey="j">What links here</a></li>
+			<li id="t-recentchangeslinked"><a href="https://wiki.osdev.org/Special:RecentChangesLinked/RTC" title="Recent changes in pages linked from this page [alt-k]" accesskey="k">Related changes</a></li>
+			<li id="t-specialpages"><a href="https://wiki.osdev.org/Special:SpecialPages" title="A list of all special pages [alt-q]" accesskey="q">Special pages</a></li>
+			<li><a href="https://wiki.osdev.org/index.php?title=RTC&amp;printable=yes" rel="alternate">Printable version</a></li>
+			<li id="t-permalink"><a href="https://wiki.osdev.org/index.php?title=RTC&amp;oldid=27484" title="Permanent link to this revision of the page">Permanent link</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /TOOLBOX -->
+
+<!-- LANGUAGES -->
+
+<!-- /LANGUAGES -->
+			</div>
+		<!-- /panel -->
+		<!-- footer -->
+		<div id="footer">
+							<ul id="footer-info">
+											<li id="footer-info-lastmod"> This page was last modified on 5 November 2022, at 04:35.</li>
+											<li id="footer-info-viewcount">This page has been accessed 139,831 times.</li>
+									</ul>
+							<ul id="footer-places">
+											<li id="footer-places-privacy"><a href="https://wiki.osdev.org/OSDev_Wiki:Privacy_policy" title="OSDev Wiki:Privacy policy">Privacy policy</a></li>
+											<li id="footer-places-about"><a href="https://wiki.osdev.org/OSDev_Wiki:About" title="OSDev Wiki:About">About OSDev Wiki</a></li>
+											<li id="footer-places-disclaimer"><a href="https://wiki.osdev.org/OSDev_Wiki:General_disclaimer" title="OSDev Wiki:General disclaimer">Disclaimers</a></li>
+									</ul>
+										<ul id="footer-icons" class="noprint">
+					<li id="footer-poweredbyico">
+						<a href="http://www.mediawiki.org/"><img src="./RTC - OSDev Wiki_files/poweredby_mediawiki_88x31.png" alt="Powered by MediaWiki" width="88" height="31"></a>
+					</li>
+				</ul>
+						<div style="clear:both"></div>
+		</div>
+		<!-- /footer -->
+		<!-- fixalpha -->
+		<script type="text/javascript"> if ( window.isMSIE55 ) fixalpha(); </script>
+		<!-- /fixalpha -->
+		<script src="./RTC - OSDev Wiki_files/load(5).php"></script>
+<script>if(window.mw){
+	mw.loader.load(["mediawiki.user", "mediawiki.util", "mediawiki.page.ready", "mediawiki.legacy.wikibits", "mediawiki.legacy.ajax"]);
+}
+</script><script type="text/javascript" src="./RTC - OSDev Wiki_files/load(6).php"></script>
+<script src="./RTC - OSDev Wiki_files/load(7).php"></script>
+<script>if(window.mw){
+	mw.user.options.set({"ccmeonemails":0,"cols":80,"date":"default","diffonly":0,"disablemail":0,"disablesuggest":0,"editfont":"default","editondblclick":0,"editsection":1,"editsectiononrightclick":0,"enotifminoredits":0,"enotifrevealaddr":0,"enotifusertalkpages":1,"enotifwatchlistpages":0,"extendwatchlist":0,"externaldiff":0,"externaleditor":0,"fancysig":0,"forceeditsummary":0,"gender":"unknown","hideminor":0,"hidepatrolled":0,"highlightbroken":1,"imagesize":2,"justify":0,"math":1,"minordefault":0,"newpageshidepatrolled":0,"nocache":0,"noconvertlink":0,"norollbackdiff":0,"numberheadings":0,"previewonfirst":0,"previewontop":1,"quickbar":5,"rcdays":7,"rclimit":50,"rememberpassword":0,"rows":25,"searchlimit":20,"showhiddencats":0,"showjumplinks":1,"shownumberswatching":1,"showtoc":1,"showtoolbar":1,"skin":"vector","stubthreshold":0,"thumbsize":2,"underline":2,"uselivepreview":0,"usenewrc":0,"watchcreations":0,"watchdefault":0,"watchdeletion":0,"watchlistdays":3,"watchlisthideanons":0,
+	"watchlisthidebots":0,"watchlisthideliu":0,"watchlisthideminor":0,"watchlisthideown":0,"watchlisthidepatrolled":0,"watchmoves":0,"wllimit":250,"variant":"en","language":"en","searchNs0":true,"searchNs1":false,"searchNs2":false,"searchNs3":false,"searchNs4":false,"searchNs5":false,"searchNs6":false,"searchNs7":false,"searchNs8":false,"searchNs9":false,"searchNs10":false,"searchNs11":false,"searchNs12":false,"searchNs13":false,"searchNs14":false,"searchNs15":false});;mw.user.tokens.set({"editToken":"+\\","watchToken":false});;mw.loader.state({"user.options":"ready","user.tokens":"ready"});
+	
+	/* cache key: wikidb:resourceloader:filter:minify-js:4:19a4b18a9ac79a6b8c60b24af4668814 */
+}
+</script><!-- Served in 0.021 secs. -->
+	
+
+</body></html>
