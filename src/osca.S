@@ -129,7 +129,7 @@ loop lbl2
 #movl $0x0e0e0f0f,0xa0118 # on screen
 # setup IRQ 0,1,8. keyboard, system timer and RTC timer
 #  only the lower offset set, handlers within 64K
-#  reprogrammed below to map IRQ to IDT mapping 32-47
+#  PIC reprogrammed below to map IRQ to IDT mapping 32-47
 movw $isr_tck,IDT+(32+0)*8 # IRQ 0: keyboard
 movw $isr_kbd,IDT+(32+1)*8 # IRQ 1: timer 18.2Hz
 movw $isr_tmr,IDT+(32+8)*8 # IRQ 8: timer 1024Hz
