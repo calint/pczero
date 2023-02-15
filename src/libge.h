@@ -24,8 +24,10 @@ public:
 	void operator delete(void*)=delete;
 
 	constexpr auto init_normals()->void{
-		if(nbnd<2) // not enough points for a line
+		if(nbnd<2){ // not enough points for a line
+			// ? create a {0,0} normal if nbnd==1
 			return;
+		}
 		nmls=new Vector[unsigned(nbnd)];
 		const PointIx n=nbnd-1;
 		for(PointIx i=0;i<n;i++){
@@ -273,7 +275,8 @@ public:
 		used_ixes[used_ix_]=movedSlot;
 		// delete cached points
 		delete[]pts_wld_;
-		delete[]nmls_wld_;
+		if(nmls_wld_)
+			delete[]nmls_wld_;
 	}
 	inline constexpr auto type_bits()const->TypeBits{return tb_;}	// returns false if object is to be deleted
 	inline constexpr auto type_bits_collision_mask()const->TypeBits{return colchk_tb_;}	// returns false if object is to be deleted
@@ -300,17 +303,19 @@ public:
 			}
 		}
 		if(enable::draw_polygons){
-			draw_polygon(dsp, pts_wld_, def_.nbnd, def_.bnd,color_);
+			draw_polygon(dsp, pts_wld_,def_.nbnd,def_.bnd,color_);
 		}
 		if(enable::draw_normals){
-			const Point*nml=nmls_wld_;
-			for(PointIx i=0;i<def_.nbnd;i++){
-				Vector v=*nml;
-				v.normalize().scale(3);
-				Point p=pts_wld_[def_.bnd[i]];
-				Vector v1{p.x+nml->x,p.y+nml->y};
-				World::draw_dot(v1,0xf);
-				nml++;
+			if(nmls_wld_){
+				const Point*nml=nmls_wld_;
+				for(PointIx i=0;i<def_.nbnd;i++){
+					Vector v=*nml;
+					v.normalize().scale(3);
+					Point p=pts_wld_[def_.bnd[i]];
+					Vector v1{p.x+nml->x,p.y+nml->y};
+					World::draw_dot(v1,0xf);
+					nml++;
+				}
 			}
 		}
 		if(enable::draw_bounding_circle){

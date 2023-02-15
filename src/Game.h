@@ -522,6 +522,13 @@ auto Game::create_boss()->void{
 		new PointIx[]{0} // bounding points and convex polygon CCW
 	};
 	bullet_def.init_normals();
+//	bullet_def={1,0, // at least one bounding point for collision detection
+//		new Point[]{
+//			{0,0},
+//		},
+//		nullptr // bounding points and convex polygon CCW
+//	};
+//	bullet_def.init_normals();
 
 	wall_def={4,4,
 		new Point[]{ // points in model coordinates, negative Y is "forward"
