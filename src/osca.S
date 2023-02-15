@@ -154,11 +154,14 @@ out %al,$0x21
 out %al,$0xa1 # done
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
 # disable the Non-Maskable Interrupt (NMI) before programming RTC
+# this interrupt happens when there is a critical hardware failure
+# https://wiki.osdev.org/Non_Maskable_Interrupt
 in $0x70,%al
 or $0x80,%al
 out %al,$0x70
 in $0x71,%al
-# enable RTC 1024Hz timer on irq 8
+# enable RTC 1024 Hz timer on irq 8
+# https://wiki.osdev.org/RTC
 mov $0x8b,%al
 out %al,$0x70
 in $0x71,%al
