@@ -127,14 +127,12 @@ lbl2:
     add $8,%bx
 loop lbl2
 #movl $0x0e0e0f0f,0xa0118 # on screen
-#movw $isr_tck,IDT+0x40 # only the lower offset
-#movw $isr_kbd,IDT+0x48 #   handlers within 64K
 # only the lower offset set, handlers within 64K
-movw $isr_tck,IDT+(32+0)*8 # IRQ0: keyboard
-movw $isr_kbd,IDT+(32+1)*8 # IRQ1: timer 18.2Hz
-movw $isr_tmr,IDT+(32+8)*8 # IRQ8: timer 1024Hz
+movw $isr_tck,IDT+(32+0)*8 # IRQ 0: keyboard
+movw $isr_kbd,IDT+(32+1)*8 # IRQ 1: timer 18.2Hz
+movw $isr_tmr,IDT+(32+8)*8 # IRQ 8: timer 1024Hz
 lidt idtr
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - map irqs
 # reprogram the PIC (8259's) to map IRQ0-15 to IDT mapping 32 to 47
 # http://www.osdever.net/bkerndev/Docs/irqs.htm
 # https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interrupt_Controller
