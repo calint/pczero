@@ -68,12 +68,16 @@ public:
 	inline static TimeSec time{0};
 	inline static TimeSec time_dt{0};
 	inline static TimeSec time_prv{0};
+	inline static Count fps_frame_counter{0};
+	inline static TimeSec fps_last_time{0};
+	inline static Count fps{0};
 
 	static auto init_statics()->void{
 		time=TimeSec(osca_tmr_lo)*sec_per_tick;
 		// set previous time to a reasonable value so that dt does not
 		// become huge at first frame
 		time_prv=time-sec_per_tick;
+		fps_last_time=time;
 	}
 	static auto tick()->void;
 	static auto deleted_add(Object*o)->void;
@@ -698,9 +702,16 @@ auto World::tick()->void{
 	metrics::reset();
 
 	time_prv=time;
-	time=Real(osca_tmr_lo)*sec_per_tick;
-//	time=Real(osca_t)*sec_per_tick;
+	time=TimeSec(osca_tmr_lo)*sec_per_tick;
 	time_dt=time-time_prv;
+	// fps calculations
+	fps_frame_counter++;
+	const TimeSec dt=time-fps_last_time;
+	if(dt>1){
+		fps=Count(TimeSec(fps_frame_counter)/dt);
+		fps_frame_counter=0;
+		fps_last_time=time;
+	}
 
 	Object::draw_all(vga13h.bmp());
 	PhysicsState::update_all();

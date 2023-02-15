@@ -602,7 +602,7 @@ auto Game::create_boss()->void{
 			Game::boss=nullptr;
 		}
 
-		out.pos({12,2}).fg(2);
+		out.pos({4,2}).fg(2);
 		out.p("k=").p_hex_8b(static_cast<unsigned char>(osca_key)).spc();
 		out.p("e=").p_hex_8b(static_cast<unsigned char>(Game::enemies_alive)).spc();
 		out.p("m=").p_hex_8b(static_cast<unsigned char>(metrics::matrix_set_transforms)).spc();
@@ -613,6 +613,7 @@ auto Game::create_boss()->void{
 		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_tmr_lo)).spc();
 		out.p("s=").p_hex_8b(static_cast<unsigned char>(World::time)).spc();
 		out.p("d=").p_hex_8b(static_cast<unsigned char>(World::time_dt*1000)).spc();
+		out.p("f=").p_hex_16b(static_cast<unsigned short>(World::fps)).spc();
 
 		if(!Game::player)
 			shp=nullptr;
