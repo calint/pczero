@@ -30,13 +30,15 @@ extern "C" [[noreturn]] void tsk0(){
 	pb.fg(6).p("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
 	pb.fg(7).p(' ').p_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
+//	pb.pos({5,7}).fg(2).p('_');
 	pb.pos({3,3}).fg(2).p('_');
 
 	while(true){
 		// handle keyboard events
 		while(true){
+			if(keyboard_focus!=tsk0)
+				break;
 			const unsigned char sc=keyboard.get_next_scan_code();
-			asm("nop"); // ? doesn't work without this unless O0
 			if(!sc)
 				break;
 			if(sc==0xe){ // backspace
@@ -54,7 +56,7 @@ extern "C" [[noreturn]] void tsk0(){
 				ch&=~0x20; // to upper case
 			pb.backspace().p(ch).p('_');
 		}
-//		osca_yield();
+		osca_yield();
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -88,7 +90,7 @@ extern "C" [[noreturn]] void tsk3(){
 
 #include"Game.h"
 extern "C" void tsk4(){
-	osca::Game::start();
+	osca::Game::start(tsk4);
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

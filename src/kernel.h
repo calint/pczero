@@ -175,12 +175,28 @@ namespace osca{
 	};
 	extern Keyboard keyboard;
 	Keyboard keyboard;
+
+	// ? hack
+	inline static void(*keyboard_focus)(){tsk4};
+	inline static bool keyboard_ctrl_pressed{false};
 } // end namespace
 
 // called by osca from the keyboard interrupt
 extern "C" void osca_keyb_ev(){
 	// on screen
 	*reinterpret_cast<int*>(0xa0000+4)=osca_key;
+
+	if(osca_key==0x1d)osca::keyboard_ctrl_pressed=true;
+	if(osca_key==0x9d)osca::keyboard_ctrl_pressed=false;
+
+	if(osca::keyboard_ctrl_pressed&&osca_key==0xf){ // ctrl+tab
+		if(osca::keyboard_focus==tsk0){
+			osca::keyboard_focus=tsk4;
+		}else{
+			osca::keyboard_focus=tsk0;
+		}
+		return;
+	}
 
 	// to keyboard handler
 	osca::keyboard.on_key(osca_key);

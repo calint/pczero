@@ -117,7 +117,7 @@ public:
 		}
 		return true;
 	}
-	[[noreturn]] static auto start()->void;
+	[[noreturn]] static auto start(void(*keyboard_focus_id)())->void;
 };
 
 class Enemy final:public Object{
@@ -474,7 +474,7 @@ auto Game::create_boss()->void{
 	Game::boss=o;
 }
 
-[[noreturn]] auto Game::start()->void{
+[[noreturn]] auto Game::start(void(*keyboard_focus_id)())->void{
 	//----------------------------------------------------------
 	// init statics
 	//----------------------------------------------------------
@@ -585,7 +585,7 @@ auto Game::create_boss()->void{
 	constexpr unsigned char key_spc=4;
 	bool keyb[]{false,false,false,false,false}; // wasd and space pressed status
 
-	out.pos({12,1}).fg(6).p("keys: w a s d [space] F1 x c");
+	out.pos({12,1}).fg(6).p("keys: w a s d [space] F1 x c [ctrl+tab]");
 
 	// start task
 	while(true){
@@ -618,9 +618,9 @@ auto Game::create_boss()->void{
 		if(!Game::player)
 			shp=nullptr;
 
-		if(shp){
-			while(const unsigned char kc=keyboard.get_next_scan_code()){
-				switch(kc){
+		if(shp&&keyboard_focus==keyboard_focus_id){
+			while(const unsigned char sc=keyboard.get_next_scan_code()){
+				switch(sc){
 				case 0x11: // w pressed
 					keyb[key_w]=true;
 					break;
@@ -658,27 +658,15 @@ auto Game::create_boss()->void{
 					break;
 				}
 			}
-			if(keyb[key_w])
-				shp->thrust_fwd();
-
-			if(keyb[key_s])
-				shp->thrust_rev();
-
+			if(keyb[key_w])shp->thrust_fwd();
+			if(keyb[key_s])shp->thrust_rev();
 			if(!shp->auto_aim_at_boss){
-				if(keyb[key_a])
-					shp->turn_left();
-
-				if(keyb[key_d])
-					shp->turn_right();
-
-				if(!keyb[key_a]&&!keyb[key_d])
-					shp->turn_still();
+				if(keyb[key_a])shp->turn_left();
+				if(keyb[key_d])shp->turn_right();
+				if(!keyb[key_a]&&!keyb[key_d])shp->turn_still();
 			}
-			if(!keyb[key_w]&&!keyb[key_s])
-				shp->phy().vel={0,0};
-
-			if(keyb[key_spc])
-				shp->fire();
+			if(!keyb[key_w]&&!keyb[key_s])shp->phy().vel={0,0};
+			if(keyb[key_spc])shp->fire();
 		}
 		switch(table_scancode_to_ascii[osca_key]){
 		case'x':
