@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<!-- saved from url=(0031)https://wiki.osdev.org/A20_Line -->
+<html lang="en" dir="ltr" class="client-js"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>A20 Line - OSDev Wiki</title>
+
+<meta name="generator" content="MediaWiki 1.18.0">
+<link rel="shortcut icon" href="https://wiki.osdev.org/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="https://wiki.osdev.org/opensearch_desc.php" title="OSDev Wiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.osdev.org/api.php?action=rsd">
+<link rel="alternate" type="application/atom+xml" title="OSDev Wiki Atom feed" href="https://wiki.osdev.org/index.php?title=Special:RecentChanges&amp;feed=atom">
+<link rel="stylesheet" href="./A20 Line - OSDev Wiki_files/load.php">
+<style type="text/css" media="all">.mw-collapsible-toggle{float:right} li .mw-collapsible-toggle{float:none} .mw-collapsible-toggle-li{list-style:none}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:4250852ed2349a0d4d0fc6509a3e7d4c */
+</style><style type="text/css" media="all">.js-messagebox{margin:1em 5%;padding:0.5em 2.5%;border:1px solid #ccc;background-color:#fcfcfc;font-size:0.8em}.js-messagebox .js-messagebox-group{margin:1px;padding:0.5em 2.5%;border-bottom:1px solid #ddd}.js-messagebox .js-messagebox-group:last-child{border-bottom:thin none transparent}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:8b08bdc91c52a9ffba396dccfb5b473c */
+</style><meta name="ResourceLoaderDynamicStyles" content="">
+<link rel="stylesheet" href="./A20 Line - OSDev Wiki_files/load(1).php">
+<style>a:lang(ar),a:lang(ckb),a:lang(fa),a:lang(kk-arab),a:lang(mzn),a:lang(ps),a:lang(ur){text-decoration:none}a.new,#quickbar a.new{color:#ba0000}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:c88e2bcd56513749bec09a7e29cb3ffa */
+</style>
+<script src="./A20 Line - OSDev Wiki_files/load(2).php"></script><script src="./A20 Line - OSDev Wiki_files/load(3).php"></script>
+<script>if(window.mw){
+	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "A20_Line", "wgTitle": "A20 Line", "wgCurRevisionId": 26835, "wgArticleId": 1433, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["X86"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
+}
+</script><script>if(window.mw){
+	mw.loader.load(["mediawiki.page.startup"]);
+}
+</script><script type="text/javascript" src="./A20 Line - OSDev Wiki_files/load(4).php"></script>
+<style type="text/css">/*<![CDATA[*/
+.source-asm {line-height: normal;}
+.source-asm li, .source-asm pre {
+	line-height: normal; border: 0px none white;
+}
+/**
+ * GeSHi Dynamically Generated Stylesheet
+ * --------------------------------------
+ * Dynamically generated stylesheet for asm
+ * CSS class: source-asm, CSS id: 
+ * GeSHi (C) 2004 - 2007 Nigel McNie, 2007 - 2008 Benny Baumann
+ * (http://qbnz.com/highlighter/ and http://geshi.org/)
+ * --------------------------------------
+ */
+.asm.source-asm .de1, .asm.source-asm .de2 {font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;}
+.asm.source-asm  {font-family:monospace;}
+.asm.source-asm .imp {font-weight: bold; color: red;}
+.asm.source-asm li, .asm.source-asm .li1 {font-weight: normal; vertical-align:top;}
+.asm.source-asm .ln {width:1px;text-align:right;margin:0;padding:0 2px;vertical-align:top;}
+.asm.source-asm .li2 {font-weight: bold; vertical-align:top;}
+.asm.source-asm .kw1 {color: #00007f; font-weight: bold;}
+.asm.source-asm .kw2 {color: #0000ff; font-weight: bold;}
+.asm.source-asm .kw3 {color: #00007f;}
+.asm.source-asm .kw4 {color: #000000; font-weight: bold;}
+.asm.source-asm .kw5 {color: #000000; font-weight: bold;}
+.asm.source-asm .co1 {color: #666666; font-style: italic;}
+.asm.source-asm .co2 {color: #adadad; font-style: italic;}
+.asm.source-asm .es0 {color: #000099; font-weight: bold;}
+.asm.source-asm .br0 {color: #009900; font-weight: bold;}
+.asm.source-asm .sy0 {color: #339933;}
+.asm.source-asm .st0 {color: #7f007f;}
+.asm.source-asm .nu0 {color: #0000ff;}
+.asm.source-asm .ln-xtra, .asm.source-asm li.ln-xtra, .asm.source-asm div.ln-xtra {background-color: #ffc;}
+.asm.source-asm span.xtra { display:block; }
+
+/*]]>*/
+</style>
+<style type="text/css">/*<![CDATA[*/
+@import "/index.php?title=MediaWiki:Geshi.css&usemsgcache=yes&action=raw&ctype=text/css&smaxage=18000";
+/*]]>*/
+</style><style type="text/css">/*<![CDATA[*/
+.source-c {line-height: normal;}
+.source-c li, .source-c pre {
+	line-height: normal; border: 0px none white;
+}
+/**
+ * GeSHi Dynamically Generated Stylesheet
+ * --------------------------------------
+ * Dynamically generated stylesheet for c
+ * CSS class: source-c, CSS id: 
+ * GeSHi (C) 2004 - 2007 Nigel McNie, 2007 - 2008 Benny Baumann
+ * (http://qbnz.com/highlighter/ and http://geshi.org/)
+ * --------------------------------------
+ */
+.c.source-c .de1, .c.source-c .de2 {font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;}
+.c.source-c  {font-family:monospace;}
+.c.source-c .imp {font-weight: bold; color: red;}
+.c.source-c li, .c.source-c .li1 {font-weight: normal; vertical-align:top;}
+.c.source-c .ln {width:1px;text-align:right;margin:0;padding:0 2px;vertical-align:top;}
+.c.source-c .li2 {font-weight: bold; vertical-align:top;}
+.c.source-c .kw1 {color: #b1b100;}
+.c.source-c .kw2 {color: #000000; font-weight: bold;}
+.c.source-c .kw3 {color: #000066;}
+.c.source-c .kw4 {color: #993333;}
+.c.source-c .co1 {color: #666666; font-style: italic;}
+.c.source-c .co2 {color: #339933;}
+.c.source-c .coMULTI {color: #808080; font-style: italic;}
+.c.source-c .es0 {color: #000099; font-weight: bold;}
+.c.source-c .es1 {color: #000099; font-weight: bold;}
+.c.source-c .es2 {color: #660099; font-weight: bold;}
+.c.source-c .es3 {color: #660099; font-weight: bold;}
+.c.source-c .es4 {color: #660099; font-weight: bold;}
+.c.source-c .es5 {color: #006699; font-weight: bold;}
+.c.source-c .br0 {color: #009900;}
+.c.source-c .sy0 {color: #339933;}
+.c.source-c .st0 {color: #ff0000;}
+.c.source-c .nu0 {color: #0000dd;}
+.c.source-c .nu6 {color: #208080;}
+.c.source-c .nu8 {color: #208080;}
+.c.source-c .nu12 {color: #208080;}
+.c.source-c .nu16 {color:#800080;}
+.c.source-c .nu17 {color:#800080;}
+.c.source-c .nu18 {color:#800080;}
+.c.source-c .nu19 {color:#800080;}
+.c.source-c .me1 {color: #202020;}
+.c.source-c .me2 {color: #202020;}
+.c.source-c .ln-xtra, .c.source-c li.ln-xtra, .c.source-c div.ln-xtra {background-color: #ffc;}
+.c.source-c span.xtra { display:block; }
+
+/*]]>*/
+</style>
+<style type="text/css">/*<![CDATA[*/
+@import "/index.php?title=MediaWiki:Geshi.css&usemsgcache=yes&action=raw&ctype=text/css&smaxage=18000";
+/*]]>*/
+</style><!--[if lt IE 7]><style type="text/css">body{behavior:url("/skins/vector/csshover.min.htc")}</style><![endif]--></head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-A20_Line action-view skin-vector">
+		<div id="mw-page-base" class="noprint"></div>
+		<div id="mw-head-base" class="noprint"></div>
+		<!-- content -->
+		<div id="content">
+			<a id="top"></a>
+			<div id="mw-js-message" style="display:none;" class="js-messagebox"></div>
+						<!-- firstHeading -->
+			<h1 id="firstHeading" class="firstHeading">A20 Line</h1>
+			<!-- /firstHeading -->
+			<!-- bodyContent -->
+			<div id="bodyContent">
+								<!-- tagline -->
+				<div id="siteSub">From OSDev Wiki</div>
+				<!-- /tagline -->
+								<!-- subtitle -->
+				<div id="contentSub"></div>
+				<!-- /subtitle -->
+																<!-- jumpto -->
+				<div id="jump-to-nav">
+					Jump to: <a href="https://wiki.osdev.org/A20_Line#mw-head">navigation</a>,
+					<a href="https://wiki.osdev.org/A20_Line#p-search">search</a>
+				</div>
+				<!-- /jumpto -->
+								<!-- bodycontent -->
+				<div lang="en" dir="ltr" class="mw-content-ltr"><p>The A20 Address Line is the physical representation of the 21st bit (number 20, counting from 0) of any memory access. When the IBM-AT (Intel 286) was introduced, it was able to access up to sixteen megabytes of memory (instead of the 1 MByte of the 8086). But to remain compatible with the 8086, a quirk in the 8086 architecture (memory wraparound) had to be duplicated in the AT. To achieve this, the A20 line on the address bus was disabled by default.
+</p><p>The wraparound was caused by the fact the 8086 could only access 1 megabyte of memory, but because of the segmented memory model it could effectively address up to 1 megabyte and 64 kilobytes (minus 16 bytes).  Because there are 20 address lines on the 8086 (A0 through A19), any address above the 1 megabyte mark wraps around to zero. For some reason a few short-sighted programmers decided to write programs that actually used this wraparound (rather than directly addressing the memory at its normal location at the bottom of memory).  Therefore in order to support these 8086-era programs on the new processors, this wraparound had to be emulated on the IBM AT and its compatibles; this was originally achieved by way of a latch that by default set the A20 line to zero. Later the 486 added the logic into the processor and introduced the A20M pin to control it.
+</p><p>For an operating system developer (or <a href="https://wiki.osdev.org/Bootloader" title="Bootloader">Bootloader</a> developer) this means the A20 line has to be enabled so that all memory can be accessed. This started off as a simple hack but as simpler methods were added to do it, it became harder to program code that would definitely enable it and even harder to program code that would definitely disable it.
+</p>
+<table id="toc" class="toc"><tbody><tr><td><div id="toctitle"><h2>Contents</h2><span class="toctoggle">&nbsp;[<a href="https://wiki.osdev.org/A20_Line#" class="internal" id="togglelink">hide</a>]&nbsp;</span></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="https://wiki.osdev.org/A20_Line#Keyboard_Controller"><span class="tocnumber">1</span> <span class="toctext">Keyboard Controller</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="https://wiki.osdev.org/A20_Line#Testing_the_A20_line"><span class="tocnumber">2</span> <span class="toctext">Testing the A20 line</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="https://wiki.osdev.org/A20_Line#Testing_The_A20_Line_From_Protected_Mode"><span class="tocnumber">2.1</span> <span class="toctext">Testing The A20 Line From Protected Mode</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="https://wiki.osdev.org/A20_Line#Enabling"><span class="tocnumber">3</span> <span class="toctext">Enabling</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="https://wiki.osdev.org/A20_Line#Keyboard_Controller_2"><span class="tocnumber">3.1</span> <span class="toctext">Keyboard Controller</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="https://wiki.osdev.org/A20_Line#Fast_A20_Gate"><span class="tocnumber">3.2</span> <span class="toctext">Fast A20 Gate</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="https://wiki.osdev.org/A20_Line#INT_15"><span class="tocnumber">3.3</span> <span class="toctext">INT 15</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="https://wiki.osdev.org/A20_Line#Access_of_0xee"><span class="tocnumber">3.4</span> <span class="toctext">Access of 0xee</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="https://wiki.osdev.org/A20_Line#Recommended_Method"><span class="tocnumber">3.5</span> <span class="toctext">Recommended Method</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="https://wiki.osdev.org/A20_Line#See_Also"><span class="tocnumber">4</span> <span class="toctext">See Also</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="https://wiki.osdev.org/A20_Line#External_links"><span class="tocnumber">4.1</span> <span class="toctext">External links</span></a></li>
+</ul>
+</li>
+</ul>
+</td></tr></tbody></table>
+<h2> <span class="mw-headline" id="Keyboard_Controller">Keyboard Controller</span></h2>
+<p>The traditional method for A20 line enabling is to directly probe the keyboard controller. The reason for this is that Intel's <a href="https://wiki.osdev.org/%228042%22_PS/2_Controller" title="&quot;8042&quot; PS/2 Controller">8042 keyboard controller</a> had a spare pin which they decided to route the A20 line through. This seems foolish now given their unrelated nature, but at the time computers weren't quite so standardized. Keyboard controllers are usually derivatives of the <a rel="nofollow" class="external text" href="http://www.diakom.ru/el/elfirms/datashts/Smsc/42w11.pdf">8042</a> chip. By programming that chip accurately, you can either enable or disable bit #20 on the address bus.
+</p><p>When your PC boots, the A20 gate is generally disabled, but some BIOSes (and emulators, like QEMU) do enable it for you, as do some high-memory managers (HIMEM.SYS) or bootloaders (<a href="https://wiki.osdev.org/GRUB" title="GRUB">GRUB</a>).
+</p>
+<h2> <span class="mw-headline" id="Testing_the_A20_line">Testing the A20 line</span></h2>
+<p>Before enabling the A20 with any of the methods described below it is better to test whether the A20 address line was already enabled by the <a href="https://wiki.osdev.org/BIOS" title="BIOS">BIOS</a>. This can be achieved by comparing, at boot time in real mode, the bootsector identifier (0xAA55) located at address 0000:7DFE with the value 1 MiB higher which is at address FFFF:7E0E. When the two values are different it means that the A20 is already enabled otherwise if the values are identical it must be ruled out that this is not by mere chance. Therefore the bootsector identifier needs to be changed, for instance by rotating it left by 8 bits, and again compared to the 16 bits word at FFFF:7E0E. When they are still the same then the A20 address line is disabled otherwise it is enabled.
+</p><p>The following code performs a check (not like described above -- more directly).
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="asm source-asm"><pre class="de1"><span class="co1">; The following code is public domain licensed</span>
+&nbsp;
+<span class="br0">[</span>bits <span class="nu0">16</span><span class="br0">]</span>
+&nbsp;
+<span class="co1">; Function: check_a20</span>
+<span class="co1">;</span>
+<span class="co1">; Purpose: to check the status of the a20 line in a completely self-contained state-preserving way.</span>
+<span class="co1">;          The function can be modified as necessary by removing push's at the beginning and their</span>
+<span class="co1">;          respective pop's at the end if complete self-containment is not required.</span>
+<span class="co1">;</span>
+<span class="co1">; Returns: 0 in ax if the a20 line is disabled (memory wraps around)</span>
+<span class="co1">;          1 in ax if the a20 line is enabled (memory does not wrap around)</span>
+&nbsp;
+check_a20<span class="sy0">:</span>
+    <span class="kw1">pushf</span>
+    <span class="kw1">push</span> <span class="kw3">ds</span>
+    <span class="kw1">push</span> <span class="kw3">es</span>
+    <span class="kw1">push</span> <span class="kw3">di</span>
+    <span class="kw1">push</span> <span class="kw3">si</span>
+&nbsp;
+    <span class="kw1">cli</span>
+&nbsp;
+    <span class="kw1">xor</span> <span class="kw3">ax</span><span class="sy0">,</span> <span class="kw3">ax</span> <span class="co1">; ax = 0</span>
+    <span class="kw1">mov</span> <span class="kw3">es</span><span class="sy0">,</span> <span class="kw3">ax</span>
+&nbsp;
+    <span class="kw1">not</span> <span class="kw3">ax</span> <span class="co1">; ax = 0xFFFF</span>
+    <span class="kw1">mov</span> <span class="kw3">ds</span><span class="sy0">,</span> <span class="kw3">ax</span>
+&nbsp;
+    <span class="kw1">mov</span> <span class="kw3">di</span><span class="sy0">,</span> <span class="nu0">0x0500</span>
+    <span class="kw1">mov</span> <span class="kw3">si</span><span class="sy0">,</span> <span class="nu0">0x0510</span>
+&nbsp;
+    <span class="kw1">mov</span> <span class="kw3">al</span><span class="sy0">,</span> <span class="kw5">byte</span> <span class="br0">[</span><span class="kw3">es</span><span class="sy0">:</span><span class="kw3">di</span><span class="br0">]</span>
+    <span class="kw1">push</span> <span class="kw3">ax</span>
+&nbsp;
+    <span class="kw1">mov</span> <span class="kw3">al</span><span class="sy0">,</span> <span class="kw5">byte</span> <span class="br0">[</span><span class="kw3">ds</span><span class="sy0">:</span><span class="kw3">si</span><span class="br0">]</span>
+    <span class="kw1">push</span> <span class="kw3">ax</span>
+&nbsp;
+    <span class="kw1">mov</span> <span class="kw5">byte</span> <span class="br0">[</span><span class="kw3">es</span><span class="sy0">:</span><span class="kw3">di</span><span class="br0">]</span><span class="sy0">,</span> <span class="nu0">0x00</span>
+    <span class="kw1">mov</span> <span class="kw5">byte</span> <span class="br0">[</span><span class="kw3">ds</span><span class="sy0">:</span><span class="kw3">si</span><span class="br0">]</span><span class="sy0">,</span> <span class="nu0">0xFF</span>
+&nbsp;
+    <span class="kw1">cmp</span> <span class="kw5">byte</span> <span class="br0">[</span><span class="kw3">es</span><span class="sy0">:</span><span class="kw3">di</span><span class="br0">]</span><span class="sy0">,</span> <span class="nu0">0xFF</span>
+&nbsp;
+    <span class="kw1">pop</span> <span class="kw3">ax</span>
+    <span class="kw1">mov</span> <span class="kw5">byte</span> <span class="br0">[</span><span class="kw3">ds</span><span class="sy0">:</span><span class="kw3">si</span><span class="br0">]</span><span class="sy0">,</span> <span class="kw3">al</span>
+&nbsp;
+    <span class="kw1">pop</span> <span class="kw3">ax</span>
+    <span class="kw1">mov</span> <span class="kw5">byte</span> <span class="br0">[</span><span class="kw3">es</span><span class="sy0">:</span><span class="kw3">di</span><span class="br0">]</span><span class="sy0">,</span> <span class="kw3">al</span>
+&nbsp;
+    <span class="kw1">mov</span> <span class="kw3">ax</span><span class="sy0">,</span> <span class="nu0">0</span>
+    <span class="kw1">je</span> check_a20__exit
+&nbsp;
+    <span class="kw1">mov</span> <span class="kw3">ax</span><span class="sy0">,</span> <span class="nu0">1</span>
+&nbsp;
+check_a20__exit<span class="sy0">:</span>
+    <span class="kw1">pop</span> <span class="kw3">si</span>
+    <span class="kw1">pop</span> <span class="kw3">di</span>
+    <span class="kw1">pop</span> <span class="kw3">es</span>
+    <span class="kw1">pop</span> <span class="kw3">ds</span>
+    <span class="kw1">popf</span>
+&nbsp;
+    <span class="kw1">ret</span></pre></div></div>
+<h3> <span class="mw-headline" id="Testing_The_A20_Line_From_Protected_Mode">Testing The A20 Line From Protected Mode</span></h3>
+<p>When in Protected Mode it's easier to test A20 because you can access A20's set memory addresses using any odd megabyte address and compare it to it's even megabyte neighbor.
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="asm source-asm"><pre class="de1"><span class="br0">[</span>bits <span class="nu0">32</span><span class="br0">]</span>
+&nbsp;
+<span class="co1">; Check A20 line</span>
+<span class="co1">; Returns to caller if A20 gate is cleared.</span>
+<span class="co1">; Continues to A20_on if A20 line is set.</span>
+<span class="co1">; Written by Elad Ashkcenazi </span>
+&nbsp;
+is_A20_on?<span class="sy0">:</span>   
+&nbsp;
+<span class="kw1">pushad</span>
+<span class="kw1">mov</span> <span class="kw3">edi</span><span class="sy0">,</span><span class="nu0">0x112345</span>  <span class="co1">;odd megabyte address.</span>
+<span class="kw1">mov</span> <span class="kw3">esi</span><span class="sy0">,</span><span class="nu0">0x012345</span>  <span class="co1">;even megabyte address.</span>
+<span class="kw1">mov</span> <span class="br0">[</span><span class="kw3">esi</span><span class="br0">]</span><span class="sy0">,</span><span class="kw3">esi</span>     <span class="co1">;making sure that both addresses contain diffrent values.</span>
+<span class="kw1">mov</span> <span class="br0">[</span><span class="kw3">edi</span><span class="br0">]</span><span class="sy0">,</span><span class="kw3">edi</span>     <span class="co1">;(if A20 line is cleared the two pointers would point to the address 0x012345 that would contain 0x112345 (edi)) </span>
+<span class="kw1">cmpsd</span>             <span class="co1">;compare addresses to see if the're equivalent.</span>
+<span class="kw1">popad</span>
+<span class="kw1">jne</span> A20_on        <span class="co1">;if not equivalent , A20 line is set.</span>
+<span class="kw1">ret</span>               <span class="co1">;if equivalent , the A20 line is cleared.</span>
+&nbsp;
+A20_on<span class="sy0">:</span>
+<span class="co1">; *your code from here*</span></pre></div></div>
+<h2> <span class="mw-headline" id="Enabling">Enabling</span></h2>
+<p>There are several sources that enable A20, commonly each of the inputs are or'ed together to form the A20 enable signal. This means that using one method (if supported by the chipset) is enough to enable A20. If you want to disable A20, you might have to disable all present sources. Always make sure that the A20 has the requested state by testing the line as described above.
+</p>
+<h3> <span class="mw-headline" id="Keyboard_Controller_2">Keyboard Controller</span></h3>
+<p>For the original method to enable the A20 line, some hardware IO using the Keyboard Controller chip (8042 chip) is necessary.
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1"><span class="kw4">void</span> init_A20<span class="br0">(</span><span class="kw4">void</span><span class="br0">)</span>
+<span class="br0">{</span>
+   <span class="kw4">uint8_t</span>   a<span class="sy0">;</span>
+&nbsp;
+   disable_ints<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+   kyb_wait_until_done<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+   kyb_send_command<span class="br0">(</span><span class="nu12">0xAD</span><span class="br0">)</span><span class="sy0">;</span>         <span class="co1">// disable keyboard</span>
+&nbsp;
+   kyb_wait_until_done<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+   kyb_send_command<span class="br0">(</span><span class="nu12">0xD0</span><span class="br0">)</span><span class="sy0">;</span>         <span class="co1">// Read from input</span>
+&nbsp;
+   kyb_wait_until_done<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+   a<span class="sy0">=</span>kyb_get_data<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+   kyb_wait_until_done<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+   kyb_send_command<span class="br0">(</span><span class="nu12">0xD1</span><span class="br0">)</span><span class="sy0">;</span>         <span class="co1">// Write to output</span>
+&nbsp;
+   kyb_wait_until_done<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+   kyb_send_data<span class="br0">(</span>a<span class="sy0">|</span><span class="nu0">2</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+   kyb_wait_until_done<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+   kyb_send_command<span class="br0">(</span><span class="nu12">0xAE</span><span class="br0">)</span><span class="sy0">;</span>         <span class="co1">// enable keyboard</span>
+&nbsp;
+   enable_ints<span class="br0">(</span><span class="br0">)</span><span class="sy0">;</span>
+<span class="br0">}</span></pre></div></div>
+<p>or in <a href="https://wiki.osdev.org/Assembly" title="Assembly">assembly</a>
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="asm source-asm"><pre class="de1"><span class="co1">;;</span>
+<span class="co1">;; NASM 32bit assembler</span>
+<span class="co1">;;</span>
+&nbsp;
+<span class="br0">[</span>bits <span class="nu0">32</span><span class="br0">]</span>
+<span class="br0">[</span>section <span class="sy0">.</span>text<span class="br0">]</span>
+&nbsp;
+enable_A20<span class="sy0">:</span>
+        <span class="kw1">cli</span>
+&nbsp;
+        <span class="kw1">call</span>    a20wait
+        <span class="kw1">mov</span>     <span class="kw3">al</span><span class="sy0">,</span><span class="nu0">0xAD</span>
+        <span class="kw1">out</span>     <span class="nu0">0x64</span><span class="sy0">,</span><span class="kw3">al</span>
+&nbsp;
+        <span class="kw1">call</span>    a20wait
+        <span class="kw1">mov</span>     <span class="kw3">al</span><span class="sy0">,</span><span class="nu0">0xD0</span>
+        <span class="kw1">out</span>     <span class="nu0">0x64</span><span class="sy0">,</span><span class="kw3">al</span>
+&nbsp;
+        <span class="kw1">call</span>    a20wait2
+        <span class="kw1">in</span>      <span class="kw3">al</span><span class="sy0">,</span><span class="nu0">0x60</span>
+        <span class="kw1">push</span>    <span class="kw3">eax</span>
+&nbsp;
+        <span class="kw1">call</span>    a20wait
+        <span class="kw1">mov</span>     <span class="kw3">al</span><span class="sy0">,</span><span class="nu0">0xD1</span>
+        <span class="kw1">out</span>     <span class="nu0">0x64</span><span class="sy0">,</span><span class="kw3">al</span>
+&nbsp;
+        <span class="kw1">call</span>    a20wait
+        <span class="kw1">pop</span>     <span class="kw3">eax</span>
+        <span class="kw1">or</span>      <span class="kw3">al</span><span class="sy0">,</span><span class="nu0">2</span>
+        <span class="kw1">out</span>     <span class="nu0">0x60</span><span class="sy0">,</span><span class="kw3">al</span>
+&nbsp;
+        <span class="kw1">call</span>    a20wait
+        <span class="kw1">mov</span>     <span class="kw3">al</span><span class="sy0">,</span><span class="nu0">0xAE</span>
+        <span class="kw1">out</span>     <span class="nu0">0x64</span><span class="sy0">,</span><span class="kw3">al</span>
+&nbsp;
+        <span class="kw1">call</span>    a20wait
+        <span class="kw1">sti</span>
+        <span class="kw1">ret</span>
+&nbsp;
+a20wait<span class="sy0">:</span>
+        <span class="kw1">in</span>      <span class="kw3">al</span><span class="sy0">,</span><span class="nu0">0x64</span>
+        <span class="kw1">test</span>    <span class="kw3">al</span><span class="sy0">,</span><span class="nu0">2</span>
+        <span class="kw1">jnz</span>     a20wait
+        <span class="kw1">ret</span>
+&nbsp;
+&nbsp;
+a20wait2<span class="sy0">:</span>
+        <span class="kw1">in</span>      <span class="kw3">al</span><span class="sy0">,</span><span class="nu0">0x64</span>
+        <span class="kw1">test</span>    <span class="kw3">al</span><span class="sy0">,</span><span class="nu0">1</span>
+        <span class="kw1">jz</span>      a20wait2
+        <span class="kw1">ret</span></pre></div></div>
+<h3> <span class="mw-headline" id="Fast_A20_Gate">Fast A20 Gate</span></h3>
+<p>On most newer computers starting with the IBM PS/2, the chipset has a FAST A20 option that can quickly enable the A20 line. To enable A20 this way, there is no need for delay loops or polling, just 3 simple instructions.
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="asm source-asm"><pre class="de1"><span class="kw1">in</span> <span class="kw3">al</span><span class="sy0">,</span> <span class="nu0">0x92</span>
+<span class="kw1">or</span> <span class="kw3">al</span><span class="sy0">,</span> <span class="nu0">2</span>
+<span class="kw1">out</span> <span class="nu0">0x92</span><span class="sy0">,</span> <span class="kw3">al</span></pre></div></div>
+<p>As mentioned at <a rel="nofollow" class="external text" href="http://www.win.tue.nl/~aeb/linux/kbd/A20.html">the see also site</a>, it would be best to do the write only when necessary, and to make sure bit 0 is 0, as it is used for fast reset. An example follows:
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="asm source-asm"><pre class="de1"><span class="kw1">in</span> <span class="kw3">al</span><span class="sy0">,</span> <span class="nu0">0x92</span>
+<span class="kw1">test</span> <span class="kw3">al</span><span class="sy0">,</span> <span class="nu0">2</span>
+<span class="kw1">jnz</span> after
+<span class="kw1">or</span> <span class="kw3">al</span><span class="sy0">,</span> <span class="nu0">2</span>
+<span class="kw1">and</span> <span class="kw3">al</span><span class="sy0">,</span> <span class="nu0">0xFE</span>
+<span class="kw1">out</span> <span class="nu0">0x92</span><span class="sy0">,</span> <span class="kw3">al</span>
+after<span class="sy0">:</span></pre></div></div>
+<p>However, the Fast A20 method is not supported everywhere and there is no reliable way to tell if it will have some effect or not on a given system. Even worse, on some systems, it may actually do something else like blanking the screen, so it should be used only after the <a href="https://wiki.osdev.org/BIOS" title="BIOS">BIOS</a> has reported that FAST A20 is available. Code for systems lacking FAST A20 support is also needed, so relying only on this method is discouraged. Also, on some chipsets you might have to enable Fast A20 support in the BIOS configuration screen.
+</p>
+<h3> <span class="mw-headline" id="INT_15">INT 15</span></h3>
+<p>Another way is to use the BIOS.
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="asm source-asm"><pre class="de1"><span class="co1">;FASM</span>
+<span class="kw5">use16</span>
+<span class="kw1">mov</span>     <span class="kw3">ax</span><span class="sy0">,</span><span class="nu0">2403h</span>                <span class="co1">;--- A20-Gate Support ---</span>
+<span class="kw1">int</span>     <span class="nu0">15h</span>
+<span class="kw1">jb</span>      a20_ns                  <span class="co1">;INT 15h is not supported</span>
+<span class="kw1">cmp</span>     <span class="kw3">ah</span><span class="sy0">,</span><span class="nu0">0</span>
+<span class="kw1">jnz</span>     a20_ns                  <span class="co1">;INT 15h is not supported</span>
+&nbsp;
+<span class="kw1">mov</span>     <span class="kw3">ax</span><span class="sy0">,</span><span class="nu0">2402h</span>                <span class="co1">;--- A20-Gate Status ---</span>
+<span class="kw1">int</span>     <span class="nu0">15h</span>
+<span class="kw1">jb</span>      a20_failed              <span class="co1">;couldn't get status</span>
+<span class="kw1">cmp</span>     <span class="kw3">ah</span><span class="sy0">,</span><span class="nu0">0</span>
+<span class="kw1">jnz</span>     a20_failed              <span class="co1">;couldn't get status</span>
+&nbsp;
+<span class="kw1">cmp</span>     <span class="kw3">al</span><span class="sy0">,</span><span class="nu0">1</span>
+<span class="kw1">jz</span>      a20_activated           <span class="co1">;A20 is already activated</span>
+&nbsp;
+<span class="kw1">mov</span>     <span class="kw3">ax</span><span class="sy0">,</span><span class="nu0">2401h</span>                <span class="co1">;--- A20-Gate Activate ---</span>
+<span class="kw1">int</span>     <span class="nu0">15h</span>
+<span class="kw1">jb</span>      a20_failed              <span class="co1">;couldn't activate the gate</span>
+<span class="kw1">cmp</span>     <span class="kw3">ah</span><span class="sy0">,</span><span class="nu0">0</span>
+<span class="kw1">jnz</span>     a20_failed              <span class="co1">;couldn't activate the gate</span>
+&nbsp;
+a20_activated<span class="sy0">:</span>                  <span class="co1">;go on</span></pre></div></div>
+<p>If only one interrupt fails, you will have to use another method. (See below.)
+</p>
+<h3> <span class="mw-headline" id="Access_of_0xee">Access of 0xee</span></h3>
+<p>On some systems reading ioport 0xee enables A20, and writing it disables A20. (Or, sometimes, this action only occurs when ioport 0xee is enabled.) And similar things hold for ioport 0xef and reset (a write causes a reset).
+The i386SL/i486SL documents say
+</p><p>The following ports are visible only when enabled,
+Any writes to these ports cause the action named.
+Name of Register     Address   Default Value  Where placed    Size
+FAST CPU RESET         EFh          N/A         82360SL         8
+FAST A20 GATE          EEh          N/A         82360SL         8  
+</p><p>Enable A20:
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="asm source-asm"><pre class="de1"><span class="kw1">in</span> <span class="kw3">al</span><span class="sy0">,</span><span class="nu0">0xee</span></pre></div></div>
+<p>Disable A20:
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="asm source-asm"><pre class="de1"><span class="kw1">out</span> <span class="nu0">0xee</span><span class="sy0">,</span><span class="kw3">al</span></pre></div></div>
+<p><b>NOTE</b> that it doesn't matter what AL contains when writing and AL is undefined while reading (to / from port 0xee)
+</p>
+<h3> <span class="mw-headline" id="Recommended_Method">Recommended Method</span></h3>
+<p>Because there are several different methods that may or may not be supported, and because some of them cause problems on some computers; the recommended method is to try all of them until one works in the "order of least risk". Essentially:
+</p>
+<ul><li> Test if A20 is already enabled - if it is you don't need to do anything at all
+</li><li> Try the BIOS function. Ignore the returned status.
+</li><li> Test if A20 is enabled (to see if the BIOS function actually worked or not)
+</li><li> Try the keyboard controller method.
+</li><li> Test if A20 is enabled in a loop with a time-out (as the keyboard controller method may work slowly)
+</li><li> Try the Fast A20 method last
+</li><li> Test if A20 is enabled in a loop with a time-out (as the fast A20 method may work slowly)
+</li><li> If none of the above worked, give up
+</li></ul>
+<h2> <span class="mw-headline" id="See_Also">See Also</span></h2>
+<h3> <span class="mw-headline" id="External_links">External links</span></h3>
+<ul><li><a rel="nofollow" class="external free" href="http://www.win.tue.nl/~aeb/linux/kbd/A20.html">http://www.win.tue.nl/~aeb/linux/kbd/A20.html</a>
+</li></ul>
+
+<!-- 
+NewPP limit report
+Preprocessor node count: 148/1000000
+Post-expand include size: 0/2097152 bytes
+Template argument size: 0/2097152 bytes
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key wikidb:pcache:idhash:1433-0!*!0!!en!*!* and timestamp 20230216102852 -->
+</div>				<!-- /bodycontent -->
+								<!-- printfooter -->
+				<div class="printfooter">
+				Retrieved from "<a href="https://wiki.osdev.org/index.php?title=A20_Line&amp;oldid=26835">https://wiki.osdev.org/index.php?title=A20_Line&amp;oldid=26835</a>"				</div>
+				<!-- /printfooter -->
+												<!-- catlinks -->
+				<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks"><a href="https://wiki.osdev.org/Special:Categories" title="Special:Categories">Category</a>: <ul><li><a href="https://wiki.osdev.org/Category:X86" title="Category:X86">X86</a></li></ul></div></div>				<!-- /catlinks -->
+												<div class="visualClear"></div>
+				<!-- debughtml -->
+								<!-- /debughtml -->
+			</div>
+			<!-- /bodyContent -->
+		</div>
+		<!-- /content -->
+		<!-- header -->
+		<div id="mw-head" class="noprint">
+			
+<!-- 0 -->
+<div id="p-personal" class="">
+	<h5>Personal tools</h5>
+	<ul>
+		<li id="pt-login"><a href="https://wiki.osdev.org/index.php?title=Special:UserLogin&amp;returnto=A20_Line" title="You are encouraged to log in; however, it is not mandatory [alt-o]" accesskey="o">Log in</a></li>
+	</ul>
+</div>
+
+<!-- /0 -->
+			<div id="left-navigation">
+				
+<!-- 0 -->
+<div id="p-namespaces" class="vectorTabs">
+	<h5>Namespaces</h5>
+	<ul>
+					<li id="ca-nstab-main" class="selected"><span><a href="https://wiki.osdev.org/A20_Line" title="View the content page [alt-c]" accesskey="c">Page</a></span></li>
+					<li id="ca-talk"><span><a href="https://wiki.osdev.org/Talk:A20_Line" title="Discussion about the content page [alt-t]" accesskey="t">Discussion</a></span></li>
+			</ul>
+</div>
+
+<!-- /0 -->
+
+<!-- 1 -->
+<div id="p-variants" class="vectorMenu emptyPortlet">
+		<h5><span>Variants</span><a href="https://wiki.osdev.org/A20_Line#"></a></h5>
+	<div class="menu">
+		<ul>
+					</ul>
+	</div>
+</div>
+
+<!-- /1 -->
+			</div>
+			<div id="right-navigation">
+				
+<!-- 0 -->
+<div id="p-views" class="vectorTabs">
+	<h5>Views</h5>
+	<ul>
+					<li id="ca-view" class="selected"><span><a href="https://wiki.osdev.org/A20_Line">Read</a></span></li>
+					<li id="ca-viewsource"><span><a href="https://wiki.osdev.org/index.php?title=A20_Line&amp;action=edit" title="This page is protected.
+You can view its source [alt-e]" accesskey="e">View source</a></span></li>
+					<li id="ca-history" class="collapsible"><span><a href="https://wiki.osdev.org/index.php?title=A20_Line&amp;action=history" title="Past revisions of this page [alt-h]" accesskey="h">View history</a></span></li>
+			</ul>
+</div>
+
+<!-- /0 -->
+
+<!-- 1 -->
+<div id="p-cactions" class="vectorMenu emptyPortlet">
+	<h5><span>Actions</span><a href="https://wiki.osdev.org/A20_Line#"></a></h5>
+	<div class="menu">
+		<ul>
+					</ul>
+	</div>
+</div>
+
+<!-- /1 -->
+
+<!-- 2 -->
+<div id="p-search">
+	<h5><label for="searchInput">Search</label></h5>
+	<form action="https://wiki.osdev.org/index.php" id="searchform">
+		<input type="hidden" name="title" value="Special:Search">
+				<input type="search" name="search" title="Search OSDev Wiki [alt-f]" accesskey="f" id="searchInput">		<input type="submit" name="go" value="Go" title="Go to a page with this exact name if exists" id="searchGoButton" class="searchButton">		<input type="submit" name="fulltext" value="Search" title="Search the pages for this text" id="mw-searchButton" class="searchButton">			</form>
+</div>
+
+<!-- /2 -->
+			</div>
+		</div>
+		<!-- /header -->
+		<!-- panel -->
+			<div id="mw-panel" class="noprint">
+				<!-- logo -->
+					<div id="p-logo"><a style="background-image: url(/skins/common/images/osdev.png);" href="https://wiki.osdev.org/Main_Page" title="Visit the main page"></a></div>
+				<!-- /logo -->
+				
+<!-- navigation -->
+<div class="portal" id="p-navigation">
+	<h5>Navigation</h5>
+	<div class="body">
+		<ul>
+			<li id="n-mainpage"><a href="https://wiki.osdev.org/Main_Page" title="Visit the main page [alt-z]" accesskey="z">Main Page</a></li>
+			<li id="n-portal"><a href="http://forum.osdev.org/" rel="nofollow" title="About the project, what you can do, where to find things">Forums</a></li>
+			<li id="n-FAQ"><a href="https://wiki.osdev.org/Category:FAQ">FAQ</a></li>
+			<li id="n-OS-Projects"><a href="https://wiki.osdev.org/Projects">OS Projects</a></li>
+			<li id="n-randompage"><a href="https://wiki.osdev.org/Special:Random" title="Load a random page [alt-x]" accesskey="x">Random page</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /navigation -->
+
+<!-- about -->
+<div class="portal" id="p-about">
+	<h5>About</h5>
+	<div class="body">
+		<ul>
+			<li id="n-This-site"><a href="https://wiki.osdev.org/OSDevWiki:About">This site</a></li>
+			<li id="n-Joining"><a href="https://wiki.osdev.org/OSDevWiki:Joining">Joining</a></li>
+			<li id="n-Editing-help"><a href="https://wiki.osdev.org/OSDevWiki:Editing">Editing help</a></li>
+			<li id="n-recentchanges"><a href="https://wiki.osdev.org/Special:RecentChanges" title="A list of recent changes in the wiki [alt-r]" accesskey="r">Recent changes</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /about -->
+
+<!-- SEARCH -->
+
+<!-- /SEARCH -->
+
+<!-- TOOLBOX -->
+<div class="portal" id="p-tb">
+	<h5>Toolbox</h5>
+	<div class="body">
+		<ul>
+			<li id="t-whatlinkshere"><a href="https://wiki.osdev.org/Special:WhatLinksHere/A20_Line" title="A list of all wiki pages that link here [alt-j]" accesskey="j">What links here</a></li>
+			<li id="t-recentchangeslinked"><a href="https://wiki.osdev.org/Special:RecentChangesLinked/A20_Line" title="Recent changes in pages linked from this page [alt-k]" accesskey="k">Related changes</a></li>
+			<li id="t-specialpages"><a href="https://wiki.osdev.org/Special:SpecialPages" title="A list of all special pages [alt-q]" accesskey="q">Special pages</a></li>
+			<li><a href="https://wiki.osdev.org/index.php?title=A20_Line&amp;printable=yes" rel="alternate">Printable version</a></li>
+			<li id="t-permalink"><a href="https://wiki.osdev.org/index.php?title=A20_Line&amp;oldid=26835" title="Permanent link to this revision of the page">Permanent link</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /TOOLBOX -->
+
+<!-- LANGUAGES -->
+<div class="portal" id="p-lang">
+	<h5>In other languages</h5>
+	<div class="body">
+		<ul>
+			<li class="interwiki-de"><a href="http://www.lowlevel.eu/wiki/A20-Gate" title="A20-Gate">Deutsch</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /LANGUAGES -->
+			</div>
+		<!-- /panel -->
+		<!-- footer -->
+		<div id="footer">
+							<ul id="footer-info">
+											<li id="footer-info-lastmod"> This page was last modified on 3 January 2022, at 10:58.</li>
+											<li id="footer-info-viewcount">This page has been accessed 265,327 times.</li>
+									</ul>
+							<ul id="footer-places">
+											<li id="footer-places-privacy"><a href="https://wiki.osdev.org/OSDev_Wiki:Privacy_policy" title="OSDev Wiki:Privacy policy">Privacy policy</a></li>
+											<li id="footer-places-about"><a href="https://wiki.osdev.org/OSDev_Wiki:About" title="OSDev Wiki:About">About OSDev Wiki</a></li>
+											<li id="footer-places-disclaimer"><a href="https://wiki.osdev.org/OSDev_Wiki:General_disclaimer" title="OSDev Wiki:General disclaimer">Disclaimers</a></li>
+									</ul>
+										<ul id="footer-icons" class="noprint">
+					<li id="footer-poweredbyico">
+						<a href="http://www.mediawiki.org/"><img src="./A20 Line - OSDev Wiki_files/poweredby_mediawiki_88x31.png" alt="Powered by MediaWiki" width="88" height="31"></a>
+					</li>
+				</ul>
+						<div style="clear:both"></div>
+		</div>
+		<!-- /footer -->
+		<!-- fixalpha -->
+		<script type="text/javascript"> if ( window.isMSIE55 ) fixalpha(); </script>
+		<!-- /fixalpha -->
+		<script src="./A20 Line - OSDev Wiki_files/load(5).php"></script>
+<script>if(window.mw){
+	mw.loader.load(["mediawiki.user", "mediawiki.util", "mediawiki.page.ready", "mediawiki.legacy.wikibits", "mediawiki.legacy.ajax"]);
+}
+</script><script type="text/javascript" src="./A20 Line - OSDev Wiki_files/load(6).php"></script>
+<script src="./A20 Line - OSDev Wiki_files/load(7).php"></script>
+<script>if(window.mw){
+	mw.user.options.set({"ccmeonemails":0,"cols":80,"date":"default","diffonly":0,"disablemail":0,"disablesuggest":0,"editfont":"default","editondblclick":0,"editsection":1,"editsectiononrightclick":0,"enotifminoredits":0,"enotifrevealaddr":0,"enotifusertalkpages":1,"enotifwatchlistpages":0,"extendwatchlist":0,"externaldiff":0,"externaleditor":0,"fancysig":0,"forceeditsummary":0,"gender":"unknown","hideminor":0,"hidepatrolled":0,"highlightbroken":1,"imagesize":2,"justify":0,"math":1,"minordefault":0,"newpageshidepatrolled":0,"nocache":0,"noconvertlink":0,"norollbackdiff":0,"numberheadings":0,"previewonfirst":0,"previewontop":1,"quickbar":5,"rcdays":7,"rclimit":50,"rememberpassword":0,"rows":25,"searchlimit":20,"showhiddencats":0,"showjumplinks":1,"shownumberswatching":1,"showtoc":1,"showtoolbar":1,"skin":"vector","stubthreshold":0,"thumbsize":2,"underline":2,"uselivepreview":0,"usenewrc":0,"watchcreations":0,"watchdefault":0,"watchdeletion":0,"watchlistdays":3,"watchlisthideanons":0,
+	"watchlisthidebots":0,"watchlisthideliu":0,"watchlisthideminor":0,"watchlisthideown":0,"watchlisthidepatrolled":0,"watchmoves":0,"wllimit":250,"variant":"en","language":"en","searchNs0":true,"searchNs1":false,"searchNs2":false,"searchNs3":false,"searchNs4":false,"searchNs5":false,"searchNs6":false,"searchNs7":false,"searchNs8":false,"searchNs9":false,"searchNs10":false,"searchNs11":false,"searchNs12":false,"searchNs13":false,"searchNs14":false,"searchNs15":false});;mw.user.tokens.set({"editToken":"+\\","watchToken":false});;mw.loader.state({"user.options":"ready","user.tokens":"ready"});
+	
+	/* cache key: wikidb:resourceloader:filter:minify-js:4:19a4b18a9ac79a6b8c60b24af4668814 */
+}
+</script><!-- Served in 0.021 secs. -->
+	
+
+</body></html>

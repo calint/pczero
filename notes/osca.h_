@@ -1,0 +1,37 @@
+#pragma once
+
+// called from osca.S before starting tasks
+extern "C" void osca_init(); // called from keyboard interrupt when new scan code from keyboard
+
+// callback from osca.S:isr_kbd
+extern "C" void osca_keyb_ev(); // called from keyboard interrupt when new scan code from keyboard
+
+// symbols exported from osca.S
+extern "C" volatile const unsigned char osca_key; // last received keycode
+//extern "C" volatile const unsigned osca_t; // time lower 32b
+//extern "C" volatile const unsigned osca_th; // time higher 32b
+extern "C" volatile const unsigned osca_tmr_lo; // time lower 32b
+extern "C" volatile const unsigned osca_tmr_hi; // time higher 32b
+
+// functions
+extern "C" inline void osca_halt(){asm("cli;hlt");}
+extern "C" void osca_yield();
+//extern "C" void osca_yield(){
+//	asm("incl 0xa0000+100"); // debugging
+//	asm("cli"); // disable interrupts
+//	asm("pushf"); // push flags. stack is: IP, FLAGS
+//	asm("movb $1,isr_tmr_yield"); // set mode for task_switch
+//	asm("jmp isr_tmr_switch_task"); // do the rest of task switch
+////	asm("mov %eax,isr_tmr_eax"); // save eax,ebx
+////	asm("mov %ebx,isr_tmr_ebx"); // eax,ebx will be used as scratch
+////	asm("mov osca_tsk_a,%ebx"); // point ebx to active task
+////	asm("mov 4(%esp),%eax"); // get eip before the call
+////	asm("mov %eax,(%ebx)"); // save to task.eip
+////	asm("mov (%esp),%eax"); // # get eflags
+////	asm("mov %eax,8(%ebx)"); // save to task.eflags
+////	asm("mov %esp,%eax"); // adjust esp to value before the call
+////	asm("add $8,%eax"); // skip FLAGS, IP
+////	asm("mov %eax,4(%ebx)"); // save to task.esp
+////	asm("jmp switch_task_continue"); // do the rest of task switch
+////	asm("hlt");
+//}
