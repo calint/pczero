@@ -9,7 +9,7 @@ extern "C" void osca_keyb_ev();
 
 // symbols exported from osca.S
 
-// last received keycode
+// last received scan code
 extern "C" volatile const unsigned char osca_key;
 
 // time lower 32b
