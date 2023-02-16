@@ -72,7 +72,8 @@ int $0x10
 #rep movsw
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - a20
 # enable access to odd megs
-# enabled by default on non ancient pc?
+# https://wiki.osdev.org/A20_Line
+#   enabled by default on non ancient pc?
 #movw $0x0404,%es:0x104
 in $0x92,%al
 or $2,%al
