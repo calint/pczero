@@ -183,23 +183,24 @@ namespace osca{
 
 // called by osca from the keyboard interrupt
 extern "C" void osca_keyb_ev(){
+	using namespace osca;
 	// on screen
 	*reinterpret_cast<int*>(0xa0000+4)=osca_key;
 
-	if(osca_key==0x1d)osca::keyboard_ctrl_pressed=true;
-	if(osca_key==0x9d)osca::keyboard_ctrl_pressed=false;
+	if(osca_key==0x1d)keyboard_ctrl_pressed=true;
+	else if(osca_key==0x9d)keyboard_ctrl_pressed=false;
 
-	if(osca::keyboard_ctrl_pressed&&osca_key==0xf){ // ctrl+tab
-		if(osca::keyboard_focus==tsk0){
-			osca::keyboard_focus=tsk4;
+	if(keyboard_ctrl_pressed&&osca_key==0xf){ // ctrl+tab
+		if(keyboard_focus==tsk0){
+			keyboard_focus=tsk4;
 		}else{
-			osca::keyboard_focus=tsk0;
+			keyboard_focus=tsk0;
 		}
 		return;
 	}
 
 	// to keyboard handler
-	osca::keyboard.on_key(osca_key);
+	keyboard.on_key(osca_key);
 
 //	static unsigned char*p=reinterpret_cast<unsigned char*>(0xa0000+320*49+100);
 //	*p++=osca_key;
