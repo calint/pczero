@@ -180,7 +180,7 @@ out %al,$0x71
 #movw $0x0404,0xa4000
 call osca_init
 mov osca_tsk_a,%ebx # ebx points to active task record
-# potential bug? because eflags not restored and registers in unknown state?)
+# potential bug? because eflags not restored and registers in unknown state?
 mov 4(%ebx),%esp # restore stack pointer
 sti # enables interrupts after next instruction
 jmp *(%ebx) # jmp to first task
