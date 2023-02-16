@@ -182,7 +182,7 @@ call osca_init
 mov osca_tsk_a,%ebx # ebx points to active task record
 # potential bug? because eflags not restored and registers in unknown state?)
 mov 4(%ebx),%esp # restore stack pointer
-sti # enable interrupts after next instruction
+sti # enables interrupts after next instruction
 jmp *(%ebx) # jmp to first task
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - vars
 .align 16,0x90
@@ -247,7 +247,7 @@ osca_yield: # switches to next task
   push isr_tmr_eflags # restore eflags
   popf # restore eflags. no calculations done to alter it before resuming task
   mov isr_tmr_esp,%esp # restore task esp
-  sti # enable interrupts after next instruction
+  sti # enables interrupts after next instruction
   jmp *isr_tmr_eip # jmp to restored eip
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - interrupts
 # "*NOTE* Because IA-32 tasks are not re-entrant, an interrupt-handler
@@ -278,7 +278,7 @@ isr_tmr:
     out %al,$0xa0 # second controller PIC1
     out %al,$0x20 # main controller PIC0
     pop %ax       # restore ax
-    sti           # enable interrupts after next instruction
+    sti           # enables interrupts after next instruction
     iret
 switch_task:
   # start task switching
@@ -330,7 +330,7 @@ switch_task:
   out %al,$0x20 #  main controller PIC0
 
   pop %ax # restore %ax
-  sti # enable interrupts after next instruction
+  sti # enables interrupts after next instruction
   jmp *isr_tmr_eip # jmp to restored eip. racing?
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ierr
 .align 16,0x90
@@ -355,7 +355,7 @@ isr_kbd:
   mov $0x20,%al # ack interrupt
   out %al,$0x20 # ...
   pop %ax # restore %ax
-  sti # enable interrupts after next instruction
+  sti # enables interrupts after next instruction
   iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - itck
 .align 16,0x90
@@ -366,7 +366,7 @@ isr_tck:
   mov $0x20,%al
   out %al,$0x20
   pop %ax
-  sti # enable interrupts after next instruction
+  sti # enables interrupts after next instruction
   iret
 .space sector2+512-.,0X90
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - tasks
