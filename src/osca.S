@@ -18,6 +18,7 @@
 .global osca_key # last pressed key
 .global osca_tmr_lo # 1024 Hz timer low bits
 .global osca_tmr_hi # 1024 Hz timer high bits
+.global osca_yield # export function
 .global _start # export entry point
 #.text
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - bpb
@@ -181,7 +182,7 @@ call osca_init
 mov osca_tsk_a,%ebx # ebx points to active task record
 # potential bug? because eflags not restored and registers in unknown state?)
 mov 4(%ebx),%esp # restore stack pointer
-sti # enable interrupts (racing?)
+sti # enable interrupts after next instruction
 jmp *(%ebx) # jmp to first task
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - vars
 .align 16,0x90
@@ -205,6 +206,49 @@ isr_tmr_esp:.long 0x00000000 # ...
 isr_tmr_eip:.long 0x00000000 # ...
 isr_tmr_eflags:.long 0x00000000 #...
 osca_key:.byte 0x00 # last key event
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - yield
+.align 16,0x90
+osca_yield: # switches to next task
+  cli # disable interrupts
+  pushf # push flags. stack is now EIP, EFLAGS
+  # start task switching
+  mov %eax,isr_tmr_eax # save eax,ebx
+  mov %ebx,isr_tmr_ebx # eax,ebx will be used as scratch
+  mov osca_tsk_a,%ebx # point ebx to active task
+  mov 4(%esp),%eax # get eip from stack
+  mov %eax,(%ebx) # save to task.eip
+  mov (%esp),%eax # get eflags from stack
+  mov %eax,8(%ebx) # save to task.eflags
+  mov %esp,%eax # adjust esp to value before call
+  add $8,%eax # skip eip,eflags
+  mov %eax,4(%ebx) # save to task.esp
+  mov %ebx,%esp # save gprs by preparing esp and then pusha
+  add $48,%esp # move to end of task record
+  pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
+  mov isr_tmr_eax,%eax # save proper eax,ebx
+  mov %eax,44(%ebx) # to task.eax
+  mov isr_tmr_ebx,%eax # save proper ebx
+  mov %eax,32(%ebx) # to task.ebx
+  add $48,%ebx # next task
+  cmp $tsk_eot,%ebx # if last
+  jl lbl5
+    mov $tsk,%ebx # roll
+  lbl5:
+  mov %ebx,osca_tsk_a # save pointer to task record
+  mov 4(%ebx),%esp # restore esp
+  mov %esp,isr_tmr_esp # save esp, will be used as scratch
+  mov (%ebx),%esp # restore eip
+  mov %esp,isr_tmr_eip # save for jump
+  mov 8(%ebx),%esp # get eflags
+  mov %esp,isr_tmr_eflags # save to restore later
+  mov %ebx,%esp # restore gprs
+  add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
+  popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
+  push isr_tmr_eflags # restore eflags
+  popf # restore eflags. no calculations done to alter it before resuming task
+  mov isr_tmr_esp,%esp # restore task esp
+  sti # enable interrupts after next instruction
+  jmp *isr_tmr_eip # jmp to restored eip
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - interrupts
 # "*NOTE* Because IA-32 tasks are not re-entrant, an interrupt-handler
 # task must disable interrupts between the time it completes handling
@@ -234,7 +278,7 @@ isr_tmr:
     out %al,$0xa0 # second controller PIC1
     out %al,$0x20 # main controller PIC0
     pop %ax       # restore ax
-    sti           # enable interrupts
+    sti           # enable interrupts after next instruction
     iret
 switch_task:
   # start task switching
@@ -286,7 +330,7 @@ switch_task:
   out %al,$0x20 #  main controller PIC0
 
   pop %ax # restore %ax
-  sti # enable interrupts
+  sti # enable interrupts after next instruction
   jmp *isr_tmr_eip # jmp to restored eip. racing?
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ierr
 .align 16,0x90
@@ -311,7 +355,7 @@ isr_kbd:
   mov $0x20,%al # ack interrupt
   out %al,$0x20 # ...
   pop %ax # restore %ax
-  sti # enable interrupts
+  sti # enable interrupts after next instruction
   iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - itck
 .align 16,0x90
@@ -322,20 +366,19 @@ isr_tck:
   mov $0x20,%al
   out %al,$0x20
   pop %ax
-  sti # enable interrupts
+  sti # enable interrupts after next instruction
   iret
 .space sector2+512-.,0X90
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - tasks
 # sector3: #0x8200 tasks state table
 .align 16,0x90
 tsk: # eip,  esp,       eflags,     bits,       edi        esi        ebp        esp0       ebx        edx        ecx        eax
-  .long tsk4 ,0x000afa00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-tsk_eot:
-  .long tsk0 ,0x000afa00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+#  .long tsk0 ,0x000afa00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
   .long tsk1 ,0x000af780,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-  .long tsk2 ,0x000af500,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-  .long tsk3 ,0x000af280,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+#  .long tsk2 ,0x000af500,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+#  .long tsk3 ,0x000af280,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
   .long tsk4 ,0x000af000,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+tsk_eot:
 #tsk_eot:
 #  .long tsk5 ,0x000aed80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
 #  .long tsk6 ,0x000aeb00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000

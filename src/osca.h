@@ -14,5 +14,5 @@ extern "C" volatile const unsigned osca_tmr_lo; // time lower 32b
 extern "C" volatile const unsigned osca_tmr_hi; // time higher 32b
 
 // functions
-extern "C" inline void osca_yield(){asm("hlt");}// ? do task switch
+extern "C" void osca_yield();
 extern "C" inline void osca_halt(){asm("cli;hlt");}

@@ -30,12 +30,13 @@ extern "C" [[noreturn]] void tsk0(){
 	pb.fg(6).p("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
 	pb.fg(7).p(' ').p_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
-	pb.pos({5,7}).fg(2).p('_');
+	pb.pos({3,3}).fg(2).p('_');
 
 	while(true){
 		// handle keyboard events
 		while(true){
 			const unsigned char sc=keyboard.get_next_scan_code();
+			asm("nop"); // ? doesn't work without this unless O0
 			if(!sc)
 				break;
 			if(sc==0xe){ // backspace
@@ -53,15 +54,15 @@ extern "C" [[noreturn]] void tsk0(){
 				ch&=~0x20; // to upper case
 			pb.backspace().p(ch).p('_');
 		}
-		osca_yield();
+//		osca_yield();
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".global tsk1");
 asm(".align 16");
 asm("tsk1:");
-asm("  incl 0xa0000+100");
-//asm("  hlt");
+asm("  incl 0xa0000+160");
+asm("  call osca_yield");
 asm("  jmp tsk1");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] void tsk2(){
@@ -80,7 +81,8 @@ extern "C" [[noreturn]] void tsk3(){
 	using namespace osca;
 	while(true){
 		vga13h.bmp().data().pointer().offset(160).write(osca_tmr_lo);
-		osca_yield(); // ? without this the line above is optimized away by the compiler
+		asm("nop"); // ? without this the line above is optimized away by the compiler
+//		osca_yield();
 	}
 }
 
