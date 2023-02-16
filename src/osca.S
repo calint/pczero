@@ -16,8 +16,8 @@
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - intro
 .set IDT,0x600 # interrupt descriptor table address
 .global osca_key # last pressed key
-.global osca_tmr_lo # 1024Hz timer low bits
-.global osca_tmr_hi # 1024Hz timer high bits
+.global osca_tmr_lo # 1024 Hz timer low bits
+.global osca_tmr_hi # 1024 Hz timer high bits
 .global _start # export entry point
 #.text
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - bpb
@@ -41,7 +41,7 @@ mov $_start,%sp # at 0x7c00
 cld # clear direction (forward)
 # command 2 (%ah), sectors to read (%al) 0x3f (31½K)
 #mov $0x023f,%ax
-# read 128 sectors * 512B = 65536 bytes. maximum without DMA exception
+# read 128 sectors * 512B = 65536 bytes. maximum without DMA interrupt
 mov $0x0280,%ax
 # from cylinder 0 (%ch), sector 2 (%cl) (sector starts from 1, not 0)
 mov $0x0002,%cx
@@ -131,8 +131,8 @@ loop lbl2
 #  only the lower offset set, handlers within 64K
 #  PIC reprogrammed in "map irqs" to map IRQ to IDT mapping 32-47
 movw $isr_tck,IDT+(32+0)*8 # IRQ 0: keyboard
-movw $isr_kbd,IDT+(32+1)*8 # IRQ 1: timer 18.2Hz
-movw $isr_tmr,IDT+(32+8)*8 # IRQ 8: timer 1024Hz
+movw $isr_kbd,IDT+(32+1)*8 # IRQ 1: timer 18.2 Hz
+movw $isr_tmr,IDT+(32+8)*8 # IRQ 8: timer 1024 Hz
 lidt idtr
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - map irqs
 # reprogram the PIC (8259's) to map IRQ 0-15 to IDT mapping 32 to 47
