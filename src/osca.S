@@ -65,12 +65,17 @@ mov $0x13,%ax # vga mode 320x200x8 bmp @ 0xa0000
 int $0x10
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - display
 #movw $0x0404,%es:0x100
-#mov $0xa000,%ax
-#mov %ax,%es
-#mov $0x8000,%di
-#mov $0x7c00,%si
-#mov $PROG_SIZE>>1,%cx
-#rep movsw
+#mov $0xa000,%ax # vga
+#mov %ax,%es     # at 0xa0000
+#xor %di,%di     #
+#mov $0x7c0,%ax  # program
+#mov %ax,%ds     # starting at 0x7c00
+#xor %si,%si     #
+#mov $0xffff,%cx # copy 65535 bytes
+#rep movsb
+#xor %ax,%ax     # restore data segment
+#mov %ax,%ds     # to zero
+#hlt
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - a20
 # enable access to odd megs
 # https://wiki.osdev.org/A20_Line
@@ -258,7 +263,7 @@ osca_yield: # switches to next task
 # (#GP) exception."
 #
 #—Intel Software Developer Manual
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- irq 8 timer
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
 .align 16,0x90
 isr_tmr:
   cli # disable interrupts
