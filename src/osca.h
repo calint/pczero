@@ -19,6 +19,9 @@ extern "C" volatile const unsigned osca_tmr_lo;
 extern "C" volatile const unsigned osca_tmr_hi;
 
 // switches to next task
+// note. single small task yielding in a tight loop might inhibit
+// interrupts due to most time being spent in non-interruptable
+// task switching code block
 extern "C" void osca_yield();
 
 // halts the system

@@ -16,6 +16,8 @@
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - intro
 .set IDT,0x600 # interrupt descriptor table address
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
+                      # high task switching frequency might hang
+                      # slower hardware
 .global osca_key # last pressed key
 .global osca_tmr_lo # 1024 Hz timer low bits
 .global osca_tmr_hi # 1024 Hz timer high bits
