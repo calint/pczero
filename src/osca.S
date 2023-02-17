@@ -323,6 +323,7 @@ switch_task:
   popf # restore eflags. no calculations done to alter it before resuming task.
   mov isr_tmr_esp,%esp # restore task esp
 
+  # https://forum.osdev.org/viewtopic.php?f=1&t=15526&start=0
   # https://www.compuphase.com/int70.txt
   # "When an IRQ 8 fires and interrupt 70h is called, status register C holds a bit
   # mask that tells what kind of interrupt occurred: periodic interrupt, alarm
