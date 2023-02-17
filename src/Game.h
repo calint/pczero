@@ -684,7 +684,7 @@ auto Game::create_boss()->void{
 		}
 
 //			draw_axis(vga13h.bmp());
-		osca_yield();
+//		osca_yield();
 	}
 }
 

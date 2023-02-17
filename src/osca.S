@@ -323,6 +323,13 @@ switch_task:
   popf # restore eflags. no calculations done to alter it before resuming task.
   mov isr_tmr_esp,%esp # restore task esp
 
+  # https://www.compuphase.com/int70.txt
+  # "When an IRQ 8 fires and interrupt 70h is called, status register C holds a bit
+  # mask that tells what kind of interrupt occurred: periodic interrupt, alarm
+  # interrupt or update ended interrupt. And unless you read status register C,
+  # IRQ 8 will not be generated again. This means that you must read status
+  # register C inside your ISR for interrupt 70h even when you normally don't care
+  # about its contents. Otherwise you will only see a single interrupt."
   # acknowledge interrupt and jmp
   push %ax # save to be clobbered %ax
 
