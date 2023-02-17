@@ -115,7 +115,7 @@ idtr:.word 0x03ff # limit of table (size of table - 1)
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - protected mode
 protected_mode:
 .code32
-mov $0x10,%ax # offset in gdt, data segment
+mov $0x10,%ax # offset in gdt, the data segment
 mov %ax,%ss
 mov %ax,%ds
 mov %ax,%es
