@@ -105,12 +105,12 @@ gdt:.quad 0x0000000000000000 #0x00:
 # global descriptor table register
 gdtr:.word gdtr-gdt-1,gdt,0,0
 # interrupt vector table (16 bit mode)
-ivtr:.word 0x03ff # size of table - 1
-     .long 0x00000000
+ivtr:.word 0x03ff     # limit (size of table - 1)
+     .long 0x00000000 # address
 .align 8,0
 # interrupt descriptor table register (32 bit protected mode)
-idtr:.word 0x03ff # size of table - 1
-     .long IDT # idt address
+idtr:.word 0x03ff # limit (size of table - 1)
+     .long IDT    # idt address
 .align 8,0x90
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - protected mode
 protected_mode:
