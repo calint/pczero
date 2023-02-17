@@ -191,7 +191,7 @@ out %al,$0x70
 in $0x71,%al
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 #movw $0x0404,0xa4000
-call osca_init
+call osca_init # calls C function
 mov osca_tsk_a,%ebx # ebx points to active task record
 # potential bug? because eflags not restored and registers in unknown state?
 mov 4(%ebx),%esp # restore stack pointer
