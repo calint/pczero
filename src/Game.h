@@ -310,25 +310,23 @@ private:
 	// ? move to TargetingSystem class
 	auto find_aim_vector_for_moving_target(const Object&tgt,const Real eval_t,const Real eval_dt,const Real error_margin_t,const bool draw_trajectory=false)->Vector{
 		Real t=0;
-		const Point p_tgt=tgt.phy_ro().pos;
-		const Vector v_tgt=tgt.phy_ro().vel;
+		Point p_tgt=tgt.phy_ro().pos;
+		Vector v_tgt=tgt.phy_ro().vel;
+		const Vector a_tgt=tgt.phy_ro().acc;
 		while(true){
 			t+=eval_dt;
 			if(t>eval_t)
 				break;
-			// get expected position of target at 't'
-			Vector v=v_tgt;
-			v.scale(t);
-			Point p{p_tgt};
-			p.inc_by(v);
-
+			// get expected position of target
+			v_tgt.inc_by(a_tgt,eval_dt);
+			p_tgt.inc_by(v_tgt,eval_dt);
 			if(draw_trajectory){
 				// draw target position at 't'
-				Game::draw_dot(p,2);
+				Game::draw_dot(p_tgt,2);
 			}
 
 			// aim vector to the expected location
-			const Vector v_aim=p-phy_ro().pos;
+			const Vector v_aim=p_tgt-phy_ro().pos;
 			// get t for bullet to reach expected location
 			const Real t_bullet=v_aim.magnitude()/Bullet::speed;
 			// note. optimizing away sqrt() in magnitude() reduces precision when aiming at far targets since t_aim is then non-linear
