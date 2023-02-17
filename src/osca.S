@@ -10,6 +10,7 @@
 # 00000-003FF  IVT (Interrupt Vector Table)
 # 00400-005FF  BDA (BIOS Data Area)
 # 00600-9FFFF  Ordinary application RAM
+# 00600-007ff    osca IDT (Interrupt Descriptor Table)
 # A0000-BFFFF  Video memory
 # C0000-EFFFF  Optional ROMs (The VGA ROM is usually located at C0000)
 # F0000-FFFFF  BIOS ROM
@@ -67,7 +68,7 @@ int $0x13 # read disk
 mov $0x13,%ax # vga mode 320x200x8 bmp @ 0xa0000
 int $0x10
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - display
-#movw $0x0404,%es:0x100
+# display loaded program on screen
 #mov $0xa000,%ax # vga
 #mov %ax,%es     # at 0xa0000
 #xor %di,%di     #
@@ -91,20 +92,24 @@ out %al,$0x92
 #movw $0x0404,%es:0x108
 lgdt gdtr # load global descriptor tables
 mov %cr0,%eax # enter 32b protected mode
-or $0x1,%al
+or $1,%al
 mov %eax,%cr0
 jmp $8,$protected_mode # jmp and flush
 .align 16,0x90
+# global descriptor table
 gdt:.quad 0x0000000000000000 #0x00:
     .quad 0x00cf9a000000ffff #0x08: 32b code 4g pl0 rx
     .quad 0x00cf92000000ffff #0x10: 32b data 4g pl0 rw
     .quad 0x009f9a000000ffff #0x18: 16b code 1m rx
     .quad 0x009f92000000ffff #0x20: 16b data 1m rw
+# global descriptor table register
 gdtr:.word gdtr-gdt-1,gdt,0,0
-ivtr:.word 0x03ff
+# interrupt vector table (16 bit mode)
+ivtr:.word 0x03ff # size of table - 1
      .long 0x00000000
 .align 8,0
-idtr:.word 0x03ff
+# interrupt descriptor table register (32 bit protected mode)
+idtr:.word 0x03ff # size of table - 1
      .long IDT # idt address
 .align 8,0x90
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - protected mode
@@ -170,6 +175,7 @@ and $0x7f,%al
 out %al,$0x70
 in $0x71,%al
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
+# setup interrupt service routines
 #movw $0x0404,0xa0114
 mov $IDT,%ebx # idt address
 mov $0x40,%ecx # interrupt count
