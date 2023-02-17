@@ -178,6 +178,7 @@ out %al,$0x70
 in $0x71,%al
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
 # setup interrupt service routines
+# https://wiki.osdev.org/Interrupt_Descriptor_Table
 #movw $0x0404,0xa0114
 mov $IDT,%ebx # idt address
 mov $0x40,%ecx # interrupt count
