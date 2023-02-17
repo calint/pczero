@@ -73,7 +73,7 @@ public:
 	inline static Count fps{0};
 
 	static auto init_statics()->void{
-		time=TimeSec(osca_tmr_lo)*sec_per_tick;
+		time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits can be problem
 		// set previous time to a reasonable value so that dt does not
 		// become huge at first frame
 		time_prv=time-sec_per_tick;
@@ -690,8 +690,8 @@ auto World::tick()->void{
 	metrics::reset();
 
 	time_prv=time;
-	time=TimeSec(osca_tmr_lo)*sec_per_tick;
-	time_dt=time-time_prv;
+	time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits can be a problem
+	time_dt=time-time_prv; // ? if time_dt<0 then the high bits should be considered
 	// fps calculations
 	fps_frame_counter++;
 	const TimeSec dt=time-fps_last_time;
