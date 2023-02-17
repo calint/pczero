@@ -145,25 +145,6 @@ out %al,$0xa1
 mov $0x01,%al
 out %al,$0x21
 out %al,$0xa1 # done
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
-#movw $0x0404,0xa0114
-mov $IDT,%ebx # idt address
-mov $0x40,%ecx # interrupt count
-lbl2:
-    movw $isr_err,(%ebx) # offset 0..15
-    movw $0x0008,2(%ebx) # selector in gdt
-    movb $0x00,  4(%ebx) # unused
-    movb $0x8e,  5(%ebx) # type_attrs p,pv0,!s,i32b
-    movw $0x0000,6(%ebx) # offfset 16..31
-    add $8,%bx
-loop lbl2
-#movl $0x0e0e0f0f,0xa0118 # on screen
-# setup IRQ 0,1,8. keyboard, system timer and RTC timer
-#  only the lower offset set, handlers within 64K
-movw $isr_tck,IDT+(32+0)*8 # IRQ 0: keyboard
-movw $isr_kbd,IDT+(32+1)*8 # IRQ 1: timer 18.2 Hz
-movw $isr_tmr,IDT+(32+8)*8 # IRQ 8: timer 1024 Hz
-lidt idtr
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
 # disable the Non-Maskable Interrupt (NMI) before programming RTC
 # this interrupt happens when there is a critical hardware failure
@@ -188,6 +169,25 @@ in $0x70,%al
 and $0x7f,%al
 out %al,$0x70
 in $0x71,%al
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
+#movw $0x0404,0xa0114
+mov $IDT,%ebx # idt address
+mov $0x40,%ecx # interrupt count
+lbl2:
+    movw $isr_err,(%ebx) # offset 0..15
+    movw $0x0008,2(%ebx) # selector in gdt
+    movb $0x00,  4(%ebx) # unused
+    movb $0x8e,  5(%ebx) # type_attrs p,pv0,!s,i32b
+    movw $0x0000,6(%ebx) # offfset 16..31
+    add $8,%bx
+loop lbl2
+#movl $0x0e0e0f0f,0xa0118 # on screen
+# setup IRQ 0,1,8. keyboard, system timer and RTC timer
+#  only the lower offset set, handlers within 64K
+movw $isr_tck,IDT+(32+0)*8 # IRQ 0: keyboard
+movw $isr_kbd,IDT+(32+1)*8 # IRQ 1: timer 18.2 Hz
+movw $isr_tmr,IDT+(32+8)*8 # IRQ 8: timer 1024 Hz
+lidt idtr
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 #movw $0x0404,0xa4000
 call osca_init # calls C function
@@ -277,11 +277,11 @@ isr_tmr:
   incl 0xa0000+320-12
   incl osca_tmr_lo     # increase lower 32 bits ticker
   adcl $0,osca_tmr_hi  # add carry to upper 32 bits
-  push %eax            # don't switch task at every tick
-  mov osca_tmr_lo,%eax #
-  and $FREQ_DIV_AND,%eax   # 1024/8 Hz (running at 1024 Hz hangs Asus Zenbook)
-  pop %eax             #
-  jz switch_task       #
+  push %eax
+  mov osca_tmr_lo,%eax # switch task every 8'th tick
+  and $FREQ_DIV_AND,%eax # 1024/8 Hz (running at 1024 Hz hangs Asus Zenbook)
+  pop %eax
+  jz switch_task  # if no task switch acknowledge irq and return
     push %ax      # save ax
     mov $0x0c,%al # read register C in ISR
     out %al,$0x70 #  to keep getting
@@ -366,16 +366,16 @@ isr_err:
 .align 16,0x90
 isr_kbd:
   cli # disable interrupts
-  push %ax # save to be clobbered %ax
+  push %ax # save to be clobbered ax
   in $0x60,%al # read keyboard port
   mov %al,osca_key # store
   mov %al,0xa0000+320-8 # on screen
   pusha # save registers
-  call osca_keyb_ev # call keyb handler function
+  call osca_keyb_ev # call keyboard handler C function
   popa # restore register
   mov $0x20,%al # ack interrupt
   out %al,$0x20 # ...
-  pop %ax # restore %ax
+  pop %ax # restore ax
   sti # enables interrupts after next instruction
   iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - itck
