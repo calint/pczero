@@ -1,0 +1,24 @@
+from https://www.geeksforgeeks.org/what-is-global-descriptor-table/
+
+Limit 0:15 means that the field carries 0-15 bits of the limit value.
+The base has 32 bits value which contains the linear address from where
+the segment starts and a 20-bit value here indicates the maximum addressable
+unit (which is either in 1 byte of units or in pages).
+Therefore, if someone selects the page granularity such as 4 KiB and then sets
+the limit value to 0 × FFFFF, the segment here will length 4 GiB address space.
+
+Following is the composition of flags and access byte shown as follows.
+Symbol description –
+    Pr – It means Present Bit. It should be 1 bit for all valid sectors.
+    Privl – It means Privilege. It should contain 2 bits and the ring level where 0 = highest (kernel) and 3 = lowest (user applications).
+    S – It means Descriptor type. It must be set for data segments or code and should be made empty for system segments (e.g, Task State Segment).
+    Ex – It means Executable Bit. If Ex is 1 then code in this segment can be carried out (i.e, code selector) and if Ex is 0 then it is a data selector.
+    DC – It means Direction Bit, also known as Conforming Bit. It tells the direction. If DC = 0, then the segment grows up, and if DC = 1, then the segment grows down (means the limit is smaller than the offset).
+    RW – It means Readable bit or Writable bit.
+         Readable bit for code selectors : 
+           In-case read access for this segment is allowed. Write access is never allowed for code segments.
+         Writable bit for data selectors : 
+           In case write access for this segment is allowed. Read access is always allowed for data segments.
+    Ac – It means Accessed bit. Set it to 0. When the segment is accessed the CPU sets this to 1.
+    Gr – It means Granularity bit. If 0, the limit is in 1 B blocks (byte granularity), if 1, the limit is in 4 KiB blocks (page granularity).
+    Sz – It means Size bit. If 0, the selector defines 16 bit protected mode. If 1, the selector defines 32 bit protected mode. We can have both 16 bit and 32-bit selectors at once.
