@@ -25,8 +25,9 @@
 [ ] multiple bounding shapes per object to allow non-convex shape
 [o] input text
 [x]   step 1. one keyboard buffer for the system
-[ ]   step 2. "osca_keyb_task" pointer to function that should read keyboard
-[ ]   step 3. a way to switch keyboard focus to other tasks
+[x]   step 2. "osca_keyb_task" pointer to function that should read keyboard
+[ ]     a non-hack implementation
+[x]   step 3. a way to switch keyboard focus to other tasks
 [x] investigate why any -O other than -O0,-O1,-Og breaks osca_keyb.next_scan_code() -> osca did not load the whole program
 [ ] review const correctness regarding const bmp().data().address() then write to pointer
 [ ]   const Bitmap&dbmp=dsp.bmp(); then mutate data in const dbmp
