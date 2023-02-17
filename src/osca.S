@@ -216,7 +216,7 @@ osca_drv_b:.byte 0x00 # boot drive
 .space 16,0 # #3
 .space 16,0 # #4
 .word 0xaa55 # pc boot sector signature
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - interrupts
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - sector 2
 sector2: # 0x7e00
 osca_tmr_lo:.long 0x00000000 # 1024 Hz tick lower
 osca_tmr_hi:.long 0x00000000 # 1024 Hz tick higher
