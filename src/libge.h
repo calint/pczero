@@ -690,8 +690,11 @@ auto World::tick()->void{
 	metrics::reset();
 
 	time_prv=time;
-	time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits can be a problem
-	time_dt=time-time_prv; // ? if time_dt<0 then the high bits should be considered
+	time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits is a problem. fix
+	time_dt=time-time_prv;
+	if(time_dt<0){ // is that once every 4 billionth tick?
+		time_dt=0;
+	}
 	// fps calculations
 	fps_frame_counter++;
 	const TimeSec dt=time-fps_last_time;
