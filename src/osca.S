@@ -184,7 +184,11 @@ out %al,$0x70
 mov %dl,%al
 or $0x40,%al
 out %al,$0x71
-# ? enable NMI
+# enable NMI
+in $0x70,%al
+and $0x7f,%al
+out %al,$0x70
+in $0x71,%al
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 #movw $0x0404,0xa4000
 call osca_init
