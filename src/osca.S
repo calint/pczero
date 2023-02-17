@@ -192,7 +192,7 @@ in $0x71,%al
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 #movw $0x0404,0xa4000
 call osca_init # calls C function
-mov osca_tsk_a,%ebx # ebx points to active task record
+mov osca_tsk_active,%ebx # ebx points to active task record
 # potential bug? because eflags not restored and registers in unknown state?
 mov 4(%ebx),%esp # restore stack pointer
 sti # enables interrupts after next instruction
@@ -212,7 +212,7 @@ osca_drv_b:.byte 0x00 # boot drive
 sector2: # 0x7e00
 osca_tmr_lo:.long 0x00000000 # 1024 Hz tick lower
 osca_tmr_hi:.long 0x00000000 # 1024 Hz tick higher
-osca_tsk_a:.long tsk # pointer to first task record (tsk0)
+osca_tsk_active:.long tsk # pointer to first task record (tsk0)
 isr_tmr_eax:.long 0x00000000 # used in isr_tmr
 isr_tmr_ebx:.long 0x00000000 # ...
 isr_tmr_esp:.long 0x00000000 # ...
@@ -227,7 +227,7 @@ osca_yield: # switches to next task
   # start task switching
   mov %eax,isr_tmr_eax # save eax,ebx
   mov %ebx,isr_tmr_ebx # eax,ebx will be used as scratch
-  mov osca_tsk_a,%ebx # point ebx to active task
+  mov osca_tsk_active,%ebx # point ebx to active task
   mov 4(%esp),%eax # get eip from stack
   mov %eax,(%ebx) # save to task.eip
   mov (%esp),%eax # get eflags from stack
@@ -247,7 +247,7 @@ osca_yield: # switches to next task
   jl lbl5
     mov $tsk,%ebx # roll
   lbl5:
-  mov %ebx,osca_tsk_a # save pointer to task record
+  mov %ebx,osca_tsk_active # save pointer to task record
   mov 4(%ebx),%esp # restore esp
   mov %esp,isr_tmr_esp # save esp, will be used as scratch
   mov (%ebx),%esp # restore eip
@@ -297,7 +297,7 @@ switch_task:
   # start task switching
   mov %eax,isr_tmr_eax # save eax,ebx
   mov %ebx,isr_tmr_ebx # eax,ebx will be used as scratch
-  mov osca_tsk_a,%ebx # point ebx to active task
+  mov osca_tsk_active,%ebx # point ebx to active task
   # stack is ..., EFLAGS, CS, EIP
   mov (%esp),%eax # get eip before irq from stack
   mov %eax,(%ebx) # save to task.eip
@@ -318,7 +318,7 @@ switch_task:
   jl lbl4
     mov $tsk,%ebx # roll
   lbl4:
-  mov %ebx,osca_tsk_a # save pointer to task record
+  mov %ebx,osca_tsk_active # save pointer to task record
   mov 4(%ebx),%esp # restore esp
   mov %esp,isr_tmr_esp # save esp, will be used as scratch
   mov (%ebx),%esp # restore eip
