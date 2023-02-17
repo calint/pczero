@@ -44,8 +44,6 @@ mov %bx,%ss # setup stack
 mov $_start,%sp # at 0x7c00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
 cld # clear direction (forward)
-# command 2 (%ah), sectors to read (%al) 0x3f (31½K)
-#mov $0x023f,%ax
 # read 128 sectors * 512B = 65536 bytes. maximum without DMA interrupt
 mov $0x0280,%ax
 # from cylinder 0 (%ch), sector 2 (%cl) (sector starts from 1, not 0)
