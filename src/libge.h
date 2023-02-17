@@ -578,6 +578,7 @@ public:
 				// check if o1 points in o2 bounding shape or o2 points in o1 bounding shape
 				if(!Object::is_in_collision(*o1,*o2)&&!Object::is_in_collision(*o2,*o1))
 					continue;
+
 				if(o1_check_col_with_o2){
 					// o1 type wants to handle collisions with o2 type
 					if(!o1->on_collision(*o2)){
