@@ -15,6 +15,7 @@
 # F0000-FFFFF  BIOS ROM
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - intro
 .set IDT,0x600 # interrupt descriptor table address
+.set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
 .global osca_key # last pressed key
 .global osca_tmr_lo # 1024 Hz timer low bits
 .global osca_tmr_hi # 1024 Hz timer high bits
@@ -272,7 +273,7 @@ isr_tmr:
   adcl $0,osca_tmr_hi  # add carry to upper 32 bits
   push %eax            # don't switch task at every tick
   mov osca_tmr_lo,%eax #
-  and $0x1,%eax        # 1024/2 Hz (running at 1024 Hz hangs Asus Zenbook)
+  and $FREQ_DIV_AND,%eax   # 1024/8 Hz (running at 1024 Hz hangs Asus Zenbook)
   pop %eax             #
   jz switch_task       #
     push %ax      # save ax
