@@ -215,7 +215,7 @@ osca_key:.byte 0x00 # last key event
 .align 16,0x90
 osca_yield: # switches to next task
   cli # disable interrupts
-  pushf # push flags. stack is now EIP, EFLAGS
+  pushf # push flags. stack is now ..., EIP, EFLAGS
   # start task switching
   mov %eax,isr_tmr_eax # save eax,ebx
   mov %ebx,isr_tmr_ebx # eax,ebx will be used as scratch
@@ -290,6 +290,7 @@ switch_task:
   mov %eax,isr_tmr_eax # save eax,ebx
   mov %ebx,isr_tmr_ebx # eax,ebx will be used as scratch
   mov osca_tsk_a,%ebx # point ebx to active task
+  # stack is ..., EFLAGS, CS, EIP
   mov (%esp),%eax # get eip before irq from stack
   mov %eax,(%ebx) # save to task.eip
   mov 8(%esp),%eax # get eflags before ieq from stack
