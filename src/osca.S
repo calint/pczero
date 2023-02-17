@@ -344,7 +344,7 @@ switch_task:
 
   pop %ax # restore %ax
   sti # enables interrupts after next instruction
-  jmp *isr_tmr_eip # jmp to restored eip. racing?
+  jmp *isr_tmr_eip # jmp to restored eip
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ierr
 .align 16,0x90
 isr_err:
