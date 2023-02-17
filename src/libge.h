@@ -575,33 +575,19 @@ public:
 				o1->refresh_wld_points();
 				o2->refresh_wld_points();
 
-				// check if o1 points in o2 bounding shape
-				if(Object::is_in_collision(*o1,*o2)){
-					if(o1_check_col_with_o2){
-						// o1 type wants to handle collisions with o2 type
-						if(!o1->on_collision(*o2)){
-							World::deleted_add(o1);
-						}
-					}
-					if(o2_check_col_with_o1){
-						// o2 type wants to handle collisions with o1 type
-						if(!o2->on_collision(*o1)){
-							World::deleted_add(o2);
-						}
-					}
+				// check if o1 points in o2 bounding shape or o2 points in o1 bounding shape
+				if(!Object::is_in_collision(*o1,*o2)&&!Object::is_in_collision(*o2,*o1))
 					continue;
-				}
-				// check if o2 points in o1 bounding shape
-				if(Object::is_in_collision(*o2,*o1)){
-					if(o1_check_col_with_o2){
-						if(!o1->on_collision(*o2)){
-							World::deleted_add(o1);
-						}
+				if(o1_check_col_with_o2){
+					// o1 type wants to handle collisions with o2 type
+					if(!o1->on_collision(*o2)){
+						World::deleted_add(o1);
 					}
-					if(o2_check_col_with_o1){
-						if(!o2->on_collision(*o1)){
-							World::deleted_add(o2);
-						}
+				}
+				if(o2_check_col_with_o1){
+					// o2 type wants to handle collisions with o1 type
+					if(!o2->on_collision(*o1)){
+						World::deleted_add(o2);
 					}
 				}
 			}
