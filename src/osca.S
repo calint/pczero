@@ -124,29 +124,9 @@ xor %edi,%edi
 xor %esi,%esi
 xor %ebp,%ebp
 #movw $0x0404,0xa0110
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
-#movw $0x0404,0xa0114
-mov $IDT,%ebx # idt address
-mov $0x40,%ecx # interrupt count
-lbl2:
-    movw $isr_err,(%ebx) # offset 0..15
-    movw $0x0008,2(%ebx) # selector in gdt
-    movb $0x00,  4(%ebx) # unused
-    movb $0x8e,  5(%ebx) # type_attrs p,pv0,!s,i32b
-    movw $0x0000,6(%ebx) # offfset 16..31
-    add $8,%bx
-loop lbl2
-#movl $0x0e0e0f0f,0xa0118 # on screen
-# setup IRQ 0,1,8. keyboard, system timer and RTC timer
-#  only the lower offset set, handlers within 64K
-#  PIC reprogrammed in "map irqs" to map IRQ to IDT mapping 32-47
-#  avoiding the first 32 reserved for exceptions
-movw $isr_tck,IDT+(32+0)*8 # IRQ 0: keyboard
-movw $isr_kbd,IDT+(32+1)*8 # IRQ 1: timer 18.2 Hz
-movw $isr_tmr,IDT+(32+8)*8 # IRQ 8: timer 1024 Hz
-lidt idtr
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - map irqs
 # reprogram the PIC (8259's) to map IRQ 0-15 to IDT mapping 32 to 47
+# avoiding the first 32 reserved for exceptions
 # https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interrupt_Controller
 mov $0x11,%al
 out %al,$0x20 # restart PIC1
@@ -165,6 +145,25 @@ out %al,$0xa1
 mov $0x01,%al
 out %al,$0x21
 out %al,$0xa1 # done
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
+#movw $0x0404,0xa0114
+mov $IDT,%ebx # idt address
+mov $0x40,%ecx # interrupt count
+lbl2:
+    movw $isr_err,(%ebx) # offset 0..15
+    movw $0x0008,2(%ebx) # selector in gdt
+    movb $0x00,  4(%ebx) # unused
+    movb $0x8e,  5(%ebx) # type_attrs p,pv0,!s,i32b
+    movw $0x0000,6(%ebx) # offfset 16..31
+    add $8,%bx
+loop lbl2
+#movl $0x0e0e0f0f,0xa0118 # on screen
+# setup IRQ 0,1,8. keyboard, system timer and RTC timer
+#  only the lower offset set, handlers within 64K
+movw $isr_tck,IDT+(32+0)*8 # IRQ 0: keyboard
+movw $isr_kbd,IDT+(32+1)*8 # IRQ 1: timer 18.2 Hz
+movw $isr_tmr,IDT+(32+8)*8 # IRQ 8: timer 1024 Hz
+lidt idtr
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
 # disable the Non-Maskable Interrupt (NMI) before programming RTC
 # this interrupt happens when there is a critical hardware failure
