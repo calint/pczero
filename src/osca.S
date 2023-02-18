@@ -132,10 +132,10 @@ protected_mode:
 .code32
 mov $0x10,%ax # offset in gdt, the data segment
 mov %ax,%ds
-mov %ax,%ss
 mov %ax,%es
-#mov %ax,%fs
-#mov %ax,%gs
+mov %ax,%fs
+mov %ax,%gs
+mov %ax,%ss
 #xor %eax,%eax
 #xor %ebx,%ebx
 #xor %ecx,%ecx
