@@ -82,6 +82,7 @@ in $0x92,%al
 or $2,%al
 out %al,$0x92
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - protected mode
+# enable 32bit protected mode
 # https://wiki.osdev.org/Protected_Mode
 #movw $0x0404,%es:0x108
 lgdt gdtr # load global descriptor tables
