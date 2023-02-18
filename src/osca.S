@@ -97,8 +97,7 @@ gdt:.quad 0x0000000000000000 #0x00:
 #    .quad 0x009f92000000ffff #0x20: 16b data 1m rw
 # global descriptor table register
 gdtr:.word gdtr-gdt-1 # limit of table (size of table - 1)
-     .word gdt # low word of gdt address (assumes within 64 KB)
-     .word 0   # high word of gdt address
+     .long gdt # address
 # interrupt vector table (16 bit mode)
 #ivtr:.word 0x03ff     # limit (size of table - 1)
 #     .long 0x00000000 # address
