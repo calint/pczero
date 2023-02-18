@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<!-- saved from url=(0059)https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h) -->
+<html lang="en" dir="ltr" class="client-js"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Disk access using the BIOS (INT 13h) - OSDev Wiki</title>
+
+<meta name="generator" content="MediaWiki 1.18.0">
+<link rel="shortcut icon" href="https://wiki.osdev.org/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="https://wiki.osdev.org/opensearch_desc.php" title="OSDev Wiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.osdev.org/api.php?action=rsd">
+<link rel="alternate" type="application/atom+xml" title="OSDev Wiki Atom feed" href="https://wiki.osdev.org/index.php?title=Special:RecentChanges&amp;feed=atom">
+<link rel="stylesheet" href="./Disk access using the BIOS (INT 13h) - OSDev Wiki_files/load.php">
+<style type="text/css" media="all">.mw-collapsible-toggle{float:right} li .mw-collapsible-toggle{float:none} .mw-collapsible-toggle-li{list-style:none}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:4250852ed2349a0d4d0fc6509a3e7d4c */
+</style><style type="text/css" media="all">.js-messagebox{margin:1em 5%;padding:0.5em 2.5%;border:1px solid #ccc;background-color:#fcfcfc;font-size:0.8em}.js-messagebox .js-messagebox-group{margin:1px;padding:0.5em 2.5%;border-bottom:1px solid #ddd}.js-messagebox .js-messagebox-group:last-child{border-bottom:thin none transparent}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:8b08bdc91c52a9ffba396dccfb5b473c */
+</style><meta name="ResourceLoaderDynamicStyles" content="">
+<link rel="stylesheet" href="./Disk access using the BIOS (INT 13h) - OSDev Wiki_files/load(1).php">
+<style>a:lang(ar),a:lang(ckb),a:lang(fa),a:lang(kk-arab),a:lang(mzn),a:lang(ps),a:lang(ur){text-decoration:none}a.new,#quickbar a.new{color:#ba0000}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:c88e2bcd56513749bec09a7e29cb3ffa */
+</style>
+<script src="./Disk access using the BIOS (INT 13h) - OSDev Wiki_files/load(2).php"></script><script src="./Disk access using the BIOS (INT 13h) - OSDev Wiki_files/load(3).php"></script>
+<script>if(window.mw){
+	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "Disk_access_using_the_BIOS_(INT_13h)", "wgTitle": "Disk access using the BIOS (INT 13h)", "wgCurRevisionId": 26464, "wgArticleId": 2245, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["X86"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
+}
+</script><script>if(window.mw){
+	mw.loader.load(["mediawiki.page.startup"]);
+}
+</script><script type="text/javascript" src="./Disk access using the BIOS (INT 13h) - OSDev Wiki_files/load(4).php"></script>
+<style type="text/css">/*<![CDATA[*/
+.source-asm {line-height: normal;}
+.source-asm li, .source-asm pre {
+	line-height: normal; border: 0px none white;
+}
+/**
+ * GeSHi Dynamically Generated Stylesheet
+ * --------------------------------------
+ * Dynamically generated stylesheet for asm
+ * CSS class: source-asm, CSS id: 
+ * GeSHi (C) 2004 - 2007 Nigel McNie, 2007 - 2008 Benny Baumann
+ * (http://qbnz.com/highlighter/ and http://geshi.org/)
+ * --------------------------------------
+ */
+.asm.source-asm .de1, .asm.source-asm .de2 {font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;}
+.asm.source-asm  {font-family:monospace;}
+.asm.source-asm .imp {font-weight: bold; color: red;}
+.asm.source-asm li, .asm.source-asm .li1 {font-weight: normal; vertical-align:top;}
+.asm.source-asm .ln {width:1px;text-align:right;margin:0;padding:0 2px;vertical-align:top;}
+.asm.source-asm .li2 {font-weight: bold; vertical-align:top;}
+.asm.source-asm .kw1 {color: #00007f; font-weight: bold;}
+.asm.source-asm .kw2 {color: #0000ff; font-weight: bold;}
+.asm.source-asm .kw3 {color: #00007f;}
+.asm.source-asm .kw4 {color: #000000; font-weight: bold;}
+.asm.source-asm .kw5 {color: #000000; font-weight: bold;}
+.asm.source-asm .co1 {color: #666666; font-style: italic;}
+.asm.source-asm .co2 {color: #adadad; font-style: italic;}
+.asm.source-asm .es0 {color: #000099; font-weight: bold;}
+.asm.source-asm .br0 {color: #009900; font-weight: bold;}
+.asm.source-asm .sy0 {color: #339933;}
+.asm.source-asm .st0 {color: #7f007f;}
+.asm.source-asm .nu0 {color: #0000ff;}
+.asm.source-asm .ln-xtra, .asm.source-asm li.ln-xtra, .asm.source-asm div.ln-xtra {background-color: #ffc;}
+.asm.source-asm span.xtra { display:block; }
+
+/*]]>*/
+</style>
+<style type="text/css">/*<![CDATA[*/
+@import "/index.php?title=MediaWiki:Geshi.css&usemsgcache=yes&action=raw&ctype=text/css&smaxage=18000";
+/*]]>*/
+</style><!--[if lt IE 7]><style type="text/css">body{behavior:url("/skins/vector/csshover.min.htc")}</style><![endif]--></head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Disk_access_using_the_BIOS_INT_13h action-view skin-vector">
+		<div id="mw-page-base" class="noprint"></div>
+		<div id="mw-head-base" class="noprint"></div>
+		<!-- content -->
+		<div id="content">
+			<a id="top"></a>
+			<div id="mw-js-message" style="display:none;" class="js-messagebox"></div>
+						<!-- firstHeading -->
+			<h1 id="firstHeading" class="firstHeading">Disk access using the BIOS (INT 13h)</h1>
+			<!-- /firstHeading -->
+			<!-- bodyContent -->
+			<div id="bodyContent">
+								<!-- tagline -->
+				<div id="siteSub">From OSDev Wiki</div>
+				<!-- /tagline -->
+								<!-- subtitle -->
+				<div id="contentSub"></div>
+				<!-- /subtitle -->
+																<!-- jumpto -->
+				<div id="jump-to-nav">
+					Jump to: <a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#mw-head">navigation</a>,
+					<a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#p-search">search</a>
+				</div>
+				<!-- /jumpto -->
+								<!-- bodycontent -->
+				<div lang="en" dir="ltr" class="mw-content-ltr"><p>The BIOS provides a set of disk access routines using the INT 0x13 family of BIOS functions. Until an appropriate driver is implemented, these BIOS functions are the only way to access disks.
+</p><p>There are two basic INT 0x13 call families to use for disk access. One uses Cylinder, Head, Sector addressing, and the other uses LBA addressing. There is a third command set to access ATAPI drives using the PACKET command set.
+</p><p>Note: These BIOS INT calls should completely preserve all the registers (except AX). However, some older versions of the Bochs/QEMU BIOS destroyed the upper 16-bit values of some of the 32bit registers.
+</p>
+<table id="toc" class="toc"><tbody><tr><td><div id="toctitle"><h2>Contents</h2><span class="toctoggle">&nbsp;[<a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#" class="internal" id="togglelink">hide</a>]&nbsp;</span></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#CHS"><span class="tocnumber">1</span> <span class="toctext">CHS</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#Converting_LBA_to_CHS"><span class="tocnumber">1.1</span> <span class="toctext">Converting LBA to CHS</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3"><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#Quick_Explanation_of_the_Algorithm"><span class="tocnumber">1.1.1</span> <span class="toctext">Quick Explanation of the Algorithm</span></a></li>
+<li class="toclevel-3 tocsection-4"><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#The_Algorithm"><span class="tocnumber">1.1.2</span> <span class="toctext">The Algorithm</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#Getting_Sectors.2FTrack.2C_Total_Head_values"><span class="tocnumber">1.1.3</span> <span class="toctext">Getting Sectors/Track, Total Head values</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-6"><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#Reading_sectors_with_a_CHS_address"><span class="tocnumber">1.2</span> <span class="toctext">Reading sectors with a CHS address</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#LBA_in_Extended_Mode"><span class="tocnumber">2</span> <span class="toctext">LBA in Extended Mode</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#64-bit_Addressing_Extensions"><span class="tocnumber">2.1</span> <span class="toctext">64-bit Addressing Extensions</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#x86_Examples"><span class="tocnumber">3</span> <span class="toctext">x86 Examples</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#Supported_Systems"><span class="tocnumber">4</span> <span class="toctext">Supported Systems</span></a></li>
+<li class="toclevel-1 tocsection-11"><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#Comments"><span class="tocnumber">5</span> <span class="toctext">Comments</span></a></li>
+</ul>
+</td></tr></tbody></table>
+<h2> <span class="mw-headline" id="CHS">CHS</span></h2>
+<p>Remember that there are severe addressing limitations with CHS addressing. Typically only the first 8 GB of the media can be accessed, at most. Sometimes USB drives might be using floppy emulation, so the maximum accessable size becomes only 1.44M.
+</p>
+<h3> <span class="mw-headline" id="Converting_LBA_to_CHS">Converting LBA to CHS</span></h3>
+<p>The addresses of sectors on a disk are almost always calculated or stored as LBAs, but some drives (especially floppies and USB drives with floppy emulation) cannot use LBA addressing. So your code must translate the address, and use a CHS read call. This also applies if you are trying to read floppies and hard disks with the same code.
+</p>
+<h4> <span class="mw-headline" id="Quick_Explanation_of_the_Algorithm">Quick Explanation of the Algorithm</span></h4>
+<p>You can think of a CHS address as the digits of a 3-digit number. The sectors are the low digit, the heads are the middle digit, and cylinders are the high digit. As an analogy, think of the decimal number 345. To extract the low (sectors) digit, you take the modulo with 10. 345&nbsp;% 10 = 5. You also need the integer result of 345 / 10 to calculate the heads and cylinders. 345 / 10 = 34. Then&nbsp;%10 again gets the head, and /10 gets the cylinder. The nice thing is that all CPU chips have "div" opcodes that give you <b>both</b> the result <b>and</b> the modulus for every operation.
+</p>
+<h4> <span class="mw-headline" id="The_Algorithm">The Algorithm</span></h4>
+<p>LBA is the input value,
+</p>
+<ul><li>Temp = LBA / (Sectors per Track)
+</li><li>Sector = (LBA&nbsp;% (Sectors per Track)) + 1
+</li><li>Head = Temp&nbsp;% (Number of Heads)
+</li><li>Cylinder = Temp / (Number of Heads)
+</li></ul>
+<p>
+Note: Always remember that sector is 1-based, and not 0-based ... this detail causes many problems.
+
+</p>
+<h4> <span class="mw-headline" id="Getting_Sectors.2FTrack.2C_Total_Head_values">Getting Sectors/Track, Total Head values</span></h4>
+<p>There is only one real place where you can get the "Sectors per Track" and "Number of Heads" values for the previous LBA-&gt;CHS calculation. All modern BIOSes use automatic CHS to LBA conversions internally, with internal hardcoded conversion values. They <b>do not use</b> the "real" CHS values that are written on the drive's label. Also, if you perhaps have a FAT formatted drive, it will claim to have "Sectors per Track" and "Number of Heads" information stored in the BPB. These values are almost always <b>wrong</b>.
+</p><p>If the 0x80 bit is set for the BIOS drive number, then you have no real choice other than to use the INT13h AH=8 BIOS function to get the "drive geometry".
+</p>
+<ul><li>Set AH to 8, DL to the BIOS drive number, and execute INT 0x13.
+</li><li>The value returned in DH is the "Number of Heads" -1.
+</li><li>AND the value returned in CL with 0x3f to get the "Sectors per Track".
+</li></ul>
+<p>Note: INT 0x13 AH=8 does not work well with floppy drives, or emulated floppy drives. It may be best to use default values in that case.
+</p>
+<h3> <span class="mw-headline" id="Reading_sectors_with_a_CHS_address">Reading sectors with a CHS address</span></h3>
+<p>Cylinder = 0 to 1023 (maybe 4095), Head = 0 to 15 (maybe 254, maybe 255), Sector = 1 to 63
+</p>
+<ul><li>Set AH = 2
+</li><li>AL = total sector count (0 is illegal) -- cannot cross ES page boundary, <b>or a cylinder boundary</b>, and must be &lt; 128
+</li><li>CH = cylinder &amp; 0xff
+</li><li>CL = Sector | ((cylinder &gt;&gt; 2) &amp; 0xC0);
+</li><li>DH = Head -- may include two more cylinder bits
+</li><li>ES:BX -&gt; buffer
+</li><li>Set DL = "drive number" -- typically 0x80, for the "C" drive
+</li><li>Issue an INT 0x13.
+</li></ul>
+<p>The carry flag will be set if there is any error during the read. AH should be set to 0 on success.
+</p><p>To write: set AH to 3, instead.
+</p><p>Note: The limitation about not crossing cylinder boundaries is very annoying, especially when combined with the 127 sector limit -- because the arithmetic for the length and "start CHS" of the <i>next</i> consecutive read or write gets messy. The simplest workaround is to read or write only one sector at a time in CHS mode. Not all BIOSes have these two limitations, of course, but it is necessary to program for the "lowest common denominator".
+</p>
+<h2> <span class="mw-headline" id="LBA_in_Extended_Mode">LBA in Extended Mode</span></h2>
+<p>To use LBA addressing with INT 0x13, you need to use a command in the "INT13h Extensions".
+Every BIOS since the mid-90's supports the extensions, but you may want to verify that they are supported anyway.
+</p>
+<ul><li> Set AH = 0x41
+</li><li> BX = 0x55AA
+</li><li> DL = 0x80
+</li><li> Issue an INT 0x13.
+</li></ul>
+<p>The carry flag will be set if Extensions are <b>not</b> supported.
+</p><p><br>
+To read or write, first you need to set up a "Disk Address Packet Structure" in memory, on a uint32_t (4 byte) boundary.
+</p>
+<ul><li> Format of disk address packet:
+</li></ul>
+<pre>Offset	Size	Description
+ 0	1	size of packet (16 bytes)
+ 1	1	always 0
+ 2	2	number of sectors to transfer (max 127 on some BIOSes)
+ 4	4	transfer buffer (16 bit segment:16 bit offset) (see note #1)
+ 8	4	lower 32-bits of 48-bit starting LBA
+12	4	upper 16-bits of 48-bit starting LBA
+</pre>
+<p>Notes: 
+</p><p>(1) The 16 bit segment value ends up at an offset of 6 from the beginning of the structure (i.e., when declaring segment:offset as two separate 16-bit fields, place the offset first and then follow with the segment because x86 is little-endian). 
+</p><p>(2) If the disk drive itself does not support LBA addressing, the BIOS will automatically convert the LBA to a CHS address for you -- so this function still works. 
+</p><p>(3) The transfer buffer should be 16-bit (2 byte) aligned.
+</p><p><br>
+To read a disk:
+</p>
+<ul><li>Set the proper values in the disk address packet structure
+</li><li>Set DS:SI -&gt; Disk Address Packet in memory
+</li><li>Set AH = 0x42
+</li><li>Set DL = "drive number" -- typically 0x80 for the "C" drive
+</li><li>Issue an INT 0x13.
+</li></ul>
+<p>The carry flag will be set if there is any error during the transfer. AH should be set to 0 on success.
+</p><p>To write to a disk, set AH = 0x43.
+</p>
+<h3> <span class="mw-headline" id="64-bit_Addressing_Extensions"> 64-bit Addressing Extensions </span></h3>
+<p>The BIOS Enhanced Disk Drives Services version 3.0 specifies the possibility of loading to flat 64-bit addresses. Then the format of disk address packet looks like:
+</p>
+<pre>Offset	Size	Description
+ 0	1	size of packet (24 bytes)
+ 1	1	always 0
+ 2	2	number of sectors to transfer (max 127 on some BIOSes)
+ 4	4	transfer buffer (0xFFFF:0xFFFF)
+ 8	4	lower 32-bits of starting 48-bit LBA
+12	4	upper 32-bits of starting 48-bit LBA
+16	4	lower 32-bits of load address
+20	4	upper 32-bits of load address
+</pre>
+<p><b>Warning</b>: 64-bit addressing extensions are not implemented by most BIOSes, therefore they are very unpractical. Even BIOSes of most virtual machine softwares don't implement them!
+</p>
+<h2> <span class="mw-headline" id="x86_Examples">x86 Examples</span></h2>
+<ul><li> Reading 16 sectors from LBA #1 to physical address 0x7C00
+</li></ul>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="asm source-asm"><pre class="de1">DAPACK<span class="sy0">:</span>
+	<span class="kw4">db</span>	<span class="nu0">0x10</span>
+	<span class="kw4">db</span>	<span class="nu0">0</span>
+blkcnt<span class="sy0">:</span>	<span class="kw4">dw</span>	<span class="nu0">16</span>		<span class="co1">; int 13 resets this to # of blocks actually read/written</span>
+db_add<span class="sy0">:</span>	<span class="kw4">dw</span>	<span class="nu0">0x7C00</span>		<span class="co1">; memory buffer destination address (0:7c00)</span>
+	<span class="kw4">dw</span>	<span class="nu0">0</span>		<span class="co1">; in memory page zero</span>
+d_lba<span class="sy0">:</span>	<span class="kw4">dd</span>	<span class="nu0">1</span>		<span class="co1">; put the lba to read in this spot</span>
+	<span class="kw4">dd</span>	<span class="nu0">0</span>		<span class="co1">; more storage bytes only for big lba's ( &gt; 4 bytes )</span>
+&nbsp;
+	<span class="kw1">mov</span> <span class="kw3">si</span><span class="sy0">,</span> DAPACK		<span class="co1">; address of "disk address packet"</span>
+	<span class="kw1">mov</span> <span class="kw3">ah</span><span class="sy0">,</span> <span class="nu0">0x42</span>		<span class="co1">; AL is unused</span>
+	<span class="kw1">mov</span> <span class="kw3">dl</span><span class="sy0">,</span> <span class="nu0">0x80</span>		<span class="co1">; drive number 0 (OR the drive # with 0x80)</span>
+	<span class="kw1">int</span> <span class="nu0">0x13</span>
+	<span class="kw1">jc</span> <span class="kw4">short</span> <span class="sy0">.</span><span class="kw5">error</span></pre></div></div>
+<h2> <span class="mw-headline" id="Supported_Systems">Supported Systems</span></h2>
+<p>All systems support CHS addressing.
+</p><p>There exist some 486 systems that do not support LBA in any way. All known original Pentium and newer systems support Extended LBA in the BIOS.
+</p>
+<h2> <span class="mw-headline" id="Comments">Comments</span></h2>
+<p>One of the easiest ways to read or write a USB flash drive is to drop into Real or Unreal Mode, and use the INT 0x13 BIOS commands. However, the transfer must fit in the usable part of low memory (if in Real Mode), and you need to somehow know the proper drive number to use in DL. 
+</p><p>BIOS can emulate USB flash drives as a floppy drive or as an hard disk. If the USB drive is emulated as a floppy drive, it is likely 0x00 or 0x01 and you can only use AH=0x02 and AH=0x03. If it's emulated as an hard disk, it is most likely 0x80 or 0x81 and you can <b>also</b> use AH=0x42 and AH=0x43.
+</p>
+<!-- 
+NewPP limit report
+Preprocessor node count: 82/1000000
+Post-expand include size: 0/2097152 bytes
+Template argument size: 0/2097152 bytes
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key wikidb:pcache:idhash:2245-0!*!*!!en!*!* and timestamp 20230218154854 -->
+</div>				<!-- /bodycontent -->
+								<!-- printfooter -->
+				<div class="printfooter">
+				Retrieved from "<a href="https://wiki.osdev.org/index.php?title=Disk_access_using_the_BIOS_(INT_13h)&amp;oldid=26464">https://wiki.osdev.org/index.php?title=Disk_access_using_the_BIOS_(INT_13h)&amp;oldid=26464</a>"				</div>
+				<!-- /printfooter -->
+												<!-- catlinks -->
+				<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks"><a href="https://wiki.osdev.org/Special:Categories" title="Special:Categories">Category</a>: <ul><li><a href="https://wiki.osdev.org/Category:X86" title="Category:X86">X86</a></li></ul></div></div>				<!-- /catlinks -->
+												<div class="visualClear"></div>
+				<!-- debughtml -->
+								<!-- /debughtml -->
+			</div>
+			<!-- /bodyContent -->
+		</div>
+		<!-- /content -->
+		<!-- header -->
+		<div id="mw-head" class="noprint">
+			
+<!-- 0 -->
+<div id="p-personal" class="">
+	<h5>Personal tools</h5>
+	<ul>
+		<li id="pt-login"><a href="https://wiki.osdev.org/index.php?title=Special:UserLogin&amp;returnto=Disk_access_using_the_BIOS_%28INT_13h%29" title="You are encouraged to log in; however, it is not mandatory [alt-o]" accesskey="o">Log in</a></li>
+	</ul>
+</div>
+
+<!-- /0 -->
+			<div id="left-navigation">
+				
+<!-- 0 -->
+<div id="p-namespaces" class="vectorTabs">
+	<h5>Namespaces</h5>
+	<ul>
+					<li id="ca-nstab-main" class="selected"><span><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)" title="View the content page [alt-c]" accesskey="c">Page</a></span></li>
+					<li id="ca-talk" class="new"><span><a href="https://wiki.osdev.org/index.php?title=Talk:Disk_access_using_the_BIOS_(INT_13h)&amp;action=edit&amp;redlink=1" title="Discussion about the content page [alt-t]" accesskey="t">Discussion</a></span></li>
+			</ul>
+</div>
+
+<!-- /0 -->
+
+<!-- 1 -->
+<div id="p-variants" class="vectorMenu emptyPortlet">
+		<h5><span>Variants</span><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#"></a></h5>
+	<div class="menu">
+		<ul>
+					</ul>
+	</div>
+</div>
+
+<!-- /1 -->
+			</div>
+			<div id="right-navigation">
+				
+<!-- 0 -->
+<div id="p-views" class="vectorTabs">
+	<h5>Views</h5>
+	<ul>
+					<li id="ca-view" class="selected"><span><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)">Read</a></span></li>
+					<li id="ca-viewsource"><span><a href="https://wiki.osdev.org/index.php?title=Disk_access_using_the_BIOS_(INT_13h)&amp;action=edit" title="This page is protected.
+You can view its source [alt-e]" accesskey="e">View source</a></span></li>
+					<li id="ca-history" class="collapsible"><span><a href="https://wiki.osdev.org/index.php?title=Disk_access_using_the_BIOS_(INT_13h)&amp;action=history" title="Past revisions of this page [alt-h]" accesskey="h">View history</a></span></li>
+			</ul>
+</div>
+
+<!-- /0 -->
+
+<!-- 1 -->
+<div id="p-cactions" class="vectorMenu emptyPortlet">
+	<h5><span>Actions</span><a href="https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#"></a></h5>
+	<div class="menu">
+		<ul>
+					</ul>
+	</div>
+</div>
+
+<!-- /1 -->
+
+<!-- 2 -->
+<div id="p-search">
+	<h5><label for="searchInput">Search</label></h5>
+	<form action="https://wiki.osdev.org/index.php" id="searchform">
+		<input type="hidden" name="title" value="Special:Search">
+				<input type="search" name="search" title="Search OSDev Wiki [alt-f]" accesskey="f" id="searchInput">		<input type="submit" name="go" value="Go" title="Go to a page with this exact name if exists" id="searchGoButton" class="searchButton">		<input type="submit" name="fulltext" value="Search" title="Search the pages for this text" id="mw-searchButton" class="searchButton">			</form>
+</div>
+
+<!-- /2 -->
+			</div>
+		</div>
+		<!-- /header -->
+		<!-- panel -->
+			<div id="mw-panel" class="noprint">
+				<!-- logo -->
+					<div id="p-logo"><a style="background-image: url(/skins/common/images/osdev.png);" href="https://wiki.osdev.org/Main_Page" title="Visit the main page"></a></div>
+				<!-- /logo -->
+				
+<!-- navigation -->
+<div class="portal" id="p-navigation">
+	<h5>Navigation</h5>
+	<div class="body">
+		<ul>
+			<li id="n-mainpage"><a href="https://wiki.osdev.org/Main_Page" title="Visit the main page [alt-z]" accesskey="z">Main Page</a></li>
+			<li id="n-portal"><a href="http://forum.osdev.org/" rel="nofollow" title="About the project, what you can do, where to find things">Forums</a></li>
+			<li id="n-FAQ"><a href="https://wiki.osdev.org/Category:FAQ">FAQ</a></li>
+			<li id="n-OS-Projects"><a href="https://wiki.osdev.org/Projects">OS Projects</a></li>
+			<li id="n-randompage"><a href="https://wiki.osdev.org/Special:Random" title="Load a random page [alt-x]" accesskey="x">Random page</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /navigation -->
+
+<!-- about -->
+<div class="portal" id="p-about">
+	<h5>About</h5>
+	<div class="body">
+		<ul>
+			<li id="n-This-site"><a href="https://wiki.osdev.org/OSDevWiki:About">This site</a></li>
+			<li id="n-Joining"><a href="https://wiki.osdev.org/OSDevWiki:Joining">Joining</a></li>
+			<li id="n-Editing-help"><a href="https://wiki.osdev.org/OSDevWiki:Editing">Editing help</a></li>
+			<li id="n-recentchanges"><a href="https://wiki.osdev.org/Special:RecentChanges" title="A list of recent changes in the wiki [alt-r]" accesskey="r">Recent changes</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /about -->
+
+<!-- SEARCH -->
+
+<!-- /SEARCH -->
+
+<!-- TOOLBOX -->
+<div class="portal" id="p-tb">
+	<h5>Toolbox</h5>
+	<div class="body">
+		<ul>
+			<li id="t-whatlinkshere"><a href="https://wiki.osdev.org/Special:WhatLinksHere/Disk_access_using_the_BIOS_(INT_13h)" title="A list of all wiki pages that link here [alt-j]" accesskey="j">What links here</a></li>
+			<li id="t-recentchangeslinked"><a href="https://wiki.osdev.org/Special:RecentChangesLinked/Disk_access_using_the_BIOS_(INT_13h)" title="Recent changes in pages linked from this page [alt-k]" accesskey="k">Related changes</a></li>
+			<li id="t-specialpages"><a href="https://wiki.osdev.org/Special:SpecialPages" title="A list of all special pages [alt-q]" accesskey="q">Special pages</a></li>
+			<li><a href="https://wiki.osdev.org/index.php?title=Disk_access_using_the_BIOS_(INT_13h)&amp;printable=yes" rel="alternate">Printable version</a></li>
+			<li id="t-permalink"><a href="https://wiki.osdev.org/index.php?title=Disk_access_using_the_BIOS_(INT_13h)&amp;oldid=26464" title="Permanent link to this revision of the page">Permanent link</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /TOOLBOX -->
+
+<!-- LANGUAGES -->
+
+<!-- /LANGUAGES -->
+			</div>
+		<!-- /panel -->
+		<!-- footer -->
+		<div id="footer">
+							<ul id="footer-info">
+											<li id="footer-info-lastmod"> This page was last modified on 5 October 2021, at 13:00.</li>
+											<li id="footer-info-viewcount">This page has been accessed 99,483 times.</li>
+									</ul>
+							<ul id="footer-places">
+											<li id="footer-places-privacy"><a href="https://wiki.osdev.org/OSDev_Wiki:Privacy_policy" title="OSDev Wiki:Privacy policy">Privacy policy</a></li>
+											<li id="footer-places-about"><a href="https://wiki.osdev.org/OSDev_Wiki:About" title="OSDev Wiki:About">About OSDev Wiki</a></li>
+											<li id="footer-places-disclaimer"><a href="https://wiki.osdev.org/OSDev_Wiki:General_disclaimer" title="OSDev Wiki:General disclaimer">Disclaimers</a></li>
+									</ul>
+										<ul id="footer-icons" class="noprint">
+					<li id="footer-poweredbyico">
+						<a href="http://www.mediawiki.org/"><img src="./Disk access using the BIOS (INT 13h) - OSDev Wiki_files/poweredby_mediawiki_88x31.png" alt="Powered by MediaWiki" width="88" height="31"></a>
+					</li>
+				</ul>
+						<div style="clear:both"></div>
+		</div>
+		<!-- /footer -->
+		<!-- fixalpha -->
+		<script type="text/javascript"> if ( window.isMSIE55 ) fixalpha(); </script>
+		<!-- /fixalpha -->
+		<script src="./Disk access using the BIOS (INT 13h) - OSDev Wiki_files/load(5).php"></script>
+<script>if(window.mw){
+	mw.loader.load(["mediawiki.user", "mediawiki.util", "mediawiki.page.ready", "mediawiki.legacy.wikibits", "mediawiki.legacy.ajax"]);
+}
+</script><script type="text/javascript" src="./Disk access using the BIOS (INT 13h) - OSDev Wiki_files/load(6).php"></script>
+<script src="./Disk access using the BIOS (INT 13h) - OSDev Wiki_files/load(7).php"></script>
+<script>if(window.mw){
+	mw.user.options.set({"ccmeonemails":0,"cols":80,"date":"default","diffonly":0,"disablemail":0,"disablesuggest":0,"editfont":"default","editondblclick":0,"editsection":1,"editsectiononrightclick":0,"enotifminoredits":0,"enotifrevealaddr":0,"enotifusertalkpages":1,"enotifwatchlistpages":0,"extendwatchlist":0,"externaldiff":0,"externaleditor":0,"fancysig":0,"forceeditsummary":0,"gender":"unknown","hideminor":0,"hidepatrolled":0,"highlightbroken":1,"imagesize":2,"justify":0,"math":1,"minordefault":0,"newpageshidepatrolled":0,"nocache":0,"noconvertlink":0,"norollbackdiff":0,"numberheadings":0,"previewonfirst":0,"previewontop":1,"quickbar":5,"rcdays":7,"rclimit":50,"rememberpassword":0,"rows":25,"searchlimit":20,"showhiddencats":0,"showjumplinks":1,"shownumberswatching":1,"showtoc":1,"showtoolbar":1,"skin":"vector","stubthreshold":0,"thumbsize":2,"underline":2,"uselivepreview":0,"usenewrc":0,"watchcreations":0,"watchdefault":0,"watchdeletion":0,"watchlistdays":3,"watchlisthideanons":0,
+	"watchlisthidebots":0,"watchlisthideliu":0,"watchlisthideminor":0,"watchlisthideown":0,"watchlisthidepatrolled":0,"watchmoves":0,"wllimit":250,"variant":"en","language":"en","searchNs0":true,"searchNs1":false,"searchNs2":false,"searchNs3":false,"searchNs4":false,"searchNs5":false,"searchNs6":false,"searchNs7":false,"searchNs8":false,"searchNs9":false,"searchNs10":false,"searchNs11":false,"searchNs12":false,"searchNs13":false,"searchNs14":false,"searchNs15":false});;mw.user.tokens.set({"editToken":"+\\","watchToken":false});;mw.loader.state({"user.options":"ready","user.tokens":"ready"});
+	
+	/* cache key: wikidb:resourceloader:filter:minify-js:4:19a4b18a9ac79a6b8c60b24af4668814 */
+}
+</script><!-- Served in 0.040 secs. -->
+	
+
+</body></html>

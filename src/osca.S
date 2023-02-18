@@ -37,11 +37,24 @@ mov %dl,osca_drv_b # save boot drive
 mov %bx,%ss # setup stack
 mov $_start,%sp # at 0x7c00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
+# https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)
+# Reading sectors with a CHS address
+# Cylinder = 0 to 1023 (maybe 4095), Head = 0 to 15 (maybe 254, maybe 255), Sector = 1 to 63
+#    Set AH = 2
+#    AL = total sector count (0 is illegal) -- cannot cross ES page boundary, or a cylinder boundary, and must be < 128
+#    CH = cylinder & 0xff
+#    CL = Sector | ((cylinder >> 2) & 0xC0);
+#    DH = Head -- may include two more cylinder bits
+#    ES:BX -> buffer
+#    Set DL = "drive number" -- typically 0x80, for the "C" drive
+#    Issue an INT 0x13.
+# The carry flag will be set if there is any error during the read. AH should be set to 0 on success.
+#
 cld # clear direction (forward)
-# read 128 sectors * 512B = 65536 bytes. maximum without DMA interrupt
-#  assumes load from USB. floppy does support that many sectors.
+# read 127 sectors * 512B = 65024 bytes
+#   assumes load from USB. floppy does support that many sectors.
 # command 2 (%ah), number of sectors to read (%al)
-mov $0x0280,%ax
+mov $0x027f,%ax
 # from cylinder 0 (%ch), sector 2 (%cl) (sector starts from 1, not 0)
 mov $0x0002,%cx
 xor %dh,%dh # head 0
