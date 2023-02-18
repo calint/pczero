@@ -174,7 +174,7 @@ lbl2:
     movb $0x00,  4(%ebx) # unused
     movb $0x8e,  5(%ebx) # type_attrs p,pv0,!s,i32b
     movw $0x0000,6(%ebx) # offfset 16..31
-    add $8,%bx
+    add $8,%bx # increment by the size of the entry
 loop lbl2
 #movl $0x0e0e0f0f,0xa0118 # on screen
 # setup IRQ 0,1,8. keyboard, system timer and RTC timer
