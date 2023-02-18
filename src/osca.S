@@ -23,6 +23,7 @@
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - bpb
 .code16 # boot in 16 bit mode
 _start:
+# https://stackoverflow.com/questions/47277702/custom-bootloader-booted-via-usb-drive-produces-incorrect-output-on-some-compute
 # jump over BIOS Parameter Block (BPB) because
 # that memory may be written to by BIOS when booting from USB
 jmp _main
