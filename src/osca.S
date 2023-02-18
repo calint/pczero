@@ -31,7 +31,6 @@ jmp _main
 _main:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - setup
 cli # disable interrupts
-# disable NMI? outb(0x70,inb(0x70)|0x80);inb(0x71);
 xor %bx,%bx # clear bx
 mov %bx,%ds # data segment
 mov %dl,osca_drv_b # save boot drive
@@ -40,6 +39,7 @@ mov $_start,%sp # at 0x7c00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
 cld # clear direction (forward)
 # read 128 sectors * 512B = 65536 bytes. maximum without DMA interrupt
+# command 2 (%ah), number of sectors to read (%al)
 mov $0x0280,%ax
 # from cylinder 0 (%ch), sector 2 (%cl) (sector starts from 1, not 0)
 mov $0x0002,%cx
