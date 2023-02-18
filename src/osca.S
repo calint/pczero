@@ -291,7 +291,7 @@ osca_yield: # switches to next task
 # (#GP) exception."
 #
 #—Intel Software Developer Manual
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 1024Hz timer
 isr_tmr:
   cli # disable interrupts
   incl 0xa0000+320-12 # on screen
@@ -373,14 +373,16 @@ switch_task:
   pop %ax # restore %ax
   sti # enables interrupts after next instruction
   jmp *isr_tmr_eip # jmp to restored eip
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ierr
-isr_err:
-  cli
-  pop %eax # pop error
-  mov %eax,0xa0000 # to screen (top-left)
-  lbl3:
-    incl 0xa0004
-  jmp lbl3
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 18.2Hz timer
+isr_tck:
+  cli # disable interrupts
+  incl 0xa0000+320-4 # on screen, top right corner
+  push %ax # ack irq
+  mov $0x20,%al
+  out %al,$0x20
+  pop %ax
+  sti # enables interrupts after next instruction
+  iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ikbd
 isr_kbd:
   cli # disable interrupts
@@ -396,16 +398,14 @@ isr_kbd:
   pop %ax # restore ax
   sti # enables interrupts after next instruction
   iret
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - itck
-isr_tck:
-  cli # disable interrupts
-  incl 0xa0000+320-4 # on screen, top right corner
-  push %ax # ack irq
-  mov $0x20,%al
-  out %al,$0x20
-  pop %ax
-  sti # enables interrupts after next instruction
-  iret
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ierr
+isr_err:
+  cli
+  pop %eax # pop error
+  mov %eax,0xa0000 # to screen (top-left)
+  lbl3:
+    incl 0xa0004
+  jmp lbl3
 .space sector2+512-.,0X90
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - tasks
 sector3: # 0x8000 tasks state table
