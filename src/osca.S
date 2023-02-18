@@ -11,6 +11,8 @@
 # F0000-FFFFF  BIOS ROM
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - intro
 .set IDT,0x600 # interrupt descriptor table address
+.set IDT_ENTRY_COUNT,0x40 # number of interrupts registered
+.set IDT_ENTRY_SIZE,8 # size of an idt entry
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
                       # high task switching frequency might hang
                       # slower hardware
@@ -122,24 +124,24 @@ gdtr:.word gdt_end-gdt-1 # limit of table (size of table - 1)
 #ivtr:.word 0x03ff     # limit (size of table - 1)
 #     .long 0x00000000 # address
 # interrupt descriptor table register (32 bit protected mode)
-idtr:.word 0x40*8-1 # limit of table (size of table - 1)
-     .long IDT      # idt address
+idtr:.word IDT_ENTRY_COUNT*IDT_ENTRY_SIZE-1 # limit of table
+     .long IDT                              # idt address
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 32b code
 protected_mode:
 .code32
 mov $0x10,%ax # offset in gdt, the data segment
-mov %ax,%ss
 mov %ax,%ds
+mov %ax,%ss
 mov %ax,%es
-mov %ax,%fs
-mov %ax,%gs
-xor %eax,%eax
-xor %ebx,%ebx
-xor %ecx,%ecx
-xor %edx,%edx
-xor %edi,%edi
-xor %esi,%esi
-xor %ebp,%ebp
+#mov %ax,%fs
+#mov %ax,%gs
+#xor %eax,%eax
+#xor %ebx,%ebx
+#xor %ecx,%ecx
+#xor %edx,%edx
+#xor %edi,%edi
+#xor %esi,%esi
+#xor %ebp,%ebp
 #movw $0x0404,0xa0110
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - map irqs
 # reprogram the PIC (8259's) to map IRQ 0-15 to IDT mapping 32 to 47
@@ -167,21 +169,21 @@ out %al,$0xa1 # done
 # https://wiki.osdev.org/Interrupt_Descriptor_Table
 #movw $0x0404,0xa0114
 mov $IDT,%ebx # idt address
-mov $0x40,%ecx # interrupt count
+mov $IDT_ENTRY_COUNT,%ecx # interrupt count
 lbl2:
-    movw $isr_err,(%ebx) # offset 0..15
-    movw $0x0008,2(%ebx) # selector in gdt
-    movb $0x00,  4(%ebx) # unused
-    movb $0x8e,  5(%ebx) # type_attrs p,pv0,!s,i32b
-    movw $0x0000,6(%ebx) # offfset 16..31
-    add $8,%bx # increment by the size of the entry
+    movw $isr_err,(%ebx)    # offset 0..15
+    movw $0x0008,2(%ebx)    # selector in gdt
+    movb $0x00,  4(%ebx)    # unused
+    movb $0x8e,  5(%ebx)    # type_attrs p,pv0,!s,i32b
+    movw $0x0000,6(%ebx)    # offfset 16..31
+    add $IDT_ENTRY_SIZE,%bx # increment by the size of the entry
 loop lbl2
 #movl $0x0e0e0f0f,0xa0118 # on screen
 # setup IRQ 0,1,8. keyboard, system timer and RTC timer
 #  only the lower offset set, handlers within 64K
-movw $isr_tck,IDT+(32+0)*8 # IRQ 0: keyboard
-movw $isr_kbd,IDT+(32+1)*8 # IRQ 1: timer 18.2 Hz
-movw $isr_tmr,IDT+(32+8)*8 # IRQ 8: timer 1024 Hz
+movw $isr_tck,IDT+(32+0)*IDT_ENTRY_SIZE # IRQ 0: keyboard
+movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE # IRQ 1: timer 18.2 Hz
+movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE # IRQ 8: timer 1024 Hz
 lidt idtr
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
 # disable the Non-Maskable Interrupt (NMI) before programming RTC
