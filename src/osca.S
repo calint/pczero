@@ -32,7 +32,7 @@ jmp _main
 _main:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - setup
 cli # disable interrupts
-mov %dl,osca_drv_b # save boot drive
+#mov %dl,osca_drv_b # save boot drive
 xor %bx,%bx # clear bx
 mov %bx,%ds # data segment
 mov %bx,%ss # setup stack
@@ -219,8 +219,8 @@ mov 4(%ebx),%esp # restore stack pointer
 sti # enables interrupts after next instruction
 jmp *(%ebx) # jmp to first task
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - vars
-.align 16,0x90
-osca_drv_b:.byte 0x00 # boot drive
+#.align 16,0x90
+#osca_drv_b:.byte 0x00 # boot drive
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partition
 .space _start+436-.,0X90 # reserved
 .space 10,0 # partition table
