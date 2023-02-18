@@ -103,14 +103,12 @@ int $0x10
 # enable access to odd megs
 # https://wiki.osdev.org/A20_Line
 #   enabled by default on non ancient pc?
-#movw $0x0404,%es:0x104
 in $0x92,%al
 or $2,%al
 out %al,$0x92
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - to protected mode
 # enable 32bit protected mode
 # https://wiki.osdev.org/Protected_Mode
-#movw $0x0404,%es:0x108
 lgdt gdtr # load global descriptor tables
 mov %cr0,%eax # enter 32b protected mode
 or $1,%al     #  set PE (Protection Enable) bit
@@ -151,7 +149,6 @@ mov %ax,%ss
 #xor %edi,%edi
 #xor %esi,%esi
 #xor %ebp,%ebp
-#movw $0x0404,0xa0110
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - map irqs
 # reprogram the PIC (8259's) to map IRQ 0-15 to IDT mapping 32 to 47
 # avoiding the first 32 reserved for exceptions
@@ -176,7 +173,6 @@ out %al,$0xa1 # done
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
 # setup interrupt service routines
 # https://wiki.osdev.org/Interrupt_Descriptor_Table
-#movw $0x0404,0xa0114
 mov $IDT,%ebx # idt address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
 lbl2:
@@ -219,7 +215,6 @@ and $0x7f,%al
 out %al,$0x70
 in $0x71,%al
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
-#movw $0x0404,0xa4000
 call osca_init # calls C function
 mov osca_tsk_active,%ebx # ebx points to active task record
 # potential bug? because eflags not restored and registers in unknown state?
