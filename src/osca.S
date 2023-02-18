@@ -32,9 +32,9 @@ jmp _main
 _main:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - setup
 cli # disable interrupts
+mov %dl,osca_drv_b # save boot drive
 xor %bx,%bx # clear bx
 mov %bx,%ds # data segment
-mov %dl,osca_drv_b # save boot drive
 mov %bx,%ss # setup stack
 mov $_start,%sp # at 0x7c00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
