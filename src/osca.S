@@ -463,9 +463,9 @@ tsk_eot:
 #mov $0x7e00,%bx
 #int $0x13
 #jc 8f # if error
-## display save ack?
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
+# display save ack?
 #8:
 #cli
 #hlt
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
 .space sector3+512-.,0X90
