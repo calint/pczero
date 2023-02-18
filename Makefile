@@ -36,7 +36,7 @@ AF=--march=i386 --32
 
 #Ubuntu clang version 15.0.6
 #Target: x86_64-pc-linux-gnu
-CC=clang++ -std=c++2b # c++ 23
+CC=clang++ -std=c++20 # c++ 23
 CW=-Weverything
 CW+=-Werror # warnings are errors
 CW+=-Wno-c++98-compat
