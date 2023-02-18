@@ -1,9 +1,4 @@
 # tested on:
-# * dell inspiron 1545
-# * asus-eeepc-4g
-# * hp-compaq-mini-110
-# * sony-vaio-vgnfw11m
-# * qemu 0.11.0 on linux 2.6
 # * qemu 7.0.0 on linux 5.19
 # * asus zenbook
 #
