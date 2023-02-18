@@ -5,8 +5,8 @@
 # 00000-003FF  IVT (Interrupt Vector Table)
 # 00400-005FF  BDA (BIOS Data Area)
 # 00600-9FFFF  Ordinary application RAM
-# 00600-00747    osca IDT (Interrupt Descriptor Table)
-# 00748-07BFF    free
+# 00600-0077F    osca IDT (Interrupt Descriptor Table)
+# 00780-07BFF    free
 # 07C00-081FF    osca kernel
 # 08200-         application
 # A0000-BFFFF  Video memory
@@ -14,8 +14,8 @@
 # F0000-FFFFF  BIOS ROM
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - constants
 .set IDT,0x600          # interrupt descriptor table address
-.set IDT_ENTRY_COUNT,41 # number of interrupts registered
-                        # 32 reserved exceptions + irq 0..8
+.set IDT_ENTRY_COUNT,48 # number of interrupts registered
+                        # 32 reserved exceptions + irq 0..15
 .set IDT_ENTRY_SIZE,8   # size of an idt entry
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
                       # note. high task switching frequency
