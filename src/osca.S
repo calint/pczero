@@ -81,16 +81,16 @@ int $0x10
 in $0x92,%al
 or $2,%al
 out %al,$0x92
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 32b
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - protected mode
 # https://wiki.osdev.org/Protected_Mode
 #movw $0x0404,%es:0x108
 lgdt gdtr # load global descriptor tables
 mov %cr0,%eax # enter 32b protected mode
 or $1,%al     #  set PE (Protection Enable) bit
 mov %eax,%cr0 #  in CR0 (Control Register 0)
-# Perform far jump to selector 08h (offset into GDT,
-# pointing at a 32bit PM code segment descriptor)
-# to load CS with proper PM32 descriptor
+# far jump to selector 08h (offset into GDT, pointing at
+# a 32bit PM code segment descriptor) to load CS with
+# proper PM32 descriptor
 jmp $8,$protected_mode # jmp and flush
 .align 16,0x90
 # global descriptor table
@@ -110,7 +110,7 @@ gdtr:.word gdtr-gdt-1 # limit of table (size of table - 1)
 idtr:.word 0x03ff # limit of table (size of table - 1)
      .long IDT    # idt address
 .align 8,0x90
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - protected mode
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 32b code
 protected_mode:
 .code32
 mov $0x10,%ax # offset in gdt, the data segment
