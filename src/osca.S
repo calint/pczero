@@ -9,13 +9,14 @@
 # A0000-BFFFF  Video memory
 # C0000-EFFFF  Optional ROMs (The VGA ROM is usually located at C0000)
 # F0000-FFFFF  BIOS ROM
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - intro
-.set IDT,0x600 # interrupt descriptor table address
-.set IDT_ENTRY_COUNT,0x40 # number of interrupts registered
-.set IDT_ENTRY_SIZE,8 # size of an idt entry
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - constants
+.set IDT,0x600          # interrupt descriptor table address
+.set IDT_ENTRY_COUNT,64 # number of interrupts registered
+.set IDT_ENTRY_SIZE,8   # size of an idt entry
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
                       # high task switching frequency might hang
                       # slower hardware
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - exports
 .global osca_key # last received keyboard scan code
 .global osca_tmr_lo # 1024 Hz timer low bits
 .global osca_tmr_hi # 1024 Hz timer high bits
@@ -98,7 +99,7 @@ int $0x10
 in $0x92,%al
 or $2,%al
 out %al,$0x92
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - protected mode
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - to protected mode
 # enable 32bit protected mode
 # https://wiki.osdev.org/Protected_Mode
 #movw $0x0404,%es:0x108
@@ -219,7 +220,7 @@ sti # enables interrupts after next instruction
 jmp *(%ebx) # jmp to first task
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - vars
 #osca_drv_b:.byte 0x00 # boot drive
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partition
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partitions
 .space _start+436-.,0X90 # reserved
 .space 10,0 # partition table
 .space 16,0 # #1
