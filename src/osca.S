@@ -108,24 +108,25 @@ mov %eax,%cr0 #  in CR0 (Control Register 0)
 # a 32bit PM code segment descriptor) to load CS with
 # proper PM32 descriptor
 jmp $8,$protected_mode # jmp and flush
-.align 16,0x90
+#.align 16,0x90
 # global descriptor table
-gdt:.quad 0x0000000000000000 #0x00:
+gdt:.quad 0x0000000000000000 #0x00: reserved and unused
     .quad 0x00cf9a000000ffff #0x08: 32b code 4g pl0 rx
     .quad 0x00cf92000000ffff #0x10: 32b data 4g pl0 rw
+gdt_end:
 #    .quad 0x009f9a000000ffff #0x18: 16b code 1m rx
 #    .quad 0x009f92000000ffff #0x20: 16b data 1m rw
 # global descriptor table register
-gdtr:.word gdtr-gdt-1 # limit of table (size of table - 1)
-     .long gdt # address
+gdtr:.word gdt_end-gdt-1 # limit of table (size of table - 1)
+     .long gdt        # address
 # interrupt vector table (16 bit mode)
 #ivtr:.word 0x03ff     # limit (size of table - 1)
 #     .long 0x00000000 # address
-.align 8,0
+#.align 8,0
 # interrupt descriptor table register (32 bit protected mode)
 idtr:.word 0x03ff # limit of table (size of table - 1)
      .long IDT    # idt address
-.align 8,0x90
+#.align 8,0x90
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 32b code
 protected_mode:
 .code32
@@ -240,7 +241,7 @@ isr_tmr_eip:.long 0x00000000 # ...
 isr_tmr_eflags:.long 0x00000000 #...
 osca_key:.byte 0x00 # last key event
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - yield
-.align 16,0x90
+#.align 16,0x90
 osca_yield: # switches to next task
   cli # disable interrupts
   pushf # push flags. stack is now ..., EIP, EFLAGS
@@ -292,7 +293,7 @@ osca_yield: # switches to next task
 #
 #—Intel Software Developer Manual
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
-.align 16,0x90
+#.align 16,0x90
 isr_tmr:
   cli # disable interrupts
   incl 0xa0000+320-12 # on screen
@@ -375,7 +376,7 @@ switch_task:
   sti # enables interrupts after next instruction
   jmp *isr_tmr_eip # jmp to restored eip
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ierr
-.align 16,0x90
+#.align 16,0x90
 isr_err:
   cli
   pop %eax # pop error
@@ -384,7 +385,7 @@ isr_err:
     incl 0xa0004
   jmp lbl3
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ikbd
-.align 16,0x90
+#.align 16,0x90
 isr_kbd:
   cli # disable interrupts
   push %ax # save to be clobbered ax
@@ -400,7 +401,7 @@ isr_kbd:
   sti # enables interrupts after next instruction
   iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - itck
-.align 16,0x90
+#.align 16,0x90
 isr_tck:
   cli # disable interrupts
   incl 0xa0000+320-4 # on screen, top right corner
