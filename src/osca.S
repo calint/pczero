@@ -5,8 +5,9 @@
 # 00000-003FF  IVT (Interrupt Vector Table)
 # 00400-005FF  BDA (BIOS Data Area)
 # 00600-9FFFF  Ordinary application RAM
-# 00600-00748    osca IDT (Interrupt Descriptor Table)
-# 07c00-08200    osca kernel
+# 00600-00747    osca IDT (Interrupt Descriptor Table)
+# 00748-07BFF    free
+# 07C00-081FF    osca kernel
 # 08200-         application
 # A0000-BFFFF  Video memory
 # C0000-EFFFF  Optional ROMs (The VGA ROM is usually located at C0000)
@@ -33,7 +34,7 @@ _start:
 # that memory may be written to by BIOS when booting from USB
 jmp _main
 .space 3-(.-_start),0x90 # support 2 or 3 bytes encoded jmp
-.space 59,0x90 # BPB area that may be written to by BIOS
+.space 59,0 # BPB area that may be written to by BIOS
 _main:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - setup
 cli # disable interrupts
@@ -183,7 +184,6 @@ lbl2:
     movw $0x0000,6(%ebx)    # offfset 16..31
     add $IDT_ENTRY_SIZE,%bx # increment by the size of the entry
 loop lbl2
-#movl $0x0e0e0f0f,0xa0118 # on screen
 # setup IRQ 0,1,8. keyboard, system timer and RTC timer
 #  only the lower offset set, handlers within 64K
 movw $isr_tck,IDT+(32+0)*IDT_ENTRY_SIZE # IRQ 0: keyboard
@@ -221,18 +221,8 @@ mov osca_tsk_active,%ebx # ebx points to active task record
 mov 4(%ebx),%esp # restore stack pointer
 sti # enables interrupts after next instruction
 jmp *(%ebx) # jmp to first task
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - vars
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
 #osca_drv_b:.byte 0x00 # boot drive
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partitions
-.space _start+436-.,0X90 # reserved
-.space 10,0 # partition table
-.space 16,0 # #1
-.space 16,0 # #2
-.space 16,0 # #3
-.space 16,0 # #4
-.word 0xaa55 # pc boot sector signature
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - sector 2
-sector2: # 0x7e00
 osca_tmr_lo:.long 0x00000000 # 1024 Hz tick lower
 osca_tmr_hi:.long 0x00000000 # 1024 Hz tick higher
 osca_tsk_active:.long tsk # pointer to first task record (tsk0)
@@ -242,6 +232,16 @@ isr_tmr_esp:.long 0x00000000 # ...
 isr_tmr_eip:.long 0x00000000 # ...
 isr_tmr_eflags:.long 0x00000000 #...
 osca_key:.byte 0x00 # last key event
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partitions
+.space _start+436-.,0
+.space 10,0 # partition table
+.space 16,0 # #1
+.space 16,0 # #2
+.space 16,0 # #3
+.space 16,0 # #4
+.word 0xaa55 # pc boot sector signature
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - sector 2
+sector2: # 0x7e00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - yield
 osca_yield: # switches to next task
   cli # disable interrupts
@@ -408,7 +408,7 @@ isr_err:
   lbl3:
     incl 0xa0004
   jmp lbl3
-.space sector2+512-.,0X90
+.space sector2+512-.,0
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - tasks
 sector3: # 0x8000 tasks state table
 tsk: #  eip,  esp,       eflags,    bits,       edi        esi        ebp        esp0       ebx        edx        ecx        eax
@@ -468,4 +468,4 @@ tsk_eot:
 #cli
 #hlt
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
-.space sector3+512-.,0X90
+.space sector3+512-.,0
