@@ -5,13 +5,14 @@
 # 00000-003FF  IVT (Interrupt Vector Table)
 # 00400-005FF  BDA (BIOS Data Area)
 # 00600-9FFFF  Ordinary application RAM
-# 00600-007ff    osca IDT (Interrupt Descriptor Table)
+# 00600-00748    osca IDT (Interrupt Descriptor Table)
 # A0000-BFFFF  Video memory
 # C0000-EFFFF  Optional ROMs (The VGA ROM is usually located at C0000)
 # F0000-FFFFF  BIOS ROM
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - constants
 .set IDT,0x600          # interrupt descriptor table address
-.set IDT_ENTRY_COUNT,64 # number of interrupts registered
+.set IDT_ENTRY_COUNT,41 # number of interrupts registered
+                        # 32 reserved exceptions + irq handlers
 .set IDT_ENTRY_SIZE,8   # size of an idt entry
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
                       # high task switching frequency might hang
