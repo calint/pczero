@@ -222,6 +222,7 @@ mov 4(%ebx),%esp # restore stack pointer
 sti # enables interrupts after next instruction
 jmp *(%ebx) # jmp to first task
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
+.align 4
 #osca_drv_b:.byte 0x00 # boot drive
 osca_tmr_lo:.long 0x00000000 # 1024 Hz tick lower
 osca_tmr_hi:.long 0x00000000 # 1024 Hz tick higher
@@ -243,6 +244,7 @@ osca_key:.byte 0x00 # last key event
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - sector 2
 sector2: # 0x7e00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - yield
+.align 4
 osca_yield: # switches to next task
   cli # disable interrupts
   pushf # push flags. stack is now ..., EIP, EFLAGS
@@ -294,6 +296,7 @@ osca_yield: # switches to next task
 #
 #—Intel Software Developer Manual
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 1024Hz timer
+.align 4
 isr_tmr:
   cli # disable interrupts
   incl 0xa0000+320-12 # on screen
@@ -376,6 +379,7 @@ switch_task:
   sti # enables interrupts after next instruction
   jmp *isr_tmr_eip # jmp to restored eip
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 18.2Hz timer
+.align 4
 isr_tck:
   cli # disable interrupts
   incl 0xa0000+320-4 # on screen, top right corner
@@ -386,6 +390,7 @@ isr_tck:
   sti # enables interrupts after next instruction
   iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ikbd
+.align 4
 isr_kbd:
   cli # disable interrupts
   push %ax # save to be clobbered ax
@@ -401,6 +406,7 @@ isr_kbd:
   sti # enables interrupts after next instruction
   iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ierr
+.align 4
 isr_err:
   cli
   pop %eax # pop error
