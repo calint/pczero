@@ -14,7 +14,7 @@
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
                       # high task switching frequency might hang
                       # slower hardware
-.global osca_key # last pressed key
+.global osca_key # last received keyboard scan code
 .global osca_tmr_lo # 1024 Hz timer low bits
 .global osca_tmr_hi # 1024 Hz timer high bits
 .global osca_yield # export function
