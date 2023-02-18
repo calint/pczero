@@ -42,7 +42,6 @@ inline auto pz_memcpy(Address to,Address from,SizeBytes n)->void{
 	);
 }
 
-//inline void pz_memset(Address to,unsigned char v,SizeBytes n){
 inline auto pz_memset(Address to,char v,SizeBytes n)->void{
 	asm("mov %0,%%edi;"
 		"mov %1,%%al;"
