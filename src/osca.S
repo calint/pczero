@@ -82,11 +82,15 @@ in $0x92,%al
 or $2,%al
 out %al,$0x92
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 32b
+# https://wiki.osdev.org/Protected_Mode
 #movw $0x0404,%es:0x108
 lgdt gdtr # load global descriptor tables
 mov %cr0,%eax # enter 32b protected mode
-or $1,%al
-mov %eax,%cr0
+or $1,%al     #  set PE (Protection Enable) bit
+mov %eax,%cr0 #  in CR0 (Control Register 0)
+# Perform far jump to selector 08h (offset into GDT,
+# pointing at a 32bit PM code segment descriptor)
+# to load CS with proper PM32 descriptor
 jmp $8,$protected_mode # jmp and flush
 .align 16,0x90
 # global descriptor table
