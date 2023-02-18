@@ -17,8 +17,8 @@
                         # 32 reserved exceptions + irq 0..8
 .set IDT_ENTRY_SIZE,8   # size of an idt entry
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
-                      # high task switching frequency might hang
-                      # slower hardware
+                      # note. high task switching frequency
+                      # might hang slower hardware
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - exports
 .global osca_key # last received keyboard scan code
 .global osca_tmr_lo # 1024 Hz timer low bits
