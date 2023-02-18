@@ -39,6 +39,7 @@ mov $_start,%sp # at 0x7c00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
 cld # clear direction (forward)
 # read 128 sectors * 512B = 65536 bytes. maximum without DMA interrupt
+#  assumes load from USB. floppy does support that many sectors.
 # command 2 (%ah), number of sectors to read (%al)
 mov $0x0280,%ax
 # from cylinder 0 (%ch), sector 2 (%cl) (sector starts from 1, not 0)
@@ -58,7 +59,8 @@ int $0x13 # read disk
 #  hlt
 #lbl1:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - mode 13h
-mov $0x13,%ax # vga mode 320x200x8 bmp @ 0xa0000
+# switch to vga mode 13h (320x200x8 bmp @ 0xa0000)
+mov $0x13,%ax
 int $0x10
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - display
 # display loaded program on screen
