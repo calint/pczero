@@ -6,7 +6,8 @@
 # 00400-005FF  BDA (BIOS Data Area)
 # 00600-9FFFF  Ordinary application RAM
 # 00600-00748    osca IDT (Interrupt Descriptor Table)
-# 07c00-         osca
+# 07c00-08200    osca kernel
+# 08200-         application
 # A0000-BFFFF  Video memory
 # C0000-EFFFF  Optional ROMs (The VGA ROM is usually located at C0000)
 # F0000-FFFFF  BIOS ROM
