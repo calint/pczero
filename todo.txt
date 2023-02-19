@@ -1,4 +1,5 @@
 [ ] review 'using' Scale Coord Angle etc terminology
+[ ] review default values and where it is necessary to specify if other than 0
 [ ] struct TaskInfo{eip,eflags,bits,eax,ebx...}
 [ ]   enable/disable task
 [ ] move draw_x into Bitmap?
