@@ -107,7 +107,7 @@ public:
 	AngleRad agl{0};
 	AngularVelocity dagl{0}; // angular velocity per sec
 	Object*obj{nullptr}; // pointer to the object to which this physics state belongs to
-
+	                     // note. circular reference
 //	inline constexpr auto pos()const->const Point2D&{return pos_;}
 //	inline constexpr auto dpos()const->const Point2D&{return dpos_;}
 //	inline constexpr auto ddpos()const->const Point2D&{return ddpos_;}
