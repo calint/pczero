@@ -477,7 +477,7 @@ auto Game::create_boss()->void{
 	// init statics
 	//----------------------------------------------------------
 	enemy_def={5,4,
-		new Point[]{ // points in model coordinates, negative Y is "forward"
+		new Point[]{ // points in model coordinates, negative Y is "forward"/"up"
 			{ 0,0},
 			{-1,-.5},
 			{-1, .5},
@@ -494,7 +494,7 @@ auto Game::create_boss()->void{
 //			create_circle_ix(segments),
 //		};
 //		ship_def={4,4,
-//			new Point2D[]{ // points in model coordinates, negative Y is "forward"
+//			new Point2D[]{ // points in model coordinates, negative Y is "forward"/"up"
 //				{-1,-1},
 //				{-1, 1},
 //				{ 1, 1},
