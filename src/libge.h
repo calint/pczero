@@ -69,7 +69,7 @@ public:
 	inline static TimeSec time_dt;
 	inline static TimeSec time_prv;
 	inline static Count fps_frame_counter;
-	inline static TimeSec fps_last_time;
+	inline static TimeSec fps_prv_time;
 	inline static Count fps;
 
 	static auto init_statics()->void{
@@ -77,7 +77,7 @@ public:
 		// set previous time to a reasonable value so that dt does not
 		// become huge at first frame
 		time_prv=time-sec_per_tick;
-		fps_last_time=time;
+		fps_prv_time=time;
 	}
 	static auto tick()->void;
 	static auto deleted_add(Object*o)->void;
@@ -694,11 +694,11 @@ auto World::tick()->void{
 	}
 	// fps calculations
 	fps_frame_counter++;
-	const TimeSec dt=time-fps_last_time;
+	const TimeSec dt=time-fps_prv_time;
 	if(dt>1){
 		fps=Count(TimeSec(fps_frame_counter)/dt);
 		fps_frame_counter=0;
-		fps_last_time=time;
+		fps_prv_time=time;
 	}
 
 	Object::draw_all(vga13h.bmp());
