@@ -61,7 +61,7 @@ constexpr inline auto deg_to_rad(const AngleDeg deg)->AngleRad{
 
 class Vector{
 public:
-	Real x{0},y{0};
+	Real x{},y{};
 	// normalizes and returns this vector
 	inline auto normalize()->Vector&{
 		const Real len=sqrt(x*x+y*y);
@@ -118,9 +118,9 @@ public:
 using Count=Size;
 
 class Matrix2D{
-	Real xx{1},xy{0},xt{0};
-	Real yx{0},yy{1},yt{0};
-	Real ux{0},uy{0},id{1};
+	Real xx{},xy{},xt{};
+	Real yx{},yy{},yt{};
+	Real ux{},uy{},id{};
 public:
 	auto set_transform(const Scale scale,const AngleRad rotation,const Vector&translation)->void{
 		Real fcos,fsin;
