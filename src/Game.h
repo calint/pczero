@@ -595,6 +595,8 @@ auto Game::create_boss()->void{
 		if(!Game::boss){
 			create_boss();
 		}
+		if(!Game::player)
+			shp=nullptr;
 		if((World::time-Game::boss_t)>Game::boss_live_t){
 			World::deleted_add(boss);
 			Game::boss=nullptr;
@@ -612,9 +614,6 @@ auto Game::create_boss()->void{
 		out.p("s=").p_hex_8b(static_cast<unsigned char>(World::time)).spc();
 		out.p("d=").p_hex_8b(static_cast<unsigned char>(World::time_dt*1'000)).spc();
 		out.p("f=").p_hex_16b(static_cast<unsigned short>(World::fps)).spc();
-
-		if(!Game::player)
-			shp=nullptr;
 
 		if(shp&&keyboard_focus==keyboard_focus_id){
 			while(const unsigned char sc=keyboard.get_next_scan_code()){
