@@ -195,6 +195,7 @@ struct SlotInfo{
 };
 
 using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types.
+using Bits8=unsigned char;
 constexpr Scale sqrt_of_2=Real(1.414213562);
 class Object{
 	friend World;
@@ -206,14 +207,14 @@ class Object{
 	const ObjectDef&def_; // contains the model definition
 	Point*pts_wld_; // transformed model to world points cache
 	Vector*nmls_wld_; // normals of boundingunsigned shape rotated to the world coordinates (not normalized if scale!=1)
-	Matrix2D Mmw_; // model to world transform
-	Point Mmw_pos_; // current position used in transform matrix
-	AngleRad Mmw_agl_; // current angle used in transform matrix
-	Scale Mmw_scl_;  // current scale used in transform matrix
+	Matrix2D Mmw_{}; // model to world transform
+	Point Mmw_pos_{}; // current position used in transform matrix
+	AngleRad Mmw_agl_{}; // current angle used in transform matrix
+	Scale Mmw_scl_{};  // current scale used in transform matrix
 	Scalar br_; // bounding radius scl_*sqrt(2)
-	SlotIx used_ix_; // index in used_ixes array. used at new and delete
+	SlotIx used_ix_{0}; // index in used_ixes array. used at new and delete
 	Color8b color_;
-	unsigned char bits_; // bit 1: is not alive
+	Bits8 bits_{0}; // bit 1: is not alive
 	                     // bit 2: pts_wls_ don't need update
 public:
 	constexpr Object()=delete;
@@ -230,14 +231,8 @@ public:
 		pts_wld_{new Point[unsigned(def.npts)]},
 		 // def might be a dot or a line and not have normals -> no bounding shape
 		nmls_wld_{def.nmls?new Vector[unsigned(def.nbnd)]:nullptr},
-		Mmw_{},
-		Mmw_pos_{0,0},
-		Mmw_agl_{0},
-		Mmw_scl_{0},
 		br_{bounding_radius},
-		used_ix_{0},
-		color_{color},
-		bits_{0}
+		color_{color}
 	{
 		// initiate physics state
 		*phy_=PhysicsState{};

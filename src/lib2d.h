@@ -118,9 +118,9 @@ public:
 using Count=Size;
 
 class Matrix2D{
-	Real xx{1},xy{0},xt{0};
-	Real yx{0},yy{1},yt{0};
-	Real ux{0},uy{0},id{1};
+	Real xx{0},xy{0},xt{0};
+	Real yx{0},yy{0},yt{0};
+	Real ux{0},uy{0},id{0};
 public:
 	auto set_transform(const Scale scale,const AngleRad rotation,const Vector&translation)->void{
 		Real fcos,fsin;
