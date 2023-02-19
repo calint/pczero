@@ -549,7 +549,7 @@ auto Game::create_boss()->void{
 	};
 	missile_def.init_normals();
 
-	constexpr unsigned segments=6;
+	constexpr Count segments=6;
 	boss_def={segments,segments,
 		create_circle(segments),
 		create_circle_ix(segments),
