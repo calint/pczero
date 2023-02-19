@@ -3,6 +3,7 @@
 // built-in functions replacements (used by clang++ -O0)
 extern "C" void memcpy(void*to,void*from,unsigned n);
 extern "C" void memcpy(void*to,void*from,unsigned n){
+	// ? optimize movsb a times,movsd b times,movsb c times
 	asm("mov %0,%%esi;"
 		"mov %1,%%edi;"
 		"mov %2,%%ecx;"
@@ -14,6 +15,7 @@ extern "C" void memcpy(void*to,void*from,unsigned n){
 }
 extern "C" void*memset(void*to,unsigned char c,unsigned n);
 extern "C" void*memset(void*to,unsigned char c,unsigned n){
+	// ? optimize stosb a times,stosd b times,stosb c times
 	asm("mov %0,%%edi;"
 		"mov %1,%%al;"
 		"mov %2,%%ecx;"
@@ -32,6 +34,7 @@ using Size=int;
 using SizeBytes=Size;
 
 inline auto pz_memcpy(Address to,Address from,SizeBytes n)->void{
+	// ? optimize movsb a times,movsd b times,movsb c times
 	asm("mov %0,%%esi;"
 		"mov %1,%%edi;"
 		"mov %2,%%ecx;"
@@ -43,6 +46,7 @@ inline auto pz_memcpy(Address to,Address from,SizeBytes n)->void{
 }
 
 inline auto pz_memset(Address to,char v,SizeBytes n)->void{
+	// ? optimize stosb a times,stosd b times,stosb c times
 	asm("mov %0,%%edi;"
 		"mov %1,%%al;"
 		"mov %2,%%ecx;"
@@ -138,7 +142,7 @@ public:
 		const SizePx h=d_.height();
 		const SizePx w=d_.width();
 		for(SizePx y=0;y<h;y++){
-			for(SizePx x=0;x<w;x++){
+			for(SizePx x=0;x<w;x++){ // ? pz_memcpy
 				*di=*si;
 				si++;
 				di++;
@@ -353,7 +357,7 @@ class PrinterToBitmap{
 	const char padding1{0};
 	static constexpr SizePx font_wi_{5};
 	static constexpr SizePx font_hi_{6};
-	static constexpr SizePx line_padding_{2};
+	static constexpr SizePx line_padding_{2}; // ? attribute
 public:
 	constexpr PrinterToBitmap(Bitmap8b&b):
 		di_{static_cast<Color8b*>(b.data().address())},
@@ -373,10 +377,8 @@ public:
 		fg_=o.fg_;
 		bg_=o.bg_;
 		transparent_=o.transparent_;
-//		padding1=o.padding1;
 		return*this;
 	}
-
 	constexpr auto pos(const CoordsChar p)->PrinterToBitmap&{
 		di_=static_cast<Color8b*>(b_.data().address());
 		di_+=bmp_wi_*p.y()*(font_hi_+line_padding_)+p.x()*font_wi_;
@@ -495,7 +497,7 @@ private:
 class Vga13h{
 	Bitmap8b b_;
 public:
-	Vga13h():b_{Address(0xa0000),DimensionPx{320,200}}{}
+	Vga13h():b_{Address(0xa'0000),DimensionPx{320,200}}{}
 	inline constexpr auto bmp()->Bitmap8b&{return b_;}
 };
 

@@ -54,44 +54,44 @@ inline auto abs(const Real in)->Real{
 
 constexpr Real PI=Real(3.141592653589793);
 
-constexpr auto deg_to_rad(const AngleDeg deg)->AngleRad{
-	constexpr Real deg_to_rad=PI/180;
+constexpr inline auto deg_to_rad(const AngleDeg deg)->AngleRad{
+	constexpr Real deg_to_rad{PI/180};
 	return deg*deg_to_rad;
 }
 
 class Vector{
 public:
 	Real x{0},y{0};
-	// normalizes this vector
+	// normalizes and returns this vector
 	inline auto normalize()->Vector&{
 		const Real len=sqrt(x*x+y*y);
 		x/=len;
 		y/=len;
 		return*this;
 	}
-	// scales this vector
+	// scales and returns this vector
 	inline constexpr auto scale(Scale s)->Vector&{
 		x*=s;
 		y*=s;
 		return*this;
 	}
-	// increases this vector by v
+	// increases and returns this vector by v
 	inline constexpr auto inc_by(const Vector&v)->void{
 		x+=v.x;
 		y+=v.y;
 	}
-	// increases this vector by v*scl
+	// increases and returns this vector by v*scl
 	inline constexpr auto inc_by(const Vector&v,const Real scl)->void{
 		x+=v.x*scl;
 		y+=v.y*scl;
 	}
-	// negates this vector
+	// negates and returns this vector
 	inline constexpr auto negate()->Vector&{
 		x=-x;
 		y=-y;
 		return*this;
 	}
-	// sets this vector to absolute value of itself
+	// sets and returns this vector to absolute value of itself
 	inline auto absolute()->Vector&{
 		x=abs(x);
 		y=abs(y);
