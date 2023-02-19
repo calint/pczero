@@ -49,12 +49,12 @@ class Game{
 		World::draw_dot({yaxis.x+160,yaxis.y+100},2);
 	}
 public:
-	inline static ObjectDef enemy_def;
-	inline static ObjectDef ship_def;
-	inline static ObjectDef bullet_def;
-	inline static ObjectDef wall_def;
-	inline static ObjectDef missile_def;
-	inline static ObjectDef boss_def;
+	inline static ObjectDef enemy_def{};
+	inline static ObjectDef ship_def{};
+	inline static ObjectDef bullet_def{};
+	inline static ObjectDef wall_def{};
+	inline static ObjectDef missile_def{};
+	inline static ObjectDef boss_def{};
 
 	inline static Object*player{nullptr};
 	inline static Object*boss{nullptr};
@@ -329,7 +329,9 @@ private:
 			const Vector v_aim=p_tgt-phy_ro().pos;
 			// get t for bullet to reach expected location
 			const Real t_bullet=v_aim.magnitude()/Bullet::speed;
-			// note. optimizing away sqrt() in magnitude() reduces precision when aiming at far targets since t_aim is then non-linear
+			// note. optimizing away sqrt() in magnitude() reduces precision when
+			// aiming at far targets since t_aim grows in a "non-linear" way
+
 			// difference between target and bullet intersection t
 			const Real t_aim=abs(t_bullet-t);
 
