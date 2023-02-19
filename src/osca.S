@@ -37,7 +37,6 @@ jmp _main
 .space 59,0 # BPB area that may be written to by BIOS
 _main:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - setup
-cli # disable interrupts
 #mov %dl,osca_drv_b # save boot drive
 xor %bx,%bx # clear bx
 mov %bx,%ds # data segment
@@ -100,16 +99,10 @@ int $0x10
 #xor %ax,%ax     # restore data segment
 #mov %ax,%ds     # to zero
 #hlt
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - a20
-# enable access to odd megs
-# https://wiki.osdev.org/A20_Line
-#   enabled by default on non ancient pc?
-in $0x92,%al
-or $2,%al
-out %al,$0x92
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - to protected mode
 # enable 32bit protected mode
 # https://wiki.osdev.org/Protected_Mode
+cli # done with bios, disable interrupts
 lgdt gdtr # load global descriptor tables
 mov %cr0,%eax # enter 32b protected mode
 or $1,%al     #  set PE (Protection Enable) bit
@@ -150,6 +143,13 @@ mov %ax,%ss
 #xor %edi,%edi
 #xor %esi,%esi
 #xor %ebp,%ebp
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - a20
+# enable access to odd megs
+# https://wiki.osdev.org/A20_Line
+#   enabled by default on non ancient pc?
+in $0x92,%al
+or $2,%al
+out %al,$0x92
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - map irqs
 # reprogram the PIC (8259's) to map IRQ 0-15 to IDT mapping 32 to 47
 # avoiding the first 32 reserved for exceptions
@@ -171,25 +171,6 @@ out %al,$0xa1
 mov $0x01,%al
 out %al,$0x21
 out %al,$0xa1 # done
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
-# setup interrupt service routines
-# https://wiki.osdev.org/Interrupt_Descriptor_Table
-mov $IDT,%ebx # idt address
-mov $IDT_ENTRY_COUNT,%ecx # interrupt count
-lbl2:
-    movw $isr_err,(%ebx)    # offset 0..15
-    movw $0x0008,2(%ebx)    # selector in gdt
-    movb $0x00,  4(%ebx)    # unused
-    movb $0x8e,  5(%ebx)    # type_attrs p,pv0,!s,i32b
-    movw $0x0000,6(%ebx)    # offfset 16..31
-    add $IDT_ENTRY_SIZE,%bx # increment by the size of the entry
-loop lbl2
-# setup IRQ 0,1,8. keyboard, system timer and RTC timer
-#  only the lower offset set, handlers within 64K
-movw $isr_tck,IDT+(32+0)*IDT_ENTRY_SIZE # IRQ 0: keyboard
-movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE # IRQ 1: timer 18.2 Hz
-movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE # IRQ 8: timer 1024 Hz
-lidt idtr
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
 # disable the Non-Maskable Interrupt (NMI) before programming RTC
 # this interrupt happens when there is a critical hardware failure
@@ -214,6 +195,25 @@ in $0x70,%al
 and $0x7f,%al
 out %al,$0x70
 in $0x71,%al
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
+# setup interrupt service routines
+# https://wiki.osdev.org/Interrupt_Descriptor_Table
+mov $IDT,%ebx # idt address
+mov $IDT_ENTRY_COUNT,%ecx # interrupt count
+lbl2:
+    movw $isr_err,(%ebx)    # offset 0..15
+    movw $0x0008,2(%ebx)    # selector in gdt
+    movb $0x00,  4(%ebx)    # unused
+    movb $0x8e,  5(%ebx)    # type_attrs p,pv0,!s,i32b
+    movw $0x0000,6(%ebx)    # offfset 16..31
+    add $IDT_ENTRY_SIZE,%bx # increment by the size of the entry
+loop lbl2
+# setup IRQ 0,1,8. keyboard, system timer and RTC timer
+#  only the lower offset set, handlers within 64K
+movw $isr_tck,IDT+(32+0)*IDT_ENTRY_SIZE # IRQ 0: keyboard
+movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE # IRQ 1: timer 18.2 Hz
+movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE # IRQ 8: timer 1024 Hz
+lidt idtr
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 call osca_init # calls C function
 mov osca_tsk_active,%ebx # ebx points to active task record
