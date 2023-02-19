@@ -41,9 +41,9 @@ public:
 
 namespace metrics{
 	constexpr static bool enabled{true};
-	static Count matrix_set_transforms{};
-	static Count collisions_checks{};
-	static Count collisions_checks_bounding_shapes{};
+	static Count matrix_set_transforms;
+	static Count collisions_checks;
+	static Count collisions_checks_bounding_shapes;
 	static auto reset()->void{
 		matrix_set_transforms=0;
 		collisions_checks=0;
@@ -61,16 +61,16 @@ public:
 	constexpr static Size nobjects_max{256}; // maximum number of objects
 private:
 	inline static Object*deleted[nobjects_max]; // ? todo improve with lesser memory footprint
-	inline static int deleted_ix{};
+	inline static int deleted_ix;
 public:
 //	constexpr static Real sec_per_tick{1/Real(18.2)}; // the default 18.2 Hz clock
 	constexpr static Real sec_per_tick{Real(1)/Real(1024)}; // the 1024 Hz clock
-	inline static TimeSec time{};
-	inline static TimeSec time_dt{};
-	inline static TimeSec time_prv{};
-	inline static Count fps_frame_counter{};
-	inline static TimeSec fps_last_time{};
-	inline static Count fps{};
+	inline static TimeSec time;
+	inline static TimeSec time_dt;
+	inline static TimeSec time_prv;
+	inline static Count fps_frame_counter;
+	inline static TimeSec fps_last_time;
+	inline static Count fps;
 
 	static auto init_statics()->void{
 		time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits can be problem
@@ -521,9 +521,9 @@ private:
 	//----------------------------------------------------------------
 	inline static Object*all[World::nobjects_max]; // array of pointers to allocated objects
 	inline static Object**free_ixes[World::nobjects_max]; // free indexes in all[]
-	inline static SlotIx free_ixes_i{0}; // index in freeSlots[] of next free slot
+	inline static SlotIx free_ixes_i; // index in freeSlots[] of next free slot
 	inline static SlotInfo used_ixes[World::nobjects_max]; // free indexes in all[]
-	inline static SlotIx used_ixes_i{0}; // index in freeSlots[] of next free slot
+	inline static SlotIx used_ixes_i; // index in freeSlots[] of next free slot
 public:
 	static auto free_slots_count()->SlotIx{return free_ixes_i;}
 	static auto used_slots_count()->SlotIx{return used_ixes_i;}
