@@ -8,11 +8,11 @@ using PointIx=short; // index into a list of points
 
 class ObjectDef final{
 public:
-	PointIx npts{}; // number of points in pts // ? implement span
-	PointIx nbnd{}; // number of indexes in bnd // ? implement span
-	Point*pts{}; // array of points used for rendering and bounding shape
-	PointIx*bnd{}; // array of indexes in pts that defines the bounding shape as a convex polygon CCW
-	Vector*nmls{}; // array of normals to the lines defined by bnd (calculated by init_normals())
+	PointIx npts{0}; // number of points in pts // ? implement span
+	PointIx nbnd{0}; // number of indexes in bnd // ? implement span
+	Point*pts{nullptr}; // array of points used for rendering and bounding shape
+	PointIx*bnd{nullptr}; // array of indexes in pts that defines the bounding shape as a convex polygon CCW
+	Vector*nmls{nullptr}; // array of normals to the lines defined by bnd (calculated by init_normals())
 //	~ObjectDef(){
 //		if(pts)
 //			delete[]pts;
@@ -41,9 +41,9 @@ public:
 
 namespace metrics{
 	constexpr static bool enabled{true};
-	static Count matrix_set_transforms;
-	static Count collisions_checks;
-	static Count collisions_checks_bounding_shapes;
+	static Count matrix_set_transforms{0};
+	static Count collisions_checks{0};
+	static Count collisions_checks_bounding_shapes{0};
 	static auto reset()->void{
 		matrix_set_transforms=0;
 		collisions_checks=0;
@@ -61,23 +61,23 @@ public:
 	constexpr static Size nobjects_max{256}; // maximum number of objects
 private:
 	inline static Object*deleted[nobjects_max]; // ? todo improve with lesser memory footprint
-	inline static int deleted_ix;
+	inline static int deleted_ix{0};
 public:
 //	constexpr static Real sec_per_tick{1/Real(18.2)}; // the default 18.2 Hz clock
 	constexpr static Real sec_per_tick{Real(1)/Real(1024)}; // the 1024 Hz clock
-	inline static TimeSec time;
-	inline static TimeSec time_dt;
-	inline static TimeSec time_prv;
-	inline static Count fps_frame_counter;
-	inline static TimeSec fps_prv_time;
-	inline static Count fps;
+	inline static TimeSec time{0};
+	inline static TimeSec time_dt{0};
+	inline static TimeSec time_prv{0};
+	inline static Count fps_frame_counter{0};
+	inline static TimeSec fps_last_time{0};
+	inline static Count fps{0};
 
 	static auto init_statics()->void{
 		time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits can be problem
 		// set previous time to a reasonable value so that dt does not
 		// become huge at first frame
 		time_prv=time-sec_per_tick;
-		fps_prv_time=time;
+		fps_last_time=time;
 	}
 	static auto tick()->void;
 	static auto deleted_add(Object*o)->void;
@@ -101,12 +101,12 @@ using Acceleration=Vector;
 using AngularVelocity=AngleRad;
 class PhysicsState final{
 public:
-	Point pos{};
-	Velocity vel{}; // velocity per sec
-	Acceleration acc{}; // acceleration per sec
-	AngleRad agl{};
-	AngularVelocity dagl{}; // angular velocity per sec
-	Object*obj{}; // pointer to the object to which this physics state belongs to
+	Point pos{0,0};
+	Velocity vel{0,0}; // velocity per sec
+	Acceleration acc{0,0}; // acceleration per sec
+	AngleRad agl{0};
+	AngularVelocity dagl{0}; // angular velocity per sec
+	Object*obj{nullptr}; // pointer to the object to which this physics state belongs to
 	                     // note. circular reference
 //	inline constexpr auto pos()const->const Point2D&{return pos_;}
 //	inline constexpr auto dpos()const->const Point2D&{return dpos_;}
@@ -128,9 +128,9 @@ public:
 	//-----------------------------------------------------------
 	//-----------------------------------------------------------
 
-	inline static PhysicsState*mem_start;
-	inline static PhysicsState*next_free;
-	inline static PhysicsState*mem_limit;
+	inline static PhysicsState*mem_start{nullptr};
+	inline static PhysicsState*next_free{nullptr};
+	inline static PhysicsState*mem_limit{nullptr};
 	static auto init_statics()->void{
 		mem_start=new PhysicsState[World::nobjects_max];
 		next_free=mem_start;
@@ -190,12 +190,11 @@ namespace enable{
 using SlotIx=short; // index in Object::freeSlots[]
 // info that together with ~Object maintains usedSlots[]
 struct SlotInfo{
-	Object**oix{}; // pointer to element in Object::all[]
-	Object*obj{}; // object owning this slot
+	Object**oix{nullptr}; // pointer to element in Object::all[]
+	Object*obj{nullptr}; // object owning this slot
 };
 
 using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types.
-using Bits8=unsigned char;
 constexpr Scale sqrt_of_2=Real(1.414213562);
 class Object{
 	friend World;
@@ -207,14 +206,14 @@ class Object{
 	const ObjectDef&def_; // contains the model definition
 	Point*pts_wld_; // transformed model to world points cache
 	Vector*nmls_wld_; // normals of boundingunsigned shape rotated to the world coordinates (not normalized if scale!=1)
-	Matrix2D Mmw_{}; // model to world transform
-	Point Mmw_pos_{}; // current position used in transform matrix
-	AngleRad Mmw_agl_{}; // current angle used in transform matrix
-	Scale Mmw_scl_{};  // current scale used in transform matrix
+	Matrix2D Mmw_; // model to world transform
+	Point Mmw_pos_; // current position used in transform matrix
+	AngleRad Mmw_agl_; // current angle used in transform matrix
+	Scale Mmw_scl_;  // current scale used in transform matrix
 	Scalar br_; // bounding radius scl_*sqrt(2)
-	SlotIx used_ix_{}; // index in used_ixes array. used at new and delete
+	SlotIx used_ix_; // index in used_ixes array. used at new and delete
 	Color8b color_;
-	Bits8 bits_{}; // bit 1: is not alive
+	unsigned char bits_; // bit 1: is not alive
 	                     // bit 2: pts_wls_ don't need update
 public:
 	constexpr Object()=delete;
@@ -231,8 +230,14 @@ public:
 		pts_wld_{new Point[unsigned(def.npts)]},
 		 // def might be a dot or a line and not have normals -> no bounding shape
 		nmls_wld_{def.nmls?new Vector[unsigned(def.nbnd)]:nullptr},
+		Mmw_{},
+		Mmw_pos_{0,0},
+		Mmw_agl_{0},
+		Mmw_scl_{0},
 		br_{bounding_radius},
-		color_{color}
+		used_ix_{0},
+		color_{color},
+		bits_{0}
 	{
 		// initiate physics state
 		*phy_=PhysicsState{};
@@ -522,9 +527,9 @@ private:
 	//----------------------------------------------------------------
 	inline static Object*all[World::nobjects_max]; // array of pointers to allocated objects
 	inline static Object**free_ixes[World::nobjects_max]; // free indexes in all[]
-	inline static SlotIx free_ixes_i; // index in freeSlots[] of next free slot
+	inline static SlotIx free_ixes_i{0}; // index in freeSlots[] of next free slot
 	inline static SlotInfo used_ixes[World::nobjects_max]; // free indexes in all[]
-	inline static SlotIx used_ixes_i; // index in freeSlots[] of next free slot
+	inline static SlotIx used_ixes_i{0}; // index in freeSlots[] of next free slot
 public:
 	static auto free_slots_count()->SlotIx{return free_ixes_i;}
 	static auto used_slots_count()->SlotIx{return used_ixes_i;}
@@ -694,11 +699,11 @@ auto World::tick()->void{
 	}
 	// fps calculations
 	fps_frame_counter++;
-	const TimeSec dt=time-fps_prv_time;
+	const TimeSec dt=time-fps_last_time;
 	if(dt>1){
 		fps=Count(TimeSec(fps_frame_counter)/dt);
 		fps_frame_counter=0;
-		fps_prv_time=time;
+		fps_last_time=time;
 	}
 
 	Object::draw_all(vga13h.bmp());
