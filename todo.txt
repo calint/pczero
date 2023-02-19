@@ -1,6 +1,6 @@
 [ ] review 'using' Scale Coord Angle etc terminology
 [ ] review default values and where it is necessary to specify if other than 0
-[ ]   although redundant, initializing to 0, false, nullptr is ok.
+[ ]   although redundant, initializing to 0, false, nullptr is ok. initialize everything.
 [ ] struct TaskInfo{eip,eflags,bits,eax,ebx...}
 [ ]   enable/disable task
 [ ] move draw_x into Bitmap?
