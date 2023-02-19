@@ -399,7 +399,7 @@ isr_kbd:
   mov %al,0xa0000+320-8 # on screen
   pusha # save registers
   call osca_keyb_ev # call keyboard handler C function
-  popa # restore register
+  popa # restore registers
   mov $0x20,%al # ack interrupt
   out %al,$0x20 # ...
   pop %ax # restore ax
