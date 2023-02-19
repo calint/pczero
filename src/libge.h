@@ -128,9 +128,9 @@ public:
 	//-----------------------------------------------------------
 	//-----------------------------------------------------------
 
-	inline static PhysicsState*mem_start{nullptr};
-	inline static PhysicsState*next_free{nullptr};
-	inline static PhysicsState*mem_limit{nullptr};
+	inline static PhysicsState*mem_start;
+	inline static PhysicsState*next_free;
+	inline static PhysicsState*mem_limit;
 	static auto init_statics()->void{
 		mem_start=new PhysicsState[World::nobjects_max];
 		next_free=mem_start;
@@ -195,6 +195,7 @@ struct SlotInfo{
 };
 
 using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types.
+using Bits8=unsigned char;
 constexpr Scale sqrt_of_2=Real(1.414213562);
 class Object{
 	friend World;
@@ -213,7 +214,7 @@ class Object{
 	Scalar br_; // bounding radius scl_*sqrt(2)
 	SlotIx used_ix_{}; // index in used_ixes array. used at new and delete
 	Color8b color_;
-	unsigned char bits_{}; // bit 1: is not alive
+	Bits8 bits_{}; // bit 1: is not alive
 	                     // bit 2: pts_wls_ don't need update
 public:
 	constexpr Object()=delete;
