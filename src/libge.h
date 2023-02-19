@@ -260,6 +260,7 @@ public:
 		used_ix_=used_ixes_i;
 		used_ixes_i++;
 	}
+	// called only by 'World' at 'commit_deleted()'
 	virtual~Object(){
 		// free returns a pointer to the object that has had it's
 		// physics state moved to the newly freed physics location.
