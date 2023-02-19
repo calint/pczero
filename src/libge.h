@@ -309,7 +309,7 @@ public:
 			}
 		}
 		if(enable::draw_polygons){
-			draw_polygon(dsp, pts_wld_,def_.nbnd,def_.bnd,color_);
+			draw_polygon(dsp,pts_wld_,def_.nbnd,def_.bnd,color_);
 		}
 		if(enable::draw_normals){
 			if(nmls_wld_){ // check if there are any normals defined
@@ -337,7 +337,8 @@ public:
 	inline constexpr auto bounding_radius()const->Scalar{return br_;}
 
 private:
-	// used by 'world' to avoid deleting same object more than once
+	// set to false by 'World' add 'deleted_add' and used to avoid deleting
+	// same object more than once
 	inline constexpr auto set_is_alive(const bool v)->void{
 		if(v){ // alive bit is 0
 			bits_&=0xff-1;
