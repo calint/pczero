@@ -9,27 +9,27 @@ contains:
 
 ```
 sizes
-25372   pczero.img
-19111   src/osca.S
-4543    src/main.cc
-747     src/osca.h
-6775    src/kernel.h
-18340   src/lib.h
-3895    src/lib2d.h
-22634   src/libge.h
-17719   src/Game.h
+25400	pczero.img
+19111	src/osca.S
+4543	src/main.cc
+747	src/osca.h
+6845	src/kernel.h
+18472	src/lib.h
+3895	src/lib2d.h
+22734	src/libge.h
+17737	src/Game.h
 
 wc source
   482  2931 19111 src/osca.S
   191   533  4543 src/main.cc
    28   113   747 src/osca.h
-  222   593  6775 src/kernel.h
-  562  1614 18340 src/lib.h
+  223   601  6845 src/kernel.h
+  562  1632 18472 src/lib.h
   155   431  3895 src/lib2d.h
-  707  2161 22634 src/libge.h
-  691  1452 17719 src/Game.h
- 3038  9828 93764 total
+  708  2175 22734 src/libge.h
+  691  1456 17737 src/Game.h
+ 3040  9872 94084 total
 
 wc source | gzip
-     93     583   24228
+    117     567   24327
 ```
