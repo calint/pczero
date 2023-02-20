@@ -21,6 +21,7 @@ public:
 //		if(nmls)
 //			delete[]nmls;
 //	}
+	// destructor should not happen and generates calls to __cxa_atexit __dso_handle
 	void operator delete(void*)=delete;
 
 	constexpr auto init_normals()->void{
