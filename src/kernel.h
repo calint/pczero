@@ -140,6 +140,7 @@ void operator delete[](void*ptr)noexcept{osca::Heap::free(ptr);}
 void operator delete[](void*ptr,unsigned size)noexcept{osca::Heap::free(ptr);}
 
 namespace osca{
+	using TaskFuncPtr=void(*)();
 	class Keyboard{
 		unsigned char buf[2<<4]{}; // minimum size 2 and a power of 2, max size 256
 		unsigned char s{0}; // next event index
@@ -167,7 +168,7 @@ namespace osca{
 	Keyboard keyboard;
 
 	// ? temporary hack
-	inline static void(*keyboard_focus)(){tsk4};
+	inline static TaskFuncPtr keyboard_focus{tsk4};
 	inline static bool keyboard_ctrl_pressed{false};
 } // end namespace
 

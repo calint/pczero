@@ -117,7 +117,7 @@ public:
 		}
 		return true;
 	}
-	[[noreturn]] static auto start(void(*keyboard_focus_id)())->void;
+	[[noreturn]] static auto start(const TaskFuncPtr keyboard_focus_id)->void;
 };
 
 class Enemy final:public Object{
@@ -474,7 +474,7 @@ auto Game::create_boss()->void{
 	Game::boss=o;
 }
 
-[[noreturn]] auto Game::start(void(*const keyboard_focus_id)())->void{
+[[noreturn]] auto Game::start(const TaskFuncPtr keyboard_focus_id)->void{
 	//----------------------------------------------------------
 	// init statics
 	//----------------------------------------------------------
