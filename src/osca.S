@@ -281,9 +281,9 @@ osca_yield: # switches to next task
   mov %ebx,%esp # restore gprs
   add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  push isr_tmr_eflags # restore eflags
-  popf # restore eflags. no calculations done to alter it before resuming task
   mov isr_tmr_esp,%esp # restore task esp
+  push isr_tmr_eflags # restore eflags
+  popf                # ..
   sti # enables interrupts after next instruction
   jmp *isr_tmr_eip # jmp to restored eip
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - interrupts
@@ -352,9 +352,9 @@ switch_task:
   mov %ebx,%esp # restore gprs
   add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  push isr_tmr_eflags # restore eflags
-  popf # restore eflags. no calculations done to alter it before resuming task.
   mov isr_tmr_esp,%esp # restore task esp
+  push isr_tmr_eflags # restore eflags
+  popf                # ..
 
   # https://forum.osdev.org/viewtopic.php?f=1&t=15526&start=0
   # https://www.compuphase.com/int70.txt
