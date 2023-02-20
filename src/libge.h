@@ -200,7 +200,7 @@ constexpr Scale sqrt_of_2=Real(1.414213562);
 class Object{
 	friend World;
 	TypeBits tb_; // object type that is usually a bit (32 object types supported)
-	TypeBits tb_colchk_; // bits used to bitwise 'and' with other object's type_bits and if true then collision detection is done
+	TypeBits tb_col_msk_; // bits used to bitwise 'and' with other object's type_bits and if true then collision detection is done
 	PhysicsState*phy_; // kept in own buffer of states for better CPU cache utilization at update
 	                   // may change between frames (when objects are deleted)
 	Scale scl_; // scale that is used in transform from model to world coordinates
@@ -222,9 +222,9 @@ public:
 	constexpr Object&operator=(const Object&)=delete; // copy assignment
 	constexpr Object(Object&&)=delete; // move constructor
 	constexpr Object&operator=(Object&&)=delete; // move assignment
-	Object(const TypeBits tb,const TypeBits collision_check_tb,const ObjectDef&def,const Scale scl,const Scalar bounding_radius,const Point&pos,const AngleRad rad,const Color8b color):
+	Object(const TypeBits tb,const TypeBits tb_col_msk,const ObjectDef&def,const Scale scl,const Scalar bounding_radius,const Point&pos,const AngleRad rad,const Color8b color):
 		tb_{tb},
-		tb_colchk_{collision_check_tb},
+		tb_col_msk_{tb_col_msk},
 		phy_{PhysicsState::alloc()},
 		scl_{scl},
 		def_{def},
@@ -281,7 +281,7 @@ public:
 			delete[]nmls_wld_;
 	}
 	inline constexpr auto type_bits()const->TypeBits{return tb_;}	// returns false if object is to be deleted
-	inline constexpr auto type_bits_collision_mask()const->TypeBits{return tb_colchk_;}	// returns false if object is to be deleted
+	inline constexpr auto type_bits_collision_mask()const->TypeBits{return tb_col_msk_;}	// returns false if object is to be deleted
 	inline constexpr auto phy()->PhysicsState&{return*phy_;}
 	// returns physics state as const (read only)
 	inline constexpr auto phy_ro()const->const PhysicsState&{return*phy_;}
@@ -556,8 +556,8 @@ public:
 				Object*o1=used_ixes[i].obj;
 				Object*o2=used_ixes[j].obj;
 				// check if objects are interested in collision check
-				const bool o1_check_col_with_o2=o1->tb_colchk_&o2->tb_;
-				const bool o2_check_col_with_o1=o2->tb_colchk_&o1->tb_;
+				const bool o1_check_col_with_o2=o1->tb_col_msk_&o2->tb_;
+				const bool o2_check_col_with_o1=o2->tb_col_msk_&o1->tb_;
 				if(!o1_check_col_with_o2&&!o2_check_col_with_o1)
 					continue;
 //				out.p("chk ").p_hex_8b(static_cast<unsigned char>(tb1)).p(' ').p_hex_8b(static_cast<unsigned char>(tb2)).p(' ');
