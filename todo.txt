@@ -10,7 +10,7 @@
 [ ]   PhyicsStates instance
 [ ]   World instance
 [ ]   Game instance
-[ ] libge: handle objects with null bounding points indexes, no normals
+[x] libge: handle objects with null bounding points indexes, no normals
 [x] better clock, higher resolution than the default 18.2 Hz -> 1024 Hz RTC
 [ ] implement a unique_ptr<T>
 [o] heap
