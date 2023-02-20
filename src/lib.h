@@ -75,7 +75,7 @@ public:
 	inline constexpr auto write(const unsigned long v)->void{*static_cast<unsigned long*>(a_)=v;}
 };
 
-class Data{
+class Data{ // ? bounds check on constexpr
 	Address a_;
 	SizeBytes s_;
 public:
@@ -83,8 +83,8 @@ public:
 	inline constexpr auto address()const->Address{return a_;}
 	inline constexpr auto size()const->SizeBytes{return s_;}
 	inline constexpr auto pointer()const->Pointer{return{a_};}
-	inline auto to(const Data&d)const->void{pz_memcpy(d.address(),a_,s_);} // ? bounds check
-	inline auto to(const Data&d,const SizeBytes sb)const->void{pz_memcpy(d.address(),a_,sb);} // ? bounds check
+	inline auto to(const Data&d)const->void{pz_memcpy(d.address(),a_,s_);}
+	inline auto to(const Data&d,const SizeBytes sb)const->void{pz_memcpy(d.address(),a_,sb);}
 	inline auto clear(char byte=0)const->void{pz_memset(a_,byte,s_);}
 	inline constexpr auto end()const->Address{return static_cast<char*>(a_)+s_;}
 };
@@ -112,7 +112,7 @@ using Coord=Real;
 using Coords=CoordsT<Coord>;
 
 template<typename T>
-class DimensionT{ // ? guideline C.131
+class DimensionT{
 	T w_;
 	T h_;
 public:
@@ -126,14 +126,16 @@ using DimensionPx=DimensionT<SizePx>;
 using Color8b=char;
 
 template<typename T>
-class Bitmap{
+class Bitmap{ // ? bounds check on constexpr
 	DimensionPx d_;
 	Data dt_;
 public:
 	constexpr Bitmap(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()*Size(sizeof(T))}{}
 	inline constexpr auto dim()const->const DimensionPx&{return d_;}
 	inline constexpr auto data()const->const Data&{return dt_;}
-	inline constexpr auto pointer_offset(const CoordsPx p)const->Pointer{return dt_.pointer().offset(p.y()*d_.width()*Size(sizeof(T))+p.x()*Size(sizeof(T)));}
+	inline constexpr auto pointer_offset(const CoordsPx p)const->Pointer{
+		return dt_.pointer().offset(p.y()*d_.width()*Size(sizeof(T))+p.x()*Size(sizeof(T)));
+	}
 	constexpr auto to(const Bitmap&dst,const CoordsPx&c)const->void{
 		T*si=static_cast<T*>(dt_.address());
 		T*di=static_cast<T*>(dst.dt_.address());
@@ -345,7 +347,7 @@ static constexpr unsigned table_ascii_to_font[]{
 };
 
 using CoordsChar=CoordsT<int>;
-class PrinterToBitmap{
+class PrinterToBitmap{ // ? bounds check on constexpr
 	Color8b*di_; // current pixel in bitmap
 	Color8b*dil_; // beginning of current line
 	Bitmap8b&b_;
