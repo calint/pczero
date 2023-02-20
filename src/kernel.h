@@ -165,7 +165,7 @@ namespace osca{
 		}
 	};
 	extern Keyboard keyboard;
-	Keyboard keyboard;
+	Keyboard keyboard; // global initialized by osca_init
 
 	// ? temporary hack
 	inline static TaskFuncPtr keyboard_focus{tsk4};
