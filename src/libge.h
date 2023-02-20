@@ -480,7 +480,7 @@ private:
 //				Color8b*p_lft=pline+static_cast<CoordPx>(x_lft+.5555f);
 //				Color8b*p_rht=pline+static_cast<CoordPx>(x_rht+.5555f);
 				Color8b*p_lft=pline+CoordPx(x_lft);
-				Color8b*p_rht=pline+CoordPx(x_rht);
+				const Color8b*p_rht=pline+CoordPx(x_rht);
 				if(p_lft>p_rht) // ? can happen?
 					break;
 				scan_lines_until_next_turn--;
@@ -621,7 +621,7 @@ private:
 		return true;
 	}
 	// checks if any o1 bounding points are in o2 bounding shape
-	static auto is_in_collision(Object&o1,Object&o2)->bool{
+	static auto is_in_collision(const Object&o1,const Object&o2)->bool{
 		// for each point in o1 check if behind every normal of o2
 		// if behind every normal then within the convex bounding shape thus collision
 

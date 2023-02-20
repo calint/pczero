@@ -62,7 +62,7 @@ using OffsetBytes=int;
 class Pointer{ // ? can/should be removed
 	Address a_;
 public:
-	inline constexpr Pointer(const Address a):a_{a}{}
+	inline constexpr explicit Pointer(const Address a):a_{a}{}
 	inline constexpr auto address()const->Address{return a_;}
 	inline constexpr auto offset(const OffsetBytes ob)const->Pointer{return Pointer{static_cast<char*>(a_)+ob};}
 	inline constexpr auto write(const char v)->void{*static_cast<char*>(a_)=v;}
@@ -82,7 +82,7 @@ public:
 	inline constexpr Data(const Address a,const SizeBytes n):a_{a},s_{n}{}
 	inline constexpr auto address()const->Address{return a_;}
 	inline constexpr auto size()const->SizeBytes{return s_;}
-	inline constexpr auto pointer()const->Pointer{return{a_};}
+	inline constexpr auto pointer()const->Pointer{return Pointer{a_};}
 	inline auto to(const Data&d)const->void{pz_memcpy(d.address(),a_,s_);}
 	inline auto to(const Data&d,const SizeBytes sb)const->void{pz_memcpy(d.address(),a_,sb);}
 	inline auto clear(char byte=0)const->void{pz_memset(a_,byte,s_);}
@@ -361,7 +361,7 @@ class PrinterToBitmap{ // ? bounds check on constexpr
 	static constexpr SizePx font_hi_{6};
 	static constexpr SizePx line_padding_{2}; // ? attribute
 public:
-	constexpr PrinterToBitmap(Bitmap8b&b):
+	constexpr explicit PrinterToBitmap(Bitmap8b&b):
 		di_{static_cast<Color8b*>(b.data().address())},
 		dil_{di_},
 		b_{b},

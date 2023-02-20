@@ -141,7 +141,7 @@ void operator delete[](void*ptr,unsigned size)noexcept{osca::Heap::free(ptr);}
 
 namespace osca{
 	class Keyboard{
-		unsigned char buf[2<<4]; // minimum size 2 and a power of 2, max size 256
+		unsigned char buf[2<<4]{}; // minimum size 2 and a power of 2, max size 256
 		unsigned char s{0}; // next event index
 		unsigned char e{0}; // last event index +1 & roll
 	public:

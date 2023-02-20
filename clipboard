@@ -8,6 +8,8 @@ objdump -d bin/src/main.o | grep call
 
 clang-tidy -header-filter=.* src/main.cc -- -pedantic -pedantic-errors -Wall -Wextra -Werror -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wmissing-declarations -Wmissing-include-dirs -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wswitch-default -Wundef -Weffc++ -Wfloat-equal -Wno-unused-private-field
 
+cppcheck --enable=style src/main.cc
+
 
 # more read
 mov $0x023f,%ax # command 2, 0x3f sectors 31½K
