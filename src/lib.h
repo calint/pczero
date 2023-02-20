@@ -86,7 +86,7 @@ public:
 	inline auto to(const Data&d)const->void{pz_memcpy(d.address(),a_,s_);} // ? bounds check
 	inline auto to(const Data&d,const SizeBytes sb)const->void{pz_memcpy(d.address(),a_,sb);} // ? bounds check
 	inline auto clear(char byte=0)const->void{pz_memset(a_,byte,s_);}
-	inline constexpr auto limit()const->Address{return static_cast<char*>(a_)+s_;}
+	inline constexpr auto end()const->Address{return static_cast<char*>(a_)+s_;}
 };
 
 template<typename T>

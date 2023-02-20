@@ -10,54 +10,55 @@ extern "C" [[noreturn]] void tsk3();
 extern "C" [[noreturn]] void tsk4();
 
 namespace osca{
-	class HeapEntry final{
-	public:
-		void*ptr; // pointer to memory
-		unsigned size; // size of allocated memory
+	struct HeapEntry final{
+		void*ptr{nullptr}; // pointer to memory
+		unsigned size_bytes{0}; // size of allocated memory in bytes
 	};
+	using SizeCount=Size;
 	class Heap final{
 		inline static Data d_{nullptr,0};
 		inline static char*ptr_{nullptr}; // pointer to free memory
 		inline static char*ptr_lim_{nullptr}; // limit of buffer
 		inline static HeapEntry*entry_used_start_{nullptr}; // beginning of vector containing used memory info
 		inline static HeapEntry*entry_used_next_{nullptr}; // next available slot
-		inline static HeapEntry*entry_used_lim_{nullptr}; // limit of used entries memory
+		inline static HeapEntry*entry_used_end_{nullptr}; // limit of used entries memory
 		inline static HeapEntry*entry_free_start_{nullptr}; // beginning of vector containing freed memory info
 		inline static HeapEntry*entry_free_next_{nullptr};
-		inline static HeapEntry*entry_free_lim_{nullptr};
-		inline static Size nentries_max_{0};
+		inline static HeapEntry*entry_free_end_{nullptr};
+		inline static SizeCount nentries_max_{0};
 	public:
-		static auto init_statics(const Data&d,const Size nentries_max){
+		static auto init_statics(const Data&d,const SizeCount nentries_max){
 			d_=d;
 			ptr_=reinterpret_cast<char*>(d.address());
 			nentries_max_=nentries_max;
 
-			entry_used_start_=static_cast<HeapEntry*>(d.limit())-nentries_max;
+			entry_used_start_=static_cast<HeapEntry*>(d.end())-nentries_max;
 			if(reinterpret_cast<char*>(entry_used_start_)<ptr_){
 				err.p("Heap.init_statics:1");
 				osca_halt();
 			}
 			entry_used_next_=entry_used_start_;
-			entry_used_lim_=entry_used_start_+nentries_max;
+			entry_used_end_=entry_used_start_+nentries_max;
 
 			entry_free_start_=entry_used_start_-nentries_max;
 			entry_free_next_=entry_free_start_;
-			entry_free_lim_=entry_free_start_+nentries_max;
+			entry_free_end_=entry_free_start_+nentries_max;
 			ptr_lim_=reinterpret_cast<char*>(entry_used_start_);
 		}
 		static inline auto data()->const Data&{
 			return d_;
 		}
-		static auto alloc(const unsigned size)->void*{
+		// called by operator 'new'
+		static auto alloc(const unsigned size_bytes)->void*{
 //			err.p_hex_32b(size).spc();
 			// try to find a free slot with that size
 			HeapEntry*he=entry_free_start_;
-			while(he<entry_free_lim_){
-				if(he->size==size){
+			while(he<entry_free_end_){
+				if(he->size_bytes==size_bytes){
 					// found a matching size entry
 					void*p=he->ptr;
 					// move to used entries
-					if(entry_used_next_>=entry_used_lim_){
+					if(entry_used_next_>=entry_used_end_){
 						err.p("Heap.alloc: 1");
 						osca_halt();
 					}
@@ -73,20 +74,21 @@ namespace osca{
 			}
 			// did not find in free list
 			char*p=ptr_;
-			ptr_+=size;
+			ptr_+=size_bytes;
 			if(ptr_>ptr_lim_){
 				err.p("Heap.alloc: 2");
 				osca_halt();
 			}
-			if(entry_used_next_>=entry_used_lim_){
+			if(entry_used_next_>=entry_used_end_){
 				err.p("Heap.alloc: 3");
 				osca_halt();
 			}
 			// write to used list
-			*entry_used_next_={p,size};
+			*entry_used_next_={p,size_bytes};
 			entry_used_next_++;
 			return reinterpret_cast<void*>(p);
 		}
+		// called by operator 'delete'
 		static auto free(void*ptr){
 //			err.p_hex_32b(reinterpret_cast<unsigned>(ptr)).spc();
 			// find the allocated memory in the used list
@@ -95,7 +97,7 @@ namespace osca{
 				if(hep->ptr==ptr){
 					// found the allocation entry
 					// copy entry from used to free
-					if(entry_free_next_>=entry_free_lim_){
+					if(entry_free_next_>=entry_free_end_){
 						err.p("Heap.free: 1");
 						osca_halt();
 					}
@@ -104,7 +106,7 @@ namespace osca{
 
 					// copy last entry from used list to this entry
 					entry_used_next_--;
-					const unsigned size=hep->size;
+					const unsigned size=hep->size_bytes;
 					*hep=*entry_used_next_;
 
 					// debugging
@@ -132,22 +134,10 @@ void operator delete[](void*ptr,unsigned size)noexcept;
 
 void*operator new[](unsigned count){return osca::Heap::alloc(count);}
 void*operator new(unsigned count){return osca::Heap::alloc(count);}
-void operator delete(void*ptr)noexcept{
-	//	out.p("d:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
-	osca::Heap::free(ptr);
-}
-void operator delete(void*ptr,unsigned size)noexcept{
-	//	out.p("ds:").p_hex_16b(static_cast<unsigned short>(size)).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
-	osca::Heap::free(ptr);
-}
-void operator delete[](void*ptr)noexcept{
-	//	out.p("da:").p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
-	osca::Heap::free(ptr);
-}
-void operator delete[](void*ptr,unsigned size)noexcept{
-	//	out.p("das:").p_hex_16b(static_cast<unsigned short>(size)).p(' ').p_hex_32b(reinterpret_cast<unsigned int>(ptr)).p(' ');
-	osca::Heap::free(ptr);
-}
+void operator delete(void*ptr)noexcept{osca::Heap::free(ptr);}
+void operator delete(void*ptr,unsigned size)noexcept{osca::Heap::free(ptr);}
+void operator delete[](void*ptr)noexcept{osca::Heap::free(ptr);}
+void operator delete[](void*ptr,unsigned size)noexcept{osca::Heap::free(ptr);}
 
 namespace osca{
 	class Keyboard{
@@ -176,7 +166,7 @@ namespace osca{
 	extern Keyboard keyboard;
 	Keyboard keyboard;
 
-	// ? hack
+	// ? temporary hack
 	inline static void(*keyboard_focus)(){tsk4};
 	inline static bool keyboard_ctrl_pressed{false};
 } // end namespace
@@ -187,9 +177,9 @@ extern "C" void osca_keyb_ev(){
 	// on screen
 	*reinterpret_cast<int*>(0xa0000+4)=osca_key;
 
+	// ? temporary hack
 	if(osca_key==0x1d)keyboard_ctrl_pressed=true;
 	else if(osca_key==0x9d)keyboard_ctrl_pressed=false;
-
 	if(keyboard_ctrl_pressed&&osca_key==0xf){ // ctrl+tab
 		if(keyboard_focus==tsk0){
 			keyboard_focus=tsk4;
@@ -206,7 +196,8 @@ extern "C" void osca_keyb_ev(){
 //	*p++=osca_key;
 }
 
-// called by osca from the keyboard interrupt
+// called by osca before starting tasks
+// initiates globals
 extern "C" void osca_init(){
 	using namespace osca;
 	// green dot on screen (top left)

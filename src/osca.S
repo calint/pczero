@@ -112,6 +112,7 @@ mov %eax,%cr0 #  in CR0 (Control Register 0)
 # proper PM32 descriptor
 jmp $8,$protected_mode # jmp and flush
 # global descriptor table
+#.align 8
 gdt:.quad 0x0000000000000000 #0x00: reserved and unused
     .quad 0x00cf9a000000ffff #0x08: 32b code 4g pl0 rx
     .quad 0x00cf92000000ffff #0x10: 32b data 4g pl0 rw
@@ -119,17 +120,21 @@ gdt:.quad 0x0000000000000000 #0x00: reserved and unused
 #    .quad 0x009f92000000ffff #0x20: 16b data 1m rw
 gdt_end:
 # global descriptor table register
+#.align 8
 gdtr:.word gdt_end-gdt-1 # limit of table (size of table - 1)
      .long gdt           # address
 # interrupt vector table (16 bit mode)
+#.align 8
 #ivtr:.word 0x03ff     # limit (size of table - 1)
 #     .long 0x00000000 # address
 # interrupt descriptor table register (32 bit protected mode)
+#.align 8
 idtr:.word IDT_ENTRY_COUNT*IDT_ENTRY_SIZE-1 # limit of table
      .long IDT                              # idt address
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 32b code
 protected_mode:
 .code32
+#.align 4
 mov $0x10,%ax # offset in gdt, the data segment
 mov %ax,%ds
 mov %ax,%es
