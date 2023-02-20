@@ -156,7 +156,7 @@ namespace osca{
 		unsigned char e{0}; // last event index +1 & roll
 	public:
 		// called by osca_keyb_ev
-		constexpr auto on_key(unsigned char ch){
+		constexpr auto on_key(unsigned char ch)->void{
 			const unsigned char ne=(e+1)&(sizeof(buf)-1);// next "end" index
 			if(ne==s)// check overrun
 				return;// write would overwrite. display on status line?
