@@ -130,15 +130,15 @@ public:
 
 	inline static PhysicsState*mem_start{nullptr};
 	inline static PhysicsState*next_free{nullptr};
-	inline static PhysicsState*mem_limit{nullptr};
+	inline static PhysicsState*mem_end{nullptr};
 	static auto init_statics()->void{
 		mem_start=new PhysicsState[World::nobjects_max];
 		next_free=mem_start;
-		mem_limit=reinterpret_cast<PhysicsState*>(mem_start+World::nobjects_max);
+		mem_end=reinterpret_cast<PhysicsState*>(mem_start+World::nobjects_max);
 	}
 	static auto alloc()->PhysicsState*{
 		// check buffer overrun
-		if(next_free==mem_limit){
+		if(next_free==mem_end){
 			err.p("PhysicsState:e1");
 			osca_halt();
 		}
@@ -172,7 +172,7 @@ public:
 	}
 	static auto clear_buffer(char b=0)->void{
 		const Address from=Address(mem_start);
-		const SizeBytes n=SizeBytes(mem_limit)-SizeBytes(mem_start); // ? may break if pointer is bigger than 2G
+		const SizeBytes n=SizeBytes(mem_end)-SizeBytes(mem_start); // ? may break if pointer is bigger than 2G
 		pz_memset(from,b,n);
 	}
 };
@@ -665,11 +665,7 @@ private:
 	}
 };
 
-auto World::deleted_add(Object*o)->void{ // ! this might be called several times for the same object
-//		if(!o->is_alive()){
-//			err.p("world::deleted_add:1");
-//			osca_halt();
-//		}
+auto World::deleted_add(Object*o)->void{
 	if(!o->is_alive()) // check if object already deleted
 		return;
 	o->set_is_alive(false);

@@ -597,8 +597,9 @@ auto Game::create_boss()->void{
 		if(!Game::boss){
 			create_boss();
 		}
-		if(!Game::player)
+		if(!Game::player){
 			shp=nullptr;
+		}
 		if((World::time-Game::boss_t)>Game::boss_live_t){
 			World::deleted_add(boss);
 			Game::boss=nullptr;
