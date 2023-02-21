@@ -377,9 +377,9 @@ isr_tmr_next_task:
   mov osca_active_task,%ecx
   mov 4(%ecx),%esp # restore esp
   mov %esp,tmp_esp # save esp, will be used as scratch
-  mov (%ecx),%esp # restore eip
+  mov (%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
-  mov 8(%ecx),%esp # get eflags
+  mov 8(%ecx),%esp # get task.eflags
   mov %esp,tmp_eflags # save to restore later
   mov %ecx,%esp # restore gprs
   add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
