@@ -14,9 +14,9 @@ namespace osca{
 	extern "C" struct Task*tasks_end; // used by osca.S
 	struct Task tasks[]{
 		//        eip   esp        eflags bits edi esi ebp esp0 ebx edx ecx eax
-		{Register(tsk4),0x000af000,0     ,3   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
-		{Register(tsk0),0x000afa00,0     ,1   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
-		{Register(tsk3),0x000af280,0     ,2   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
+		{Register(tsk4),0x000af000,0     ,4   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
+		{Register(tsk0),0x000afa00,0     ,0   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
+		{Register(tsk3),0x000af280,0     ,3   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
 	};
 	Task*tasks_end=tasks+sizeof(tasks)/sizeof(Task);
 
