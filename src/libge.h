@@ -596,10 +596,10 @@ public:
 private:
 	static inline auto object_for_used_slot(const SlotIx i)->Object*{
 		Object*o=used_ixes[i].obj;
-		if(!o){
-			err.p("null-pointer-exception [e1]");
-			osca_hang();
-		}
+//		if(!o){
+//			err.p("null-pointer-exception [e1]");
+//			osca_hang();
+//		}
 		return o;
 	}
 

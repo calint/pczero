@@ -7,21 +7,27 @@
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] void tsk0(){
 	using namespace osca;
-	unsigned eax=unsigned(osca_get_eax());
-	unsigned esi=unsigned(osca_get_esi());
-	unsigned edi=unsigned(osca_get_edi());
-	unsigned edx=unsigned(osca_get_edx());
-	unsigned ecx=unsigned(osca_get_ecx());
-	unsigned ebx=unsigned(osca_get_ebx());
-//	err.p_hex_32b(eax).spc();
-//	err.p_hex_32b(ebx).spc();
-//	err.p_hex_32b(ecx).spc();
-//	err.p_hex_32b(edx).spc();
-//	err.p_hex_32b(esi).spc();
-//	err.p_hex_32b(edi).spc();
+	osca_cli();
 	const TaskId taskId=osca_active_task->get_id();
-	const char*hello=reinterpret_cast<const char*>(esi);
+//	Register eax=osca_active_task->eax;
+//	Register ebx=osca_active_task->ebx;
+//	Register ecx=osca_active_task->ecx;
+//	Register edx=osca_active_task->edx;
+	Register esi=osca_active_task->esi;
+//	Register edi=osca_active_task->edi;
+//	Register ebp=osca_active_task->ebp;
+//	Register esp0=osca_active_task->esp0;
+	osca_sti();
+//	err.p_hex_32b(unsigned(eax)).spc();
+//	err.p_hex_32b(unsigned(ebx)).spc();
+//	err.p_hex_32b(unsigned(ecx)).spc();
+//	err.p_hex_32b(unsigned(edx)).spc();
+//	err.p_hex_32b(unsigned(esi)).spc();
+//	err.p_hex_32b(unsigned(edi)).spc();
+//	err.p_hex_32b(unsigned(ebp)).spc();
+//	err.p_hex_32b(unsigned(esp0)).spc();
 
+	const char*hello=reinterpret_cast<const char*>(esi);
 	PrinterToBitmap pb{vga13h.bmp()};
 
 //	pb.pos({30,1});
@@ -100,9 +106,13 @@ extern "C" [[noreturn]] void tsk2(){
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] void tsk3(){
 	using namespace osca;
+	osca_cli();
+	const Register eax=osca_active_task->eax;
+	osca_sti();
+
 	while(true){
-		vga13h.bmp().data().pointer().offset(160).write(osca_tmr_lo);
-		asm("nop"); // ? without this the line above is optimized away by the compiler
+		vga13h.bmp().data().pointer().offset(eax).write(osca_tmr_lo);
+//		osca_nop(); // ? without this or yield line above is optimized away by the compiler
 		osca_yield();
 	}
 }

@@ -9,12 +9,16 @@ extern "C" [[noreturn]] void tsk4();
 
 namespace osca{
 
+static const char*_msg="hello";
+
 struct Task osca_tasks[]{
-	//        eip   esp        eflags bits   id   edi  esi  ebp  esp0 ebx  edx  ecx  eax
-	{Register(tsk4),0x000af000,0     ,0b11  ,4   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
-	{Register(tsk0),0x000afa00,0     ,0b11  ,0   ,0xde,Register("kernel osca"),0xeb,0   ,0xb,0xd,0xc,0xa},
-	{Register(tsk3),0x000af280,0     ,0b10  ,3   ,0   ,0        ,0   ,0   ,0   ,0   ,0   ,0   },
-	{Register(tsk2),0x000af500,0     ,0b00  ,2   ,0   ,0        ,0   ,0   ,0   ,0   ,0   ,0   },
+	//        eip   esp              eflags bits   id   edi  esi  ebp  esp0 ebx  edx  ecx  eax
+	{Register(tsk4),0xa'0000+320*180,0     ,0b11  ,4   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
+	{Register(tsk0),0xa'0000+320*184,0     ,0b11  ,0   ,0xde,Register("kernel osca"),0xeb,0xe5,0xb ,0xd ,0xc ,0xa},
+	{Register(tsk2),0xa'0000+320*188,0     ,0b10  ,2   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
+	{Register(tsk3),0xa'0000+320*192,0     ,0b10  ,3   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,140 },
+	{Register(tsk3),0xa'0000+320*196,0     ,0b10  ,3   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,160 },
+	{Register(tsk3),0xa'0000+320*200,0     ,0b10  ,3   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,180 },
 };
 Task*osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
 
@@ -216,7 +220,6 @@ extern "C" void osca_keyb_ev(){
 					return;
 				}
 			}
-			return;
 		}
 		// if F1 through F12 pressed toggle running state of task
 		if(osca_key>=0x3b&&osca_key<=0x3b+12){

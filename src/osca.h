@@ -27,23 +27,30 @@ struct Task{
 // tasks list implemented in kernel.h
 // used by osca.S in osca_yield and isr_tmr
 extern "C" struct Task osca_tasks[];
+// pointer to end of tasks (last entry + 1)
 extern "C" struct Task*osca_tasks_end;
 
-// halts the system
-inline void osca_hang(){asm("cli;hlt");}
+// hangs the system
+inline auto osca_hang()->void{asm("cli;hlt");}
 
 // rest of time slice is spent in halt
-inline void osca_halt(){asm("hlt");}
+inline auto osca_halt()->void{asm("hlt");}
 
-// space for interrupt to happen
-inline void osca_nop(){asm("nop");}
+// nop instruction
+inline auto osca_nop()->void{asm("nop");}
 
-inline int osca_get_eax(){int r;asm("mov %%eax,%0":"=a"(r));return r;}
-inline int osca_get_ebx(){int r;asm("mov %%ebx,%0":"=b"(r));return r;}
-inline int osca_get_ecx(){int r;asm("mov %%ecx,%0":"=c"(r));return r;}
-inline int osca_get_edx(){int r;asm("mov %%edx,%0":"=d"(r));return r;}
-inline int osca_get_esi(){int r;asm("mov %%esi,%0":"=S"(r));return r;}
-inline int osca_get_edi(){int r;asm("mov %%edi,%0":"=D"(r));return r;}
+// disables interrupts
+inline auto osca_cli()->void{asm("cli");}
+
+// enables interrupts
+inline auto osca_sti()->void{asm("sti");}
+
+//inline int osca_get_eax(){int r;asm("mov %%eax,%0":"=a"(r));return r;}
+//inline int osca_get_ebx(){int r;asm("mov %%ebx,%0":"=b"(r));return r;}
+//inline int osca_get_ecx(){int r;asm("mov %%ecx,%0":"=c"(r));return r;}
+//inline int osca_get_edx(){int r;asm("mov %%edx,%0":"=d"(r));return r;}
+//inline int osca_get_esi(){int r;asm("mov %%esi,%0":"=S"(r));return r;}
+//inline int osca_get_edi(){int r;asm("mov %%edi,%0":"=D"(r));return r;}
 //inline int osca_get_eax(){int r;asm("mov %%eax,%0":"=m"(r));return r;}
 //inline int osca_get_ebx(){int r;asm("mov %%ebx,%0":"=m"(r));return r;}
 //inline int osca_get_ecx(){int r;asm("mov %%ecx,%0":"=m"(r));return r;}
