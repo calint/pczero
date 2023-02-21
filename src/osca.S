@@ -240,12 +240,12 @@ jmp *(%ebx) # jmp to first task
 osca_tmr_lo:.long 0x00000000 # 1024 Hz tick lower
 osca_tmr_hi:.long 0x00000000 # 1024 Hz tick higher
 osca_active_task:.long osca_tasks # pointer to first task record (tsk0)
-isr_tmr_eax:.long 0x00000000 # used in isr_tmr
-isr_tmr_ebx:.long 0x00000000 # ...
-isr_tmr_ecx:.long 0x00000000 # ...
-isr_tmr_esp:.long 0x00000000 # ...
-isr_tmr_eip:.long 0x00000000 # ...
-isr_tmr_eflags:.long 0x00000000 #...
+tmp_eax:.long 0x00000000 # used in osca_yield and isr_tmr
+tmp_ebx:.long 0x00000000 # ...
+tmp_ecx:.long 0x00000000 # ...
+tmp_esp:.long 0x00000000 # ...
+tmp_eip:.long 0x00000000 # ...
+tmp_eflags:.long 0x00000000 #...
 osca_key:.byte 0x00 # last key event
 #osca_boot_drive:.byte 0x00 # boot drive
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partitions
@@ -265,9 +265,9 @@ osca_yield: # switches to next task
   pushf # push flags. stack is now ..., EIP, EFLAGS
   incl 0xa0000+320-12 # create output on screen
   # start task switching
-  mov %eax,isr_tmr_eax # save eax,ebx,ecx
-  mov %ebx,isr_tmr_ebx # ..
-  mov %ecx,isr_tmr_ecx # ..
+  mov %eax,tmp_eax # save eax,ebx,ecx
+  mov %ebx,tmp_ebx # ..
+  mov %ecx,tmp_ecx # ..
   mov osca_active_task,%ebx # ebx points to current active task
   mov %ebx,%ecx # ecx will point to the next task
   # find next task and store it in %ecx
@@ -291,32 +291,32 @@ osca_yield_next_task:
   mov %ebx,%esp # save gprs by preparing esp and then pusha
   add $TASK_STRUCT_SIZE,%esp # move to end of task record
   mov %ecx,osca_active_task # save pointer to next task record
-  mov isr_tmr_eax,%eax # restore eax
-  mov isr_tmr_ebx,%ebx # restore ebx
-  mov isr_tmr_ecx,%ecx # restore ecx
+  mov tmp_eax,%eax # restore eax
+  mov tmp_ebx,%ebx # restore ebx
+  mov tmp_ecx,%ecx # restore ecx
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
   # restore task pointed by ecx
   mov osca_active_task,%ecx
   mov 4(%ecx),%esp # restore esp
-  mov %esp,isr_tmr_esp # save esp, will be used as scratch
+  mov %esp,tmp_esp # save esp, will be used as scratch
   mov (%ecx),%esp # restore eip
-  mov %esp,isr_tmr_eip # save for jump
+  mov %esp,tmp_eip # save for jump
   mov 8(%ecx),%esp # get eflags
-  mov %esp,isr_tmr_eflags # save to restore later
+  mov %esp,tmp_eflags # save to restore later
   mov %ecx,%esp # restore gprs
   add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  mov isr_tmr_esp,%esp # restore task esp
-  push isr_tmr_eflags # restore eflags
+  mov tmp_esp,%esp # restore task esp
+  push tmp_eflags # restore eflags
   popf                # ..
   sti # enables interrupts after next instruction
-  jmp *isr_tmr_eip # jmp to restored eip
+  jmp *tmp_eip # jmp to restored eip
 
 osca_yield_exit_without_task_switch:
   # restore clobbered registers
-  mov isr_tmr_eax,%eax
-  mov isr_tmr_ebx,%ebx
-  mov isr_tmr_ecx,%ecx
+  mov tmp_eax,%eax
+  mov tmp_ebx,%ebx
+  mov tmp_ecx,%ecx
   # stack is ..., EIP, EFLAGS
   popf # restore flags
   sti
@@ -343,9 +343,9 @@ isr_tmr:
   pop %eax
   jnz isr_tmr_acknowledge_and_return # if no task switch
   # start task switching
-  mov %eax,isr_tmr_eax # save eax,ebx,ecx
-  mov %ebx,isr_tmr_ebx # ..
-  mov %ecx,isr_tmr_ecx # ..
+  mov %eax,tmp_eax # save eax,ebx,ecx
+  mov %ebx,tmp_ebx # ..
+  mov %ecx,tmp_ecx # ..
   mov osca_active_task,%ebx # ebx points to current active task
   mov %ebx,%ecx # ecx will point to the next task
   # find next task and store it in %ecx
@@ -369,23 +369,23 @@ isr_tmr_next_task:
   mov %ebx,%esp # save gprs by preparing esp and then pusha
   add $TASK_STRUCT_SIZE,%esp # move to end of task record
   mov %ecx,osca_active_task # save pointer to next task record
-  mov isr_tmr_eax,%eax # save proper eax
-  mov isr_tmr_ebx,%ebx # save proper ebx
-  mov isr_tmr_ecx,%ecx # save proper ecx
+  mov tmp_eax,%eax # save proper eax
+  mov tmp_ebx,%ebx # save proper ebx
+  mov tmp_ecx,%ecx # save proper ecx
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
   # restore task pointed by ecx
   mov osca_active_task,%ecx
   mov 4(%ecx),%esp # restore esp
-  mov %esp,isr_tmr_esp # save esp, will be used as scratch
+  mov %esp,tmp_esp # save esp, will be used as scratch
   mov (%ecx),%esp # restore eip
-  mov %esp,isr_tmr_eip # save for jump
+  mov %esp,tmp_eip # save for jump
   mov 8(%ecx),%esp # get eflags
-  mov %esp,isr_tmr_eflags # save to restore later
+  mov %esp,tmp_eflags # save to restore later
   mov %ecx,%esp # restore gprs
   add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  mov isr_tmr_esp,%esp # restore task esp
-  push isr_tmr_eflags # restore eflags
+  mov tmp_esp,%esp # restore task esp
+  push tmp_eflags # restore eflags
   popf                # ..
   # https://forum.osdev.org/viewtopic.php?f=1&t=15526&start=0
   # https://www.compuphase.com/int70.txt
@@ -405,13 +405,13 @@ isr_tmr_next_task:
   out %al,$0x20 #  main controller PIC0
   pop %ax # restore %ax
   sti # enables interrupts after next instruction
-  jmp *isr_tmr_eip # jmp to restored eip
+  jmp *tmp_eip # jmp to restored eip
 
 isr_tmr_exit_without_task_switch:
   # restore clobbered registers
-  mov isr_tmr_eax,%eax
-  mov isr_tmr_ebx,%ebx
-  mov isr_tmr_ecx,%ecx
+  mov tmp_eax,%eax
+  mov tmp_ebx,%ebx
+  mov tmp_ecx,%ecx
 
 isr_tmr_acknowledge_and_return:
   # acknowledge interrupt and exit
