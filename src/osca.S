@@ -293,13 +293,13 @@ osca_yield_next_task:
   mov tmp_ebx,%ebx # restore ebx
   mov tmp_ecx,%ecx # restore ecx
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
-    # restore task pointed by ecx
+  # restore task pointed by ecx
   mov osca_active_task,%ecx
   mov (%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
   mov %ecx,%esp # restore gprs
   add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
-  popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
+  popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
   sub $TASK_STRUCT_SIZE-8,%esp # position stack pointer at task.eflags
   popf # restore flags, no op that modifies flags after this
   mov -8(%esp),%esp # restore task esp
@@ -373,7 +373,7 @@ isr_tmr_next_task:
   mov %esp,tmp_eip # save for jump
   mov %ecx,%esp # restore gprs
   add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
-  popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
+  popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
   sub $TASK_STRUCT_SIZE-8,%esp # position stack pointer at task.eflags
   popf # restore flags, no op that modifies flags after this
   mov -8(%esp),%esp # restore task esp
