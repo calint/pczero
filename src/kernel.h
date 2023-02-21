@@ -10,15 +10,13 @@ extern "C" [[noreturn]] void tsk3();
 extern "C" [[noreturn]] void tsk4();
 
 namespace osca{
-extern "C" struct Task tasks[]; // used by osca.S
-extern "C" struct Task*tasks_end; // used by osca.S
-struct Task tasks[]{
-	//        eip   esp        eflags bits edi esi ebp esp0 ebx edx ecx eax
-	{Register(tsk4),0x000af000,0     ,4   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
-	{Register(tsk0),0x000afa00,0     ,0   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
-	{Register(tsk3),0x000af280,0     ,3   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
+struct Task osca_tasks[]{
+	//        eip   esp        eflags bits   id  edi esi ebp esp0 ebx edx ecx eax
+	{Register(tsk4),0x000af000,0     ,0x0001,4   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
+	{Register(tsk0),0x000afa00,0     ,0x0001,0   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
+	{Register(tsk3),0x000af280,0     ,0x0000,3   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
 };
-Task*tasks_end=tasks+sizeof(tasks)/sizeof(Task);
+Task*osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
 
 struct HeapEntry final{
 	void*ptr{nullptr}; // pointer to memory
@@ -184,7 +182,7 @@ extern "C" void osca_init(){
 	out=PrinterToVga{};
 	out.pos({1,2}).fg(2);
 	keyboard=Keyboard{};
-	task_focused=&tasks[0];
+	task_focused=&osca_tasks[0];
 	task_focused_id=task_focused->get_id();
 	Heap::init_statics({Address(0x10'0000),320*100},World::nobjects_max);
 	Heap::clear_buffer(0x12);
@@ -194,6 +192,7 @@ extern "C" void osca_init(){
 	PhysicsState::clear_buffer(1);
 }
 // called by osca from the keyboard interrupt
+// there is no task switch during this function
 extern "C" void osca_keyb_ev(){
 	using namespace osca;
 	// on screen
@@ -201,14 +200,21 @@ extern "C" void osca_keyb_ev(){
 
 	if(osca_key==0x1d)keyboard_ctrl_pressed=true;
 	else if(osca_key==0x9d)keyboard_ctrl_pressed=false;
-	// ? implement better task focus switch
+	// ? implement better task focus switch (same behaviour as alt+tab)
 	if(keyboard_ctrl_pressed&&osca_key==0xf){ // ctrl+tab
-		task_focused++;
-		if(task_focused==tasks_end){
-			task_focused=tasks;
+		const Task*prev_task_focused=task_focused;
+		while(true){
+			task_focused++;
+			if(task_focused==osca_tasks_end){
+				task_focused=osca_tasks;
+			}
+			if(task_focused==prev_task_focused)
+				return;
+			if(task_focused->is_grab_keyboard_focus()){
+				task_focused_id=task_focused->get_id();
+				return;
+			}
 		}
-		task_focused_id=task_focused->get_id();
-		return;
 	}
 
 	// to keyboard handler
