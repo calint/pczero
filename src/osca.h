@@ -21,7 +21,7 @@ struct Task{
 	Register eax{0};
 
 	constexpr inline TaskId get_id()const{return id;}
-	constexpr inline TaskBits get_bits()const{return bits;}
+//	constexpr inline TaskBits get_bits()const{return bits;}
 	constexpr inline bool is_grab_keyboard_focus()const{return bits&1;}
 };
 
