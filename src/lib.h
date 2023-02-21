@@ -505,7 +505,7 @@ public:
 
 // the vga 13h bitmap
 extern Vga13h vga13h;
-Vga13h vga13h;  // global initialized by osca_init
+Vga13h vga13h; // global initialized by osca_init
 
 class PrinterToVga:public PrinterToBitmap{
 public:

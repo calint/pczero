@@ -9,7 +9,6 @@ namespace osca{
 class Game{
 	inline static CoordsPx play_area_top_left{0,50};
 	inline static DimensionPx play_area_dim{320,100};
-
 	static auto create_scene()->void;
 	static auto create_scene2()->void;
 	static auto create_scene3()->void;
@@ -117,7 +116,7 @@ public:
 		}
 		return true;
 	}
-	[[noreturn]] static auto start(const TaskFuncPtr keyboard_focus_id)->void;
+	[[noreturn]] static auto start()->void;
 };
 
 class Enemy final:public Object{
@@ -474,7 +473,8 @@ auto Game::create_boss()->void{
 	Game::boss=o;
 }
 
-[[noreturn]] auto Game::start(const TaskFuncPtr keyboard_focus_id)->void{
+[[noreturn]] auto Game::start()->void{
+	const TaskId taskId=osca_active_task->get_id();
 	//----------------------------------------------------------
 	// init statics
 	//----------------------------------------------------------
@@ -605,7 +605,8 @@ auto Game::create_boss()->void{
 			Game::boss=nullptr;
 		}
 
-		out.pos({4,2}).fg(2);
+		out.pos({0,2}).fg(2);
+		out.p("i=").p_hex_8b(static_cast<unsigned char>(task_focused_id)).spc();
 		out.p("k=").p_hex_8b(static_cast<unsigned char>(osca_key)).spc();
 		out.p("e=").p_hex_8b(static_cast<unsigned char>(Game::enemies_alive)).spc();
 		out.p("m=").p_hex_8b(static_cast<unsigned char>(metrics::matrix_set_transforms)).spc();
@@ -618,7 +619,7 @@ auto Game::create_boss()->void{
 		out.p("d=").p_hex_8b(static_cast<unsigned char>(World::time_dt*1'000)).spc();
 		out.p("f=").p_hex_16b(static_cast<unsigned short>(World::fps)).spc();
 
-		if(shp&&keyboard_focus==keyboard_focus_id){
+		if(shp&&task_focused_id==taskId){
 			while(const unsigned char sc=keyboard.get_next_scan_code()){
 				switch(sc){
 				case 0x11: // w pressed

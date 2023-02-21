@@ -25,6 +25,9 @@
 .global osca_tmr_lo # 1024 Hz timer low bits
 .global osca_tmr_hi # 1024 Hz timer high bits
 .global osca_yield # export function
+.global osca_active_task # pointer to active task
+.global osca_tasks # pointer to start of tasks list
+.global osca_tasks_end # pointer to end of tasks list
 .global _start # export entry point
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - bpb
 .code16 # boot in 16 bit mode
@@ -37,7 +40,7 @@ jmp _main
 .space 59,0 # BPB area that may be written to by BIOS
 _main:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - setup
-#mov %dl,osca_drv_b # save boot drive
+#mov %dl,osca_boot_drive # save boot drive
 xor %bx,%bx # clear bx
 mov %bx,%ds # data segment
 mov %bx,%ss # setup stack
@@ -221,23 +224,25 @@ movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE # IRQ 8: timer 1024 Hz
 lidt idtr
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 call osca_init # calls C function
-mov osca_tsk_active,%ebx # ebx points to active task record
+mov osca_active_task,%ebx # ebx points to active task record
 # potential bug? because eflags not restored and registers in unknown state?
 mov 4(%ebx),%esp # restore stack pointer
 sti # enables interrupts after next instruction
 jmp *(%ebx) # jmp to first task
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
 .align 4
-#osca_drv_b:.byte 0x00 # boot drive
 osca_tmr_lo:.long 0x00000000 # 1024 Hz tick lower
 osca_tmr_hi:.long 0x00000000 # 1024 Hz tick higher
-osca_tsk_active:.long tsk # pointer to first task record (tsk0)
+osca_active_task:.long tasks # pointer to first task record (tsk0)
+osca_tasks:.long tasks # pointer to tasks table
+osca_tasks_end:.long tasks_end # pointer to end of tasks table
 isr_tmr_eax:.long 0x00000000 # used in isr_tmr
 isr_tmr_ebx:.long 0x00000000 # ...
 isr_tmr_esp:.long 0x00000000 # ...
 isr_tmr_eip:.long 0x00000000 # ...
 isr_tmr_eflags:.long 0x00000000 #...
 osca_key:.byte 0x00 # last key event
+#osca_boot_drive:.byte 0x00 # boot drive
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partitions
 .space _start+436-.,0
 .space 10,0 # partition table
@@ -256,7 +261,7 @@ osca_yield: # switches to next task
   # start task switching
   mov %eax,isr_tmr_eax # save eax,ebx
   mov %ebx,isr_tmr_ebx # eax,ebx will be used as scratch
-  mov osca_tsk_active,%ebx # point ebx to active task
+  mov osca_active_task,%ebx # point ebx to active task
   mov 4(%esp),%eax # get eip from stack
   mov %eax,(%ebx) # save to task.eip
   mov (%esp),%eax # get eflags from stack
@@ -272,11 +277,11 @@ osca_yield: # switches to next task
   mov isr_tmr_ebx,%eax # save proper ebx
   mov %eax,32(%ebx) # to task.ebx
   add $48,%ebx # next task
-  cmp $tsk_eot,%ebx # if last
+  cmp $tasks_end,%ebx # if last
   jl lbl5
-    mov $tsk,%ebx # roll
+    mov $tasks,%ebx # roll
   lbl5:
-  mov %ebx,osca_tsk_active # save pointer to task record
+  mov %ebx,osca_active_task # save pointer to task record
   mov 4(%ebx),%esp # restore esp
   mov %esp,isr_tmr_esp # save esp, will be used as scratch
   mov (%ebx),%esp # restore eip
@@ -326,7 +331,7 @@ switch_task:
   # start task switching
   mov %eax,isr_tmr_eax # save eax,ebx
   mov %ebx,isr_tmr_ebx # eax,ebx will be used as scratch
-  mov osca_tsk_active,%ebx # point ebx to active task
+  mov osca_active_task,%ebx # point ebx to active task
   # stack is ..., EFLAGS, CS, EIP
   mov (%esp),%eax # get eip before irq from stack
   mov %eax,(%ebx) # save to task.eip
@@ -343,11 +348,11 @@ switch_task:
   mov isr_tmr_ebx,%eax # save proper ebx
   mov %eax,32(%ebx) # to task.ebx
   add $48,%ebx # next task
-  cmp $tsk_eot,%ebx # if last
+  cmp $tasks_end,%ebx # if last
   jl lbl4
-    mov $tsk,%ebx # roll
+    mov $tasks,%ebx # roll
   lbl4:
-  mov %ebx,osca_tsk_active # save pointer to task record
+  mov %ebx,osca_active_task # save pointer to task record
   mov 4(%ebx),%esp # restore esp
   mov %esp,isr_tmr_esp # save esp, will be used as scratch
   mov (%ebx),%esp # restore eip
@@ -422,13 +427,13 @@ isr_err:
 .space sector2+512-.,0
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - tasks
 sector3: # 0x8000 tasks state table
-tsk: #  eip,  esp,       eflags,    bits,       edi        esi        ebp        esp0       ebx        edx        ecx        eax
-  .long tsk0 ,0x000afa00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-  .long tsk1 ,0x000af780,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+tasks: #  eip,  esp,       eflags,    bits,       edi        esi        ebp        esp0       ebx        edx        ecx        eax
+  .long tsk0 ,0x000afa00,0x00000000,0x00000001, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+#  .long tsk1 ,0x000af780,0x00000000,0x00000002, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
 #  .long tsk2 ,0x000af500,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk3 ,0x000af280,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-  .long tsk4 ,0x000af000,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-tsk_eot:
+  .long tsk3 ,0x000af280,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+  .long tsk4 ,0x000af000,0x00000000,0x00000004, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+tasks_end:
 #  .long tsk5 ,0x000aed80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
 #  .long tsk6 ,0x000aeb00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
 #  .long tsk7 ,0x000ae880,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000

@@ -7,6 +7,8 @@
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] void tsk0(){
 	using namespace osca;
+	const TaskId taskId=osca_active_task->get_id();
+
 	PrinterToBitmap pb{vga13h.bmp()};
 
 	pb.pos({30,1});
@@ -36,7 +38,7 @@ extern "C" [[noreturn]] void tsk0(){
 	while(true){
 		// handle keyboard events
 		while(true){
-			if(keyboard_focus!=tsk0)
+			if(task_focused_id!=taskId)
 				break;
 			const unsigned char sc=keyboard.get_next_scan_code();
 			if(!sc)
@@ -90,7 +92,7 @@ extern "C" [[noreturn]] void tsk3(){
 
 #include"Game.h"
 extern "C" void tsk4(){
-	osca::Game::start(tsk4);
+	osca::Game::start();
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

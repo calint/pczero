@@ -166,10 +166,9 @@ namespace osca{
 	};
 	extern Keyboard keyboard;
 	Keyboard keyboard; // global initialized by osca_init
-
-	// ? temporary hack
-	inline static TaskFuncPtr keyboard_focus{tsk4};
 	inline static bool keyboard_ctrl_pressed{false};
+	inline static Task*task_focused{nullptr};
+	inline static TaskId task_focused_id{0};
 } // end namespace
 
 // called by osca from the keyboard interrupt
@@ -178,15 +177,15 @@ extern "C" void osca_keyb_ev(){
 	// on screen
 	*reinterpret_cast<int*>(0xa0000+4)=osca_key;
 
-	// ? temporary hack
 	if(osca_key==0x1d)keyboard_ctrl_pressed=true;
 	else if(osca_key==0x9d)keyboard_ctrl_pressed=false;
+	// ? implement better task focus switch
 	if(keyboard_ctrl_pressed&&osca_key==0xf){ // ctrl+tab
-		if(keyboard_focus==tsk0){
-			keyboard_focus=tsk4;
-		}else{
-			keyboard_focus=tsk0;
+		task_focused++;
+		if(task_focused==osca_tasks_end){
+			task_focused=osca_tasks;
 		}
+		task_focused_id=task_focused->get_id();
 		return;
 	}
 
@@ -214,6 +213,8 @@ extern "C" void osca_init(){
 	out=PrinterToVga{};
 	out.pos({1,2}).fg(2);
 	keyboard=Keyboard{};
+	task_focused=osca_active_task;
+	task_focused_id=task_focused->get_id();
 	Heap::init_statics({Address(0x10'0000),320*100},World::nobjects_max);
 	Heap::clear_buffer(0x12);
 	Heap::clear_heap_entries(3,5);
