@@ -7,7 +7,20 @@
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] void tsk0(){
 	using namespace osca;
+	unsigned eax=unsigned(osca_get_eax());
+	unsigned esi=unsigned(osca_get_esi());
+	unsigned edi=unsigned(osca_get_edi());
+	unsigned edx=unsigned(osca_get_edx());
+	unsigned ecx=unsigned(osca_get_ecx());
+	unsigned ebx=unsigned(osca_get_ebx());
+//	err.p_hex_32b(eax).spc();
+//	err.p_hex_32b(ebx).spc();
+//	err.p_hex_32b(ecx).spc();
+//	err.p_hex_32b(edx).spc();
+//	err.p_hex_32b(esi).spc();
+//	err.p_hex_32b(edi).spc();
 	const TaskId taskId=osca_active_task->get_id();
+	const char*hello=reinterpret_cast<const char*>(esi);
 
 	PrinterToBitmap pb{vga13h.bmp()};
 
@@ -33,7 +46,7 @@ extern "C" [[noreturn]] void tsk0(){
 //	pb.fg(8).p(' ').p_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
 //	pb.pos({5,7}).fg(2).p('_');
-	pb.pos({2,3}).fg(3).p('_');
+	pb.pos({2,3}).fg(3).p(hello).nl().p('_');
 
 	while(true){
 		// handle keyboard events

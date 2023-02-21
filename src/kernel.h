@@ -8,12 +8,13 @@ extern "C" [[noreturn]] void tsk3();
 extern "C" [[noreturn]] void tsk4();
 
 namespace osca{
+
 struct Task osca_tasks[]{
-	//        eip   esp        eflags bits   id   edi esi ebp esp0 ebx edx ecx eax
-	{Register(tsk4),0x000af000,0     ,0b11  ,4   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0  },
-	{Register(tsk0),0x000afa00,0     ,0b11  ,0   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0  },
-	{Register(tsk3),0x000af280,0     ,0b10  ,3   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0  },
-	{Register(tsk2),0x000af500,0     ,0b00  ,2   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0  },
+	//        eip   esp        eflags bits   id   edi  esi  ebp  esp0 ebx  edx  ecx  eax
+	{Register(tsk4),0x000af000,0     ,0b11  ,4   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
+	{Register(tsk0),0x000afa00,0     ,0b11  ,0   ,0xde,Register("kernel osca"),0xeb,0   ,0xb,0xd,0xc,0xa},
+	{Register(tsk3),0x000af280,0     ,0b10  ,3   ,0   ,0        ,0   ,0   ,0   ,0   ,0   ,0   },
+	{Register(tsk2),0x000af500,0     ,0b00  ,2   ,0   ,0        ,0   ,0   ,0   ,0   ,0   ,0   },
 };
 Task*osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
 
