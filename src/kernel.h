@@ -33,7 +33,7 @@ class Heap final{
 	inline static HeapEntry*entry_free_end_{nullptr};
 	inline static SizeCount nentries_max_{0};
 public:
-	static auto init_statics(const Data&d,const SizeCount nentries_max){
+	static auto init_statics(const Data&d,const SizeCount nentries_max)->void{
 		d_=d;
 		ptr_=reinterpret_cast<char*>(d.address());
 		nentries_max_=nentries_max;
@@ -95,7 +95,7 @@ public:
 		return reinterpret_cast<void*>(p);
 	}
 	// called by operator 'delete'
-	static auto free(void*ptr){
+	static auto free(void*ptr)->void{
 //			err.p_hex_32b(reinterpret_cast<unsigned>(ptr)).spc();
 		// find the allocated memory in the used list
 		HeapEntry*hep=entry_used_start_;
@@ -126,8 +126,8 @@ public:
 		err.p("Heap.free: 2");
 		osca_halt();
 	}
-	static auto clear_buffer(const char b=0){d_.clear(b);}
-	static auto clear_heap_entries(char free_area=0,char used_area=0){
+	static auto clear_buffer(const char b=0)->void{d_.clear(b);}
+	static auto clear_heap_entries(char free_area=0,char used_area=0)->void{
 		const SizeBytes hes=SizeBytes(sizeof(HeapEntry));
 		pz_memset(entry_free_start_,free_area,nentries_max_*hes);
 		pz_memset(entry_used_start_,used_area,nentries_max_*hes);
