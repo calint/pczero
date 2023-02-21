@@ -26,8 +26,6 @@
 .global osca_tmr_hi # 1024 Hz timer high bits
 .global osca_yield # export function
 .global osca_active_task # pointer to active task
-.global osca_tasks # pointer to start of tasks list
-.global osca_tasks_end # pointer to end of tasks list
 .global _start # export entry point
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - bpb
 .code16 # boot in 16 bit mode
@@ -234,8 +232,6 @@ jmp *(%ebx) # jmp to first task
 osca_tmr_lo:.long 0x00000000 # 1024 Hz tick lower
 osca_tmr_hi:.long 0x00000000 # 1024 Hz tick higher
 osca_active_task:.long tasks # pointer to first task record (tsk0)
-osca_tasks:.long tasks # pointer to tasks table
-osca_tasks_end:.long tasks_end # pointer to end of tasks table
 isr_tmr_eax:.long 0x00000000 # used in isr_tmr
 isr_tmr_ebx:.long 0x00000000 # ...
 isr_tmr_esp:.long 0x00000000 # ...
@@ -277,7 +273,7 @@ osca_yield: # switches to next task
   mov isr_tmr_ebx,%eax # save proper ebx
   mov %eax,32(%ebx) # to task.ebx
   add $48,%ebx # next task
-  cmp $tasks_end,%ebx # if last
+  cmp tasks_end,%ebx # if last
   jl lbl5
     mov $tasks,%ebx # roll
   lbl5:
@@ -348,7 +344,7 @@ switch_task:
   mov isr_tmr_ebx,%eax # save proper ebx
   mov %eax,32(%ebx) # to task.ebx
   add $48,%ebx # next task
-  cmp $tasks_end,%ebx # if last
+  cmp tasks_end,%ebx # if last
   jl lbl4
     mov $tasks,%ebx # roll
   lbl4:
@@ -426,14 +422,14 @@ isr_err:
   jmp lbl3
 .space sector2+512-.,0
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - tasks
-sector3: # 0x8000 tasks state table
-tasks: #  eip,  esp,       eflags,    bits,       edi        esi        ebp        esp0       ebx        edx        ecx        eax
-  .long tsk0 ,0x000afa00,0x00000000,0x00000001, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk1 ,0x000af780,0x00000000,0x00000002, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk2 ,0x000af500,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-  .long tsk3 ,0x000af280,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-  .long tsk4 ,0x000af000,0x00000000,0x00000004, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-tasks_end:
+#sector3: # 0x8000 tasks state table
+#tasks: #  eip,  esp,       eflags,    bits,       edi        esi        ebp        esp0       ebx        edx        ecx        eax
+#  .long tsk0 ,0x000afa00,0x00000000,0x00000001, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+##  .long tsk1 ,0x000af780,0x00000000,0x00000002, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+##  .long tsk2 ,0x000af500,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+#  .long tsk3 ,0x000af280,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+#  .long tsk4 ,0x000af000,0x00000000,0x00000004, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+#tasks_end:
 #  .long tsk5 ,0x000aed80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
 #  .long tsk6 ,0x000aeb00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
 #  .long tsk7 ,0x000ae880,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
@@ -484,4 +480,4 @@ tasks_end:
 #cli
 #hlt
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
-.space sector3+512-.,0
+#.space sector3+512-.,0

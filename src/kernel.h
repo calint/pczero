@@ -10,6 +10,16 @@ extern "C" [[noreturn]] void tsk3();
 extern "C" [[noreturn]] void tsk4();
 
 namespace osca{
+	extern "C" struct Task tasks[]; // used by osca.S
+	extern "C" struct Task*tasks_end; // used by osca.S
+	struct Task tasks[]{
+		//        eip   esp        eflags bits edi esi ebp esp0 ebx edx ecx eax
+		{Register(tsk4),0x000af000,0     ,3   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
+		{Register(tsk0),0x000afa00,0     ,1   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
+		{Register(tsk3),0x000af280,0     ,2   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0},
+	};
+	Task*tasks_end=tasks+sizeof(tasks)/sizeof(Task);
+
 	struct HeapEntry final{
 		void*ptr{nullptr}; // pointer to memory
 		unsigned size_bytes{0}; // size of allocated memory in bytes
@@ -127,20 +137,7 @@ namespace osca{
 			pz_memset(entry_used_start_,used_area,nentries_max_*hes);
 		}
 	};
-}
-// called by C++ to allocate and free memory
-void operator delete(void*ptr,unsigned size)noexcept;
-void operator delete[](void*ptr,unsigned size)noexcept;
 
-void*operator new[](unsigned count){return osca::Heap::alloc(count);}
-void*operator new(unsigned count){return osca::Heap::alloc(count);}
-void operator delete(void*ptr)noexcept{osca::Heap::free(ptr);}
-void operator delete(void*ptr,unsigned size)noexcept{osca::Heap::free(ptr);}
-void operator delete[](void*ptr)noexcept{osca::Heap::free(ptr);}
-void operator delete[](void*ptr,unsigned size)noexcept{osca::Heap::free(ptr);}
-
-namespace osca{
-	using TaskFuncPtr=void(*)();
 	class Keyboard{
 		unsigned char buf[2<<4]{}; // minimum size 2 and a power of 2, max size 256
 		unsigned char s{0}; // next event index
@@ -169,56 +166,66 @@ namespace osca{
 	inline static bool keyboard_ctrl_pressed{false};
 	inline static Task*task_focused{nullptr};
 	inline static TaskId task_focused_id{0};
-} // end namespace
 
-// called by osca from the keyboard interrupt
-extern "C" void osca_keyb_ev(){
-	using namespace osca;
-	// on screen
-	*reinterpret_cast<int*>(0xa0000+4)=osca_key;
+	// called by osca before starting tasks
+	// initiates globals
+	extern "C" void osca_init(){
+		using namespace osca;
+		// green dot on screen (top left)
+		*reinterpret_cast<int*>(0xa0000)=0x02;
 
-	if(osca_key==0x1d)keyboard_ctrl_pressed=true;
-	else if(osca_key==0x9d)keyboard_ctrl_pressed=false;
-	// ? implement better task focus switch
-	if(keyboard_ctrl_pressed&&osca_key==0xf){ // ctrl+tab
-		task_focused++;
-		if(task_focused==osca_tasks_end){
-			task_focused=osca_tasks;
-		}
+		// set 64 KB of 0x11 starting at 1 MB
+		pz_memset(Address(0x10'0000),0x11,0x1'0000);
+
+		// initiate statics
+		vga13h=Vga13h{};
+		err=PrinterToVga{};
+		err.pos({1,1}).fg(4);
+		out=PrinterToVga{};
+		out.pos({1,2}).fg(2);
+		keyboard=Keyboard{};
+		task_focused=&tasks[0];
 		task_focused_id=task_focused->get_id();
-		return;
+		Heap::init_statics({Address(0x10'0000),320*100},World::nobjects_max);
+		Heap::clear_buffer(0x12);
+		Heap::clear_heap_entries(3,5);
+		Object::init_statics();
+		PhysicsState::init_statics();
+		PhysicsState::clear_buffer(1);
 	}
+	// called by osca from the keyboard interrupt
+	extern "C" void osca_keyb_ev(){
+		using namespace osca;
+		// on screen
+		*reinterpret_cast<int*>(0xa0000+4)=osca_key;
 
-	// to keyboard handler
-	keyboard.on_key(osca_key);
+		if(osca_key==0x1d)keyboard_ctrl_pressed=true;
+		else if(osca_key==0x9d)keyboard_ctrl_pressed=false;
+		// ? implement better task focus switch
+		if(keyboard_ctrl_pressed&&osca_key==0xf){ // ctrl+tab
+			task_focused++;
+			if(task_focused==tasks_end){
+				task_focused=tasks;
+			}
+			task_focused_id=task_focused->get_id();
+			return;
+		}
 
-//	static unsigned char*p=reinterpret_cast<unsigned char*>(0xa0000+320*49+100);
-//	*p++=osca_key;
-}
+		// to keyboard handler
+		keyboard.on_key(osca_key);
 
-// called by osca before starting tasks
-// initiates globals
-extern "C" void osca_init(){
-	using namespace osca;
-	// green dot on screen (top left)
-	*reinterpret_cast<int*>(0xa0000)=0x02;
+	//	static unsigned char*p=reinterpret_cast<unsigned char*>(0xa0000+320*49+100);
+	//	*p++=osca_key;
+	}
+} // end namespace osca
 
-	// set 64 KB of 0x11 starting at 1 MB
-	pz_memset(Address(0x10'0000),0x11,0x1'0000);
+// called by C++ to allocate and free memory
+void operator delete(void*ptr,unsigned size)noexcept;
+void operator delete[](void*ptr,unsigned size)noexcept;
 
-	// initiate statics
-	vga13h=Vga13h{};
-	err=PrinterToVga{};
-	err.pos({1,1}).fg(4);
-	out=PrinterToVga{};
-	out.pos({1,2}).fg(2);
-	keyboard=Keyboard{};
-	task_focused=osca_active_task;
-	task_focused_id=task_focused->get_id();
-	Heap::init_statics({Address(0x10'0000),320*100},World::nobjects_max);
-	Heap::clear_buffer(0x12);
-	Heap::clear_heap_entries(3,5);
-	Object::init_statics();
-	PhysicsState::init_statics();
-	PhysicsState::clear_buffer(1);
-}
+void*operator new[](unsigned count){return osca::Heap::alloc(count);}
+void*operator new(unsigned count){return osca::Heap::alloc(count);}
+void operator delete(void*ptr)noexcept{osca::Heap::free(ptr);}
+void operator delete(void*ptr,unsigned size)noexcept{osca::Heap::free(ptr);}
+void operator delete[](void*ptr)noexcept{osca::Heap::free(ptr);}
+void operator delete[](void*ptr,unsigned size)noexcept{osca::Heap::free(ptr);}
