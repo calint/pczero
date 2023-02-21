@@ -46,4 +46,4 @@ extern "C" volatile const unsigned osca_tmr_hi;
 // interrupts due to most time being spent in non-interruptable
 // task switching code
 extern "C" void osca_yield();
-}
+} // end namespace osca

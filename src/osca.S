@@ -178,8 +178,13 @@ mov $0x01,%al
 out %al,$0x21
 out %al,$0xa1 # done
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - irq 8 timer
+# disable system timer (IRQ 0)
+# https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interrupt_Controller
+in $0x21,%al
+or $1,%al
+out %al,$0x21
 # disable the Non-Maskable Interrupt (NMI) before programming RTC
-# this interrupt happens when there is a critical hardware failure
+#   NMI happens when there is a critical hardware failure
 # https://wiki.osdev.org/Non_Maskable_Interrupt
 in $0x70,%al
 or $0x80,%al
@@ -216,8 +221,8 @@ lbl2:
 loop lbl2
 # setup IRQ 0,1,8. keyboard, system timer and RTC timer
 #  only the lower offset set, handlers within 64K
-movw $isr_tck,IDT+(32+0)*IDT_ENTRY_SIZE # IRQ 0: keyboard
-movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE # IRQ 1: timer 18.2 Hz
+#movw $isr_tck,IDT+(32+0)*IDT_ENTRY_SIZE # IRQ 0: timer 18.2 Hz
+movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE # IRQ 1: keyboard
 movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE # IRQ 8: timer 1024 Hz
 lidt idtr
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
@@ -305,7 +310,7 @@ osca_yield: # switches to next task
 .align 4
 isr_tmr:
   cli # disable interrupts
-  incl 0xa0000+320-12 # on screen
+  incl 0xa0000+320-4 # on screen
   incl osca_tmr_lo     # increase lower 32 bits ticker
   adcl $0,osca_tmr_hi  # add carry to upper 32 bits
   push %eax
@@ -385,16 +390,16 @@ switch_task:
   sti # enables interrupts after next instruction
   jmp *isr_tmr_eip # jmp to restored eip
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 18.2Hz timer
-.align 4
-isr_tck:
-  cli # disable interrupts
-  incl 0xa0000+320-4 # on screen, top right corner
-  push %ax # ack irq
-  mov $0x20,%al
-  out %al,$0x20
-  pop %ax
-  sti # enables interrupts after next instruction
-  iret
+#.align 4
+#isr_tck:
+#  cli # disable interrupts
+#  incl 0xa0000+320-4 # on screen, top right corner
+#  push %ax # ack irq
+#  mov $0x20,%al
+#  out %al,$0x20
+#  pop %ax
+#  sti # enables interrupts after next instruction
+#  iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ikbd
 .align 4
 isr_kbd:
