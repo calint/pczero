@@ -1,6 +1,5 @@
 #pragma once
 namespace osca{
-//using TaskBits=unsigned;
 using TaskBits=unsigned short;
 using TaskId=unsigned short;
 using Register=int;
@@ -8,7 +7,6 @@ struct Task{
 	Register eip{0};
 	Register esp{0};
 	Register eflags{0};
-//	TaskBits bits{0};
 	TaskBits bits{0};
 	TaskId id{0};
 	Register edi{0};
