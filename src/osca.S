@@ -243,9 +243,7 @@ osca_active_task:.long osca_tasks # pointer to first task record (tsk0)
 tmp_eax:.long 0x00000000 # used in osca_yield and isr_tmr
 tmp_ebx:.long 0x00000000 # ...
 tmp_ecx:.long 0x00000000 # ...
-tmp_esp:.long 0x00000000 # ...
 tmp_eip:.long 0x00000000 # ...
-tmp_eflags:.long 0x00000000 #...
 osca_key:.byte 0x00 # last key event
 #osca_boot_drive:.byte 0x00 # boot drive
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partitions
@@ -295,20 +293,16 @@ osca_yield_next_task:
   mov tmp_ebx,%ebx # restore ebx
   mov tmp_ecx,%ecx # restore ecx
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
-  # restore task pointed by ecx
+    # restore task pointed by ecx
   mov osca_active_task,%ecx
-  mov 4(%ecx),%esp # restore esp
-  mov %esp,tmp_esp # save esp, will be used as scratch
   mov (%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
-  mov 8(%ecx),%esp # get task.eflags
-  mov %esp,tmp_eflags # save to restore later
   mov %ecx,%esp # restore gprs
   add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  mov tmp_esp,%esp # restore task esp
-  push tmp_eflags # restore eflags
-  popf                # ..
+  sub $TASK_STRUCT_SIZE-8,%esp # position stack pointer at task.eflags
+  popf # restore flags, no op that modifies flags after this
+  mov -8(%esp),%esp # restore task esp
   sti # enables interrupts after next instruction
   jmp *tmp_eip # jmp to restored eip
 
@@ -375,18 +369,14 @@ isr_tmr_next_task:
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
   # restore task pointed by ecx
   mov osca_active_task,%ecx
-  mov 4(%ecx),%esp # restore esp
-  mov %esp,tmp_esp # save esp, will be used as scratch
   mov (%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
-  mov 8(%ecx),%esp # get task.eflags
-  mov %esp,tmp_eflags # save to restore later
   mov %ecx,%esp # restore gprs
   add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  mov tmp_esp,%esp # restore task esp
-  push tmp_eflags # restore eflags
-  popf                # ..
+  sub $TASK_STRUCT_SIZE-8,%esp # position stack pointer at task.eflags
+  popf # restore flags, no op that modifies flags after this
+  mov -8(%esp),%esp # restore task esp
   # https://forum.osdev.org/viewtopic.php?f=1&t=15526&start=0
   # https://www.compuphase.com/int70.txt
   # "When an IRQ 8 fires and interrupt 70h is called, status register C holds a bit
