@@ -120,38 +120,23 @@ jmp $8,$protected_mode # jmp and flush
 gdt:.quad 0x0000000000000000 #0x00: reserved and unused
     .quad 0x00cf9a000000ffff #0x08: 32b code 4g pl0 rx
     .quad 0x00cf92000000ffff #0x10: 32b data 4g pl0 rw
-#    .quad 0x009f9a000000ffff #0x18: 16b code 1m rx
-#    .quad 0x009f92000000ffff #0x20: 16b data 1m rw
 gdt_end:
 # global descriptor table register
-#.align 8
 gdtr:.word gdt_end-gdt-1 # limit of table (size of table - 1)
      .long gdt           # address
-# interrupt vector table (16 bit mode)
-#.align 8
-#ivtr:.word 0x03ff     # limit (size of table - 1)
-#     .long 0x00000000 # address
-# interrupt descriptor table register (32 bit protected mode)
-#.align 8
+# interrupt descriptor table register
 idtr:.word IDT_ENTRY_COUNT*IDT_ENTRY_SIZE-1 # limit of table
      .long IDT                              # idt address
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 32b code
 protected_mode:
 .code32
-#.align 4
+.align 4
 mov $0x10,%ax # offset in gdt, the data segment
 mov %ax,%ds
 mov %ax,%es
 mov %ax,%fs
 mov %ax,%gs
 mov %ax,%ss
-#xor %eax,%eax
-#xor %ebx,%ebx
-#xor %ecx,%ecx
-#xor %edx,%edx
-#xor %edi,%edi
-#xor %esi,%esi
-#xor %ebp,%ebp
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - a20
 # enable access to odd megs
 # https://wiki.osdev.org/A20_Line
@@ -224,14 +209,12 @@ lbl2:
 loop lbl2
 # setup IRQ 0,1,8. keyboard, system timer and RTC timer
 #  only the lower offset set, handlers within 64K
-#movw $isr_tck,IDT+(32+0)*IDT_ENTRY_SIZE # IRQ 0: timer 18.2 Hz
 movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE # IRQ 1: keyboard
 movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE # IRQ 8: timer 1024 Hz
 lidt idtr
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 call osca_init # calls C function
 mov osca_active_task,%ebx # ebx points to active task record
-# potential bug? because eflags not restored and registers in unknown state?
 mov 4(%ebx),%esp # restore stack pointer
 sti # enables interrupts after next instruction
 jmp *(%ebx) # jmp to first task
@@ -245,7 +228,6 @@ tmp_ebx:.long 0x00000000 # ...
 tmp_ecx:.long 0x00000000 # ...
 tmp_eip:.long 0x00000000 # ...
 osca_key:.byte 0x00 # last key event
-#osca_boot_drive:.byte 0x00 # boot drive
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partitions
 .space _start+436-.,0
 .space 10,0 # partition table
@@ -333,7 +315,7 @@ isr_tmr:
   adcl $0,osca_tmr_hi # add carry to upper 32 bits
   push %eax
   mov osca_tmr_lo,%eax # switch task every 8'th tick
-  and $FREQ_DIV_AND,%eax # 1024/8 Hz (running at 1024 Hz hangs Asus Zenbook)
+  and $FREQ_DIV_AND,%eax # 1024/8 Hz
   pop %eax
   jnz isr_tmr_acknowledge_and_return # if no task switch
   # start task switching
@@ -415,17 +397,6 @@ isr_tmr_acknowledge_and_return:
   pop %ax # restore %ax
   sti # enables interrupts after next instruction
   iret
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 18.2Hz timer
-#.align 4
-#isr_tck:
-#  cli # disable interrupts
-#  incl 0xa0000+320-4 # on screen, top right corner
-#  push %ax # ack irq
-#  mov $0x20,%al
-#  out %al,$0x20
-#  pop %ax
-#  sti # enables interrupts after next instruction
-#  iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ikbd
 .align 4
 isr_kbd:
@@ -452,63 +423,4 @@ isr_err:
     incl 0xa0004
   jmp lbl3
 .space sector2+512-.,0
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - tasks
-#sector3: # 0x8000 tasks state table
-#tasks: #  eip,  esp,       eflags,    bits,       edi        esi        ebp        esp0       ebx        edx        ecx        eax
-#  .long tsk0 ,0x000afa00,0x00000000,0x00000001, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-##  .long tsk1 ,0x000af780,0x00000000,0x00000002, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-##  .long tsk2 ,0x000af500,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk3 ,0x000af280,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk4 ,0x000af000,0x00000000,0x00000004, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#tasks_end:
-#  .long tsk5 ,0x000aed80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk6 ,0x000aeb00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk7 ,0x000ae880,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-
-#  .long tsk8 ,0x000ae600,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk9 ,0x000ae380,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk10,0x000ae100,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk11,0x000ade80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk12,0x000adc00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk13,0x000ad980,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk14,0x000ad700,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk15,0x000ad480,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk16,0x000ad200,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk17,0x000acf80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk18,0x000acd00,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-#  .long tsk19,0x000aca80,0x00000000,0x00000000, 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - shutdown
-#.align 16,0x90
-#mode16: # protected mode to 16b mode
-#.code16
-#mov $0x20,%ax
-#mov %ax,%ds
-#mov %ax,%ss
-#mov $0x7c00,%sp
-#lidt ivtr
-#mov %cr0,%eax
-#and $0xfe,%al
-#mov %eax,%cr0
-#jmp $0x0,$rm
-#.align 16,0x90
-#rm:
-#xor %ax,%ax
-#mov %ax,%ds
-#mov %ax,%ss
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - save
-## save 2nd sector
-#mov $0x0301,%ax # command 3, 1 sector
-#mov $0x0002,%cx # track 0, sector 2
-#xor %dh,%dh # head 0
-#mov osca_drv_b,%dl # saved boot drive
-#xor %bx,%bx # from es:bx (0:0x7e00)
-#mov %bx,%es
-#mov $0x7e00,%bx
-#int $0x13
-#jc 8f # if error
-# display save ack?
-#8:
-#cli
-#hlt
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
-#.space sector3+512-.,0
