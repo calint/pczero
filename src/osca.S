@@ -199,7 +199,7 @@ lbl2:
     movw $0x0000,6(%ebx)    # offfset 16..31
     add $IDT_ENTRY_SIZE,%bx # increment by the size of the entry
 loop lbl2
-# setup IRQ 0,1,8. keyboard, system timer and RTC timer
+# setup IRQ 1 (keyboard) and IRQ 8 (RTC timer)
 #  only the lower offset set, handlers within 64K
 movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE # IRQ 1: keyboard
 movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE # IRQ 8: timer 1024 Hz
