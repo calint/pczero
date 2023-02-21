@@ -141,7 +141,7 @@ public:
 		// check buffer overrun
 		if(next_free==mem_end){
 			err.p("PhysicsState:e1");
-			osca_halt();
+			osca_hang();
 		}
 		PhysicsState*p=next_free;
 		next_free++;
@@ -244,7 +244,7 @@ public:
 		// allocate index in all[] from free slots
 		if(!free_ixes_i){
 			err.p("out of free slots");
-			osca_halt();
+			osca_hang();
 		}
 		// get the next free slot
 		Object**obj_ix_=free_ixes[free_ixes_i]; // pointer to element in all[]
@@ -598,7 +598,7 @@ private:
 		Object*o=used_ixes[i].obj;
 		if(!o){
 			err.p("null-pointer-exception [e1]");
-			osca_halt();
+			osca_hang();
 		}
 		return o;
 	}

@@ -59,6 +59,7 @@ extern "C" [[noreturn]] void tsk0(){
 			pb.backspace().p(ch).p('_');
 		}
 		osca_yield();
+//		osca_halt();
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

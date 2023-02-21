@@ -42,7 +42,7 @@ public:
 		entry_used_start_=static_cast<HeapEntry*>(d.end())-nentries_max;
 		if(reinterpret_cast<char*>(entry_used_start_)<ptr_){
 			err.p("Heap.init_statics:1");
-			osca_halt();
+			osca_hang();
 		}
 		entry_used_next_=entry_used_start_;
 		entry_used_end_=entry_used_start_+nentries_max;
@@ -67,7 +67,7 @@ public:
 				// move to used entries
 				if(entry_used_next_>=entry_used_end_){
 					err.p("Heap.alloc: 1");
-					osca_halt();
+					osca_hang();
 				}
 				*entry_used_next_=*he;
 				entry_used_next_++;
@@ -84,11 +84,11 @@ public:
 		ptr_+=size_bytes;
 		if(ptr_>ptr_lim_){
 			err.p("Heap.alloc: 2");
-			osca_halt();
+			osca_hang();
 		}
 		if(entry_used_next_>=entry_used_end_){
 			err.p("Heap.alloc: 3");
-			osca_halt();
+			osca_hang();
 		}
 		// write to used list
 		*entry_used_next_={p,size_bytes};
@@ -106,7 +106,7 @@ public:
 				// copy entry from used to free
 				if(entry_free_next_>=entry_free_end_){
 					err.p("Heap.free: 1");
-					osca_halt();
+					osca_hang();
 				}
 				*entry_free_next_=*hep;
 				entry_free_next_++;
@@ -125,7 +125,7 @@ public:
 		}
 		// did not find the allocated memory. probably a double delete
 		err.p("Heap.free: 2");
-		osca_halt();
+		osca_hang();
 	}
 	static auto clear_buffer(const char b=0)->void{d_.clear(b);}
 	static auto clear_heap_entries(char free_area=0,char used_area=0)->void{

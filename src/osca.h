@@ -37,7 +37,10 @@ extern "C" struct Task osca_tasks[];
 extern "C" struct Task*osca_tasks_end;
 
 // halts the system
-inline void osca_halt(){asm("cli;hlt");}
+inline void osca_hang(){asm("cli;hlt");}
+
+// rest of time slice is spent in halt
+inline void osca_halt(){asm("hlt");}
 
 // called from osca.S before starting tasks
 extern "C" void osca_init();
