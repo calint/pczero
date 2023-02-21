@@ -287,7 +287,7 @@ osca_yield_next_task:
   # save task pointed by ebx
   pop 8(%ebx) # pop eflags to task.eflags
   pop (%ebx) # pop eip to task.eip
-  mov %esp,4(%ebx) # save stack pointer before call to task.esp
+  mov %esp,4(%ebx) # save stack pointer as it was before call to task.esp
   mov %ebx,%esp # save gprs by preparing esp and then pusha
   add $TASK_STRUCT_SIZE,%esp # move to end of task record
   mov %ecx,osca_active_task # save pointer to next task record
@@ -363,9 +363,9 @@ isr_tmr_next_task:
   # switch to task pointed by ecx
   # stack is ..., EFLAGS, CS, EIP
   pop (%ebx) # pop eip to task.eip
-  pop 8(%ebx) # pop cs
+  add $4,%esp # skip cs
   pop 8(%ebx) # pop eflags to task.eflags
-  mov %esp,4(%ebx) # save stack pointer before irq to task.esp
+  mov %esp,4(%ebx) # save stack pointer as it was before irq to task.esp
   mov %ebx,%esp # save gprs by preparing esp and then pusha
   add $TASK_STRUCT_SIZE,%esp # move to end of task record
   mov %ecx,osca_active_task # save pointer to next task record
