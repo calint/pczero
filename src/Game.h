@@ -589,6 +589,8 @@ auto Game::create_boss()->void{
 
 	// start task
 	while(true){
+//		*reinterpret_cast<unsigned*>(0xa'0000+320*2+160)=osca_tmr_lo;
+
 		// clear game area
 		pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
 

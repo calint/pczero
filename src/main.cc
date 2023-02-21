@@ -11,29 +11,29 @@ extern "C" [[noreturn]] void tsk0(){
 
 	PrinterToBitmap pb{vga13h.bmp()};
 
-	pb.pos({30,1});
-	for(int i=0;i<16;i++){
-		pb.p_hex(i);
-	}
+//	pb.pos({30,1});
+//	for(int i=0;i<16;i++){
+//		pb.p_hex(i);
+//	}
 	pb.fg(5).pos({13,2});
 	for(char i='0';i<='9';i++){
-		pb.p(i);
-	}
-	pb.fg(6);
-	for(char i='a';i<='z';i++){
 		pb.p(i);
 	}
 	pb.fg(7).pos({13+10,3});
 	for(char i='A';i<='Z';i++){
 		pb.p(i);
 	}
+	pb.fg(6).pos({13+10,4});
+	for(char i='a';i<='z';i++){
+		pb.p(i);
+	}
 
-	pb.fg(2).pos({15,4}).p("hello world!").nl();
-	pb.fg(6).p("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
-	pb.fg(7).p(' ').p_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
+//	pb.fg(2).pos({15,4}).p("hello world!").nl();
+	pb.fg(7).pos({13+10,5}).p("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
+//	pb.fg(8).p(' ').p_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
 //	pb.pos({5,7}).fg(2).p('_');
-	pb.pos({3,3}).fg(2).p('_');
+	pb.pos({2,3}).fg(3).p('_');
 
 	while(true){
 		// handle keyboard events
@@ -58,8 +58,11 @@ extern "C" [[noreturn]] void tsk0(){
 				ch&=~0x20; // to upper case
 			pb.backspace().p(ch).p('_');
 		}
-		osca_yield();
-//		osca_halt();
+		osca_yield(); // ?! if it is only task running osca 'hangs'
+		              // because no interrupts get through due to
+		              // 'all' time spent in non-interruptable
+		              // osca_yield code
+//		osca_halt(); // pauses task until next interrupt
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -78,7 +81,7 @@ extern "C" [[noreturn]] void tsk2(){
 		Data src=Data(Address(0x7c00),kernel_size); // kernel binary
 		Data dst=Data(Address(0xa'0000+320*100),kernel_size); // on screen
 		src.to(dst);
-//		osca_yield();
+		osca_yield();
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -87,7 +90,7 @@ extern "C" [[noreturn]] void tsk3(){
 	while(true){
 		vga13h.bmp().data().pointer().offset(160).write(osca_tmr_lo);
 		asm("nop"); // ? without this the line above is optimized away by the compiler
-//		osca_yield();
+		osca_yield();
 	}
 }
 

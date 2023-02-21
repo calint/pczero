@@ -42,6 +42,9 @@ inline void osca_hang(){asm("cli;hlt");}
 // rest of time slice is spent in halt
 inline void osca_halt(){asm("hlt");}
 
+// space for interrupt to happen
+inline void osca_nop(){asm("nop");}
+
 // called from osca.S before starting tasks
 extern "C" void osca_init();
 
