@@ -1,8 +1,6 @@
 #pragma once
 #include"osca.h"
 #include"lib.h"
-#include"lib2d.h"
-#include"libge.h"
 
 extern "C" [[noreturn]] void tsk0();
 extern "C" [[noreturn]] void tsk2();
