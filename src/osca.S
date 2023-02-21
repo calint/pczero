@@ -285,13 +285,9 @@ osca_yield_next_task:
   # switch to task pointed by ecx
   # stack is ..., EIP, EFLAGS
   # save task pointed by ebx
-  mov 4(%esp),%eax # get eip before call from stack
-  mov %eax,(%ebx) # save to task.eip
-  mov (%esp),%eax # get eflags before call from stack
-  mov %eax,8(%ebx) # save to task.eflags
-  mov %esp,%eax # adjust esp to value before irq
-  add $8,%eax # skip eip,cs,eflags
-  mov %eax,4(%ebx) # save to task.esp
+  pop 8(%ebx) # pop eflags to task.eflags
+  pop (%ebx) # pop eip to task.eip
+  mov %esp,4(%ebx) # save stack pointer before call to task.esp
   mov %ebx,%esp # save gprs by preparing esp and then pusha
   add $TASK_STRUCT_SIZE,%esp # move to end of task record
   mov %ecx,osca_active_task # save pointer to next task record
@@ -366,13 +362,10 @@ isr_tmr_next_task:
   jz isr_tmr_next_task # if not 'running' get next task
   # switch to task pointed by ecx
   # stack is ..., EFLAGS, CS, EIP
-  mov (%esp),%eax # get eip before irq from stack
-  mov %eax,(%ebx) # save to task.eip
-  mov 8(%esp),%eax # get eflags before ieq from stack
-  mov %eax,8(%ebx) # save to task.eflags
-  mov %esp,%eax # adjust esp to value before irq
-  add $12,%eax # skip eip,cs,eflags
-  mov %eax,4(%ebx) # save to task.esp
+  pop (%ebx) # pop eip to task.eip
+  pop 8(%ebx) # pop cs
+  pop 8(%ebx) # pop eflags to task.eflags
+  mov %esp,4(%ebx) # save stack pointer before irq to task.esp
   mov %ebx,%esp # save gprs by preparing esp and then pusha
   add $TASK_STRUCT_SIZE,%esp # move to end of task record
   mov %ecx,osca_active_task # save pointer to next task record
