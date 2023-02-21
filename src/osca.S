@@ -262,8 +262,8 @@ sector2: # 0x7e00
 .align 4
 osca_yield: # switches to next task
   cli # disable interrupts
-  incl 0xa0000+320-12 # create output on screen
   pushf # push flags. stack is now ..., EIP, EFLAGS
+  incl 0xa0000+320-12 # create output on screen
   # start task switching
   mov %eax,isr_tmr_eax # save eax,ebx,ecx
   mov %ebx,isr_tmr_ebx # ..
@@ -294,15 +294,13 @@ osca_yield_next_task:
   mov %eax,4(%ebx) # save to task.esp
   mov %ebx,%esp # save gprs by preparing esp and then pusha
   add $TASK_STRUCT_SIZE,%esp # move to end of task record
+  mov %ecx,osca_active_task # save pointer to next task record
+  mov isr_tmr_eax,%eax # restore eax
+  mov isr_tmr_ebx,%ebx # restore ebx
+  mov isr_tmr_ecx,%ecx # restore ecx
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
-  mov isr_tmr_eax,%eax # save proper eax
-  mov %eax,44(%ebx) # to task.eax
-  mov isr_tmr_ebx,%eax # save proper ebx
-  mov %eax,32(%ebx) # to task.ebx
-  mov isr_tmr_ecx,%eax # save proper ecx
-  mov %eax,40(%ebx) # to task.ecx
-  mov %ecx,osca_active_task # save pointer to task record
   # restore task pointed by ecx
+  mov osca_active_task,%ecx
   mov 4(%ecx),%esp # restore esp
   mov %esp,isr_tmr_esp # save esp, will be used as scratch
   mov (%ecx),%esp # restore eip
@@ -377,15 +375,13 @@ isr_tmr_next_task:
   mov %eax,4(%ebx) # save to task.esp
   mov %ebx,%esp # save gprs by preparing esp and then pusha
   add $TASK_STRUCT_SIZE,%esp # move to end of task record
-  pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
+  mov %ecx,osca_active_task # save pointer to next task record
   mov isr_tmr_eax,%eax # save proper eax
-  mov %eax,44(%ebx) # to task.eax
-  mov isr_tmr_ebx,%eax # save proper ebx
-  mov %eax,32(%ebx) # to task.ebx
-  mov isr_tmr_ecx,%eax # save proper ecx
-  mov %eax,40(%ebx) # to task.ecx
-  mov %ecx,osca_active_task # save pointer to task record
+  mov isr_tmr_ebx,%ebx # save proper ebx
+  mov isr_tmr_ecx,%ecx # save proper ecx
+  pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
   # restore task pointed by ecx
+  mov osca_active_task,%ecx
   mov 4(%ecx),%esp # restore esp
   mov %esp,isr_tmr_esp # save esp, will be used as scratch
   mov (%ecx),%esp # restore eip

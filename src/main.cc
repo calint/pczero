@@ -15,7 +15,7 @@ extern "C" [[noreturn]] void tsk0(){
 //	for(int i=0;i<16;i++){
 //		pb.p_hex(i);
 //	}
-	pb.fg(5).pos({13,2});
+	pb.fg(5).pos({13,3});
 	for(char i='0';i<='9';i++){
 		pb.p(i);
 	}
