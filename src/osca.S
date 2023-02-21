@@ -78,14 +78,6 @@ mov $0x07e0,%bx # to es:bx=7e00:0000
 mov %bx,%es
 xor %bx,%bx
 int $0x13 # read disk
-#jnc lbl1 # if no error
-#  # error
-#  mov $0xb800,%ax # console segment
-#  mov %ax,%es
-#  movw $0x4045,%es:0 # E 'E1' to top left corner
-#  movw $0x4031,%es:2 # 1
-#  hlt
-#lbl1:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - mode 13h
 # switch to vga mode 13h (320x200x8 bmp @ 0xa0000)
 mov $0x13,%ax
