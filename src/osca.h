@@ -21,6 +21,14 @@ struct Task{
 	constexpr inline TaskId get_id()const{return id;}
 //	constexpr inline TaskBits get_bits()const{return bits;}
 	constexpr inline bool is_grab_keyboard_focus()const{return bits&1;}
+	constexpr inline bool is_running()const{return bits&2;}
+	constexpr inline void set_running(const bool b){
+		if(b){
+			bits|=2;
+		}else{
+			bits&=0xffff-2;
+		}
+	}
 };
 
 // tasks list implemented in kernel.h

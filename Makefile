@@ -22,7 +22,8 @@ AF=--march=i386 --32
 #CW+=-Wpadded # warn when complier pads a data structure
 #CW+=-Wsign-conversion 
 #CW+=-Wfloat-conversion 
-#CW+=-Winline # don't warn about non-inlined functions
+#CW+=-Wno-inline # don't warn about non-inlined functions
+#CW+=-Wold-style-cast
 #CW+=-Wno-analyzer-malloc-leak
 #CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
 #CW+=-Wno-unused-function # allow for debugging

@@ -9,10 +9,11 @@ extern "C" [[noreturn]] void tsk4();
 
 namespace osca{
 struct Task osca_tasks[]{
-	//        eip   esp        eflags bits  id   edi esi ebp esp0 ebx edx ecx eax
-	{Register(tsk4),0x000af000,0     ,1    ,4   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0  },
-	{Register(tsk0),0x000afa00,0     ,1    ,0   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0  },
-	{Register(tsk3),0x000af280,0     ,0    ,3   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0  },
+	//        eip   esp        eflags bits   id   edi esi ebp esp0 ebx edx ecx eax
+	{Register(tsk0),0x000afa00,0     ,0b11  ,0   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0  },
+	{Register(tsk2),0x000af500,0     ,0b00  ,2   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0  },
+	{Register(tsk3),0x000af280,0     ,0b10  ,3   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0  },
+	{Register(tsk4),0x000af000,0     ,0b11  ,4   ,0  ,0  ,0  ,0   ,0  ,0  ,0  ,0  },
 };
 Task*osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
 
@@ -199,19 +200,30 @@ extern "C" void osca_keyb_ev(){
 	if(osca_key==0x1d)keyboard_ctrl_pressed=true;
 	else if(osca_key==0x9d)keyboard_ctrl_pressed=false;
 	// ? implement better task focus switch (same behaviour as alt+tab)
-	if(keyboard_ctrl_pressed&&osca_key==0xf){ // ctrl+tab
-		const Task*prev_task_focused=task_focused;
-		while(true){
-			task_focused++;
-			if(task_focused==osca_tasks_end){
-				task_focused=osca_tasks;
+	if(keyboard_ctrl_pressed){ // ctrl+tab
+		if(osca_key==0xf){ // tab pressed
+			const Task*prev_task_focused=task_focused;
+			while(true){
+				task_focused++;
+				if(task_focused==osca_tasks_end){
+					task_focused=osca_tasks;
+				}
+				if(task_focused==prev_task_focused)
+					return;
+				if(task_focused->is_running()&&task_focused->is_grab_keyboard_focus()){
+					task_focused_id=task_focused->get_id();
+					return;
+				}
 			}
-			if(task_focused==prev_task_focused)
-				return;
-			if(task_focused->is_grab_keyboard_focus()){
-				task_focused_id=task_focused->get_id();
-				return;
+			return;
+		}
+		// if F1 through F12 pressed toggle running state of task
+		if(osca_key>=0x3b&&osca_key<=0x3b+12){
+			const unsigned char tsk=osca_key-static_cast<unsigned char>(0x3b);
+			if(sizeof(osca_tasks)/sizeof(Task)>tsk){
+				osca_tasks[tsk].set_running(!osca_tasks[tsk].is_running());
 			}
+			return;
 		}
 	}
 

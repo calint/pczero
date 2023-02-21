@@ -585,7 +585,7 @@ auto Game::create_boss()->void{
 	constexpr unsigned char key_spc=4;
 	bool keyb[]{false,false,false,false,false}; // wasd and space pressed status
 
-	out.pos({12,1}).fg(6).p("keys: w a s d [space] F1 x c [ctrl+tab]");
+	out.pos({12,1}).fg(6).p("keys: w a s d [space] f x c [ctrl+tab] [ctrl+Fx]");
 
 	// start task
 	while(true){
@@ -652,7 +652,7 @@ auto Game::create_boss()->void{
 				case 0xb9: // space released
 					keyb[key_spc]=false;
 					break;
-				case 0xbb: // F1 released
+				case 0xa1: // f released
 					shp->auto_aim_at_boss=!shp->auto_aim_at_boss;
 					break;
 				default:
