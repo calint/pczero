@@ -651,6 +651,7 @@ auto Game::create_boss()->void{
 		default:
 			break;
 		}
+//		osca_yield();
 	}
 }
 

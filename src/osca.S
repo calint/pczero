@@ -221,14 +221,14 @@ sti # enables interrupts after next instruction
 jmp *tmp_eip # jmp to saved eip (first task)
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
 .align 4
-osca_tmr_lo:.long 0x00000000 # 1024 Hz tick lower, exported
-osca_tmr_hi:.long 0x00000000 # 1024 Hz tick higher, exported
+osca_tmr_lo:.long 0 # 1024 Hz tick lower, exported
+osca_tmr_hi:.long 0 # 1024 Hz tick higher, exported
 osca_active_task:.long osca_tasks # pointer to active task, exported
-tmp_eax:.long 0x00000000 # used in osca_yield and isr_tmr
-tmp_ebx:.long 0x00000000 # ...
-tmp_ecx:.long 0x00000000 # ...
-tmp_eip:.long 0x00000000 # ...
-tmp_eflags:.long 0x00000000 #...
+tmp_eax:.long 0 # used in osca_yield and isr_tmr
+tmp_ebx:.long 0 # ...
+tmp_ecx:.long 0 # ...
+tmp_eip:.long 0 # ...
+tmp_eflags:.long 0 #...
 osca_key:.byte 0x00 # last key event, exported
 #osca_boot_drive:.byte 0x00 # boot drive
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partitions
@@ -284,7 +284,7 @@ osca_yield_next_task:
   mov %esp,tmp_eip # save for jump
   mov 8(%ecx),%esp # get eflags
   mov %esp,tmp_eflags # save to restore later
-  lea 16(%ecx),%esp # restore gprs
+  lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
   mov -(TASK_STRUCT_SIZE-4)(%esp),%esp # restore task esp
   push tmp_eflags # restore eflags
