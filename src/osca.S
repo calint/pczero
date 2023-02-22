@@ -291,6 +291,7 @@ osca_yield_next_task:
   popf            # ..
 #
 # ?! code below hangs after a while in QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
+#  it also hangs on qemu 7.2
 # sometimes with a crash. used in isr_tmr and works on asus zenbook
 # restore task pointed by ecx
 #  mov (%ecx),%esp # get task.eip
@@ -416,16 +417,14 @@ isr_tmr_acknowledge_and_return:
 .align 4
 isr_kbd:
   cli # disable interrupts
-  push %ax # save to be clobbered ax
+  pusha # save registers
   in $0x60,%al # read keyboard port
   mov %al,osca_key # store
   mov %al,0xa0000+320-8 # create output on screen
-  pusha # save registers
   call osca_keyb_ev # call keyboard handler C function
-  popa # restore registers
   mov $0x20,%al # ack interrupt
   out %al,$0x20 # ...
-  pop %ax # restore ax
+  popa # restore registers
   sti # enables interrupts after next instruction
   iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
