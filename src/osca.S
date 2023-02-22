@@ -290,7 +290,7 @@ osca_yield_next_task:
   push tmp_eflags # restore eflags
   popf            # ..
 #
-# ?! hangs after a while in QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
+# ?! code below hangs after a while in QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
 # sometimes with a crash. used in is_tmr and works on asus zenbook
 # restore task pointed by ecx
 #  mov (%ecx),%esp # get task.eip
