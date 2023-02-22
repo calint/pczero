@@ -7,8 +7,8 @@
 # 00600-9FFFF  Ordinary application RAM
 # 00600-0077F    osca IDT (Interrupt Descriptor Table)
 # 00780-07BFF    free
-# 07C00-081FF    osca kernel
-# 08200-         application
+# 07C00-07FFF    osca kernel
+# 08000-         application
 # A0000-BFFFF  Video memory
 # C0000-EFFFF  Optional ROMs (The VGA ROM is usually located at C0000)
 # F0000-FFFFF  BIOS ROM
@@ -293,7 +293,7 @@ osca_yield_next_task:
   # save task pointed by ebx
   pop 8(%ebx) # pop eflags to task.eflags
   pop (%ebx) # pop eip to task.eip
-  mov %esp,4(%ebx) # save stack pointer as it was before call to task.esp
+  mov %esp,4(%ebx) # save stack pointer to task.esp as it was before the call
   mov %ebx,%esp # save gprs by preparing esp and then pusha
   add $TASK_STRUCT_SIZE,%esp # move to end of task record
   mov %ecx,osca_active_task # save pointer to next task record
@@ -303,8 +303,7 @@ osca_yield_next_task:
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
   # restore task pointed by ecx
   mov osca_active_task,%ecx
-  mov 4(%ecx),%esp # restore esp
-  mov %esp,tmp_esp # save esp, will be used as scratch
+
   mov (%ecx),%esp # restore eip
   mov %esp,tmp_eip # save for jump
   mov 8(%ecx),%esp # get eflags
@@ -312,9 +311,22 @@ osca_yield_next_task:
   mov %ecx,%esp # restore gprs
   add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  mov tmp_esp,%esp # restore task esp
+  mov -(TASK_STRUCT_SIZE-4)(%esp),%esp # restore task esp
   push tmp_eflags # restore eflags
-  popf                # ..
+  popf            # ..
+
+#
+#  this version hangs after a while on QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
+#
+#  mov (%ecx),%esp # get task.eip
+#  mov %esp,tmp_eip # save for jump
+#  mov %ecx,%esp # restore gprs
+#  add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
+#  popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
+#  sub $TASK_STRUCT_SIZE-8,%esp # position stack pointer at task.eflags
+#  popf # restore flags, no op that modifies flags after this
+#  mov -8(%esp),%esp # restore task esp
+
   sti # enables interrupts after next instruction
   jmp *tmp_eip # jmp to restored eip
 
@@ -381,18 +393,14 @@ isr_tmr_next_task:
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
   # restore task pointed by ecx
   mov osca_active_task,%ecx
-  mov 4(%ecx),%esp # restore esp
-  mov %esp,tmp_esp # save esp, will be used as scratch
-  mov (%ecx),%esp # restore eip
+  mov (%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
-  mov 8(%ecx),%esp # get eflags
-  mov %esp,tmp_eflags # save to restore later
   mov %ecx,%esp # restore gprs
   add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
-  popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  mov tmp_esp,%esp # restore task esp
-  push tmp_eflags # restore eflags
-  popf                # ..
+  popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
+  sub $TASK_STRUCT_SIZE-8,%esp # position stack pointer at task.eflags
+  popf # restore flags, no op that modifies flags after this
+  mov -8(%esp),%esp # restore task esp
   # https://forum.osdev.org/viewtopic.php?f=1&t=15526&start=0
   # https://www.compuphase.com/int70.txt
   # "When an IRQ 8 fires and interrupt 70h is called, status register C holds a bit

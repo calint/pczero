@@ -23,3 +23,19 @@ int $0x13 # read disk
 
 https://stackoverflow.com/questions/3645803/bios-int-13h-with-ah-2-can-only-read-72-sectors-each-time-why
 
+
+  mov (%ecx),%esp # restore eip
+  mov %esp,tmp_eip # save for jump
+#  mov 4(%ecx),%esp # restore esp
+#  mov %esp,tmp_esp # save esp, will be used as scratch
+  mov 8(%ecx),%esp # get eflags
+  mov %esp,tmp_eflags # save to restore later
+  mov %ecx,%esp # restore gprs
+  add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
+  popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
+#  mov tmp_esp,%esp # restore task esp
+  mov -44(%esp),%esp # restore task esp
+  push tmp_eflags # restore eflags
+  popf            # ..
+
+  

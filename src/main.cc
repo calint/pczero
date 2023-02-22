@@ -77,6 +77,7 @@ extern "C" [[noreturn]] void tsk0(){
 				ch&=~0x20; // to upper case
 			pb.backspace().p(ch).p('_');
 		}
+//		osca_nop();
 		osca_yield(); // ?! if it is only task running osca 'hangs'
 		              // because no interrupts get through due to
 		              // 'all' time spent in non-interruptable
