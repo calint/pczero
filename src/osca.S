@@ -291,7 +291,7 @@ osca_yield_next_task:
   popf            # ..
 #
 # ?! code below hangs after a while in QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
-# sometimes with a crash. used in is_tmr and works on asus zenbook
+# sometimes with a crash. used in isr_tmr and works on asus zenbook
 # restore task pointed by ecx
 #  mov (%ecx),%esp # get task.eip
 #  mov %esp,tmp_eip # save for jump
@@ -428,17 +428,4 @@ isr_kbd:
   pop %ax # restore ax
   sti # enables interrupts after next instruction
   iret
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ierr
-.align 4
-isr_err:
-  cli
-  pop %eax # pop error
-  mov %eax,0xa0000       # to screen (top-left)
-  mov %eax,0xa0000+320   # ..
-  mov %eax,0xa0000+320*2 # ..
-  mov %eax,0xa0000+320*3 # ..
-  lbl3:
-    incl 0xa0008
-  jmp lbl3
-.space sector2+512-.,0
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - tasks
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
