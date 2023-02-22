@@ -221,15 +221,15 @@ sti # enables interrupts after next instruction
 jmp *tmp_eip # jmp to saved eip (first task)
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
 .align 4
-osca_tmr_lo:.long 0x00000000 # 1024 Hz tick lower
-osca_tmr_hi:.long 0x00000000 # 1024 Hz tick higher
-osca_active_task:.long osca_tasks # pointer to first task record (tsk0)
+osca_tmr_lo:.long 0x00000000 # 1024 Hz tick lower, exported
+osca_tmr_hi:.long 0x00000000 # 1024 Hz tick higher, exported
+osca_active_task:.long osca_tasks # pointer to active task, exported
 tmp_eax:.long 0x00000000 # used in osca_yield and isr_tmr
 tmp_ebx:.long 0x00000000 # ...
 tmp_ecx:.long 0x00000000 # ...
 tmp_eip:.long 0x00000000 # ...
 tmp_eflags:.long 0x00000000 #...
-osca_key:.byte 0x00 # last key event
+osca_key:.byte 0x00 # last key event, exported
 #osca_boot_drive:.byte 0x00 # boot drive
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partitions
 .space _start+436-.,0
