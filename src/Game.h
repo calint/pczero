@@ -14,6 +14,7 @@ class Game{
 	static auto create_scene3()->void;
 	static auto create_player()->void;
 	static auto create_boss()->void;
+
 	static auto create_circle(const Count segments)->Point*{
 		Point*pts=new Point[unsigned(segments)];
 		AngleRad th=0;
@@ -24,6 +25,7 @@ class Game{
 		}
 		return pts;
 	}
+
 	static auto create_circle_ix(const Count segments)->PointIx*{
 		PointIx*ix=new PointIx[unsigned(segments)];
 		for(PointIx i=0;i<segments;i++){
