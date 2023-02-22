@@ -7,7 +7,7 @@
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] void tsk0(){
 	using namespace osca;
-	osca_cli();
+	osca_disable_interrupts();
 	const TaskId taskId=osca_active_task->get_id();
 //	Register eax=osca_active_task->eax;
 //	Register ebx=osca_active_task->ebx;
@@ -17,7 +17,7 @@ extern "C" [[noreturn]] void tsk0(){
 //	Register edi=osca_active_task->edi;
 //	Register ebp=osca_active_task->ebp;
 //	Register esp0=osca_active_task->esp0;
-	osca_sti();
+	osca_enable_interrupts();
 //	err.p_hex_32b(unsigned(eax)).spc();
 //	err.p_hex_32b(unsigned(ebx)).spc();
 //	err.p_hex_32b(unsigned(ecx)).spc();
@@ -107,9 +107,9 @@ extern "C" [[noreturn]] void tsk2(){
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] void tsk3(){
 	using namespace osca;
-	osca_cli();
+	osca_disable_interrupts();
 	const Register eax=osca_active_task->eax;
-	osca_sti();
+	osca_enable_interrupts();
 
 	while(true){
 		vga13h.bmp().data().pointer().offset(eax).write(osca_tmr_lo);

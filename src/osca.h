@@ -40,10 +40,10 @@ inline auto osca_halt()->void{asm("hlt");}
 inline auto osca_nop()->void{asm("nop");}
 
 // disables interrupts
-inline auto osca_cli()->void{asm("cli");}
+inline auto osca_disable_interrupts()->void{asm("cli");}
 
 // enables interrupts
-inline auto osca_sti()->void{asm("sti");}
+inline auto osca_enable_interrupts()->void{asm("sti");}
 
 //inline int osca_get_eax(){int r;asm("mov %%eax,%0":"=a"(r));return r;}
 //inline int osca_get_ebx(){int r;asm("mov %%ebx,%0":"=b"(r));return r;}
@@ -93,4 +93,5 @@ extern "C" volatile const unsigned osca_tmr_hi;
 // interrupts due to most time being spent in non-interruptable
 // task switching code
 extern "C" void osca_yield();
+
 } // end namespace osca
