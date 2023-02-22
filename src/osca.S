@@ -189,15 +189,17 @@ in $0x71,%al
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
 # setup interrupt service routines
 # https://wiki.osdev.org/Interrupt_Descriptor_Table
+mov $osca_exception,%eax # store the upper bits of the handler
+shr $16,%eax             #  in ax
 mov $IDT,%ebx # idt address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
 lbl2:
-    movw $isr_err,(%ebx)    # offset 0..15
-    movw $0x0008,2(%ebx)    # selector in gdt
-    movb $0x00,  4(%ebx)    # unused
-    movb $0x8e,  5(%ebx)    # type_attrs p,pv0,!s,i32b
-    movw $0x0000,6(%ebx)    # offfset 16..31
-    add $IDT_ENTRY_SIZE,%bx # increment by the size of the entry
+    movw $osca_exception,(%ebx)    # offset 0..15
+    movw $0x0008,       2(%ebx)    # selector in gdt
+    movb $0x00,         4(%ebx)    # unused
+    movb $0x8e,         5(%ebx)    # type_attrs p,pv0,!s,i32b
+    movw %ax,           6(%ebx)    # offfset 16..31
+    add $IDT_ENTRY_SIZE,%ebx # increment by the size of the entry
 loop lbl2
 # setup IRQ 1 (keyboard) and IRQ 8 (RTC timer)
 #  only the lower offset set, handlers within 64K
@@ -277,6 +279,7 @@ osca_yield_next_task:
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
   # restore task pointed by ecx
   mov osca_active_task,%ecx
+  # restore cpu state
   mov (%ecx),%esp # restore eip
   mov %esp,tmp_eip # save for jump
   mov 8(%ecx),%esp # get eflags
@@ -288,7 +291,7 @@ osca_yield_next_task:
   popf            # ..
 #
 # ?! hangs after a while in QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
-# sometimes with a crash. works on asus zenbook
+# sometimes with a crash. used in is_tmr and works on asus zenbook
 # restore task pointed by ecx
 #  mov (%ecx),%esp # get task.eip
 #  mov %esp,tmp_eip # save for jump
@@ -430,9 +433,12 @@ isr_kbd:
 isr_err:
   cli
   pop %eax # pop error
-  mov %eax,0xa0000 # to screen (top-left)
+  mov %eax,0xa0000       # to screen (top-left)
+  mov %eax,0xa0000+320   # ..
+  mov %eax,0xa0000+320*2 # ..
+  mov %eax,0xa0000+320*3 # ..
   lbl3:
-    incl 0xa0004
+    incl 0xa0008
   jmp lbl3
 .space sector2+512-.,0
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - tasks

@@ -590,7 +590,7 @@ auto Game::create_boss()->void{
 	constexpr unsigned char key_spc=4;
 	bool keyb[]{false,false,false,false,false}; // wasd and space pressed status
 
-	out.pos({12,1}).fg(6).p("keys: w a s d [space] f x c [ctrl+tab] [ctrl+Fx]");
+	out.pos({12,1}).fg(6).p("keys: w a s d [space] f g x c [ctrl+tab] [ctrl+Fx]");
 
 	// start task
 	while(true){
@@ -620,7 +620,7 @@ auto Game::create_boss()->void{
 		out.p("f=").p_hex_16b(static_cast<unsigned short>(World::fps)).spc();
 
 		Ship*shp=Game::player;
-		if(shp&&task_focused_id==taskId){
+		if(task_focused_id==taskId){
 			while(const unsigned char sc=keyboard.get_next_scan_code()){
 				switch(sc){
 				case 0x11: // w pressed
@@ -653,13 +653,12 @@ auto Game::create_boss()->void{
 				case 0xb9: // space released
 					keyb[key_spc]=false;
 					break;
-				case 0xa1: // f released
-					shp->auto_aim_at_boss=!shp->auto_aim_at_boss;
-					break;
 				default:
 					break;
 				}
 			}
+		}
+		if(shp){
 			if(keyb[key_w])shp->thrust_fwd();
 			if(keyb[key_s])shp->thrust_rev();
 			if(!shp->auto_aim_at_boss){
@@ -679,6 +678,12 @@ auto Game::create_boss()->void{
 			if(shp)
 				break;
 			create_player();
+			break;
+		case'f':
+			shp->auto_aim_at_boss=true;
+			break;
+		case'g':
+			shp->auto_aim_at_boss=false;
 			break;
 		default:
 			break;

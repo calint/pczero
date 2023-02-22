@@ -9,9 +9,14 @@ extern "C" [[noreturn]] void tsk4();
 
 namespace osca{
 
-static const char*_msg="hello";
+// called by the interrupt handler for events other than keyboard and timer
+extern "C" void osca_exception(){
+	err.p("osca exception").spc();
+	osca_hang();
+}
 
 struct Task osca_tasks[]{
+	//                                       :-> 0b01 grabs keyboard focus, 0b10 active
 	//        eip   esp              eflags bits   id   edi  esi  ebp  esp0 ebx  edx  ecx  eax
 	{Register(tsk4),0xa'0000+320*180,0     ,0b11  ,4   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
 	{Register(tsk0),0xa'0000+320*184,0     ,0b11  ,0   ,0xde,Register("kernel osca"),0xeb,0xe5,0xb ,0xd ,0xc ,0xa},

@@ -69,6 +69,9 @@ extern "C" void osca_init();
 // keyboard interrupt when new scan code from keyboard
 extern "C" void osca_keyb_ev();
 
+// called by the interrupt handler for events other than keyboard and timer
+extern "C" void osca_exception();
+
 //
 // exported from osca.S
 //
