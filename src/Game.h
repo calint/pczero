@@ -133,6 +133,7 @@ public:
 	{
 		Game::enemies_alive++;
 	}
+
 	~Enemy()override{
 		Game::enemies_alive--;
 	}
@@ -168,12 +169,14 @@ public:
 		Object{0b10,0b11'1101,Game::bullet_def,scl,bounding_radius,{0,0},0,4},
 		created_time{World::time}
 	{}
+
 	auto update()->bool override{
 		Object::update();
 		if(lifetime<World::time-created_time)
 			return false;
 		return Game::is_in_play_area(*this);
 	}
+
 	// returns false if object is to be deleted
 	auto on_collision(Object&other)->bool override{
 		return false;
@@ -202,25 +205,16 @@ public:
 	{
 		Game::player=this;
 	}
+
 	~Ship()override{
 		Game::player=nullptr;
 	}
 
-	auto turn_left()->void{
-		phy().dagl=-deg_to_rad(dagl);
-	}
-	auto turn_right()->void{
-		phy().dagl=deg_to_rad(dagl);
-	}
-	auto turn_still()->void{
-		phy().dagl=0;
-	}
-	auto thrust_fwd()->void{
-		phy().vel=forward_vector().scale(speed);
-	}
-	auto thrust_rev()->void{
-		phy().vel=forward_vector().negate().scale(speed);
-	}
+	auto turn_left()->void{phy().dagl=-deg_to_rad(dagl);}
+	auto turn_right()->void{phy().dagl=deg_to_rad(dagl);}
+	auto turn_still()->void{phy().dagl=0;}
+	auto thrust_fwd()->void{phy().vel=forward_vector().scale(speed);}
+	auto thrust_rev()->void{phy().vel=forward_vector().negate().scale(speed);}
 
 	auto update()->bool override{
 		Object::update();
@@ -233,7 +227,6 @@ public:
 			turn_still();
 			return true;
 		}
-//		attack_target_current_location(*Game::boss,true);
 		attack_target_expected_location(*Game::boss,true);
 		return true;
 	}
@@ -377,10 +370,12 @@ public:
 	Missile():
 		Object{0b01'0000,0b11'1111,Game::missile_def,scl,bounding_radius,{0,0},0,4}
 	{}
+
 	auto update()->bool override{
 		Object::update();
 		return Game::is_in_play_area(*this);
 	}
+
 	// returns false if object is to be deleted
 	auto on_collision(Object&other)->bool override{
 		return false;
@@ -407,27 +402,20 @@ public:
 		time_started=World::time;
 		Game::boss=this;
 	}
+
 	~Boss()override{
 		Game::boss=nullptr;
 	}
+
 	auto update()->bool override{
 		Object::update();
-//		if(game::player){
-//			Vector v=game::player->phy().pos-phy().pos;
-//			v.normalize().scale(5);
-//			phy().vel=v;
-//		}else{
-//			Vector v=Vector{160,60}-phy().pos;
-//			v.normalize().scale(5);
-//			phy().vel=v;
-//		}
-//		return object_within_play_area(*this);
 		if(!Game::is_in_play_area(*this))
 			return false;
 		if(World::time-time_started>boss_live_t)
 			return false;
 		return true;
 	}
+
 	// returns false if object is to be deleted
 	auto on_collision(Object&other)->bool override{
 		health--;
@@ -443,21 +431,23 @@ auto Game::create_scene()->void{
 		e->phy().dagl=deg_to_rad(10);
 		e->phy().vel={0,2};
 	}
-//	Object*o=new Boss;
-//	o->phy().pos={160,60};
 }
+
 auto Game::create_scene2()->void{
 	Object*o=new Wall(20,{160,100},0);
 	o->phy().dagl=deg_to_rad(1);
 }
+
 auto Game::create_scene3()->void{
 	new Enemy({160,100},0);
 }
+
 auto Game::create_player()->void{
 	Ship*shp=new Ship;
 	shp->phy().pos={160,130};
 	Game::player=shp;
 }
+
 auto Game::create_boss()->void{
 	Object*o=new Boss;
 	if(Game::boss_vel.y>20){
@@ -496,20 +486,6 @@ auto Game::create_boss()->void{
 	};
 	enemy_def.init_normals();
 
-//		constexpr unsigned segments=8;
-//		ship_def={segments,segments,
-//			create_circle(segments),
-//			create_circle_ix(segments),
-//		};
-//		ship_def={4,4,
-//			new Point2D[]{ // points in model coordinates, negative Y is "forward"/"up"
-//				{-1,-1},
-//				{-1, 1},
-//				{ 1, 1},
-//				{ 1,-1},
-//			},
-//			new PointIx[]{0,1,2,3} // bounding convex polygon CCW
-//		};
 	ship_def={4,3,
 		new Point[]{
 			{ 0, 0},
@@ -528,13 +504,6 @@ auto Game::create_boss()->void{
 		new PointIx[]{0} // bounding points and convex polygon CCW
 	};
 	bullet_def.init_normals();
-//	bullet_def={1,0, // at least one bounding point for collision detection
-//		new Point[]{
-//			{0,0},
-//		},
-//		nullptr // bounding points and convex polygon CCW
-//	};
-//	bullet_def.init_normals();
 
 	wall_def={4,4,
 		new Point[]{ // points in model coordinates, negative Y is "forward"
