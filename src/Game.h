@@ -88,35 +88,35 @@ public:
 		vga13h.bmp().pointer_offset({xi,yi}).write(color);
 	}
 
-	static auto draw_trajectory(const Point&p0,const Vector&vel,const Real t_s,const Real t_inc_s,const Color8b color)->void{
-		Real t=0;
+	static auto draw_trajectory(const Point&p0,const Vector&vel,const TimeSec t_s,const TimeSec t_inc_s,const Color8b color)->void{
+		TimeSec t=0;
+		Point p{p0};
 		while(true){
 			t+=t_inc_s;
-			Vector v=vel;
-			v.scale(t);
-			v.inc_by(p0);
-			draw_dot(v,color);
+			p.inc_by(vel,t_inc_s);
+			draw_dot(p,color);
 			if(t>t_s)
 				return;
 		}
 	}
 
-	static constexpr auto is_in_play_area(Object&o)->bool{
+	static constexpr auto is_in_play_area(const Object&o)->bool{
 		const Scale bounding_radius=o.bounding_radius();
-		if(o.phy().pos.x>=Coord(Game::play_area_top_left.x()+Game::play_area_dim.width())-bounding_radius){
+		if(o.phy_ro().pos.x>=Coord(Game::play_area_top_left.x()+Game::play_area_dim.width())-bounding_radius){
 			return false;
 		}
-		if(o.phy().pos.x<=Coord(Game::play_area_top_left.x())+bounding_radius){
+		if(o.phy_ro().pos.x<=Coord(Game::play_area_top_left.x())+bounding_radius){
 			return false;
 		}
-		if(o.phy().pos.y>=Coord(Game::play_area_top_left.y()+Game::play_area_dim.height())-bounding_radius){
+		if(o.phy_ro().pos.y>=Coord(Game::play_area_top_left.y()+Game::play_area_dim.height())-bounding_radius){
 			return false;
 		}
-		if(o.phy().pos.y<=Coord(Game::play_area_top_left.y())+bounding_radius){
+		if(o.phy_ro().pos.y<=Coord(Game::play_area_top_left.y())+bounding_radius){
 			return false;
 		}
 		return true;
 	}
+
 	[[noreturn]] static auto start()->void;
 };
 
@@ -196,6 +196,7 @@ public:
 	const char padding1{0};
 	const char padding2{0};
 	const char padding3{0};
+
 	Ship():
 		// 'ships'   0b00'0001
 		// 'bullets' 0b00'0010
