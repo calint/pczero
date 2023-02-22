@@ -35,7 +35,7 @@ using SizeCount=Size;
 class Heap final{
 	inline static Data d_{nullptr,0};
 	inline static char*ptr_{nullptr}; // pointer to free memory
-	inline static char*ptr_lim_{nullptr}; // limit of buffer
+	inline static char*ptr_end_{nullptr}; // end of buffer (one past last valid address)
 	inline static HeapEntry*entry_used_start_{nullptr}; // beginning of vector containing used memory info
 	inline static HeapEntry*entry_used_next_{nullptr}; // next available slot
 	inline static HeapEntry*entry_used_end_{nullptr}; // limit of used entries memory
@@ -60,7 +60,7 @@ public:
 		entry_free_start_=entry_used_start_-nentries_max;
 		entry_free_next_=entry_free_start_;
 		entry_free_end_=entry_free_start_+nentries_max;
-		ptr_lim_=reinterpret_cast<char*>(entry_used_start_);
+		ptr_end_=reinterpret_cast<char*>(entry_used_start_);
 	}
 	static inline auto data()->const Data&{
 		return d_;
@@ -92,7 +92,7 @@ public:
 		// did not find in free list
 		char*p=ptr_;
 		ptr_+=size_bytes;
-		if(ptr_>ptr_lim_){
+		if(ptr_>ptr_end_){
 			err.p("Heap.alloc: 2");
 			osca_hang();
 		}
