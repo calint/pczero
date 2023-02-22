@@ -5,13 +5,14 @@
 #include"libge.h"
 
 namespace osca{
-
+class Ship;
 class Game{
 	inline static CoordsPx play_area_top_left{0,50};
 	inline static DimensionPx play_area_dim{320,100};
 	static auto create_scene()->void;
 	static auto create_scene2()->void;
 	static auto create_scene3()->void;
+	static auto create_player()->void;
 	static auto create_boss()->void;
 	static auto create_circle(const Count segments)->Point*{
 		Point*pts=new Point[unsigned(segments)];
@@ -55,13 +56,11 @@ public:
 	inline static ObjectDef missile_def{};
 	inline static ObjectDef boss_def{};
 
-	inline static Object*player{nullptr};
+	inline static Ship*player{nullptr};
 	inline static Object*boss{nullptr};
 	inline static Count enemies_alive{0};
 	inline static Point boss_pos{20,60};
 	inline static Vector boss_vel{10,0};
-	inline static TimeSec boss_t{0};
-	inline static TimeSec boss_live_t{10};
 
 	static constexpr auto is_in_play_area(const Point&p)->bool{
 		if(p.x>=Coord(play_area_top_left.x()+play_area_dim.width())){
@@ -391,7 +390,10 @@ public:
 class Boss final:public Object{
 	static constexpr Scale scl=3;
 	static constexpr Scale bounding_radius=scl*sqrt_of_2;
+	static constexpr TimeSec boss_live_t{10};
+
 	Count health{5};
+	TimeSec time_started{0};
 public:
 	// 'ships'   0b00'0001
 	// 'bullets' 0b00'0010
@@ -402,6 +404,7 @@ public:
 	Boss():
 		Object{0b10'0000,0b01'0010,Game::boss_def,scl,bounding_radius,{0,0},0,0xe}
 	{
+		time_started=World::time;
 		Game::boss=this;
 	}
 	~Boss()override{
@@ -419,10 +422,10 @@ public:
 //			phy().vel=v;
 //		}
 //		return object_within_play_area(*this);
-		if(!Game::is_in_play_area(*this)){
-//			phy_->pos=Game::boss_pos;
+		if(!Game::is_in_play_area(*this))
 			return false;
-		}
+		if(World::time-time_started>boss_live_t)
+			return false;
 		return true;
 	}
 	// returns false if object is to be deleted
@@ -450,9 +453,13 @@ auto Game::create_scene2()->void{
 auto Game::create_scene3()->void{
 	new Enemy({160,100},0);
 }
+auto Game::create_player()->void{
+	Ship*shp=new Ship;
+	shp->phy().pos={160,130};
+	Game::player=shp;
+}
 auto Game::create_boss()->void{
 	Object*o=new Boss;
-	Game::boss_t=World::time;
 	if(Game::boss_vel.y>20){
 		if(Game::boss_vel.x>0){
 			Game::boss_pos={300,60};
@@ -470,7 +477,6 @@ auto Game::create_boss()->void{
 	o->phy().pos=boss_pos;
 	o->phy().vel=Game::boss_vel;
 	o->phy().dagl=deg_to_rad(25);
-	Game::boss=o;
 }
 
 [[noreturn]] auto Game::start()->void{
@@ -569,8 +575,7 @@ auto Game::create_boss()->void{
 
 	World::init_statics();
 
-	Ship*shp=new Ship;
-	shp->phy().pos={160,130};
+	create_player();
 //	create_scene3();
 	create_scene();
 	create_boss();
@@ -589,7 +594,7 @@ auto Game::create_boss()->void{
 
 	// start task
 	while(true){
-//		*reinterpret_cast<unsigned*>(0xa'0000+320*2+160)=osca_tmr_lo;
+		*reinterpret_cast<unsigned*>(0xa'0000+320*2+160)=osca_tmr_lo;
 
 		// clear game area
 		pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
@@ -598,13 +603,6 @@ auto Game::create_boss()->void{
 
 		if(!Game::boss){
 			create_boss();
-		}
-		if(!Game::player){
-			shp=nullptr;
-		}
-		if((World::time-Game::boss_t)>Game::boss_live_t){
-			World::deleted_add(boss);
-			Game::boss=nullptr;
 		}
 
 		out.pos({0,2}).fg(2);
@@ -621,6 +619,7 @@ auto Game::create_boss()->void{
 		out.p("d=").p_hex_8b(static_cast<unsigned char>(World::time_dt*1'000)).spc();
 		out.p("f=").p_hex_16b(static_cast<unsigned short>(World::fps)).spc();
 
+		Ship*shp=Game::player;
 		if(shp&&task_focused_id==taskId){
 			while(const unsigned char sc=keyboard.get_next_scan_code()){
 				switch(sc){
@@ -679,13 +678,11 @@ auto Game::create_boss()->void{
 		case'c':
 			if(shp)
 				break;
-			shp=new Ship;
-			shp->phy().pos={160,130};
+			create_player();
 			break;
 		default:
 			break;
 		}
-
 //			draw_axis(vga13h.bmp());
 //		osca_yield();
 	}

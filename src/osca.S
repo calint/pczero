@@ -269,8 +269,7 @@ osca_yield_next_task:
   pop 8(%ebx) # pop eflags to task.eflags
   pop (%ebx) # pop eip to task.eip
   mov %esp,4(%ebx) # save stack pointer to task.esp as it was before the call
-  mov %ebx,%esp # save gprs by preparing esp and then pusha
-  add $TASK_STRUCT_SIZE,%esp # move to end of task record
+  lea TASK_STRUCT_SIZE(%ebx),%esp # save gprs. move esp to end of task record then pusha
   mov %ecx,osca_active_task # save pointer to next task record
   mov tmp_eax,%eax # restore eax
   mov tmp_ebx,%ebx # restore ebx
@@ -278,25 +277,22 @@ osca_yield_next_task:
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
   # restore task pointed by ecx
   mov osca_active_task,%ecx
-
   mov (%ecx),%esp # restore eip
   mov %esp,tmp_eip # save for jump
   mov 8(%ecx),%esp # get eflags
   mov %esp,tmp_eflags # save to restore later
-  mov %ecx,%esp # restore gprs
-  add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
-  popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
+  lea 16(%ecx),%esp # restore gprs
+  popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
   mov -(TASK_STRUCT_SIZE-4)(%esp),%esp # restore task esp
   push tmp_eflags # restore eflags
   popf            # ..
-
 #
-#  this version hangs after a while on QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
-#
+# ?! hangs after a while in QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
+# sometimes with a crash. works on asus zenbook
+# restore task pointed by ecx
 #  mov (%ecx),%esp # get task.eip
 #  mov %esp,tmp_eip # save for jump
-#  mov %ecx,%esp # restore gprs
-#  add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
+#  lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
 #  popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
 #  sub $TASK_STRUCT_SIZE-8,%esp # position stack pointer at task.eflags
 #  popf # restore flags, no op that modifies flags after this
@@ -355,12 +351,12 @@ isr_tmr_next_task:
   jz isr_tmr_next_task # if not 'running' get next task
   # switch to task pointed by ecx
   # stack is ..., EFLAGS, CS, EIP
+  # save task state
   pop (%ebx) # pop eip to task.eip
   add $4,%esp # skip cs
   pop 8(%ebx) # pop eflags to task.eflags
   mov %esp,4(%ebx) # save stack pointer as it was before irq to task.esp
-  mov %ebx,%esp # save gprs by preparing esp and then pusha
-  add $TASK_STRUCT_SIZE,%esp # move to end of task record
+  lea TASK_STRUCT_SIZE(%ebx),%esp # save gprs. move esp to end of task record then pusha
   mov %ecx,osca_active_task # save pointer to next task record
   mov tmp_eax,%eax # save proper eax
   mov tmp_ebx,%ebx # save proper ebx
@@ -370,8 +366,7 @@ isr_tmr_next_task:
   mov osca_active_task,%ecx
   mov (%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
-  mov %ecx,%esp # restore gprs
-  add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
+  lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
   sub $TASK_STRUCT_SIZE-8,%esp # position stack pointer at task.eflags
   popf # restore flags, no op that modifies flags after this
