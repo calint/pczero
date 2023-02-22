@@ -564,11 +564,6 @@ auto Game::create_boss()->void{
 	};
 	boss_def.init_normals();
 
-//		out.p_hex_32b(static_cast<unsigned>(play_area_top_left.y()));
-//		out.p_hex_32b(static_cast<unsigned>(play_area_dim.width()));
-//		osca_halt();
-
-	// init stack
 	const Address heap_address=Heap::data().address();
 	const Address heap_disp_at_addr=vga13h.bmp().data().pointer().offset(50*320).address();
 	const SizeBytes heap_disp_size=320*100;
@@ -580,9 +575,6 @@ auto Game::create_boss()->void{
 	create_scene();
 	create_boss();
 
-//		Ship*shp=nullptr;
-//	out.p_hex_16b(static_cast<unsigned short>(sizeof(Object))).pos({1,2});
-
 	constexpr unsigned char key_w=0;
 	constexpr unsigned char key_a=1;
 	constexpr unsigned char key_s=2;
@@ -592,7 +584,6 @@ auto Game::create_boss()->void{
 
 	out.pos({12,1}).fg(6).p("keys: w a s d [space] f g x c [ctrl+tab] [ctrl+Fx]");
 
-	// start task
 	while(true){
 		*reinterpret_cast<unsigned*>(0xa'0000+320*2+160)=osca_tmr_lo;
 
@@ -688,8 +679,6 @@ auto Game::create_boss()->void{
 		default:
 			break;
 		}
-//			draw_axis(vga13h.bmp());
-//		osca_yield();
 	}
 }
 
