@@ -680,10 +680,10 @@ auto Game::create_boss()->void{
 			create_player();
 			break;
 		case'f':
-			shp->auto_aim_at_boss=true;
+			if(shp)shp->auto_aim_at_boss=true;
 			break;
 		case'g':
-			shp->auto_aim_at_boss=false;
+			if(shp)shp->auto_aim_at_boss=false;
 			break;
 		default:
 			break;
