@@ -330,15 +330,13 @@ isr_tmr:
   incl 0xa0000+320-4 # create output on screen
   incl osca_tmr_lo    # increase lower 32 bits ticker
   adcl $0,osca_tmr_hi # add carry to upper 32 bits
-  push %eax
+  mov %eax,tmp_eax # save eax
   mov osca_tmr_lo,%eax # switch task every 8'th tick
   and $FREQ_DIV_AND,%eax # 1024/8 Hz
-  pop %eax
   jnz isr_tmr_acknowledge_and_return # if no task switch
   # start task switching
-  mov %eax,tmp_eax # save eax,ebx,ecx
-  mov %ebx,tmp_ebx # ..
-  mov %ecx,tmp_ecx # ..
+  mov %ebx,tmp_ebx # save ebx
+  mov %ecx,tmp_ecx # save ecx
   mov osca_active_task,%ebx # ebx points to current active task
   mov %ebx,%ecx # ecx will point to the next task
   # find next task and store it in %ecx
@@ -397,20 +395,18 @@ isr_tmr_next_task:
 
 isr_tmr_exit_without_task_switch:
   # restore clobbered registers
-  mov tmp_eax,%eax
   mov tmp_ebx,%ebx
   mov tmp_ecx,%ecx
 
 isr_tmr_acknowledge_and_return:
   # acknowledge interrupt and exit
-  push %ax # save to be clobbered %ax
   mov $0x0c,%al # read register C in ISR
   out %al,$0x70 #  to keep getting
   in $0x71,%al  #  irq 8
   mov $0x20,%al # acknowledge interrupt (EOI) to
   out %al,$0xa0 #  second controller PIC1
   out %al,$0x20 #  main controller PIC0
-  pop %ax # restore %ax
+  mov tmp_eax,%eax # restore clobbered register
   sti # enables interrupts after next instruction
   iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ikbd
