@@ -291,7 +291,10 @@ osca_yield_next_task:
   popf            # ..
 
 # ?! commented code below to switch task hangs after a while in QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
-# it also hangs on qemu 7.2 sometimes with a crash. used in isr_tmr and works on asus zenbook
+# it also hangs on qemu 7.2 sometimes with a crash
+# used in isr_tmr where it works??
+# works on asus zenbook
+# works in VirtualBox 6.1
 # restore task pointed by ecx
 #  mov (%ecx),%esp # get task.eip
 #  mov %esp,tmp_eip # save for jump
@@ -332,6 +335,7 @@ isr_tmr:
   mov %eax,tmp_eax # save eax
   mov osca_tmr_lo,%eax # switch task every 8'th tick
   and $FREQ_DIV_AND,%eax # 1024/8 Hz
+#  jmp isr_tmr_acknowledge_and_return # if no task switch
   jnz isr_tmr_acknowledge_and_return # if no task switch
   # start task switching
   mov %ebx,tmp_ebx # save ebx

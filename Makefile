@@ -49,7 +49,7 @@ CW+=-Wno-weak-vtables # allow for source in include files
 CW+=-Wno-unused-function # allow for debugging
 CW+=-Wno-unused-parameter # allow for debugging
 CW+=-Wno-unused-variable # allow for debugging
-CF=-Os -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
+CF=-O0 -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
 CF+=-Wfatal-errors # stop at first error
 CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 

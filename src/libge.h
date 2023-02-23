@@ -74,11 +74,7 @@ public:
 	inline static Count fps{0};
 
 	static auto init_statics()->void{
-		time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits can be problem
-		// set previous time to a reasonable value so that dt does not
-		// become huge at first frame
-		time_prv=time-sec_per_tick;
-		fps_time_prv=time;
+		fps_time_prv=time_prv=time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits can be problem
 	}
 	static auto tick()->void;
 	static auto deleted_add(Object*o)->void;
@@ -524,7 +520,7 @@ private:
 	inline static Object*all[World::nobjects_max]; // array of pointers to allocated objects
 	inline static Object**free_ixes[World::nobjects_max]; // free indexes in all[]
 	inline static SlotIx free_ixes_i{0}; // index in freeSlots[] of next free slot
-	inline static SlotInfo used_ixes[World::nobjects_max]; // free indexes in all[]
+	inline static SlotInfo used_ixes[World::nobjects_max]; // used indexes in all[]
 	inline static SlotIx used_ixes_i{0}; // index in freeSlots[] of next free slot
 public:
 	static auto free_slots_count()->SlotIx{return free_ixes_i;}
@@ -596,10 +592,10 @@ public:
 private:
 	static inline auto object_for_used_slot(const SlotIx i)->Object*{
 		Object*o=used_ixes[i].obj;
-		if(!o){
-			err.p("null-pointer-exception [e1]");
-			osca_hang();
-		}
+//		if(!o){
+//			err.p("null-pointer-exception [e1]");
+//			osca_hang();
+//		}
 		return o;
 	}
 
@@ -686,7 +682,7 @@ auto World::tick()->void{
 	time_prv=time;
 	time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits is a problem. fix
 	time_dt=time-time_prv;
-	if(time_dt<0){ // is that once every 4 billionth tick?
+	if(time_dt<0){ // ? is that once every 4 billionth tick?
 		time_dt=0;
 	}
 	// fps calculations
@@ -699,6 +695,9 @@ auto World::tick()->void{
 	}
 
 	Object::draw_all(vga13h.bmp());
+	if(time_dt==0) // if no dt then no state update
+		return;    // ?! VirtualBox 6.1 running at thousands of frames per second occasionally bugs
+	               //    when executing the code below with dt=0. no resolution to why.
 	PhysicsState::update_all();
 	Object::update_all();
 	Object::check_collisions();

@@ -7,8 +7,8 @@
 namespace osca{
 class Ship;
 class Game{
-	inline static CoordsPx play_area_top_left{0,50};
-	inline static DimensionPx play_area_dim{320,100};
+	inline static const CoordsPx play_area_top_left{0,50};
+	inline static const DimensionPx play_area_dim{320,100};
 	static auto create_scene()->void;
 	static auto create_scene2()->void;
 	static auto create_scene3()->void;
@@ -101,17 +101,22 @@ public:
 	}
 
 	static constexpr auto is_in_play_area(const Object&o)->bool{
-		const Scale bounding_radius=o.bounding_radius();
-		if(o.phy_ro().pos.x>=Coord(Game::play_area_top_left.x()+Game::play_area_dim.width())-bounding_radius){
+		const Real bounding_radius=o.bounding_radius();
+		const PhysicsState&phy=o.phy_ro();
+		const Real xmax=Real(Game::play_area_top_left.x()+Game::play_area_dim.width());
+		const Real xmin=Real(Game::play_area_top_left.x());
+		const Real ymax=Real(Game::play_area_top_left.y()+Game::play_area_dim.height());
+		const Real ymin=Real(Game::play_area_top_left.y());
+		if(phy.pos.x>=xmax-bounding_radius){
 			return false;
 		}
-		if(o.phy_ro().pos.x<=Coord(Game::play_area_top_left.x())+bounding_radius){
+		if(phy.pos.x<=xmin+bounding_radius){
 			return false;
 		}
-		if(o.phy_ro().pos.y>=Coord(Game::play_area_top_left.y()+Game::play_area_dim.height())-bounding_radius){
+		if(phy.pos.y>=ymax-bounding_radius){
 			return false;
 		}
-		if(o.phy_ro().pos.y<=Coord(Game::play_area_top_left.y())+bounding_radius){
+		if(phy.pos.y<=ymin+bounding_radius){
 			return false;
 		}
 		return true;
@@ -563,6 +568,10 @@ auto Game::create_boss()->void{
 		pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
 
 		World::tick();
+//		if(World::time_dt==0){
+//			asm("incl 0xa0000+100");
+////			continue;
+//		}
 
 		if(!Game::boss){
 			create_boss();
@@ -579,7 +588,7 @@ auto Game::create_boss()->void{
 		out.p("u=").p_hex_8b(static_cast<unsigned char>(Object::used_slots_count())).spc();
 		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_tmr_lo)).spc();
 		out.p("s=").p_hex_8b(static_cast<unsigned char>(World::time)).spc();
-		out.p("d=").p_hex_8b(static_cast<unsigned char>(World::time_dt*1'000)).spc();
+		out.p("d=").p_hex_8b(static_cast<unsigned char>(World::time_dt*10'000)).spc();
 		out.p("f=").p_hex_16b(static_cast<unsigned short>(World::fps)).spc();
 
 		Ship*shp=Game::player;
@@ -619,6 +628,22 @@ auto Game::create_boss()->void{
 				default:
 					break;
 				}
+				switch(table_scancode_to_ascii[sc]){
+				case'x':
+					if(Game::enemies_alive==0)create_scene();
+					break;
+				case'c':
+					if(!shp)create_player();
+					break;
+				case'f':
+					if(shp)shp->auto_aim_at_boss=true;
+					break;
+				case'g':
+					if(shp)shp->auto_aim_at_boss=false;
+					break;
+				default:
+					break;
+				}
 			}
 		}
 		if(shp){
@@ -631,25 +656,6 @@ auto Game::create_boss()->void{
 			}
 			if(!keyb[key_w]&&!keyb[key_s])shp->phy().vel={0,0};
 			if(keyb[key_spc])shp->fire();
-		}
-		switch(table_scancode_to_ascii[osca_key]){
-		case'x':
-			if(Game::enemies_alive==0)
-				create_scene();
-			break;
-		case'c':
-			if(shp)
-				break;
-			create_player();
-			break;
-		case'f':
-			if(shp)shp->auto_aim_at_boss=true;
-			break;
-		case'g':
-			if(shp)shp->auto_aim_at_boss=false;
-			break;
-		default:
-			break;
 		}
 //		osca_yield();
 	}

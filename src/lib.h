@@ -403,7 +403,7 @@ public:
 		return*this;
 	}
 	constexpr auto p_hex(const int hex_number_4b)->PrinterToBitmap&{
-		draw(table_hex_to_font[hex_number_4b&0xf]); // ? error if &0xf not 0
+		draw(table_hex_to_font[hex_number_4b&0xf]); // ? error if not 0..15
 		return*this;
 	}
 	constexpr auto p_hex_8b(unsigned char v)->PrinterToBitmap&{
@@ -483,7 +483,7 @@ private:
 		constexpr unsigned mask=1u<<31;
 		for(SizePx y=0;y<font_hi_;y++){
 			for(SizePx x=0;x<font_wi_;x++){
-				const bool px=bmp_5x6&mask; // ? !=0
+				const bool px=bmp_5x6&mask;
 				bmp_5x6<<=1;
 				if(px){
 					*di_=fg_;
