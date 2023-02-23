@@ -353,7 +353,7 @@ isr_tmr_next_task:
   jz isr_tmr_next_task # if not 'running' get next task
   # switch to task pointed by ecx
   # stack is ..., EFLAGS, CS, EIP
-  # save task state
+  # save cpu state of task pointed by %ebx
   pop (%ebx) # pop eip to task.eip
   add $4,%esp # skip cs
   pop 8(%ebx) # pop eflags to task.eflags
@@ -364,7 +364,7 @@ isr_tmr_next_task:
   mov tmp_ebx,%ebx # save proper ebx
   mov tmp_ecx,%ecx # save proper ecx
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
-  # restore task pointed by ecx
+  # restore cpu state of task pointed by ecx
   mov osca_active_task,%ecx
   mov (%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
