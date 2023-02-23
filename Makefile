@@ -29,7 +29,7 @@ AF=--march=i386 --32
 #CW+=-Wno-unused-function # allow for debugging
 #CW+=-Wno-unused-variable # allow for debugging
 #CW+=-Wno-unused-parameter # allow for debugging
-#CF=-Os -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-rtti -fno-threadsafe-statics
+#CF=-O2 -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
 #CF+=-Wfatal-errors # stop at first error
 #CF+=-fconserve-stack # try to inhibit excessive use of stack by optimizer
 #CF+=-fanalyzer
@@ -49,7 +49,7 @@ CW+=-Wno-weak-vtables # allow for source in include files
 CW+=-Wno-unused-function # allow for debugging
 CW+=-Wno-unused-parameter # allow for debugging
 CW+=-Wno-unused-variable # allow for debugging
-CF=-O0 -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
+CF=-O2 -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
 CF+=-Wfatal-errors # stop at first error
 CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
