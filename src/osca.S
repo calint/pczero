@@ -339,7 +339,7 @@ isr_tmr:
   mov %ecx,tmp_ecx # save ecx
   mov osca_active_task,%ebx # ebx points to current active task
   mov %ebx,%ecx # ecx will point to the next task
-  # find next task and store it in %ecx
+  # find next task and store it in ecx
 isr_tmr_next_task:
   add $TASK_STRUCT_SIZE,%ecx # next task
   cmp osca_tasks_end,%ecx # if last
@@ -353,7 +353,7 @@ isr_tmr_next_task:
   jz isr_tmr_next_task # if not 'running' get next task
   # switch to task pointed by ecx
   # stack is ..., EFLAGS, CS, EIP
-  # save cpu state of task pointed by %ebx
+  # save cpu state of task pointed by ebx
   pop (%ebx) # pop eip to task.eip
   add $4,%esp # skip cs
   pop 8(%ebx) # pop eflags to task.eflags
@@ -382,14 +382,14 @@ isr_tmr_next_task:
   # register C inside your ISR for interrupt 70h even when you normally don't care
   # about its contents. Otherwise you will only see a single interrupt."
   # acknowledge interrupt and jmp
-  push %ax # save to be clobbered %ax
+  push %ax # save to be clobbered ax
   mov $0x0c,%al # read register C in ISR
   out %al,$0x70 #  to keep getting
   in $0x71,%al  #  irq 8
   mov $0x20,%al # acknowledge interrupt (EOI) to
   out %al,$0xa0 #  second controller PIC1
   out %al,$0x20 #  main controller PIC0
-  pop %ax # restore %ax
+  pop %ax # restore ax
   sti # enables interrupts after next instruction
   jmp *tmp_eip # jmp to restored eip
 
