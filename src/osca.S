@@ -289,7 +289,7 @@ osca_yield_next_task:
   mov -(TASK_STRUCT_SIZE-4)(%esp),%esp # restore task esp
   push tmp_eflags # restore eflags
   popf            # ..
-#
+
 # ?! code below hangs after a while in QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
 #  it also hangs on qemu 7.2
 # sometimes with a crash. used in isr_tmr and works on asus zenbook
