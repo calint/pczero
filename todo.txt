@@ -1,10 +1,11 @@
+[ ] task switch and the state of x87
 [ ] review 'using' Scale Coord Angle Vertex etc terminology
-[ ] osca: task_id (lower 16 bits of task.bits?)
-[ ]   keyboard_focus
+[x] osca: task_id (lower 16 bits of task.bits?)
+[x]   keyboard_focus
 [x] review default values and where it is necessary to specify
 [x]   although redundant, initializing to 0, false, nullptr is ok. initialize everything.
-[ ] struct TaskInfo{eip,eflags,bits,eax,ebx...}
-[ ]   enable/disable task
+[x] struct TaskInfo{eip,eflags,bits,eax,ebx...}
+[x]   enable/disable task
 [ ] move draw_x into Bitmap?
 [ ] Osca::Game multiple instances
 [ ]   PhyicsStates instance
