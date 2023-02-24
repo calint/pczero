@@ -20,7 +20,7 @@ class Game{
 		AngleRad th=0;
 		AngleRad dth=2*PI/AngleRad(segments);
 		for(Count i=0;i<segments;i++){
-			pts[i]={cos(th),-sin(th)}; // CCW
+			pts[i]={cos(th),-sin(th)}; // CCW  ? use sin_and_cos()
 			th+=dth;
 		}
 		return pts;

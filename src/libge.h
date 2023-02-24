@@ -376,7 +376,7 @@ private:
 		AngleRad th=0;
 		AngleRad dth=2*PI/AngleRad(segments);
 		for(Count i=0;i<segments;i++){
-			const Coord x=p.x+r*cos(th);
+			const Coord x=p.x+r*cos(th); // ? use sin_and_cos()
 			const Coord y=p.y+r*sin(th);
 			World::draw_dot({x,y},1);
 			th+=dth;
