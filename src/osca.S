@@ -1,6 +1,7 @@
-# tested on:
-# * qemu 7.0.0 on linux 5.19
-# * VirtualBox 6.1 on linux 5.19 (no acceleration)
+# tested on linux 5.19
+# * qemu 7.0.0
+# * qemu 7.2
+# * VirtualBox 6.1 (no acceleration)
 # * asus zenbook
 #
 # 00000-003FF  IVT (Interrupt Vector Table)
