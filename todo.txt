@@ -1,4 +1,4 @@
-[ ] task switch and the state of x87
+[ ] task switch the state of FPU
 [ ] review 'using' Scale Coord Angle Vertex etc terminology
 [x] osca: task_id (lower 16 bits of task.bits?)
 [x]   keyboard_focus
