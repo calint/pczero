@@ -695,9 +695,6 @@ auto World::tick()->void{
 	}
 
 	Object::draw_all(vga13h.bmp());
-	if(time_dt==0) // if no dt then no state update
-		return;    // ?! VirtualBox 6.1 running at thousands of frames per second occasionally bugs
-	               //    when executing the code below with dt=0. no resolution to why.
 	PhysicsState::update_all();
 	Object::update_all();
 	Object::check_collisions();

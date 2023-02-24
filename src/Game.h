@@ -568,10 +568,6 @@ auto Game::create_boss()->void{
 		pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
 
 		World::tick();
-//		if(World::time_dt==0){
-//			asm("incl 0xa0000+100");
-////			continue;
-//		}
 
 		if(!Game::boss){
 			create_boss();
