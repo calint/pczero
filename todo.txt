@@ -1,5 +1,5 @@
 [ ] task switch the state of FPU
-[ ]   FXSAVE FXRSTOR
+[-]   FXSAVE FXRSTOR. not supported on i386.
 [ ] review 'using' Scale Coord Angle Vertex etc terminology
 [x] osca: task_id (lower 16 bits of task.bits?)
 [x]   keyboard_focus
