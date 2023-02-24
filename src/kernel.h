@@ -15,7 +15,7 @@ extern "C" void osca_exception(){
 	osca_hang();
 }
 
-alignas(16)struct Task osca_tasks[]{
+struct Task osca_tasks[]{
 	//                                       :-> 0b01 grabs keyboard focus, 0b10 active
 	//        eip   esp              eflags bits   id   edi  esi  ebp  esp0 ebx  edx  ecx  eax
 	{Register(tsk4),0xa'0000+320*180,0     ,0b11  ,4   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
