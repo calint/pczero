@@ -282,7 +282,7 @@ osca_yield_next_task:
   # restore cpu state of task pointed by ecx
   mov osca_active_task,%ecx
 
-#  the commented restore task code below occasionally hangs qemu 7.0 on linux
+#  ?! the commented restore task code below occasionally hangs qemu 7.0 on linux
 #  mov (%ecx),%esp # get task.eip
 #  mov %esp,tmp_eip # save for jump
 #  lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
