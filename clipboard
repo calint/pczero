@@ -76,3 +76,17 @@ auto pz_memset(Address to,char v,SizeBytes n)->void{
 	while(n--)
 		*d++=v;
 }
+
+
+  # restore task pointed by ecx
+  mov osca_active_task,%ecx
+  # restore cpu state
+#  mov (%ecx),%esp # restore eip
+#  mov %esp,tmp_eip # save for jump
+#  mov 8(%ecx),%esp # get eflags
+#  mov %esp,tmp_eflags # save to restore later
+#  lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
+#  popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
+#  mov -(TASK_STRUCT_SIZE-4)(%esp),%esp # restore task esp
+#  push tmp_eflags # restore eflags
+#  popf            # ..

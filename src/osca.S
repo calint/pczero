@@ -1,5 +1,6 @@
 # tested on:
 # * qemu 7.0.0 on linux 5.19
+# * VirtualBox 6.1 on linux 5.19 (no acceleration)
 # * asus zenbook
 #
 # 00000-003FF  IVT (Interrupt Vector Table)
@@ -265,9 +266,9 @@ osca_yield_next_task:
   mov 12(%ecx),%ax # get task.bits to check if task is running
   and $TASK_BIT_RUNNING,%ax
   jz osca_yield_next_task
-  # switch to task pointed by ecx
+  # switch from task pointed by ebx to task pointed by ecx
   # stack is ..., EIP, EFLAGS
-  # save task pointed by ebx
+  # save cpu state of task pointed by ebx
   pop 8(%ebx) # pop eflags to task.eflags
   pop (%ebx) # pop eip to task.eip
   mov %esp,4(%ebx) # save stack pointer to task.esp as it was before the call
@@ -277,25 +278,8 @@ osca_yield_next_task:
   mov tmp_ebx,%ebx # restore ebx
   mov tmp_ecx,%ecx # restore ecx
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
-  # restore task pointed by ecx
+  # restore cpu state of task pointed by ecx
   mov osca_active_task,%ecx
-  # restore cpu state
-#  mov (%ecx),%esp # restore eip
-#  mov %esp,tmp_eip # save for jump
-#  mov 8(%ecx),%esp # get eflags
-#  mov %esp,tmp_eflags # save to restore later
-#  lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
-#  popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-#  mov -(TASK_STRUCT_SIZE-4)(%esp),%esp # restore task esp
-#  push tmp_eflags # restore eflags
-#  popf            # ..
-
-# ?! commented code below to switch task hangs after a while in QEMU emulator version 7.0.0 (Debian 1:7.0+dfsg-7ubuntu2.1)
-# it also hangs on qemu 7.2 sometimes with a crash
-# used in isr_tmr where it works??
-# works on asus zenbook
-# crashes in VirtualBox 6.1 after a long while
-# restore task pointed by ecx
   mov (%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
   lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
@@ -303,7 +287,7 @@ osca_yield_next_task:
   sub $TASK_STRUCT_SIZE-8,%esp # position stack pointer at task.eflags
   popf # restore flags, no op that modifies flags after this
   mov -8(%esp),%esp # restore task esp
-
+  # task switch done
   sti # enables interrupts after next instruction
   jmp *tmp_eip # jmp to restored eip
 
@@ -336,6 +320,7 @@ isr_tmr:
   mov osca_tmr_lo,%eax # switch task every 8'th tick
   and $FREQ_DIV_AND,%eax # 1024/8 Hz
   jnz isr_tmr_acknowledge_and_return # if no task switch
+#  jmp isr_tmr_acknowledge_and_return # if no task switch
   # start task switching
   mov %ebx,tmp_ebx # save ebx
   mov %ecx,tmp_ecx # save ecx
@@ -353,7 +338,7 @@ isr_tmr_next_task:
   mov 12(%ecx),%ax # get bits to check if task is running
   and $TASK_BIT_RUNNING,%ax # check 'running' bit
   jz isr_tmr_next_task # if not 'running' get next task
-  # switch to task pointed by ecx
+  # switch from task pointed to by ebx to task pointed by ecx
   # stack is ..., EFLAGS, CS, EIP
   # save cpu state of task pointed by ebx
   pop (%ebx) # pop eip to task.eip
@@ -375,16 +360,7 @@ isr_tmr_next_task:
   sub $TASK_STRUCT_SIZE-8,%esp # position stack pointer at task.eflags
   popf # restore flags, no op that modifies flags after this
   mov -8(%esp),%esp # restore task esp
-
-#  mov (%ecx),%esp # restore eip
-#  mov %esp,tmp_eip # save for jump
-#  mov 8(%ecx),%esp # get eflags
-#  mov %esp,tmp_eflags # save to restore later
-#  lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
-#  popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-#  mov -(TASK_STRUCT_SIZE-4)(%esp),%esp # restore task esp
-#  push tmp_eflags # restore eflags
-#  popf            # ..
+  # task switch done
 
   # https://forum.osdev.org/viewtopic.php?f=1&t=15526&start=0
   # https://www.compuphase.com/int70.txt
