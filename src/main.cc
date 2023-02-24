@@ -52,7 +52,17 @@ extern "C" [[noreturn]] void tsk0(){
 //	pb.fg(8).p(' ').p_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
 
 //	pb.pos({5,7}).fg(2).p('_');
-	pb.pos({2,3}).fg(3).p(hello).nl().p('_');
+
+	pb.fg(0xe);
+	pb.pos({50,3}).p("./\\.");
+	pb.pos({50,4}).p("/--\\");
+
+	pb.fg(0xf);
+	pb.pos({55,3}).p(" ___ ");
+	pb.pos({55,4}).p("|o_o|");
+	pb.pos({55,5}).p("/| |\\");
+
+	pb.pos({2,3}).fg(0xf).p(hello).nl().p('_');
 
 	while(true){
 		// handle keyboard events
