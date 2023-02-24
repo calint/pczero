@@ -1,6 +1,6 @@
 # tested on linux 5.19
 # * qemu 7.0.0
-# * qemu 7.2 (github head 2023-02-23)
+# * qemu 7.2 (https://gitlab.com/qemu-project/qemu.git head 2023-02-23)
 # * VirtualBox 6.1 (no acceleration)
 # * asus zenbook
 #
