@@ -213,9 +213,8 @@ call osca_init # calls C function
 mov osca_active_task,%ebx # ebx points to active task record
 mov (%ebx),%esp  # save task.eip for jump
 mov %esp,tmp_eip # ..
-mov %ebx,%esp # position stack pointer
-add $16,%esp  #   for popa by skipping eip,esp,eflags,bits
-popa          #   pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
+lea 16(%ebx),%esp # position stack pointer by skipping eip,esp,eflags,bits
+popa              #   pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
 sub $TASK_STRUCT_SIZE-8,%esp # position stack pointer at task.eflags
 popf # restore flags, no op that modifies flags after this
 mov -8(%esp),%esp # restore task.esp

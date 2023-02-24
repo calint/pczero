@@ -9,11 +9,11 @@ extern "C" [[noreturn]] void tsk0(){
 	using namespace osca;
 	osca_disable_interrupts();
 	const TaskId taskId=osca_active_task->get_id();
-//	Register eax=osca_active_task->eax;
+	Register eax=osca_active_task->eax;
 //	Register ebx=osca_active_task->ebx;
 //	Register ecx=osca_active_task->ecx;
 //	Register edx=osca_active_task->edx;
-	Register esi=osca_active_task->esi;
+//	Register esi=osca_active_task->esi;
 //	Register edi=osca_active_task->edi;
 //	Register ebp=osca_active_task->ebp;
 //	Register esp0=osca_active_task->esp0;
@@ -27,7 +27,7 @@ extern "C" [[noreturn]] void tsk0(){
 //	err.p_hex_32b(unsigned(ebp)).spc();
 //	err.p_hex_32b(unsigned(esp0)).spc();
 
-	const char*hello=reinterpret_cast<const char*>(esi);
+	const char*hello=reinterpret_cast<const char*>(eax);
 	PrinterToBitmap pb{vga13h.bmp()};
 
 //	pb.pos({30,1});
