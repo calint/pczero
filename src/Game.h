@@ -541,9 +541,11 @@ auto Game::create_boss()->void{
 	};
 	boss_def.init_normals();
 
-	const Address heap_address=Heap::data().address();
-	const Address heap_disp_at_addr=vga13h.bmp().data().pointer().offset(50*320).address();
-	const SizeBytes heap_disp_size=320*100;
+	const Address clear_start_at_address=vga13h.bmp().data().pointer().offset(50*320).address();
+	const Address clear_copy_from_address=Heap::data().address();
+	const SizeBytes clear_copy_num_bytes=320*100;
+//	const Address clear_copy_from_address=osca_tasks;
+//	const SizeBytes clear_copy_num_bytes=SizeBytes(osca_tasks_end-osca_tasks)*SizeBytes(sizeof(Task));
 
 	World::init_statics();
 
@@ -565,7 +567,7 @@ auto Game::create_boss()->void{
 		*reinterpret_cast<unsigned*>(0xa'0000+320*2+160)=osca_tmr_lo;
 
 		// clear game area
-		pz_memcpy(heap_disp_at_addr,heap_address,heap_disp_size);
+		pz_memcpy(clear_start_at_address,clear_copy_from_address,clear_copy_num_bytes);
 
 		World::tick();
 
