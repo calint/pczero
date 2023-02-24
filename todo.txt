@@ -1,4 +1,5 @@
 [ ] task switch the state of FPU
+[ ]   FXSAVE FXRSTOR
 [ ] review 'using' Scale Coord Angle Vertex etc terminology
 [x] osca: task_id (lower 16 bits of task.bits?)
 [x]   keyboard_focus
