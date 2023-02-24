@@ -45,19 +45,6 @@ inline auto osca_disable_interrupts()->void{asm("cli");}
 // enables interrupts
 inline auto osca_enable_interrupts()->void{asm("sti");}
 
-//inline int osca_get_eax(){int r;asm("mov %%eax,%0":"=a"(r));return r;}
-//inline int osca_get_ebx(){int r;asm("mov %%ebx,%0":"=b"(r));return r;}
-//inline int osca_get_ecx(){int r;asm("mov %%ecx,%0":"=c"(r));return r;}
-//inline int osca_get_edx(){int r;asm("mov %%edx,%0":"=d"(r));return r;}
-//inline int osca_get_esi(){int r;asm("mov %%esi,%0":"=S"(r));return r;}
-//inline int osca_get_edi(){int r;asm("mov %%edi,%0":"=D"(r));return r;}
-//inline int osca_get_eax(){int r;asm("mov %%eax,%0":"=m"(r));return r;}
-//inline int osca_get_ebx(){int r;asm("mov %%ebx,%0":"=m"(r));return r;}
-//inline int osca_get_ecx(){int r;asm("mov %%ecx,%0":"=m"(r));return r;}
-//inline int osca_get_edx(){int r;asm("mov %%edx,%0":"=m"(r));return r;}
-//inline int osca_get_esi(){int r;asm("mov %%esi,%0":"=m"(r));return r;}
-//inline int osca_get_edi(){int r;asm("mov %%edi,%0":"=m"(r));return r;}
-
 //
 // callbacks from osca.S
 //
