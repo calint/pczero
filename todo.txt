@@ -1,5 +1,6 @@
 [ ] task switch the state of FPU
-[-]   FXSAVE FXRSTOR. not supported on i386.
+[ ]   FSAVE and FRSTOR. supported on "-march=i386+387"
+[ ]     80386 System Software Writers Guide 1987: 7.1.2.1 COPROCESSOR CONTEXT SWITCHING
 [ ] review 'using' Scale Coord Angle Vertex etc terminology
 [x] osca: task_id (lower 16 bits of task.bits?)
 [x]   keyboard_focus

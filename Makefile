@@ -13,7 +13,7 @@ FILES=$(SRC)
 FILES+=src/osca.h src/kernel.h src/lib.h src/lib2d.h src/libge.h src/Game.h
 
 # GNU assembler (GNU Binutils for Ubuntu) 2.39
-AF=--march=i386 --32
+AF=-march=i386+387 --32
 
 # g++ (Ubuntu 12.2.0-3ubuntu1) 12.2.0
 #CC=g++ -std=c++2b # c++ 23
