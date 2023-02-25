@@ -105,3 +105,43 @@ auto pz_memset(Address to,char v,SizeBytes n)->void{
 //inline int osca_get_esi(){int r;asm("mov %%esi,%0":"=m"(r));return r;}
 //inline int osca_get_edi(){int r;asm("mov %%edi,%0":"=m"(r));return r;}
 
+
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
+movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE # Exception 7: FPU task switch
+
+
+mov %cr0,%eax # enable MP (Monitor co-processor) bit
+or $2,%al     #  together with TS (Task switched) triggers
+mov %eax,%cr0 #  an exception used to switch FPU state
+
+
+  # enable TS (Task switched) bit. With MP bit set will generate
+  # exception when a FPU instruction is attempted. this will trigger
+  # a FPU state switch
+  mov %cr0,%eax
+  or $8,%al
+  mov %eax,%cr0
+
+
+.align 4
+isr_fpu:
+  cli # disable interrupts
+  incl 0xa0000+100 # debugging
+  push %eax
+  # is the active task same as active FPU state?
+  mov osca_active_task,%eax
+  cmp osca_active_fpu,%eax
+  je isr_fpu_done
+    # not same task, switch fpu context
+    incl 0xa0000+50 # debugging
+    # switch FPU state
+    mov %eax,osca_active_fpu # set active FPU to active task
+
+isr_fpu_done:
+  pop %eax
+  clts # reset the TS flag in CR0
+  sti # enables interrupts after next instruction
+  iret
+
+  
+  
