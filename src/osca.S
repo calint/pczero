@@ -275,7 +275,7 @@ sector2: # 0x7e00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 call osca_init # calls C function
 mov osca_active_task,%ebx # ebx points to active task record
-mov (%ebx),%esp  # save task.eip for jump
+mov TASK_STRUCT_OFFSET_EIP(%ebx),%esp  # save task.eip for jump
 mov %esp,tmp_eip # ..
 # position esp for popa
 lea TASK_STRUCT_OFFSET_GPRS(%ebx),%esp
@@ -322,7 +322,7 @@ osca_yield_next_task:
   # stack is ..., EIP, EFLAGS
   # save cpu state of task pointed by ebx
   pop TASK_STRUCT_OFFSET_EFLAGS(%ebx) # pop eflags to task.eflags
-  pop (%ebx) # pop eip to task.eip
+  pop TASK_STRUCT_OFFSET_EIP(%ebx) # pop eip to task.eip
   # save stack pointer to task.esp as it was before the call
   mov %esp,TASK_STRUCT_OFFSET_ESP(%ebx)
   # save gprs. move esp to end of gprs then pusha
@@ -335,7 +335,7 @@ osca_yield_next_task:
 
   # restore cpu state of task pointed by ecx
   mov osca_active_task,%ecx
-  mov (%ecx),%esp # get task.eip
+  mov TASK_STRUCT_OFFSET_EIP(%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
   # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
   lea TASK_STRUCT_OFFSET_GPRS(%ecx),%esp
