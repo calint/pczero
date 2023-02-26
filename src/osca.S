@@ -377,7 +377,6 @@ isr_tmr:
   mov osca_tmr_lo,%eax # switch task every 8'th tick
   and $FREQ_DIV_AND,%eax # 1024/8 Hz
   jnz isr_tmr_acknowledge_and_return # if no task switch
-#  jmp isr_tmr_acknowledge_and_return # if no task switch
   # start task switching
   mov %ebx,tmp_ebx # save ebx
   mov %ecx,tmp_ecx # save ecx
