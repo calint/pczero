@@ -248,7 +248,7 @@ jmp sector2
 osca_tmr_lo:.long 0 # 1024 Hz tick lower, exported
 osca_tmr_hi:.long 0 # 1024 Hz tick higher, exported
 osca_active_task:.long osca_tasks # pointer to active task, exported
-osca_active_fpu:.long osca_tasks # pointer to task that is has the fpu state
+osca_active_fpu:.long osca_tasks # pointer to task that is in the fpu
 tmp_eax:.long 0 # used in osca_yield and isr_tmr
 tmp_ebx:.long 0 # ...
 tmp_ecx:.long 0 # ...
@@ -483,7 +483,7 @@ isr_fpu:
   cli
   push %eax
   clts # reset the TS flag in CR0
-  # is the active task same as active FPU state?
+  # is the active task same as active fpu state?
   mov osca_active_task,%eax
   cmp osca_active_fpu,%eax
   je isr_fpu_done
