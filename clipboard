@@ -10,7 +10,6 @@ clang-tidy -header-filter=.* src/main.cc -- -pedantic -pedantic-errors -Wall -We
 
 cppcheck --enable=all src/main.cc
 
-
 # more read
 mov $0x023f,%ax # command 2, 0x3f sectors 31½K
 mov $0x0101,%cx # from cylinder 2 sector 1 (sector starts from 1, not 0)
@@ -20,23 +19,7 @@ mov %bx,%es
 xor %bx,%bx
 int $0x13 # read disk
 
-
 https://stackoverflow.com/questions/3645803/bios-int-13h-with-ah-2-can-only-read-72-sectors-each-time-why
-
-
-  mov (%ecx),%esp # restore eip
-  mov %esp,tmp_eip # save for jump
-#  mov 4(%ecx),%esp # restore esp
-#  mov %esp,tmp_esp # save esp, will be used as scratch
-  mov 8(%ecx),%esp # get eflags
-  mov %esp,tmp_eflags # save to restore later
-  mov %ecx,%esp # restore gprs
-  add $16,%esp # position stack pointer for popa by skipping eip,esp,eflags,bits
-  popa # write edi,esi,ebp,esp0,ebx,edx,ecx,eax
-#  mov tmp_esp,%esp # restore task esp
-  mov -44(%esp),%esp # restore task esp
-  push tmp_eflags # restore eflags
-  popf            # ..
 
 #!/bin/sh
 cp ~/w/pczero/pczero.img .
@@ -44,104 +27,3 @@ mv -f pczero.img pc.img
 truncate pc.img --size=1M
 rm pc.vdi
 VBoxManage convertfromraw --format VDI pc.img pc.vdi
-
-
-extern "C" void*memcpy(void *dest, const void * src, unsigned n);
-extern "C" void*memcpy(void *dest, const void * src, unsigned n){
-	char*d=static_cast<char*>(dest);
-	const char*s=static_cast<const char*>(src);
-	while(n--)
-		*d++=*s++;
-	return dest;
-}
-extern "C" void *memset(void *str, int c, unsigned n);
-extern "C" void *memset(void *str, int c, unsigned n){
-	unsigned char ch=static_cast<unsigned char>(c);
-	unsigned char*d=static_cast<unsigned char*>(str);
-	while(n--)
-		*d++=ch;
-	return str;
-}
-auto pz_memcpy(Address to,Address from,SizeBytes n)->void;
-auto pz_memcpy(Address to,Address from,SizeBytes n)->void{
-	char*d=static_cast<char*>(to);
-	char*s=static_cast<char*>(from);
-	while(n--)
-		*d++=*s++;
-}
-
-auto pz_memset(Address to,char v,SizeBytes n)->void;
-auto pz_memset(Address to,char v,SizeBytes n)->void{
-	char*d=static_cast<char*>(to);
-	while(n--)
-		*d++=v;
-}
-
-
-  # restore task pointed by ecx
-  mov osca_active_task,%ecx
-  # restore cpu state
-#  mov (%ecx),%esp # restore eip
-#  mov %esp,tmp_eip # save for jump
-#  mov 8(%ecx),%esp # get eflags
-#  mov %esp,tmp_eflags # save to restore later
-#  lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
-#  popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-#  mov -(TASK_STRUCT_SIZE-4)(%esp),%esp # restore task esp
-#  push tmp_eflags # restore eflags
-#  popf            # ..
-
-
-//inline int osca_get_eax(){int r;asm("mov %%eax,%0":"=a"(r));return r;}
-//inline int osca_get_ebx(){int r;asm("mov %%ebx,%0":"=b"(r));return r;}
-//inline int osca_get_ecx(){int r;asm("mov %%ecx,%0":"=c"(r));return r;}
-//inline int osca_get_edx(){int r;asm("mov %%edx,%0":"=d"(r));return r;}
-//inline int osca_get_esi(){int r;asm("mov %%esi,%0":"=S"(r));return r;}
-//inline int osca_get_edi(){int r;asm("mov %%edi,%0":"=D"(r));return r;}
-//inline int osca_get_eax(){int r;asm("mov %%eax,%0":"=m"(r));return r;}
-//inline int osca_get_ebx(){int r;asm("mov %%ebx,%0":"=m"(r));return r;}
-//inline int osca_get_ecx(){int r;asm("mov %%ecx,%0":"=m"(r));return r;}
-//inline int osca_get_edx(){int r;asm("mov %%edx,%0":"=m"(r));return r;}
-//inline int osca_get_esi(){int r;asm("mov %%esi,%0":"=m"(r));return r;}
-//inline int osca_get_edi(){int r;asm("mov %%edi,%0":"=m"(r));return r;}
-
-
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
-movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE # Exception 7: FPU task switch
-
-
-mov %cr0,%eax # enable MP (Monitor co-processor) bit
-or $2,%al     #  together with TS (Task switched) triggers
-mov %eax,%cr0 #  an exception used to switch FPU state
-
-
-  # enable TS (Task switched) bit. With MP bit set will generate
-  # exception when a FPU instruction is attempted. this will trigger
-  # a FPU state switch
-  mov %cr0,%eax
-  or $8,%al
-  mov %eax,%cr0
-
-
-.align 4
-isr_fpu:
-  cli # disable interrupts
-  incl 0xa0000+100 # debugging
-  push %eax
-  # is the active task same as active FPU state?
-  mov osca_active_task,%eax
-  cmp osca_active_fpu,%eax
-  je isr_fpu_done
-    # not same task, switch fpu context
-    incl 0xa0000+50 # debugging
-    # switch FPU state
-    mov %eax,osca_active_fpu # set active FPU to active task
-
-isr_fpu_done:
-  pop %eax
-  clts # reset the TS flag in CR0
-  sti # enables interrupts after next instruction
-  iret
-
-  
-  
