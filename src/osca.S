@@ -500,13 +500,13 @@ isr_fpu:
     push %ebx
     mov osca_active_fpu,%ebx
     add $TASK_STRUCT_OFFSET_FPU_STATE,%ebx
-    fsave (%ebx)
-    fwait
+    fsave (%ebx) # save state
+    fwait # wait for write to complete
     mov %eax,%ebx
     add $TASK_STRUCT_OFFSET_FPU_STATE,%ebx
-    frstor (%ebx)
-    fwait
-    mov %eax,osca_active_fpu
+    frstor (%ebx) # restore state
+    fwait # eait for write to complete
+    mov %eax,osca_active_fpu # set the active fpu task
     pop %ebx
 
 isr_fpu_done:
