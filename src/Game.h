@@ -159,7 +159,7 @@ public:
 };
 
 class Bullet final:public Object{
-	static constexpr Scale scl=1;
+	static constexpr Scale scl=0.5;
 	static constexpr Scale bounding_radius=scl*sqrt_of_2;
 	TimeSec created_time;
 public:
