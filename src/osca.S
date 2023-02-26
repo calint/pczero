@@ -465,7 +465,7 @@ isr_tmr_acknowledge_and_return:
   mov tmp_eax,%eax # restore clobbered register
   sti # enables interrupts after next instruction
   iret
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - ikbd
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - keyboard
 .align 4
 isr_kbd:
   cli # disable interrupts
