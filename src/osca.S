@@ -386,9 +386,9 @@ isr_tmr:
 isr_tmr_next_task:
   add $TASK_STRUCT_SIZE,%ecx # next task
   cmp osca_tasks_end,%ecx # if last
-  jl lbl4
+  jl lbl3
     mov $osca_tasks,%ecx # roll
-  lbl4:
+  lbl3:
   cmp %ebx,%ecx # if no active task found
   je isr_tmr_exit_without_task_switch # exit without task switch
   # get bits to check if task is running
