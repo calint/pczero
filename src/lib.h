@@ -1,22 +1,22 @@
 #pragma once
 
-// built-in functions replacements (used by clang++ -O0)
-//extern "C" void*memcpy(void*dest,const void*src,unsigned n);
-//extern "C" void*memcpy(void*dest,const void*src,unsigned n){
-//	char*d=static_cast<char*>(dest);
-//	const char*s=static_cast<const char*>(src);
-//	while(n--)
-//		*d++=*s++;
-//	return dest;
-//}
-//extern "C" void*memset(void*str,int c,unsigned n);
-//extern "C" void*memset(void*str,int c,unsigned n){
-//	unsigned char ch=static_cast<unsigned char>(c);
-//	unsigned char*d=static_cast<unsigned char*>(str);
-//	while(n--)
-//		*d++=ch;
-//	return str;
-//}
+// built-in functions replacements (used by clang++ -O0 and -Os)
+extern "C" void*memcpy(void*dest,const void*src,unsigned n);
+extern "C" void*memcpy(void*dest,const void*src,unsigned n){
+	char*d=static_cast<char*>(dest);
+	const char*s=static_cast<const char*>(src);
+	while(n--)
+		*d++=*s++;
+	return dest;
+}
+extern "C" void*memset(void*str,int c,unsigned n);
+extern "C" void*memset(void*str,int c,unsigned n){
+	unsigned char ch=static_cast<unsigned char>(c);
+	unsigned char*d=static_cast<unsigned char*>(str);
+	while(n--)
+		*d++=ch;
+	return str;
+}
 //extern "C" void*memcpy(void*to,void*from,unsigned n);
 //extern "C" void*memcpy(void*to,void*from,unsigned n){
 //	// ? optimize movsb a times,movsd b times,movsb c times
