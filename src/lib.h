@@ -383,7 +383,7 @@ using CoordsChar=CoordsT<int>;
 class PrinterToBitmap{ // ? bounds check on constexpr
 	Color8b*di_; // current pixel in bitmap
 	Color8b*dil_; // beginning of current line
-	Bitmap8b&b_;
+	Bitmap8b&b_; // ? C++ guidelines C.12
 	SizePx bmp_wi_;
 	SizePx ln_;
 	Color8b fg_{2};
