@@ -9,8 +9,8 @@
 # 00600-9FFFF  Ordinary application RAM
 # 00600-0077F    osca IDT (Interrupt Descriptor Table)
 # 00780-07BFF    free
-# 07C00-081FF    osca kernel
-# 08200-         application
+# 07C00-07FFF    osca kernel
+# 08000-         application
 # A0000-BFFFF  Video memory
 # C0000-EFFFF  Optional ROMs (The VGA ROM is usually located at C0000)
 # F0000-FFFFF  BIOS ROM
@@ -479,9 +479,6 @@ isr_kbd:
   popa # restore registers
   sti # enables interrupts after next instruction
   iret
-.space sector2+512-.,0
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - sector 3
-sector3: # 0x8000
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu state switch
 .align 4
 isr_fpu:
@@ -509,5 +506,5 @@ isr_fpu_done:
   sti
   iret
 
-.space sector3+512-.,0
+.space sector2+512-.,0
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done

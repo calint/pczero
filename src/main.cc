@@ -113,7 +113,7 @@ extern "C" [[noreturn]] void tsk2(){
 	using namespace osca;
 	while(true){
 		// copy kernel to screen
-		constexpr int kernel_size=512*3;
+		constexpr int kernel_size=512*2;
 		Data src=Data(Address(0x7c00),kernel_size); // kernel binary
 		Data dst=Data(Address(0xa'0000+320*150),kernel_size); // on screen
 		src.to(dst);
