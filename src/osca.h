@@ -17,9 +17,8 @@ struct Task{
 	Register edx{0};
 	Register ecx{0};
 	Register eax{0};
-//	char fpu_state[94]{};
-	//	char padding1{0};
-	//	char padding2{0};
+	// note. The FSSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
+	//       first byte of the structure needing to be aligned on a 16-byte boundary.
 	char fpu_state[108]{};
 
 	constexpr inline TaskId get_id()const{return id;}
