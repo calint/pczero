@@ -277,7 +277,7 @@ mov (%ebx),%esp  # save task.eip for jump
 mov %esp,tmp_eip # ..
 # position esp for popa
 lea TASK_STRUCT_OFFSET_GPRS(%ebx),%esp
-popa              #   pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
+popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
 # position stack pointer at task.eflags
 sub $(TASK_STRUCT_OFFSET_GPRS_END-TASK_STRUCT_OFFSET_EFLAGS),%esp
 popf # restore flags, no op that modifies flags after this
