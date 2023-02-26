@@ -58,14 +58,14 @@ inline auto osca_enable_interrupts()->void{asm("sti");}
 //
 
 // called from osca.S before starting tasks
-extern "C" void osca_init();
+extern "C" auto osca_init()->void;
 
 // called from osca.S:isr_kbd
 // keyboard interrupt when new scan code from keyboard
-extern "C" void osca_keyb_ev();
+extern "C" auto osca_keyb_ev()->void;
 
 // called when interrupt other than keyboard and timer
-extern "C" void osca_exception();
+extern "C" auto osca_exception()->void;
 
 //
 // exported from osca.S
@@ -87,6 +87,6 @@ extern "C" volatile const unsigned osca_tmr_hi;
 // note. single small task yielding in a tight loop might inhibit
 // interrupts due to most time being spent in non-interruptable
 // task switching code
-extern "C" void osca_yield();
+extern "C" auto osca_yield()->void;
 
 } // end namespace osca

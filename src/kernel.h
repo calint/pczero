@@ -10,7 +10,7 @@ extern "C" [[noreturn]] void tsk4();
 namespace osca{
 
 // called by the interrupt handler for events other than keyboard and timer
-extern "C" void osca_exception(){
+extern "C" auto osca_exception()->void{
 	err.p("osca exception").spc();
 	osca_hang();
 }
@@ -178,7 +178,7 @@ inline static TaskId task_focused_id{0};
 
 // called by osca before starting tasks
 // initiates globals
-extern "C" void osca_init(){
+extern "C" auto osca_init()->void{
 	using namespace osca;
 	// green dot on screen (top left)
 	*reinterpret_cast<int*>(0xa0000)=0x02;
@@ -204,7 +204,7 @@ extern "C" void osca_init(){
 }
 // called by osca from the keyboard interrupt
 // there is no task switch during this function
-extern "C" void osca_keyb_ev(){
+extern "C" auto osca_keyb_ev()->void{
 	using namespace osca;
 	// on screen
 	*reinterpret_cast<int*>(0xa0000+4)=osca_key;
