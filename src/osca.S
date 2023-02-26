@@ -283,6 +283,7 @@ jmp *tmp_eip # jmp to saved eip (first task)
 osca_yield: # switches to next task
   cli # disable interrupts
   pushf # push flags. stack is now ..., EIP, EFLAGS
+        # EFLAGS 'Interrupt enable flag' is off
   incl 0xa0000+320-12 # create output on screen
   # start task switching
   mov %eax,tmp_eax # save eax,ebx,ecx
@@ -323,25 +324,13 @@ osca_yield_next_task:
 
   # restore cpu state of task pointed by ecx
   mov osca_active_task,%ecx
-
-#  ?! the commented restore task code below occasionally hangs qemu 7.0 on linux
-#  mov (%ecx),%esp # get task.eip
-#  mov %esp,tmp_eip # save for jump
-#  lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
-#  popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-#  sub $TASK_STRUCT_SIZE-8,%esp # position stack pointer at task.eflags
-#  popf # restore flags, no op that modifies flags after this
-#  mov -8(%esp),%esp # restore task esp
-
-  mov (%ecx),%esp # restore eip
+  mov (%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
-  mov 8(%ecx),%esp # get eflags
-  mov %esp,tmp_eflags # save to restore later
   lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  mov -(TASK_STRUCT_OFFSET_FPU_STATE-4)(%esp),%esp # restore task esp
-  push tmp_eflags # restore eflags
-  popf            # ..
+  sub $TASK_STRUCT_OFFSET_FPU_STATE-8,%esp # position stack pointer at task.eflags
+  popf # restore flags, no op that modifies flags after this
+  mov -8(%esp),%esp # restore task esp
 
   # task switch done
   sti # enables interrupts after next instruction
@@ -406,6 +395,8 @@ isr_tmr_next_task:
   pop (%ebx) # pop eip to task.eip
   add $4,%esp # skip cs
   pop 8(%ebx) # pop eflags to task.eflags
+  andl $(0xffffffff-0x0200),8(%ebx) # clear the enable interrupts flag
+                                    #   so that popf is safe in a cli/sti section
   mov %esp,4(%ebx) # save stack pointer as it was before irq to task.esp
   lea TASK_STRUCT_OFFSET_FPU_STATE(%ebx),%esp # save gprs. move esp to end of task record then pusha
   mov %ecx,osca_active_task # save pointer to next task record
