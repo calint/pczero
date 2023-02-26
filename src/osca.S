@@ -277,7 +277,8 @@ mov (%ebx),%esp  # save task.eip for jump
 mov %esp,tmp_eip # ..
 lea 16(%ebx),%esp # position stack pointer by skipping eip,esp,eflags,bits
 popa              #   pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-sub $(TASK_STRUCT_OFFSET_GPRS_END-8),%esp # position stack pointer at task.eflags
+# position stack pointer at task.eflags
+sub $(TASK_STRUCT_OFFSET_GPRS_END-TASK_STRUCT_OFFSET_EFLAGS),%esp
 popf # restore flags, no op that modifies flags after this
 mov -8(%esp),%esp # restore task.esp
 sti # enables interrupts after next instruction
