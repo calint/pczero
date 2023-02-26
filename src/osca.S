@@ -502,7 +502,7 @@ isr_fpu:
     fwait # wait for write to complete
     mov %eax,%ebx
     frstor TASK_STRUCT_OFFSET_FPU_STATE(%ebx) # restore state
-    fwait # eait for write to complete
+    fwait # wait for write to complete
     mov %eax,osca_active_fpu # set the active fpu task
     pop %ebx
 
