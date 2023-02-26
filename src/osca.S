@@ -409,7 +409,8 @@ isr_tmr_next_task:
   pop TASK_STRUCT_OFFSET_EFLAGS(%ebx) # pop eflags to task.eflags
   andl $(0xffffffff-0x0200),8(%ebx) # clear the enable interrupts flag
                                     #  so that popf is safe in a cli/sti section
-  mov %esp,4(%ebx) # save stack pointer as it was before irq to task.esp
+  # save stack pointer as it was before irq to task.esp
+  mov %esp,TASK_STRUCT_OFFSET_ESP(%ebx)
   # save gprs. move esp to end of gprs then pusha
   lea TASK_STRUCT_OFFSET_GPRS_END(%ebx),%esp
   mov %ecx,osca_active_task # save pointer to next task record
