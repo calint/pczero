@@ -18,9 +18,9 @@ struct Task{
 	Register ecx{0};
 	Register eax{0};
 //	char fpu_state[94]{};
+	//	char padding1{0};
+	//	char padding2{0};
 	char fpu_state[108]{};
-//	char padding1{0};
-//	char padding2{0};
 
 	constexpr inline TaskId get_id()const{return id;}
 	constexpr inline bool is_grab_keyboard_focus()const{return bits&1;}
