@@ -485,6 +485,7 @@ isr_fpu:
   cmp osca_active_fpu,%eax
   je isr_fpu_done
     # not same task, switch fpu state
+    incl 0xa0000+320-16 # on screen
     push %ebx
     mov osca_active_fpu,%ebx
     add $TASK_STRUCT_OFFSET_FPU_STATE,%ebx
