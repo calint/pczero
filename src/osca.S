@@ -22,7 +22,8 @@
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
                       # note. high task switching frequency
                       # might hang slower hardware
-.set TASK_STRUCT_OFFSET_EFLAGS,8     # see osca.h: struct Task
+.set TASK_STRUCT_OFFSET_ESP,4        # see osca.h: struct Task
+.set TASK_STRUCT_OFFSET_EFLAGS,8     # ..
 .set TASK_STRUCT_OFFSET_BITS,12      # ..
 .set TASK_STRUCT_OFFSET_GPRS,16      # ..
 .set TASK_STRUCT_OFFSET_GPRS_END,48  # ..
@@ -319,9 +320,10 @@ osca_yield_next_task:
   # switch from task pointed by ebx to task pointed by ecx
   # stack is ..., EIP, EFLAGS
   # save cpu state of task pointed by ebx
-  pop 8(%ebx) # pop eflags to task.eflags
+  pop TASK_STRUCT_OFFSET_EFLAGS(%ebx) # pop eflags to task.eflags
   pop (%ebx) # pop eip to task.eip
-  mov %esp,4(%ebx) # save stack pointer to task.esp as it was before the call
+  # save stack pointer to task.esp as it was before the call
+  mov %esp,TASK_STRUCT_OFFSET_ESP(%ebx)
   # save gprs. move esp to end of gprs then pusha
   lea TASK_STRUCT_OFFSET_GPRS_END(%ebx),%esp
   mov %ecx,osca_active_task # save pointer to next task record
