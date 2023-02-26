@@ -122,7 +122,8 @@ extern "C" [[noreturn]] void tsk3(){
 	osca_enable_interrupts();
 
 	while(true){
-		vga13h.bmp().data().pointer().offset(eax).write(osca_tmr_lo);
+		const float f=float(osca_tmr_lo)*.5f;
+		vga13h.bmp().data().pointer().offset(eax).write(unsigned(f));
 //		osca_nop(); // ? without this or yield line above is optimized away by the compiler
 		osca_yield();
 	}

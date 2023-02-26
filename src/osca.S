@@ -22,7 +22,9 @@
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
                       # note. high task switching frequency
                       # might hang slower hardware
-.set TASK_STRUCT_SIZE,48
+.set TASK_STRUCT_OFFSET_FPU_STATE,48
+#.set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+94+2
+.set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+108
 .set TASK_BIT_FOCUS_KEYBOARD,1
 .set TASK_BIT_RUNNING,2
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - exports
@@ -207,24 +209,42 @@ loop lbl2
 #  only the lower offset set, handlers within 64K
 movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE # IRQ 1: keyboard
 movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE # IRQ 8: timer 1024 Hz
+movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE # Exception 7: Device not available,
+                                        #   may trigger a FPU task switch
 lidt idtr
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
-call osca_init # calls C function
-mov osca_active_task,%ebx # ebx points to active task record
-mov (%ebx),%esp  # save task.eip for jump
-mov %esp,tmp_eip # ..
-lea 16(%ebx),%esp # position stack pointer by skipping eip,esp,eflags,bits
-popa              #   pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-sub $TASK_STRUCT_SIZE-8,%esp # position stack pointer at task.eflags
-popf # restore flags, no op that modifies flags after this
-mov -8(%esp),%esp # restore task.esp
-sti # enables interrupts after next instruction
-jmp *tmp_eip # jmp to saved eip (first task)
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
+# 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
+# 7.1.2.1 COPROCESSOR CONTEXT SWITCHING page 122
+mov %cr0,%eax # enable MP (Monitor co-processor) bit in CR0
+or $2,%al     #  if TS (Task switched) bit is set and a FPU
+mov %eax,%cr0 #  instruction is used then exception 7 is triggered
+# initiate the tasks' FPU state with initial values
+fninit # initiate FPU
+fwait
+mov $osca_tasks,%ebx
+add $TASK_STRUCT_OFFSET_FPU_STATE,%ebx
+loop1:
+# from you.com
+# The FSAVE instruction writes a total of 108 bytes to the memory
+# address specified.
+#
+# from 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
+# 7.1.2.1 COPROCESSOR CONTEXT SWITCHING
+# The save area should be 94 bytes, the size of the area used
+# by the FSAVE and FRSTOR instructions.
+  fsave (%ebx)
+  fwait
+  add $TASK_STRUCT_SIZE,%ebx # next task
+  cmp osca_tasks_end,%ebx
+  jl loop1
+
+jmp sector2
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
 .align 4
 osca_tmr_lo:.long 0 # 1024 Hz tick lower, exported
 osca_tmr_hi:.long 0 # 1024 Hz tick higher, exported
 osca_active_task:.long osca_tasks # pointer to active task, exported
+osca_active_fpu:.long osca_tasks # pointer to task that has the fpu state
 tmp_eax:.long 0 # used in osca_yield and isr_tmr
 tmp_ebx:.long 0 # ...
 tmp_ecx:.long 0 # ...
@@ -242,6 +262,18 @@ osca_key:.byte 0x00 # last key event, exported
 .word 0xaa55 # pc boot sector signature
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - sector 2
 sector2: # 0x7e00
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
+call osca_init # calls C function
+mov osca_active_task,%ebx # ebx points to active task record
+mov (%ebx),%esp  # save task.eip for jump
+mov %esp,tmp_eip # ..
+lea 16(%ebx),%esp # position stack pointer by skipping eip,esp,eflags,bits
+popa              #   pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
+sub $TASK_STRUCT_OFFSET_FPU_STATE-8,%esp # position stack pointer at task.eflags
+popf # restore flags, no op that modifies flags after this
+mov -8(%esp),%esp # restore task.esp
+sti # enables interrupts after next instruction
+jmp *tmp_eip # jmp to saved eip (first task)
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - yield
 .align 4
 osca_yield: # switches to next task
@@ -266,13 +298,19 @@ osca_yield_next_task:
   mov 12(%ecx),%ax # get task.bits to check if task is running
   and $TASK_BIT_RUNNING,%ax
   jz osca_yield_next_task
+
+  # enable TS (Task switched) bit
+  mov %cr0,%eax
+  or $8,%al
+  mov %eax,%cr0
+
   # switch from task pointed by ebx to task pointed by ecx
   # stack is ..., EIP, EFLAGS
   # save cpu state of task pointed by ebx
   pop 8(%ebx) # pop eflags to task.eflags
   pop (%ebx) # pop eip to task.eip
   mov %esp,4(%ebx) # save stack pointer to task.esp as it was before the call
-  lea TASK_STRUCT_SIZE(%ebx),%esp # save gprs. move esp to end of task record then pusha
+  lea TASK_STRUCT_OFFSET_FPU_STATE(%ebx),%esp # save gprs. move esp to end of task record then pusha
   mov %ecx,osca_active_task # save pointer to next task record
   mov tmp_eax,%eax # restore eax
   mov tmp_ebx,%ebx # restore ebx
@@ -297,7 +335,7 @@ osca_yield_next_task:
   mov %esp,tmp_eflags # save to restore later
   lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  mov -(TASK_STRUCT_SIZE-4)(%esp),%esp # restore task esp
+  mov -(TASK_STRUCT_OFFSET_FPU_STATE-4)(%esp),%esp # restore task esp
   push tmp_eflags # restore eflags
   popf            # ..
 
@@ -352,6 +390,12 @@ isr_tmr_next_task:
   mov 12(%ecx),%ax # get bits to check if task is running
   and $TASK_BIT_RUNNING,%ax # check 'running' bit
   jz isr_tmr_next_task # if not 'running' get next task
+
+  # enable TS (Task switched) bit
+  mov %cr0,%eax
+  or $8,%al
+  mov %eax,%cr0
+
   # switch from task pointed to by ebx to task pointed by ecx
   # stack is ..., EFLAGS, CS, EIP
   # save cpu state of task pointed by ebx
@@ -359,7 +403,7 @@ isr_tmr_next_task:
   add $4,%esp # skip cs
   pop 8(%ebx) # pop eflags to task.eflags
   mov %esp,4(%ebx) # save stack pointer as it was before irq to task.esp
-  lea TASK_STRUCT_SIZE(%ebx),%esp # save gprs. move esp to end of task record then pusha
+  lea TASK_STRUCT_OFFSET_FPU_STATE(%ebx),%esp # save gprs. move esp to end of task record then pusha
   mov %ecx,osca_active_task # save pointer to next task record
   mov tmp_eax,%eax # save proper eax
   mov tmp_ebx,%ebx # save proper ebx
@@ -371,7 +415,7 @@ isr_tmr_next_task:
   mov %esp,tmp_eip # save for jump
   lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  sub $TASK_STRUCT_SIZE-8,%esp # position stack pointer at task.eflags
+  sub $TASK_STRUCT_OFFSET_FPU_STATE-8,%esp # position stack pointer at task.eflags
   popf # restore flags, no op that modifies flags after this
   mov -8(%esp),%esp # restore task esp
   # task switch done
@@ -426,5 +470,31 @@ isr_kbd:
   popa # restore registers
   sti # enables interrupts after next instruction
   iret
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu state switch
+.align 4
+isr_fpu:
+  cli
+  push %eax
+  clts # reset the TS flag in CR0
+  # is the active task same as active FPU state?
+  mov osca_active_task,%eax
+  cmp osca_active_fpu,%eax
+  je isr_fpu_done
+    # not same task, switch fpu state
+    push %ebx
+    mov osca_active_fpu,%ebx
+    add $TASK_STRUCT_OFFSET_FPU_STATE,%ebx
+    fsave (%ebx)
+    fwait
+    mov %eax,%ebx
+    add $TASK_STRUCT_OFFSET_FPU_STATE,%ebx
+    frstor (%ebx)
+    fwait
+    mov %eax,osca_active_fpu
+    pop %ebx
 
+isr_fpu_done:
+  pop %eax
+  sti
+  iret
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
