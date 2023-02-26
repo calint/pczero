@@ -18,7 +18,7 @@ struct alignas(16) Task{
 	Register edx{0};
 	Register ecx{0};
 	Register eax{0};
-	// note. The FSSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
+	// note. The FSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
 	//       first byte of the structure needed to be aligned on a 16-byte boundary.
 	Byte fpu_state[108]{};
 	Byte padding0{0};
