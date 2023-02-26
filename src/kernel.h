@@ -2,10 +2,10 @@
 #include"osca.h"
 #include"lib.h"
 
-extern "C" [[noreturn]] void tsk0();
-extern "C" [[noreturn]] void tsk2();
-extern "C" [[noreturn]] void tsk3();
-extern "C" [[noreturn]] void tsk4();
+extern "C" [[noreturn]] auto tsk0()->void;
+extern "C" [[noreturn]] auto tsk2()->void;
+extern "C" [[noreturn]] auto tsk3()->void;
+extern "C" [[noreturn]] auto tsk4()->void;
 
 namespace osca{
 

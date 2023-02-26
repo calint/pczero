@@ -5,7 +5,7 @@
 #include"kernel.h"
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" [[noreturn]] void tsk0(){
+extern "C" [[noreturn]] auto tsk0()->void{
 	using namespace osca;
 	osca_disable_interrupts();
 	const TaskId taskId=osca_active_task->get_id();
@@ -109,7 +109,7 @@ asm("  incl 0xa0000+160");
 asm("  call osca_yield");
 asm("  jmp tsk1");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" [[noreturn]] void tsk2(){
+extern "C" [[noreturn]] auto tsk2()->void{
 	using namespace osca;
 	while(true){
 		// copy kernel to screen
@@ -121,7 +121,7 @@ extern "C" [[noreturn]] void tsk2(){
 	}
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-extern "C" [[noreturn]] void tsk3(){
+extern "C" [[noreturn]] auto tsk3()->void{
 	using namespace osca;
 	osca_disable_interrupts();
 	const Register eax=osca_active_task->eax;
@@ -136,7 +136,7 @@ extern "C" [[noreturn]] void tsk3(){
 }
 
 #include"Game.h"
-extern "C" void tsk4(){
+extern "C" auto tsk4()->void{
 	osca::Game::start();
 }
 
