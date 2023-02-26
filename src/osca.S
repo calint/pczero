@@ -24,6 +24,17 @@
                       # might hang slower hardware
 .set TASK_STRUCT_OFFSET_FPU_STATE,48
 #.set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+94+2
+# from 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987, 7.1.2.1 COPROCESSOR CONTEXT SWITCHING
+#   The save area should be 94 bytes, the size of the area used
+#   by the FSAVE and FRSTOR instructions.
+#
+# from you.com:
+#   The FSAVE instruction writes a total of 108 bytes to the memory
+#   address specified.
+#
+# from Intel® 64 and IA-32 Architectures Software Developer’s Manual
+#   page 3-424 Vol. 2A: FSAVE/FNSAVE—Store x87 FPU State
+#   FSAVE m94/108byte Store FPU state to m94byte or m108byte after ...
 .set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+108
 .set TASK_BIT_FOCUS_KEYBOARD,1
 .set TASK_BIT_RUNNING,2
@@ -210,7 +221,8 @@ loop lbl2
 movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE # IRQ 1: keyboard
 movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE # IRQ 8: timer 1024 Hz
 movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE # Exception 7: Device not available,
-                                        #   may trigger a FPU task switch
+                                        #   triggers when a FPU task switch
+                                        #   might be needed (see isr_fpu)
 lidt idtr
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
 # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
@@ -224,14 +236,6 @@ fwait
 mov $osca_tasks,%ebx
 add $TASK_STRUCT_OFFSET_FPU_STATE,%ebx
 loop1:
-# from you.com
-# The FSAVE instruction writes a total of 108 bytes to the memory
-# address specified.
-#
-# from 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
-# 7.1.2.1 COPROCESSOR CONTEXT SWITCHING
-# The save area should be 94 bytes, the size of the area used
-# by the FSAVE and FRSTOR instructions.
   fsave (%ebx)
   fwait
   add $TASK_STRUCT_SIZE,%ebx # next task
@@ -498,3 +502,7 @@ isr_fpu_done:
   sti
   iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
+.space sector2+512-.,0
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - sector 3
+sector3: # 0x800
+
