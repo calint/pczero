@@ -474,6 +474,9 @@ isr_kbd:
   popa # restore registers
   sti # enables interrupts after next instruction
   iret
+.space sector2+512-.,0
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - sector 3
+sector3: # 0x8000
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu state switch
 .align 4
 isr_fpu:
@@ -502,8 +505,6 @@ isr_fpu_done:
   pop %eax
   sti
   iret
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
-.space sector2+512-.,0
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - sector 3
-sector3: # 0x800
 
+.space sector3+512-.,0
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
