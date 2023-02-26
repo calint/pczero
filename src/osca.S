@@ -405,7 +405,7 @@ isr_tmr_next_task:
   # switch from task pointed to by ebx to task pointed by ecx
   # stack is ..., EFLAGS, CS, EIP
   # save cpu state of task pointed by ebx
-  pop (%ebx) # pop eip to task.eip
+  pop TASK_STRUCT_OFFSET_EIP(%ebx) # pop eip to task.eip
   add $4,%esp # skip cs
   pop TASK_STRUCT_OFFSET_EFLAGS(%ebx) # pop eflags to task.eflags
   andl $(0xffffffff-0x0200),8(%ebx) # clear the enable interrupts flag
