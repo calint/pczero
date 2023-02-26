@@ -22,13 +22,14 @@
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
                       # note. high task switching frequency
                       # might hang slower hardware
-.set TASK_STRUCT_OFFSET_EIP,0        # see osca.h: struct Task
-.set TASK_STRUCT_OFFSET_ESP,4        # ..
-.set TASK_STRUCT_OFFSET_EFLAGS,8     # ..
-.set TASK_STRUCT_OFFSET_BITS,12      # ..
-.set TASK_STRUCT_OFFSET_GPRS,16      # ..
-.set TASK_STRUCT_OFFSET_GPRS_END,48  # ..
-.set TASK_STRUCT_OFFSET_FPU_STATE,48 # ..
+.set TASK_STRUCT_OFFSET_EIP,0           # see osca.h: struct Task
+.set TASK_STRUCT_OFFSET_ESP,4           # ..
+.set TASK_STRUCT_OFFSET_EFLAGS,8        # ..
+.set TASK_STRUCT_OFFSET_AFTER_EFLAGS,12 # ..
+.set TASK_STRUCT_OFFSET_BITS,12         # ..
+.set TASK_STRUCT_OFFSET_GPRS,16         # ..
+.set TASK_STRUCT_OFFSET_GPRS_END,48     # ..
+.set TASK_STRUCT_OFFSET_FPU_STATE,48    # ..
 #.set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+94+2
 # from 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987, 7.1.2.1 COPROCESSOR CONTEXT SWITCHING
 #   The save area should be 94 bytes, the size of the area used
@@ -258,7 +259,8 @@ popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
 # position stack pointer at task.eflags
 sub $(TASK_STRUCT_OFFSET_GPRS_END-TASK_STRUCT_OFFSET_EFLAGS),%esp
 popf # restore flags, no op that modifies flags after this
-mov -8(%esp),%esp # restore task.esp
+# restore task.esp
+mov (-TASK_STRUCT_OFFSET_AFTER_EFLAGS+TASK_STRUCT_OFFSET_ESP)(%esp),%esp
 sti # enables interrupts after next instruction
 jmp *tmp_eip # jmp to saved eip (first task)
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
@@ -340,7 +342,8 @@ osca_yield_next_task:
   # position stack pointer at task.eflags
   sub $(TASK_STRUCT_OFFSET_GPRS_END-TASK_STRUCT_OFFSET_EFLAGS),%esp
   popf # restore flags, no op that modifies flags after this
-  mov -8(%esp),%esp # restore task esp
+  # restore task esp
+  mov (-TASK_STRUCT_OFFSET_AFTER_EFLAGS+TASK_STRUCT_OFFSET_ESP)(%esp),%esp
 
   # task switch done
   sti # enables interrupts after next instruction
@@ -426,7 +429,8 @@ isr_tmr_next_task:
   # position stack pointer at task.eflags
   sub $(TASK_STRUCT_OFFSET_GPRS_END-TASK_STRUCT_OFFSET_EFLAGS),%esp
   popf # restore flags, no op that modifies flags after this
-  mov -8(%esp),%esp # restore task esp
+  # restore task esp
+  mov (-TASK_STRUCT_OFFSET_AFTER_EFLAGS+TASK_STRUCT_OFFSET_ESP)(%esp),%esp
   # task switch done
 
   # acknowledge interrupt and jmp
