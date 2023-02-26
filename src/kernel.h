@@ -17,7 +17,7 @@ extern "C" void osca_exception(){
 
 // note. The FSSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
 //       first byte of the structure needing to be aligned on a 16-byte boundary.
-alignas(16)struct Task osca_tasks[]{
+alignas(16) struct Task osca_tasks[]{
 	//                                       :-> 0b01 grabs keyboard focus, 0b10 active
 	//        eip   esp              eflags bits   id   edi  esi  ebp  esp0 ebx  edx  ecx  eax
 	{Register(tsk4),0xa'0000+320*180,0     ,0b11  ,4   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },

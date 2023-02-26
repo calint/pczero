@@ -41,7 +41,7 @@
 # from Intel® 64 and IA-32 Architectures Software Developer’s Manual
 #   page 3-424 Vol. 2A: FSAVE/FNSAVE—Store x87 FPU State
 #   FSAVE m94/108byte Store FPU state to m94byte or m108byte after ...
-.set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+108
+.set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+108+4
 .set TASK_BIT_FOCUS_KEYBOARD,1
 .set TASK_BIT_RUNNING,2
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - exports

@@ -3,7 +3,7 @@ namespace osca{
 using TaskBits=unsigned short;
 using TaskId=unsigned short;
 using Register=int;
-struct Task{
+struct alignas(16) Task{
 	Register eip{0};
 	Register esp{0};
 	Register eflags{0};
@@ -20,6 +20,10 @@ struct Task{
 	// note. The FSSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
 	//       first byte of the structure needing to be aligned on a 16-byte boundary.
 	char fpu_state[108]{};
+	char padding0{0};
+	char padding1{0};
+	char padding2{0};
+	char padding3{0};
 
 	constexpr inline TaskId get_id()const{return id;}
 	constexpr inline bool is_grab_keyboard_focus()const{return bits&1;}
