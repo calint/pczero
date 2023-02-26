@@ -247,8 +247,20 @@ loop1:
   add $TASK_STRUCT_SIZE,%ebx # next task
   cmp osca_tasks_end,%ebx # is ebx past the tasks end pointer?
   jl loop1
-
-jmp sector2
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
+call osca_init # calls C function
+mov osca_active_task,%ebx # ebx points to active task record
+mov TASK_STRUCT_OFFSET_EIP(%ebx),%esp  # save task.eip for jump
+mov %esp,tmp_eip # ..
+# position esp for popa
+lea TASK_STRUCT_OFFSET_GPRS(%ebx),%esp
+popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
+# position stack pointer at task.eflags
+sub $(TASK_STRUCT_OFFSET_GPRS_END-TASK_STRUCT_OFFSET_EFLAGS),%esp
+popf # restore flags, no op that modifies flags after this
+mov -8(%esp),%esp # restore task.esp
+sti # enables interrupts after next instruction
+jmp *tmp_eip # jmp to saved eip (first task)
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
 .align 4
 osca_tmr_lo:.long 0 # 1024 Hz tick lower, exported
@@ -271,20 +283,6 @@ osca_key:.byte 0 # last key event, exported
 .word 0xaa55 # pc boot sector signature
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - sector 2
 sector2: # 0x7e00
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
-call osca_init # calls C function
-mov osca_active_task,%ebx # ebx points to active task record
-mov TASK_STRUCT_OFFSET_EIP(%ebx),%esp  # save task.eip for jump
-mov %esp,tmp_eip # ..
-# position esp for popa
-lea TASK_STRUCT_OFFSET_GPRS(%ebx),%esp
-popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-# position stack pointer at task.eflags
-sub $(TASK_STRUCT_OFFSET_GPRS_END-TASK_STRUCT_OFFSET_EFLAGS),%esp
-popf # restore flags, no op that modifies flags after this
-mov -8(%esp),%esp # restore task.esp
-sti # enables interrupts after next instruction
-jmp *tmp_eip # jmp to saved eip (first task)
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - yield
 .align 4
 osca_yield: # switches to next task
