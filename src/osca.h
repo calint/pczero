@@ -1,8 +1,9 @@
 #pragma once
 namespace osca{
-using TaskBits=unsigned short;
-using TaskId=unsigned short;
+using TaskBits=short;
+using TaskId=short;
 using Register=int;
+using Byte=char;
 struct alignas(16) Task{
 	Register eip{0};
 	Register esp{0};
@@ -18,17 +19,17 @@ struct alignas(16) Task{
 	Register ecx{0};
 	Register eax{0};
 	// note. The FSSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
-	//       first byte of the structure needing to be aligned on a 16-byte boundary.
-	char fpu_state[108]{};
-	char padding0{0};
-	char padding1{0};
-	char padding2{0};
-	char padding3{0};
+	//       first byte of the structure needed to be aligned on a 16-byte boundary.
+	Byte fpu_state[108]{};
+	Byte padding0{0};
+	Byte padding1{0};
+	Byte padding2{0};
+	Byte padding3{0};
 
-	constexpr inline TaskId get_id()const{return id;}
-	constexpr inline bool is_grab_keyboard_focus()const{return bits&1;}
-	constexpr inline bool is_running()const{return bits&2;}
-	constexpr inline void set_running(const bool b){if(b)bits|=2;else bits&=-1-2;}
+	constexpr inline auto get_id()const->TaskId{return id;}
+	constexpr inline auto is_grab_keyboard_focus()const->bool{return bits&1;}
+	constexpr inline auto is_running()const->bool{return bits&2;}
+	constexpr inline auto set_running(const bool b)->void{if(b)bits|=2;else bits&=-1-2;}
 };
 
 // tasks list implemented in kernel.h
