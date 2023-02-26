@@ -181,7 +181,7 @@ inline static TaskId task_focused_id{0};
 extern "C" auto osca_init()->void{
 	using namespace osca;
 	// green dot on screen (top left)
-	*reinterpret_cast<int*>(0xa0000)=0x02;
+	*reinterpret_cast<char*>(0xa0000)=0x02;
 
 	// set 64 KB of 0x11 starting at 1 MB
 	pz_memset(Address(0x10'0000),0x11,0x1'0000);
@@ -207,7 +207,7 @@ extern "C" auto osca_init()->void{
 extern "C" auto osca_keyb_ev()->void{
 	using namespace osca;
 	// on screen
-	*reinterpret_cast<int*>(0xa0000+4)=osca_key;
+	*reinterpret_cast<unsigned char*>(0xa0000+4)=osca_key;
 
 	if(osca_key==0x1d)keyboard_ctrl_pressed=true;
 	else if(osca_key==0x9d)keyboard_ctrl_pressed=false;
