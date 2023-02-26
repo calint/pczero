@@ -22,6 +22,7 @@
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
                       # note. high task switching frequency
                       # might hang slower hardware
+.set TASK_STRUCT_OFFSET_GPRS_END,48 # see osca.h struct Task
 .set TASK_STRUCT_OFFSET_FPU_STATE,48 # see osca.h struct Task
 #.set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+94+2
 # from 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987, 7.1.2.1 COPROCESSOR CONTEXT SWITCHING
@@ -273,7 +274,7 @@ mov (%ebx),%esp  # save task.eip for jump
 mov %esp,tmp_eip # ..
 lea 16(%ebx),%esp # position stack pointer by skipping eip,esp,eflags,bits
 popa              #   pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-sub $TASK_STRUCT_OFFSET_FPU_STATE-8,%esp # position stack pointer at task.eflags
+sub $(TASK_STRUCT_OFFSET_GPRS_END-8),%esp # position stack pointer at task.eflags
 popf # restore flags, no op that modifies flags after this
 mov -8(%esp),%esp # restore task.esp
 sti # enables interrupts after next instruction
@@ -315,7 +316,7 @@ osca_yield_next_task:
   pop 8(%ebx) # pop eflags to task.eflags
   pop (%ebx) # pop eip to task.eip
   mov %esp,4(%ebx) # save stack pointer to task.esp as it was before the call
-  lea TASK_STRUCT_OFFSET_FPU_STATE(%ebx),%esp # save gprs. move esp to end of task record then pusha
+  lea TASK_STRUCT_OFFSET_GPRS_END(%ebx),%esp # save gprs. move esp to end of gprs then pusha
   mov %ecx,osca_active_task # save pointer to next task record
   mov tmp_eax,%eax # restore eax
   mov tmp_ebx,%ebx # restore ebx
@@ -328,7 +329,7 @@ osca_yield_next_task:
   mov %esp,tmp_eip # save for jump
   lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  sub $TASK_STRUCT_OFFSET_FPU_STATE-8,%esp # position stack pointer at task.eflags
+  sub $(TASK_STRUCT_OFFSET_GPRS_END-8),%esp # position stack pointer at task.eflags
   popf # restore flags, no op that modifies flags after this
   mov -8(%esp),%esp # restore task esp
 
@@ -398,7 +399,7 @@ isr_tmr_next_task:
   andl $(0xffffffff-0x0200),8(%ebx) # clear the enable interrupts flag
                                     #   so that popf is safe in a cli/sti section
   mov %esp,4(%ebx) # save stack pointer as it was before irq to task.esp
-  lea TASK_STRUCT_OFFSET_FPU_STATE(%ebx),%esp # save gprs. move esp to end of task record then pusha
+  lea TASK_STRUCT_OFFSET_GPRS_END(%ebx),%esp # save gprs. move esp to end of gprs then pusha
   mov %ecx,osca_active_task # save pointer to next task record
   mov tmp_eax,%eax # save proper eax
   mov tmp_ebx,%ebx # save proper ebx
@@ -410,7 +411,7 @@ isr_tmr_next_task:
   mov %esp,tmp_eip # save for jump
   lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
   popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  sub $TASK_STRUCT_OFFSET_FPU_STATE-8,%esp # position stack pointer at task.eflags
+  sub $(TASK_STRUCT_OFFSET_GPRS_END-8),%esp # position stack pointer at task.eflags
   popf # restore flags, no op that modifies flags after this
   mov -8(%esp),%esp # restore task esp
   # task switch done
