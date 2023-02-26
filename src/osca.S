@@ -305,7 +305,8 @@ osca_yield_next_task:
   lbl1:
   cmp %ebx,%ecx # if no active task found
   je osca_yield_exit_without_task_switch
-  mov TASK_STRUCT_OFFSET_BITS(%ecx),%ax # get task.bits to check if task is running
+  # get task.bits to check if task is running
+  mov TASK_STRUCT_OFFSET_BITS(%ecx),%ax
   and $TASK_BIT_RUNNING,%ax
   jz osca_yield_next_task
 
@@ -320,7 +321,8 @@ osca_yield_next_task:
   pop 8(%ebx) # pop eflags to task.eflags
   pop (%ebx) # pop eip to task.eip
   mov %esp,4(%ebx) # save stack pointer to task.esp as it was before the call
-  lea TASK_STRUCT_OFFSET_GPRS_END(%ebx),%esp # save gprs. move esp to end of gprs then pusha
+  # save gprs. move esp to end of gprs then pusha
+  lea TASK_STRUCT_OFFSET_GPRS_END(%ebx),%esp
   mov %ecx,osca_active_task # save pointer to next task record
   mov tmp_eax,%eax # restore eax
   mov tmp_ebx,%ebx # restore ebx
@@ -387,7 +389,8 @@ isr_tmr_next_task:
   lbl4:
   cmp %ebx,%ecx # if no active task found
   je isr_tmr_exit_without_task_switch # exit without task switch
-  mov TASK_STRUCT_OFFSET_BITS(%ecx),%ax # get bits to check if task is running
+  # get bits to check if task is running
+  mov TASK_STRUCT_OFFSET_BITS(%ecx),%ax
   and $TASK_BIT_RUNNING,%ax # check 'running' bit
   jz isr_tmr_next_task # if not 'running' get next task
 
@@ -403,9 +406,10 @@ isr_tmr_next_task:
   add $4,%esp # skip cs
   pop 8(%ebx) # pop eflags to task.eflags
   andl $(0xffffffff-0x0200),8(%ebx) # clear the enable interrupts flag
-                                    #   so that popf is safe in a cli/sti section
+                                    #  so that popf is safe in a cli/sti section
   mov %esp,4(%ebx) # save stack pointer as it was before irq to task.esp
-  lea TASK_STRUCT_OFFSET_GPRS_END(%ebx),%esp # save gprs. move esp to end of gprs then pusha
+  # save gprs. move esp to end of gprs then pusha
+  lea TASK_STRUCT_OFFSET_GPRS_END(%ebx),%esp
   mov %ecx,osca_active_task # save pointer to next task record
   mov tmp_eax,%eax # save proper eax
   mov tmp_ebx,%ebx # save proper ebx
