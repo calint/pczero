@@ -1,7 +1,8 @@
-[ ] task switch the state of FPU
-[ ]   FSAVE and FRSTOR. supported on "-march=i386+387"
-[ ]     80386 System Software Writers Guide 1987: 7.1.2.1 COPROCESSOR CONTEXT SWITCHING
-[ ]     80386 Programmer's Reference Manual -- Section 11.1
+[x] task switch the state of FPU
+[x]   FSAVE and FRSTOR. supported on "-march=i386+387"
+[x]     80386 System Software Writers Guide 1987: 7.1.2.1 COPROCESSOR CONTEXT SWITCHING
+[x]     80386 Programmer's Reference Manual -- Section 11.1
+[x]     Intel® 64 and IA-32 Architectures Software Developer’s Manual page 3-424 Vol. 2A: FSAVE/FNSAVE—Store x87 FPU State
 [ ] review 'using' Scale Coord Angle Vertex etc terminology
 [x] osca: task_id (lower 16 bits of task.bits?)
 [x]   keyboard_focus
