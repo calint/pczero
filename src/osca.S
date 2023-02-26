@@ -22,8 +22,9 @@
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
                       # note. high task switching frequency
                       # might hang slower hardware
-.set TASK_STRUCT_OFFSET_GPRS_END,48 # see osca.h struct Task
-.set TASK_STRUCT_OFFSET_FPU_STATE,48 # see osca.h struct Task
+.set TASK_STRUCT_OFFSET_GPRS_START,16 # see osca.h: struct Task
+.set TASK_STRUCT_OFFSET_GPRS_END,48 # see osca.h: struct Task
+.set TASK_STRUCT_OFFSET_FPU_STATE,48 # see osca.h: struct Task
 #.set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+94+2
 # from 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987, 7.1.2.1 COPROCESSOR CONTEXT SWITCHING
 #   The save area should be 94 bytes, the size of the area used
@@ -36,6 +37,8 @@
 # from Intel® 64 and IA-32 Architectures Software Developer’s Manual
 #   page 3-424 Vol. 2A: FSAVE/FNSAVE—Store x87 FPU State
 #   FSAVE m94/108byte Store FPU state to m94byte or m108byte after ...
+.set TASK_STRUCT_OFFSET_EFLAGS,8 # see osca.h: struct Task
+.set TASK_STRUCT_OFFSET_BITS,12 # see osca.h: struct Task
 .set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+108
 .set TASK_BIT_FOCUS_KEYBOARD,1
 .set TASK_BIT_RUNNING,2
@@ -301,7 +304,7 @@ osca_yield_next_task:
   lbl1:
   cmp %ebx,%ecx # if no active task found
   je osca_yield_exit_without_task_switch
-  mov 12(%ecx),%ax # get task.bits to check if task is running
+  mov TASK_STRUCT_OFFSET_BITS(%ecx),%ax # get task.bits to check if task is running
   and $TASK_BIT_RUNNING,%ax
   jz osca_yield_next_task
 
@@ -327,9 +330,11 @@ osca_yield_next_task:
   mov osca_active_task,%ecx
   mov (%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
-  lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
+  # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
+  lea TASK_STRUCT_OFFSET_GPRS_START(%ecx),%esp
   popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  sub $(TASK_STRUCT_OFFSET_GPRS_END-8),%esp # position stack pointer at task.eflags
+  # position stack pointer at task.eflags
+  sub $(TASK_STRUCT_OFFSET_GPRS_END-TASK_STRUCT_OFFSET_EFLAGS),%esp
   popf # restore flags, no op that modifies flags after this
   mov -8(%esp),%esp # restore task esp
 
@@ -381,7 +386,7 @@ isr_tmr_next_task:
   lbl4:
   cmp %ebx,%ecx # if no active task found
   je isr_tmr_exit_without_task_switch # exit without task switch
-  mov 12(%ecx),%ax # get bits to check if task is running
+  mov TASK_STRUCT_OFFSET_BITS(%ecx),%ax # get bits to check if task is running
   and $TASK_BIT_RUNNING,%ax # check 'running' bit
   jz isr_tmr_next_task # if not 'running' get next task
 
@@ -409,13 +414,16 @@ isr_tmr_next_task:
   mov osca_active_task,%ecx
   mov (%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
-  lea 16(%ecx),%esp # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
+  # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
+  lea TASK_STRUCT_OFFSET_GPRS_START(%ecx),%esp
   popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
-  sub $(TASK_STRUCT_OFFSET_GPRS_END-8),%esp # position stack pointer at task.eflags
+  # position stack pointer at task.eflags
+  sub $(TASK_STRUCT_OFFSET_GPRS_END-TASK_STRUCT_OFFSET_EFLAGS),%esp
   popf # restore flags, no op that modifies flags after this
   mov -8(%esp),%esp # restore task esp
   # task switch done
 
+  # acknowledge interrupt and jmp
   # https://forum.osdev.org/viewtopic.php?f=1&t=15526&start=0
   # https://www.compuphase.com/int70.txt
   # "When an IRQ 8 fires and interrupt 70h is called, status register C holds a bit
@@ -424,7 +432,6 @@ isr_tmr_next_task:
   # IRQ 8 will not be generated again. This means that you must read status
   # register C inside your ISR for interrupt 70h even when you normally don't care
   # about its contents. Otherwise you will only see a single interrupt."
-  # acknowledge interrupt and jmp
   push %ax # save to be clobbered ax
   mov $0x0c,%al # read register C in ISR
   out %al,$0x70 #  to keep getting
