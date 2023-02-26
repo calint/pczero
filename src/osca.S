@@ -245,7 +245,7 @@ loop1:
   fsave (%ebx)
   fwait
   add $TASK_STRUCT_SIZE,%ebx # next task
-  cmp osca_tasks_end,%ebx
+  cmp osca_tasks_end,%ebx # is ebx past the tasks end pointer?
   jl loop1
 
 jmp sector2
