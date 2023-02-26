@@ -22,11 +22,11 @@
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
                       # note. high task switching frequency
                       # might hang slower hardware
-.set TASK_STRUCT_OFFSET_EFLAGS,8 # see osca.h: struct Task
-.set TASK_STRUCT_OFFSET_BITS,12 # see osca.h: struct Task
-.set TASK_STRUCT_OFFSET_GPRS,16 # see osca.h: struct Task
-.set TASK_STRUCT_OFFSET_GPRS_END,48 # see osca.h: struct Task
-.set TASK_STRUCT_OFFSET_FPU_STATE,48 # see osca.h: struct Task
+.set TASK_STRUCT_OFFSET_EFLAGS,8     # see osca.h: struct Task
+.set TASK_STRUCT_OFFSET_BITS,12      # ..
+.set TASK_STRUCT_OFFSET_GPRS,16      # ..
+.set TASK_STRUCT_OFFSET_GPRS_END,48  # ..
+.set TASK_STRUCT_OFFSET_FPU_STATE,48 # ..
 #.set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+94+2
 # from 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987, 7.1.2.1 COPROCESSOR CONTEXT SWITCHING
 #   The save area should be 94 bytes, the size of the area used
