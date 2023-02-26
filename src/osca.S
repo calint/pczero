@@ -212,7 +212,7 @@ in $0x71,%al
 # https://wiki.osdev.org/Interrupt_Descriptor_Table
 mov $osca_exception,%eax # store the upper bits of the handler
 shr $16,%eax             #  in ax
-mov $IDT,%ebx # idt address
+mov $IDT,%ebx # interrupt descriptor table address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
 lbl2:
     movw $osca_exception,(%ebx)    # offset 0..15
@@ -229,7 +229,7 @@ movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE # IRQ 8: timer 1024 Hz
 movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE # Exception 7: Device not available,
                                         #  triggers when a FPU task switch
                                         #  might be needed (see isr_fpu)
-lidt idtr
+lidt idtr # load the interrupt descriptor table register
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
 # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
 # 7.1.2.1 COPROCESSOR CONTEXT SWITCHING page 122
