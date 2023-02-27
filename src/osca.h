@@ -64,7 +64,7 @@ extern "C" auto osca_init()->void;
 // keyboard interrupt when new scan code from keyboard
 extern "C" auto osca_keyb_ev()->void;
 
-// called when interrupt other than keyboard and timer
+// called when interrupt other than keyboard or timer
 extern "C" auto osca_exception()->void;
 
 //
