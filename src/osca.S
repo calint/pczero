@@ -292,6 +292,7 @@ osca_yield: # switches to next task
   cli # disable interrupts
   pushf # push flags. stack is now ..., EIP, EFLAGS
         # EFLAGS 'Interrupt enable flag' is off
+        #  so popf in cli/sti section is safe
   incl 0xa0000+320-12 # create output on screen
   # start task switching
   mov %eax,tmp_eax # save eax,ebx,ecx
