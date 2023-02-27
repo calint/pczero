@@ -9,7 +9,7 @@ extern "C" [[noreturn]] auto tsk4()->void;
 
 namespace osca{
 
-// called by the interrupt handler for events other than keyboard and timer
+// called by the interrupt handler for events other than keyboard or timer
 extern "C" auto osca_exception()->void{
 	err.p("osca exception").spc();
 	osca_hang();
