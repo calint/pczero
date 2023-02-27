@@ -9,7 +9,7 @@ extern "C" [[noreturn]] auto tsk0()->void{
 	using namespace osca;
 	osca_disable_interrupts();
 	const TaskId taskId=osca_active_task->get_id();
-	Register eax=osca_active_task->eax;
+	const Register eax=osca_active_task->eax;
 //	Register ebx=osca_active_task->ebx;
 //	Register ecx=osca_active_task->ecx;
 //	Register edx=osca_active_task->edx;
