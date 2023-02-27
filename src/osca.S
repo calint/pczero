@@ -45,6 +45,7 @@
 .set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+108+4
 .set TASK_BIT_FOCUS_KEYBOARD,1
 .set TASK_BIT_RUNNING,2
+.set EFLAGS_BIT_IF,0x200 # the 'Interrupt enable flag' bit
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - exports
 .global osca_key # last received keyboard scan code
 .global osca_tmr_lo # 1024 Hz timer low bits
@@ -409,7 +410,7 @@ isr_tmr_next_task:
   add $4,%esp # skip cs
   pop TASK_STRUCT_OFFSET_EFLAGS(%ebx) # pop eflags to task.eflags
   # clear the 'enable interrupts' flag so that popf is safe in a cli/sti section
-  andl $(-1-0x0200),TASK_STRUCT_OFFSET_EFLAGS(%ebx)
+  andl $~EFLAGS_BIT_IF,TASK_STRUCT_OFFSET_EFLAGS(%ebx)
   # save stack pointer as it was before irq to task.esp
   mov %esp,TASK_STRUCT_OFFSET_ESP(%ebx)
   # save gprs. move esp to end of gprs then pusha
