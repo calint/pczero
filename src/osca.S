@@ -130,6 +130,7 @@ mov %eax,%cr0 #  in CR0 (Control Register 0)
 # proper PM32 descriptor
 jmp $8,$protected_mode # jmp and flush
 # global descriptor table
+# https://wiki.osdev.org/Global_Descriptor_Table
 .align 4
 gdt:.quad 0x0000000000000000 #0x00: reserved and unused
     .quad 0x00cf9a000000ffff #0x08: 32b code 4g pl0 rx
