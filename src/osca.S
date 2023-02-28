@@ -241,7 +241,7 @@ or $2,%al     #  if TS (Task switched) bit is set and a FPU
 mov %eax,%cr0 #  instruction is used then exception 7 is triggered
 # initiate the tasks' FPU state with initial values
 fninit # initiate floating point unit (fpu)
-# write the initiated state to all tasks' fpu state
+# write the initialized state to all tasks' fpu state
 mov $osca_tasks,%ebx
 add $TASK_STRUCT_OFFSET_FPU_STATE,%ebx
 loop1:
