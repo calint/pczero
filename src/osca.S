@@ -240,13 +240,13 @@ mov %cr0,%eax # enable MP (Monitor co-processor) bit in CR0
 or $2,%al     #  if TS (Task switched) bit is set and a FPU
 mov %eax,%cr0 #  instruction is used then exception 7 is triggered
 # initiate the tasks' FPU state with initial values
-fninit # initiate FPU
-fwait
+fninit # initiate floating point unit (fpu)
+fwait # wait for fpu to finish
 mov $osca_tasks,%ebx
 add $TASK_STRUCT_OFFSET_FPU_STATE,%ebx
 loop1:
-  fsave (%ebx)
-  fwait
+  fsave (%ebx) # save fpu state to memory pointed by ebx
+  fwait # wait for fpu to finish
   add $TASK_STRUCT_SIZE,%ebx # next task
   cmp osca_tasks_end,%ebx # is ebx past the tasks end pointer?
   jl loop1
@@ -500,6 +500,7 @@ isr_fpu:
     incl 0xa0000+320-16 # on screen
     push %ebx
     mov osca_active_fpu,%ebx
+    fwait # wait for previous fpu instruction to finish
     fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx) # save state
     fwait # wait for write to complete
     mov %eax,%ebx # osca_active_task to ebx
