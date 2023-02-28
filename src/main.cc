@@ -129,8 +129,7 @@ extern "C" [[noreturn]] auto tsk3()->void{
 
 	while(true){
 		const float f=float(osca_tmr_lo)*.5f;
-		vga13h.bmp().data().pointer().offset(eax).write(unsigned(f));
-//		osca_nop(); // ? without this or yield line above is optimized away by the compiler
+		*static_cast<unsigned*>(vga13h.bmp().address_offset({CoordPx(eax),0}))=unsigned(f);
 		osca_yield();
 	}
 }

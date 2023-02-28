@@ -85,7 +85,7 @@ public:
 			return;
 		const CoordPx xi=CoordPx(p.x);
 		const CoordPx yi=CoordPx(p.y);
-		vga13h.bmp().pointer_offset({xi,yi}).write(color);
+		*static_cast<Color8b*>(vga13h.bmp().address_offset({xi,yi}))=color;
 	}
 
 	static auto draw_trajectory(const Point&p0,const Vector&vel,const TimeSec t_s,const TimeSec t_inc_s,const Color8b color)->void{
@@ -541,7 +541,7 @@ auto Game::create_boss()->void{
 	};
 	boss_def.init_normals();
 
-	const Address clear_start_at_address=vga13h.bmp().data().pointer().offset(50*320).address();
+	const Address clear_start_at_address=vga13h.bmp().address_offset({50*320,0});
 	const Address clear_copy_from_address=Heap::data().address();
 	const SizeBytes clear_copy_num_bytes=320*100;
 //	const Address clear_copy_from_address=osca_tasks;

@@ -88,7 +88,7 @@ public:
 			return;
 		if(yi>bmp.dim().width())
 			return;
-		bmp.pointer_offset({xi,yi}).write(color);
+		*static_cast<Color8b*>(bmp.address_offset({xi,yi}))=color;
 	}
 };
 

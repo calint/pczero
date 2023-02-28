@@ -91,23 +91,6 @@ auto pz_memset(Address to,char v,SizeBytes n)->void{
 }
 
 using OffsetBytes=int;
-
-class Pointer{ // ? can/should be removed
-	Address a_;
-public:
-	inline constexpr explicit Pointer(const Address a):a_{a}{}
-	inline constexpr auto address()const->Address{return a_;}
-	inline constexpr auto offset(const OffsetBytes ob)const->Pointer{return Pointer{static_cast<char*>(a_)+ob};}
-	inline constexpr auto write(const char v)->void{*static_cast<char*>(a_)=v;}
-	inline constexpr auto write(const unsigned char v)->void{*static_cast<unsigned char*>(a_)=v;}
-	inline constexpr auto write(const short v)->void{*static_cast<short*>(a_)=v;}
-	inline constexpr auto write(const unsigned short v)->void{*static_cast<unsigned short*>(a_)=v;}
-	inline constexpr auto write(const int v)->void{*static_cast<int*>(a_)=v;}
-	inline constexpr auto write(const unsigned v)->void{*static_cast<unsigned*>(a_)=v;}
-	inline constexpr auto write(const long v)->void{*static_cast<long*>(a_)=v;}
-	inline constexpr auto write(const unsigned long v)->void{*static_cast<unsigned long*>(a_)=v;}
-};
-
 class Data{ // ? bounds check on constexpr
 	Address a_;
 	SizeBytes s_;
@@ -115,7 +98,9 @@ public:
 	inline constexpr Data(const Address a,const SizeBytes n):a_{a},s_{n}{}
 	inline constexpr auto address()const->Address{return a_;}
 	inline constexpr auto size()const->SizeBytes{return s_;}
-	inline constexpr auto pointer()const->Pointer{return Pointer{a_};}
+	inline constexpr auto address_offset(const OffsetBytes ob)const->Address{ // ? bounds check
+		return static_cast<Address>(static_cast<char*>(a_)+ob);
+	}
 	inline auto to(const Data&d)const->void{pz_memcpy(d.address(),a_,s_);}
 	inline auto to(const Data&d,const SizeBytes sb)const->void{pz_memcpy(d.address(),a_,sb);}
 	inline auto clear(char byte=0)const->void{pz_memset(a_,byte,s_);}
@@ -166,8 +151,8 @@ public:
 	constexpr Bitmap(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()*Size(sizeof(T))}{}
 	inline constexpr auto dim()const->const DimensionPx&{return d_;}
 	inline constexpr auto data()const->const Data&{return dt_;}
-	inline constexpr auto pointer_offset(const CoordsPx p)const->Pointer{
-		return dt_.pointer().offset(p.y()*d_.width()*Size(sizeof(T))+p.x()*Size(sizeof(T)));
+	inline constexpr auto address_offset(const CoordsPx p)const->Address{
+		return dt_.address_offset(p.y()*d_.width()*Size(sizeof(T))+p.x()*Size(sizeof(T)));
 	}
 	constexpr auto to(const Bitmap&dst,const CoordsPx&c)const->void{
 		T*si=static_cast<T*>(dt_.address());
