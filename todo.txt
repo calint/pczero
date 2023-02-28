@@ -1,3 +1,4 @@
+[ ] osca: is it necessary to do fwait on i386+387?
 [x] task switch the state of FPU
 [x]   FSAVE and FRSTOR. supported on "-march=i386+387"
 [x]     80386 System Software Writers Guide 1987: 7.1.2.1 COPROCESSOR CONTEXT SWITCHING
