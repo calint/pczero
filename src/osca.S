@@ -492,6 +492,7 @@ isr_fpu:
   cli
   push %eax
   clts # reset the TS flag in CR0
+  fwait # wait for previous fpu instruction to finish
   # is the active task same as active fpu state?
   mov osca_active_task,%eax
   cmp osca_active_fpu,%eax
@@ -500,7 +501,6 @@ isr_fpu:
     incl 0xa0000+320-16 # on screen
     push %ebx
     mov osca_active_fpu,%ebx
-    fwait # wait for previous fpu instruction to finish
     fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx) # save state
     fwait # wait for write to complete
     mov %eax,%ebx # osca_active_task to ebx
