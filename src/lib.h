@@ -416,7 +416,6 @@ public:
 					*p_lft=color;
 					*(p_lft+npx)=color;
 				}
-//				y+=1;
 				pline+=wi;
 				x_lft+=dxdy_lft;
 				x_rht+=dxdy_rht;
