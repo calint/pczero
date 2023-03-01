@@ -217,14 +217,14 @@ mov $osca_exception,%eax # store the upper bits of the handler
 shr $16,%eax             #  in ax
 mov $IDT,%ebx # interrupt descriptor table address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
-lbl2:
+lp1:
     movw $osca_exception,(%ebx)    # offset 0..15
     movw $0x0008,       2(%ebx)    # selector in gdt
     movb $0x00,         4(%ebx)    # unused
     movb $0x8e,         5(%ebx)    # type_attrs p,pv0,!s,i32b
     movw %ax,           6(%ebx)    # offfset 16..31
     add $IDT_ENTRY_SIZE,%ebx # increment by the size of the entry
-loop lbl2
+loop lp1
 # setup IRQ 1 (keyboard) and IRQ 8 (RTC timer)
 #  only the lower offset set, handlers within 64K
 movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE # IRQ 1: keyboard
@@ -242,11 +242,11 @@ mov %eax,%cr0 #  instruction is used then exception 7 is triggered
 # initiate the tasks' FPU state with initial values
 fninit # initiate floating point unit (fpu)
 mov $osca_tasks,%ebx
-lp1:
+lp2:
   fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx)
   add $TASK_STRUCT_SIZE,%ebx
   cmp osca_tasks_end,%ebx
-  jne lp1
+  jne lp2
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 call osca_init # calls C function declared in osca.h
 # restore cpu state for first task
@@ -387,9 +387,9 @@ isr_tmr:
 isr_tmr_next_task:
   add $TASK_STRUCT_SIZE,%ecx # next task
   cmp osca_tasks_end,%ecx # if last
-  jl lbl3
+  jl lbl2
     mov $osca_tasks,%ecx # roll
-  lbl3:
+  lbl2:
   cmp %ebx,%ecx # if no active task found
   je isr_tmr_exit_without_task_switch # exit without task switch
   # get bits to check if task is running
