@@ -8,7 +8,8 @@
 [x]     80386 Programmer's Reference Manual -- Section 11.1
 [x]     Intel® 64 and IA-32 Architectures Software Developer’s Manual page 3-424 Vol. 2A: FSAVE/FNSAVE—Store x87 FPU State
 [ ] review 'using' Scale Coord Angle Vertex etc terminology
-[ ] lib2d move Point to lib. Replace Coords.
+[x] lib2d move Point to lib. Replace Coords.
+[ ] lib: cached transformed points without translation
 [x] osca: task_id (lower 16 bits of task.bits?)
 [x]   keyboard_focus
 [x] review default values and where it is necessary to specify
