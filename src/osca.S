@@ -233,14 +233,14 @@ movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE # exception 7: device not available,
                                         #  triggers when a FPU task switch
                                         #  might be needed (see isr_fpu)
 lidt idtr # load the interrupt descriptor table register
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --e - fpu
 # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
 # 7.1.2.1 COPROCESSOR CONTEXT SWITCHING page 122
 mov %cr0,%eax # enable MP (Monitor co-processor) bit in CR0
 or $2,%al     #  if TS (Task switched) bit is set and a FPU
 mov %eax,%cr0 #  instruction is used then exception 7 is triggered
 # initiate the tasks' FPU state with initial values
-fninit # initiate floating point unit (fpu)
+fninit # initiate FPU
 mov $osca_tasks,%ebx
 lp2:
   fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx)
@@ -268,7 +268,7 @@ jmp *tmp_eip # jmp to saved eip (first task)
 osca_tmr_lo:.long 0 # 1024 Hz tick lower, exported
 osca_tmr_hi:.long 0 # 1024 Hz tick higher, exported
 osca_active_task:.long osca_tasks # pointer to active task, exported
-osca_active_fpu:.long osca_tasks # pointer to task that has the fpu
+osca_active_fpu:.long osca_tasks # pointer to task that has the FPU
 tmp_eax:.long 0 # used in osca_yield and isr_tmr
 tmp_ebx:.long 0 # ...
 tmp_ecx:.long 0 # ...
@@ -489,18 +489,18 @@ isr_fpu:
   cli
   push %eax
   clts # reset the TS flag in CR0
-  # is the active task same as active fpu state?
+  # is the active task same as active FPU state?
   mov osca_active_task,%eax
   cmp osca_active_fpu,%eax
   je isr_fpu_done
-    # not same task, switch fpu state
+    # not same task, switch FPU state
     incl 0xa0000+320-16 # on screen
     push %ebx
     mov osca_active_fpu,%ebx
     fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx) # save state
     mov %eax,%ebx # osca_active_task to ebx
     frstor TASK_STRUCT_OFFSET_FPU_STATE(%ebx) # restore state
-    mov %eax,osca_active_fpu # set the active fpu task
+    mov %eax,osca_active_fpu # set the active FPU task
     pop %ebx
 
 isr_fpu_done:
