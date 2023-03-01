@@ -249,10 +249,11 @@ lp1:
   jne lp1
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 call osca_init # calls C function
-mov osca_active_task,%ebx # ebx points to active task record
+# restore cpu state for first task
+mov osca_active_task,%ebx # ebx points to first task
 mov TASK_STRUCT_OFFSET_EIP(%ebx),%esp  # save task.eip for jump
-mov %esp,tmp_eip # ..
-# position esp for popa
+mov %esp,tmp_eip
+# position esp for popa of registers
 lea TASK_STRUCT_OFFSET_GPRS(%ebx),%esp
 popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
 # position stack pointer at task.eflags
