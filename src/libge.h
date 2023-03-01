@@ -80,9 +80,9 @@ public:
 		const CoordPx xi=CoordPx(p.x);
 		const CoordPx yi=CoordPx(p.y);
 		const Bitmap8b bmp=vga13h.bmp();
-		if(xi>bmp.dim().width())
+		if(xi<0||xi>bmp.dim().width())
 			return;
-		if(yi>bmp.dim().width())
+		if(yi<0||yi>bmp.dim().height())
 			return;
 		*static_cast<Color8b*>(bmp.address_offset({xi,yi}))=color;
 	}
