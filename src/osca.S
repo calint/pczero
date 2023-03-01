@@ -312,7 +312,7 @@ osca_yield_next_task:
   and $TASK_BIT_RUNNING,%ax
   jz osca_yield_next_task
 
-  # enable TS (Task switched) bit
+  # enable TS (Task switched) bit in cr0
   mov %cr0,%eax
   or $8,%al
   mov %eax,%cr0
@@ -397,7 +397,7 @@ isr_tmr_next_task:
   and $TASK_BIT_RUNNING,%ax # check 'running' bit
   jz isr_tmr_next_task # if not 'running' get next task
 
-  # enable TS (Task switched) bit
+  # enable TS (Task switched) bit in cr0
   mov %cr0,%eax
   or $8,%al
   mov %eax,%cr0
