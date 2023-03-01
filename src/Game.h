@@ -33,7 +33,7 @@ class Game{
 		return ix;
 	}
 
-	static auto draw_axis()->void{
+	static auto draw_axis(Bitmap8b&dsp)->void{
 		static AngleDeg deg=0;
 		static Matrix R;
 		if(deg>360)
@@ -43,11 +43,11 @@ class Game{
 	//		shp3->set_angle(rotation);
 		R.set_transform(5,rotation,{160,100});
 		// dot axis
-		World::draw_dot({160,100},0xf);
+		dsp.draw_dot({160,100},0xf);
 		const Vector xaxis=R.axis_x().normalize().scale(7);
-		World::draw_dot({xaxis.x+160,xaxis.y+100},4);
+		dsp.draw_dot({xaxis.x+160,xaxis.y+100},4);
 		const Vector yaxis=R.axis_y().normalize().scale(7);
-		World::draw_dot({yaxis.x+160,yaxis.y+100},2);
+		dsp.draw_dot({yaxis.x+160,yaxis.y+100},2);
 	}
 public:
 	inline static ObjectDef enemy_def{};

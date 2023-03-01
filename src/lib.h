@@ -243,6 +243,11 @@ using SizePx=int;
 using DimensionPx=DimensionT<SizePx>;
 using Color8b=char;
 
+namespace enable{
+	constexpr static bool draw_polygons_fill{false};
+	constexpr static bool draw_polygons_edges{true};
+}
+
 template<typename T>
 class Bitmap{ // ? bounds check on constexpr
 	DimensionPx d_;
@@ -286,6 +291,146 @@ public:
 				di++;
 			}
 			di+=ln;
+		}
+	}
+	constexpr auto draw_dot(const Point&p,const T value)->void{
+		const CoordPx xi=CoordPx(p.x);
+		const CoordPx yi=CoordPx(p.y);
+		if(xi<0||xi>d_.width())
+			return;
+		if(yi<0||yi>d_.height())
+			return;
+		*static_cast<T*>(address_offset({xi,yi}))=value;
+	}
+	constexpr auto draw_bounding_circle(const Point&p,const Scale r)->void{
+		const Count segments=Count(5*r);
+		AngleRad th=0;
+		AngleRad dth=2*PI/AngleRad(segments);
+		for(Count i=0;i<segments;i++){
+			const Coord x=p.x+r*cos(th); // ? use sin_and_cos()
+			const Coord y=p.y+r*sin(th);
+			draw_dot({x,y},1);
+			th+=dth;
+		}
+	}
+	constexpr auto draw_polygon(const Point pts[],const PointIx npoly_ixs,const PointIx ix[],const T color)->void{
+		if(npoly_ixs<2){ // ? what if 0, 2 is a line
+			draw_dot(pts[0],color);
+			return;
+		}
+		PointIx topy_ix=0;
+		const Point&first_point=pts[ix[0]];
+		Coord topx=first_point.x;
+		Coord topy=first_point.y;
+		// find top
+		PointIx i=1;
+		while(i<npoly_ixs){
+			const Point&p=pts[ix[i]]; // ? use pointer
+			const Coord y=p.y;
+			if(y<topy){
+				topy=y;
+				topx=p.x;
+				topy_ix=i;
+			}
+			i++;
+		}
+		PointIx ix_lft,ix_rht;
+		ix_lft=ix_rht=topy_ix;
+		Coord x_lft,x_rht;
+		x_lft=x_rht=topx;
+		bool adv_lft=true,adv_rht=true;
+		Coord dxdy_lft,dxdy_rht;
+		dxdy_lft=dxdy_rht=0;
+		Coord x_nxt_lft=0;
+		Coord y_nxt_lft=topy;
+		Coord x_nxt_rht=0;
+		Coord y_nxt_rht=topy;
+		Coord dy_rht=0;
+		Coord dy_lft=0;
+		Coord y=topy;
+		CoordPx wi=CoordPx(d_.width());
+		CoordPx y_scr=CoordPx(y);
+		T*pline=static_cast<T*>(dt_.address())+y_scr*wi;
+		PointIx last_elem_ix=npoly_ixs-1;
+		while(true){
+			if(adv_lft){
+				if(ix_lft==last_elem_ix){
+					ix_lft=0;
+				}else{
+					ix_lft++;
+				}
+				x_nxt_lft=pts[ix[ix_lft]].x;
+				y_nxt_lft=pts[ix[ix_lft]].y; // ? whatif prevy==nxty
+				dy_lft=y_nxt_lft-y;
+				if(dy_lft!=0){
+					dxdy_lft=(x_nxt_lft-x_lft)/dy_lft;
+				}else{
+					dxdy_lft=x_nxt_lft-x_lft;
+				}
+			}
+			if(adv_rht){
+				if(ix_rht==0){
+					ix_rht=last_elem_ix;
+				}else{
+					ix_rht--;
+				}
+				x_nxt_rht=pts[ix[ix_rht]].x;
+				y_nxt_rht=pts[ix[ix_rht]].y;
+				dy_rht=y_nxt_rht-y;
+				if(dy_rht!=0){
+					dxdy_rht=(x_nxt_rht-x_rht)/dy_rht;
+				}else{
+					dxdy_rht=x_nxt_rht-x_rht;
+				}
+			}
+			CoordPx scan_lines_until_next_turn=0;
+			const CoordPx yscr=CoordPx(y);
+			if(y_nxt_lft>y_nxt_rht){
+//				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_rht-y);
+				scan_lines_until_next_turn=CoordPx(y_nxt_rht)-yscr;
+				adv_lft=false;
+				adv_rht=true;
+			}else{
+//				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_lft-y); // this generates more artifacts
+				scan_lines_until_next_turn=CoordPx(y_nxt_lft)-yscr;
+				adv_lft=true;
+				adv_rht=false;
+			}
+			while(true){
+				if(scan_lines_until_next_turn<=0)
+					break;
+				T*p_lft=pline+CoordPx(x_lft);
+				const T*p_rht=pline+CoordPx(x_rht);
+				if(p_lft>p_rht) // ? can happen?
+					break;
+				scan_lines_until_next_turn--;
+				const CoordPx npx=CoordPx(p_rht-p_lft);
+				if(enable::draw_polygons_fill){
+					CoordPx n=npx; // ? npx+1?
+					T*p=p_lft;
+					while(n--){
+						*p++=color;
+					}
+				}
+				if(enable::draw_polygons_edges){
+					*p_lft=color;
+					*(p_lft+npx)=color;
+				}
+//				y+=1;
+				pline+=wi;
+				x_lft+=dxdy_lft;
+				x_rht+=dxdy_rht;
+			}
+			if(ix_lft==ix_rht) // ? render dot or line?
+				break;
+			if(adv_lft){
+				x_lft=x_nxt_lft;
+				y=y_nxt_lft;
+			}
+			if(adv_rht){
+				x_rht=x_nxt_rht;
+				y=y_nxt_rht;
+			}
 		}
 	}
 };

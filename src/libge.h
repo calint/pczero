@@ -75,17 +75,6 @@ public:
 	static auto tick()->void;
 	static auto deleted_add(Object*o)->void;
 	static auto commit_deleted()->void;
-
-	static constexpr auto draw_dot(const Point&p,const Color8b color)->void{
-		const CoordPx xi=CoordPx(p.x);
-		const CoordPx yi=CoordPx(p.y);
-		const Bitmap8b bmp=vga13h.bmp();
-		if(xi<0||xi>bmp.dim().width())
-			return;
-		if(yi<0||yi>bmp.dim().height())
-			return;
-		*static_cast<Color8b*>(bmp.address_offset({xi,yi}))=color;
-	}
 };
 
 // physics states are kept in their own buffer for better CPU cache utilization at update
@@ -173,8 +162,6 @@ public:
 namespace enable{
 	constexpr static bool draw_dots{true};
 	constexpr static bool draw_polygons{true};
-	constexpr static bool draw_polygons_fill{false};
-	constexpr static bool draw_polygons_edges{true};
 	constexpr static bool draw_normals{true};
 	constexpr static bool draw_collision_check{false};
 	constexpr static bool draw_bounding_circle{true};
@@ -294,12 +281,12 @@ public:
 			const Point*pt=pts_wld_;
 			for(PointIx i=0;i<def_.npts;i++){
 //				dot(dsp,pt->x,pt->y,color_);
-				World::draw_dot(*pt,0xe); // yellow dot
+				dsp.draw_dot(*pt,0xe); // yellow dot
 				pt++;
 			}
 		}
 		if(enable::draw_polygons){
-			draw_polygon(dsp,pts_wld_,def_.nbnd,def_.bnd,color_);
+			dsp.draw_polygon(pts_wld_,def_.nbnd,def_.bnd,color_);
 		}
 		if(enable::draw_normals){
 			if(nmls_wld_){ // check if there are any normals defined
@@ -309,13 +296,13 @@ public:
 					v.normalize().scale(3);
 					Point p=pts_wld_[def_.bnd[i]];
 					Vector v1{p.x+nml->x,p.y+nml->y};
-					World::draw_dot(v1,0xf);
+					dsp.draw_dot(v1,0xf);
 					nml++;
 				}
 			}
 		}
 		if(enable::draw_bounding_circle){
-			draw_bounding_circle(dsp,phy_ro().pos,bounding_radius());
+			dsp.draw_bounding_circle(phy_ro().pos,bounding_radius());
 		}
 	}
 
@@ -366,149 +353,6 @@ private:
 		Mmw_scl_=scl_;
 		Mmw_agl_=phy().agl;
 		Mmw_pos_=phy().pos;
-	}
-	// ? move rendering code to other class
-	constexpr static auto draw_bounding_circle(Bitmap8b&dsp,const Point&p,const Scale r)->void{
-		const Count segments=Count(5*r);
-		AngleRad th=0;
-		AngleRad dth=2*PI/AngleRad(segments);
-		for(Count i=0;i<segments;i++){
-			const Coord x=p.x+r*cos(th); // ? use sin_and_cos()
-			const Coord y=p.y+r*sin(th);
-			World::draw_dot({x,y},1);
-			th+=dth;
-		}
-	}
-	// ? move rendering code to other class
-	constexpr static auto draw_polygon(Bitmap8b&dsp,const Point pts[],const PointIx npoly_ixs,const PointIx ix[],const Color8b color)->void{
-//		const PointIx*pi=ix;
-//		for(PointIx i=0;i<npoly_ixs;i++){
-//			const Point2D&p=pts[*pi++];
-//			dot(dsp,p.x,p.y,4);
-//		}
-		if(npoly_ixs<2){ // ? what if 0, 2 is a line
-			World::draw_dot(pts[0],color);
-			return;
-		}
-		PointIx topy_ix=0;
-		const Point&first_point=pts[ix[0]];
-		Coord topx=first_point.x;
-		Coord topy=first_point.y;
-		PointIx i=1;
-		while(i<npoly_ixs){
-			const Point&p=pts[ix[i]]; // ? use pointer
-			const Coord y=p.y;
-			if(y<topy){
-				topy=y;
-				topx=p.x;
-				topy_ix=i;
-			}
-			i++;
-		}
-		PointIx ix_lft,ix_rht;
-		ix_lft=ix_rht=topy_ix;
-		Coord x_lft,x_rht;
-		x_lft=x_rht=topx;
-		bool adv_lft=true,adv_rht=true;
-		Coord dxdy_lft,dxdy_rht;
-		dxdy_lft=dxdy_rht=0;
-		Coord x_nxt_lft=0;
-		Coord y_nxt_lft=topy;
-		Coord x_nxt_rht=0;
-		Coord y_nxt_rht=topy;
-		Coord dy_rht=0;
-		Coord dy_lft=0;
-		Coord y=topy;
-//		CoordPx wi=CoordPx(dsp.dim().width());
-		CoordPx wi=CoordPx(dsp.dim().width());
-		CoordPx y_scr=CoordPx(y);
-		Color8b*pline=static_cast<Color8b*>(dsp.data().address())+y_scr*wi;
-		PointIx last_elem_ix=npoly_ixs-1;
-		while(true){
-			if(adv_lft){
-				if(ix_lft==last_elem_ix){
-					ix_lft=0;
-				}else{
-					ix_lft++;
-				}
-				x_nxt_lft=pts[ix[ix_lft]].x;
-				y_nxt_lft=pts[ix[ix_lft]].y; // ? whatif prevy==nxty
-				dy_lft=y_nxt_lft-y;
-				if(dy_lft!=0){
-					dxdy_lft=(x_nxt_lft-x_lft)/dy_lft;
-				}else{
-					dxdy_lft=x_nxt_lft-x_lft;
-				}
-			}
-			if(adv_rht){
-				if(ix_rht==0){
-					ix_rht=last_elem_ix;
-				}else{
-					ix_rht--;
-				}
-				x_nxt_rht=pts[ix[ix_rht]].x;
-				y_nxt_rht=pts[ix[ix_rht]].y;
-				dy_rht=y_nxt_rht-y;
-				if(dy_rht!=0){
-					dxdy_rht=(x_nxt_rht-x_rht)/dy_rht;
-				}else{
-					dxdy_rht=x_nxt_rht-x_rht;
-				}
-			}
-			CoordPx scan_lines_until_next_turn=0;
-			const CoordPx yscr=CoordPx(y);
-			if(y_nxt_lft>y_nxt_rht){
-//				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_rht-y);
-				scan_lines_until_next_turn=CoordPx(y_nxt_rht)-yscr;
-				adv_lft=false;
-				adv_rht=true;
-			}else{
-//				scan_lines_until_next_turn=static_cast<CoordPx>(y_nxt_lft-y); // this generates more artifacts
-				scan_lines_until_next_turn=CoordPx(y_nxt_lft)-yscr;
-				adv_lft=true;
-				adv_rht=false;
-			}
-			while(true){
-				if(scan_lines_until_next_turn<=0)
-					break;
-//				Color8b*p_lft=pline+static_cast<CoordPx>(x_lft+.5555f);
-//				Color8b*p_rht=pline+static_cast<CoordPx>(x_rht+.5555f);
-				Color8b*p_lft=pline+CoordPx(x_lft);
-				const Color8b*p_rht=pline+CoordPx(x_rht);
-				if(p_lft>p_rht) // ? can happen?
-					break;
-				scan_lines_until_next_turn--;
-				CoordPx npx=CoordPx(p_rht-p_lft);
-				if(enable::draw_polygons_fill){
-					pz_memset(p_lft,char(color),npx); // ? npx+1?
-				}
-				if(enable::draw_polygons_edges){
-					*p_lft=color;
-					*(p_lft+npx)=color;
-				}
-//				y+=1;
-				pline+=wi;
-				x_lft+=dxdy_lft;
-				x_rht+=dxdy_rht;
-			}
-			if(ix_lft==ix_rht) // ? render dot or line?
-				break;
-			if(adv_lft){
-				x_lft=x_nxt_lft;
-				y=y_nxt_lft;
-//				pline=static_cast<Color8b*>(dsp.data().address())+static_cast<CoordPx>(y)*wi;
-			}
-			if(adv_rht){
-				x_rht=x_nxt_rht;
-				y=y_nxt_rht;
-//				pline=static_cast<Color8b*>(dsp.data().address())+static_cast<CoordPx>(y)*wi;
-			}
-		}
-//		const PointIx*pi=ix;
-//		for(PointIx j=0;j<npoly_ixs;j++){
-//			const Point2D&p=pts[*pi++];
-//			dot(dsp,p.x,p.y,static_cast<unsigned char>(4));
-//		}
 	}
 
 	//----------------------------------------------------------------
@@ -643,7 +487,7 @@ private:
 			const Vector&p{o.pts_wld_[*bnd_ix_ptr]};
 			bnd_ix_ptr++;
 			if(enable::draw_collision_check){
-				World::draw_dot(p,5);
+				vga13h.bmp().draw_dot(p,5);
 			}
 			const Vector v{p0-p}; // vector from point on line to point to check
 			if(v.dot(*nml_ptr)>0){ // use abs(v)<0.0001f (example)?
@@ -652,7 +496,7 @@ private:
 			}
 			nml_ptr++;
 			if(enable::draw_collision_check){
-				World::draw_dot(p,0xe);
+				vga13h.bmp().draw_dot(p,0xe);
 			}
 		}
 		return true;
