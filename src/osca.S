@@ -233,7 +233,7 @@ movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE # exception 7: device not available,
                                         #  triggers when a FPU task switch
                                         #  might be needed (see isr_fpu)
 lidt idtr # load the interrupt descriptor table register
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --e - fpu
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
 # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
 # 7.1.2.1 COPROCESSOR CONTEXT SWITCHING page 122
 mov %cr0,%eax # enable MP (Monitor co-processor) bit in CR0
