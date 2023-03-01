@@ -348,8 +348,8 @@ public:
 		Coord dy_rht=0;
 		Coord dy_lft=0;
 		Coord y=topy;
-		CoordPx wi=CoordPx(d_.width());
-		CoordPx y_scr=CoordPx(y);
+		const CoordPx wi=CoordPx(d_.width());
+		const CoordPx y_scr=CoordPx(y);
 		T*pline=static_cast<T*>(dt_.address())+y_scr*wi;
 		PointIx last_elem_ix=npoly_ixs-1;
 		while(true){
