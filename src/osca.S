@@ -248,7 +248,7 @@ lp1:
   cmp osca_tasks_end,%ebx
   jne lp1
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
-call osca_init # calls C function
+call osca_init # calls C function declared in osca.h
 # restore cpu state for first task
 mov osca_active_task,%ebx # ebx points to first task
 mov TASK_STRUCT_OFFSET_EIP(%ebx),%esp  # save task.eip for jump
