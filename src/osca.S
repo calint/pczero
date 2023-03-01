@@ -246,7 +246,7 @@ lp2:
   fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx)
   add $TASK_STRUCT_SIZE,%ebx
   cmp osca_tasks_end,%ebx
-  jne lp2
+  jl lp2
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 call osca_init # calls C function declared in osca.h
 # restore cpu state for first task
