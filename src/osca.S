@@ -231,7 +231,7 @@ movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE # IRQ 1: keyboard
 movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE # IRQ 8: timer 1024 Hz
 movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE # exception 7: device not available,
                                         #  triggers when a FPU task switch
-                                        #  might be needed (see isr_fpu)
+                                        #  might be needed
 lidt idtr # load the interrupt descriptor table register
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
 # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
