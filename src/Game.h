@@ -1,13 +1,12 @@
 #pragma once
 #include"osca.h"
 #include"lib.h"
-#include"lib2d.h"
 #include"libge.h"
 
 namespace osca{
 class Ship;
 class Game{
-	inline static const CoordsPx play_area_top_left{0,50};
+	inline static const PointPx play_area_top_left{0,50};
 	inline static const DimensionPx play_area_dim{320,100};
 	static auto create_scene()->void;
 	static auto create_scene2()->void;
@@ -36,7 +35,7 @@ class Game{
 
 	static auto draw_axis()->void{
 		static AngleDeg deg=0;
-		static Matrix2D R;
+		static Matrix R;
 		if(deg>360)
 			deg-=360;
 		deg+=5;
@@ -64,23 +63,23 @@ public:
 	inline static Point boss_pos{20,60};
 	inline static Vector boss_vel{10,0};
 
-	static constexpr auto is_in_play_area(const Point&p)->bool{
-		if(p.x>=Coord(play_area_top_left.x()+play_area_dim.width())){
+	static auto is_in_play_area(const Point&p)->bool{
+		if(p.x>=Coord(play_area_top_left.x+play_area_dim.width())){
 			return false;
 		}
-		if(p.x<=Coord(play_area_top_left.x())){
+		if(p.x<=Coord(play_area_top_left.x)){
 			return false;
 		}
-		if(p.y>=Coord(play_area_top_left.y()+play_area_dim.height())){
+		if(p.y>=Coord(play_area_top_left.y+play_area_dim.height())){
 			return false;
 		}
-		if(p.y<=Coord(play_area_top_left.y())){
+		if(p.y<=Coord(play_area_top_left.y)){
 			return false;
 		}
 		return true;
 	}
 
-	static constexpr auto draw_dot(const Point&p,const Color8b color)->void{
+	static auto draw_dot(const Point&p,const Color8b color)->void{
 		if(!is_in_play_area(p))
 			return;
 		const CoordPx xi=CoordPx(p.x);
@@ -100,13 +99,13 @@ public:
 		}
 	}
 
-	static constexpr auto is_in_play_area(const Object&o)->bool{
+	static auto is_in_play_area(const Object&o)->bool{
 		const Real bounding_radius=o.bounding_radius();
 		const PhysicsState&phy=o.phy_ro();
-		const Real xmax=Real(Game::play_area_top_left.x()+Game::play_area_dim.width());
-		const Real xmin=Real(Game::play_area_top_left.x());
-		const Real ymax=Real(Game::play_area_top_left.y()+Game::play_area_dim.height());
-		const Real ymin=Real(Game::play_area_top_left.y());
+		const Real xmax=Real(Game::play_area_top_left.x+Game::play_area_dim.width());
+		const Real xmin=Real(Game::play_area_top_left.x);
+		const Real ymax=Real(Game::play_area_top_left.y+Game::play_area_dim.height());
+		const Real ymin=Real(Game::play_area_top_left.y);
 		if(phy.pos.x>=xmax-bounding_radius){
 			return false;
 		}

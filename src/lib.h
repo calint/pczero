@@ -98,36 +98,136 @@ public:
 	inline constexpr Data(const Address a,const SizeBytes n):a_{a},s_{n}{}
 	inline constexpr auto address()const->Address{return a_;}
 	inline constexpr auto size()const->SizeBytes{return s_;}
-	inline constexpr auto address_offset(const OffsetBytes ob)const->Address{ // ? bounds check
-		return static_cast<Address>(static_cast<char*>(a_)+ob);
-	}
+	inline constexpr auto address_offset(const OffsetBytes ob)const->Address{return static_cast<Address>(static_cast<char*>(a_)+ob);}
 	inline auto to(const Data&d)const->void{pz_memcpy(d.address(),a_,s_);}
 	inline auto to(const Data&d,const SizeBytes sb)const->void{pz_memcpy(d.address(),a_,sb);}
 	inline auto clear(char byte=0)const->void{pz_memset(a_,byte,s_);}
 	inline constexpr auto end()const->Address{return static_cast<char*>(a_)+s_;}
 };
 
-template<typename T>
-class CoordsT{ // ? guideline C.131
-	T x_;
-	T y_;
-public:
-	inline constexpr CoordsT(const T&x,const T&y):x_{x},y_{y}{}
-	inline constexpr auto x()const->const T&{return x_;}
-	inline constexpr auto y()const->const T&{return y_;}
-	inline constexpr auto set_x(const T&x)->void{x_=x;}
-	inline constexpr auto set_y(const T&y)->void{y_=y;}
-	inline constexpr auto set(const T&x,const T&y)->void{set_x(x);set_y(y);}
-	inline constexpr auto inc_x(const T&dx)->void{x_+=dx;}
-	inline constexpr auto inc_y(const T&dy)->void{y_+=dy;}
-	inline constexpr auto inc_by(const CoordsT<T>&delta)->void{x_+=delta.x_;y_+=delta.y_;}
-};
 using Real=float;
-using CoordPx=short;
-using CoordsPx=CoordsT<CoordPx>;
+using Angle=Real;
+using AngleRad=Angle;
 
-using Coord=Real;
-using Coords=CoordsT<Coord>;
+inline auto sin(const AngleRad radians)->Real{
+	Real v;
+	asm("fsin"
+		:"=t"(v) // "t": first (top of stack) floating point register
+		:"0"(radians)
+	);
+	return v;
+}
+
+inline auto cos(const AngleRad radians)->Real{
+	Real v;
+	asm("fcos"
+		:"=t"(v) // "t": first (top of stack) floating point register
+		:"0"(radians)
+	);
+	return v;
+}
+
+// puts sin and cos value of 'radians' in 'fsin' and 'fcos'
+inline auto sin_and_cos(const AngleRad radians,Real&fsin,Real&fcos)->void{
+	asm("fsincos"
+		:"=t"(fcos),"=u"(fsin) // "u" : Second floating point register
+		:"0"(radians)
+	);
+}
+
+inline auto sqrt(const Real in)->Real{
+	Real v;
+	asm("fsqrt"
+		:"=t"(v) // "t": first (top of stack) floating point register
+		:"0"(in)
+	);
+	return v;
+}
+
+inline auto abs(const Real in)->Real{
+	Real v;
+	asm("fabs"
+		:"=t"(v) // "t": first (top of stack) floating point register
+		:"0"(in)
+	);
+	return v;
+}
+
+constexpr Real PI=Real(3.141592653589793);
+
+using AngleDeg=Angle;
+
+constexpr inline auto deg_to_rad(const AngleDeg deg)->AngleRad{
+	constexpr Real deg_to_rad{PI/180};
+	return deg*deg_to_rad;
+}
+
+using Scale=Real;
+
+template<typename T>
+struct VectorT{
+	T x{0},y{0};
+	// normalizes and returns this vector
+	inline auto normalize()->VectorT&{
+		const Real len=sqrt(x*x+y*y);
+		x/=len;
+		y/=len;
+		return*this;
+	}
+	// scales and returns this vector
+	inline constexpr auto scale(Scale s)->VectorT&{
+		x*=s;
+		y*=s;
+		return*this;
+	}
+	// increases and returns this vector by v
+	inline constexpr auto inc_by(const VectorT&v)->void{
+		x+=v.x;
+		y+=v.y;
+	}
+	// increases and returns this vector by v*scl
+	inline constexpr auto inc_by(const VectorT&v,const Real scl)->void{
+		x+=v.x*scl;
+		y+=v.y*scl;
+	}
+	// negates and returns this vector
+	inline constexpr auto negate()->VectorT&{
+		x=-x;
+		y=-y;
+		return*this;
+	}
+	// sets and returns this vector to absolute value of itself
+	inline auto absolute()->VectorT&{
+		x=abs(x);
+		y=abs(y);
+		return*this;
+	}
+	// returns dot product of this vector and v
+	inline constexpr auto dot(const VectorT&v)const->T{
+		return x*v.x+y*v.y;
+	}
+	// returns the normal of this vector
+	inline constexpr auto normal()const->VectorT{return{-y,x};}
+	inline auto magnitude()const->T{return sqrt(x*x+y*y);}
+	inline constexpr auto magnitude2()const->T{return x*x+y*y;}
+//	auto operator<=>(const Vector2D&)const=default; // ? does not compile in clang++ without includes from std
+	inline constexpr auto operator==(const VectorT&)const->bool=default; // bitwise equality relevant
+	inline constexpr auto operator-(const VectorT&other)const->VectorT{return{x-other.x,y-other.y};}
+	inline constexpr auto operator+(const VectorT&other)const->VectorT{return{x+other.x,y+other.y};}
+
+//	inline static constexpr auto from_to(const Vector&from,const Vector&to)->Vector{
+//		return to-from;
+//	}
+};
+
+using Coord=Real; // a coordinate in real space
+using Vector=VectorT<Coord>; // a vector in real space
+using Point=Vector; // a point in 2D
+using PointIx=short; // index into a list of points
+using CoordPx=short; // a coordinate in pixel space
+using PointPx=VectorT<CoordPx>; // a point in pixel space
+using Count=Size;
+using Position=Point;
 
 template<typename T>
 class DimensionT{
@@ -151,13 +251,13 @@ public:
 	constexpr Bitmap(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()*Size(sizeof(T))}{}
 	inline constexpr auto dim()const->const DimensionPx&{return d_;}
 	inline constexpr auto data()const->const Data&{return dt_;}
-	inline constexpr auto address_offset(const CoordsPx p)const->Address{
-		return dt_.address_offset(p.y()*d_.width()*Size(sizeof(T))+p.x()*Size(sizeof(T)));
+	inline constexpr auto address_offset(const PointPx p)const->Address{
+		return dt_.address_offset(p.y*d_.width()*Size(sizeof(T))+p.x*Size(sizeof(T)));
 	}
-	constexpr auto to(const Bitmap&dst,const CoordsPx&c)const->void{
+	constexpr auto to(const Bitmap&dst,const PointPx&c)const->void{
 		T*si=static_cast<T*>(dt_.address());
 		T*di=static_cast<T*>(dst.dt_.address());
-		di+=c.y()*dst.dim().width()+c.x();
+		di+=c.y*dst.dim().width()+c.x;
 		const SizePx ln=dst.dim().width()-d_.width();
 		const SizePx h=d_.height();
 		const SizePx w=d_.width();
@@ -170,10 +270,10 @@ public:
 			di+=ln;
 		}
 	}
-	constexpr auto to_transparent(const Bitmap&dst,const CoordsPx&c)const->void{
+	constexpr auto to_transparent(const Bitmap&dst,const PointPx&c)const->void{
 		T*si=static_cast<T*>(dt_.address());
 		T*di=static_cast<T*>(dst.dt_.address());
-		di+=c.y()*dst.dim().width()+c.x();
+		di+=c.y*dst.dim().width()+c.x;
 		const SizePx ln=dst.dim().width()-d_.width();
 		const SizePx h=d_.height();
 		const SizePx w=d_.width();
@@ -364,7 +464,7 @@ static constexpr unsigned table_ascii_to_font[]{
 		0,0,0,0,0,
 };
 
-using CoordsChar=CoordsT<int>;
+using CoordsChar=VectorT<int>;
 class PrinterToBitmap{ // ? bounds check on constexpr
 	Color8b*di_; // current pixel in bitmap
 	Color8b*dil_; // beginning of current line
@@ -401,7 +501,7 @@ public:
 	}
 	constexpr auto pos(const CoordsChar p)->PrinterToBitmap&{
 		di_=static_cast<Color8b*>(b_.data().address());
-		di_+=bmp_wi_*p.y()*(font_hi_+line_padding_)+p.x()*font_wi_;
+		di_+=bmp_wi_*p.y*(font_hi_+line_padding_)+p.x*font_wi_;
 		dil_=di_;
 		return*this;
 	}
@@ -576,5 +676,40 @@ PrinterToVga err; // global initialized by osca_init
 //	inline constexpr auto set_velocity(const Velocity&v){v_=v;}
 //	inline constexpr auto update(){v_.inc_by(a_);p_.inc_by(v_);}
 //};
-
+template<typename T>
+class MatrixT{
+	T xx{0},xy{0},xt{0};
+	T yx{0},yy{0},yt{0};
+	T ux{0},uy{0},id{0};
+public:
+	auto set_transform(const Scale scale,const AngleRad rotation,const VectorT<T>&translation)->void{
+		T fcos,fsin;
+		sin_and_cos(rotation,fsin,fcos);
+		const T cs=scale*fcos;
+		const T sn=scale*fsin;
+		xx=cs;xy=-sn;xt=translation.x;
+		yx=sn;yy= cs;yt=translation.y;
+		ux= 0;uy=  0;id=1;
+	}
+	constexpr auto transform(const VectorT<T>src[],VectorT<T>dst[],const Count n)const->void{
+		for(Count i=0;i<n;i++){
+			dst->x=xx*src->x+xy*src->y+xt;
+			dst->y=yx*src->x+yy*src->y+yt;
+			src++;
+			dst++;
+		}
+	}
+	// does the rotation part of the transform
+	constexpr auto rotate(const VectorT<T>src[],VectorT<T>dst[],const Count n)const->void{
+		for(Count i=0;i<n;i++){
+			dst->x=xx*src->x+xy*src->y;
+			dst->y=yx*src->x+yy*src->y;
+			src++;
+			dst++;
+		}
+	}
+	inline constexpr auto axis_x()const->VectorT<T>{return{xx,yx};} // math correct?
+	inline constexpr auto axis_y()const->VectorT<T>{return{xy,yy};} // math correct?
+};
+using Matrix=MatrixT<Coord>;
 } // end namespace osca

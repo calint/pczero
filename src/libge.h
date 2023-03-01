@@ -1,10 +1,6 @@
 #pragma once
-#include"lib2d.h"
 
 namespace osca{
-
-using Point=Vector; // a point in 2D
-using PointIx=short; // index into a list of points
 
 class ObjectDef final{
 public:
@@ -193,6 +189,7 @@ struct SlotInfo{
 
 using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types.
 using Bits8=unsigned char;
+using Scalar=Real;
 constexpr Scale sqrt_of_2=Real(1.414213562);
 class Object{
 	friend World;
@@ -204,7 +201,7 @@ class Object{
 	const ObjectDef&def_; // contains the model definition
 	Point*pts_wld_; // transformed model to world points cache
 	Vector*nmls_wld_; // normals of boundingunsigned shape rotated to the world coordinates (not normalized if scale!=1)
-	Matrix2D Mmw_{}; // model to world transform
+	Matrix Mmw_{}; // model to world transform
 	Point Mmw_pos_{}; // current position used in transform matrix
 	AngleRad Mmw_agl_{}; // current angle used in transform matrix
 	Scale Mmw_scl_{};  // current scale used in transform matrix

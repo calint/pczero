@@ -1,6 +1,5 @@
 #include"osca.h"
 #include"lib.h"
-#include"lib2d.h"
 #include"libge.h"
 #include"kernel.h"
 
