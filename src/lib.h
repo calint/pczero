@@ -351,7 +351,7 @@ public:
 		const CoordPx wi=CoordPx(d_.width());
 		const CoordPx y_scr=CoordPx(y);
 		T*pline=static_cast<T*>(dt_.address())+y_scr*wi;
-		PointIx last_elem_ix=npoly_ixs-1;
+		const PointIx last_elem_ix=npoly_ixs-1;
 		while(true){
 			if(adv_lft){
 				if(ix_lft==last_elem_ix){
