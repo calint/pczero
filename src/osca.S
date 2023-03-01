@@ -243,12 +243,11 @@ mov %eax,%cr0 #  instruction is used then exception 7 is triggered
 fninit # initiate floating point unit (fpu)
 # write the initialized state to all tasks' fpu state
 mov $osca_tasks,%ebx
-add $TASK_STRUCT_OFFSET_FPU_STATE,%ebx
-loop1:
-  fsave (%ebx) # save fpu state to memory pointed by ebx
-  add $TASK_STRUCT_SIZE,%ebx # next task
-  cmp osca_tasks_end,%ebx # is ebx past the tasks end pointer?
-  jl loop1
+lp1:
+  fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx)
+  add $TASK_STRUCT_SIZE,%ebx
+  cmp osca_tasks_end,%ebx
+  jne lp1
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 call osca_init # calls C function
 mov osca_active_task,%ebx # ebx points to active task record
