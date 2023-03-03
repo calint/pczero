@@ -623,6 +623,7 @@ class PrinterToBitmap{ // ? bounds check on constexpr
 	static constexpr SizePx font_hi_{6};
 	static constexpr SizePx line_padding_{2}; // ? attribute
 public:
+	// ? C++ guidelines C.21
 	constexpr explicit PrinterToBitmap(Bitmap8b&b):
 		di_{static_cast<Color8b*>(b.data().address())},
 		dil_{di_},
