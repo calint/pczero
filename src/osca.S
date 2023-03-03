@@ -45,9 +45,9 @@
 .set TASK_BIT_FOCUS_KEYBOARD,1
 .set TASK_BIT_RUNNING,2
 .set EFLAGS_BIT_IF,0x200 # the 'Interrupt enable flag' bit
-.set CR0_PE,1 # Protected Mode Enable bit
-.set CR0_MP,2 # Monitor co-processor bit
-.set CR0_TS,8 # Task switched bit
+.set CR0_BIT_PE,1 # Protected Mode Enable bit
+.set CR0_BIT_MP,2 # Monitor co-processor bit
+.set CR0_BIT_TS,8 # Task switched bit
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - exports
 .global osca_key # last received keyboard scan code
 .global osca_tmr_lo # 1024 Hz timer low bits
@@ -126,7 +126,7 @@ int $0x10
 cli # done with bios, disable interrupts
 lgdt gdtr # load global descriptor tables
 mov %cr0,%eax # enter 32b protected mode
-or $CR0_PE,%al     #  set 'Protection Enable' bit
+or $CR0_BIT_PE,%al     #  set 'Protection Enable' bit
 mov %eax,%cr0 #  in CR0 (Control Register 0)
 # far jump to selector 08h (offset into GDT, pointing at
 # a 32bit PM code segment descriptor) to load CS with
@@ -240,7 +240,7 @@ lidt idtr # load the interrupt descriptor table register
 # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
 # 7.1.2.1 COPROCESSOR CONTEXT SWITCHING page 122
 mov %cr0,%eax # enable MP (Monitor co-processor) bit in CR0
-or $CR0_MP,%al #  if TS (Task switched) bit is set and a FPU
+or $CR0_BIT_MP,%al #  if TS (Task switched) bit is set and a FPU
 mov %eax,%cr0 #  instruction is used then exception 7 is triggered
 # initiate the tasks' FPU state with initial values
 fninit # initiate FPU
@@ -317,7 +317,7 @@ osca_yield_next_task:
 
   # enable TS (Task switched) bit in cr0
   mov %cr0,%eax
-  or $CR0_TS,%al
+  or $CR0_BIT_TS,%al
   mov %eax,%cr0
 
   # switch from task pointed by ebx to task pointed by ecx
@@ -402,7 +402,7 @@ isr_tmr_next_task:
 
   # enable TS (Task switched) bit in cr0
   mov %cr0,%eax
-  or $CR0_TS,%al
+  or $CR0_BIT_TS,%al
   mov %eax,%cr0
 
   # switch from task pointed to by ebx to task pointed by ecx
