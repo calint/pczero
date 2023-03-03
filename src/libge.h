@@ -261,6 +261,7 @@ public:
 		if(nmls_wld_)
 			delete[]nmls_wld_;
 	}
+	// ? C++ guidelines C.21
 	inline constexpr auto type_bits()const->TypeBits{return tb_;}	// returns false if object is to be deleted
 	inline constexpr auto type_bits_collision_mask()const->TypeBits{return tb_col_msk_;}	// returns false if object is to be deleted
 	inline constexpr auto phy()->PhysicsState&{return*phy_;}
