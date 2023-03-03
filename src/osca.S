@@ -45,7 +45,7 @@
 .set TASK_BIT_FOCUS_KEYBOARD,1
 .set TASK_BIT_RUNNING,2
 .set EFLAGS_BIT_IF,0x200 # the 'Interrupt enable flag' bit
-.set CR0_BIT_PE,1 # Protected Mode Enable bit
+.set CR0_BIT_PE,1 # Protected mode enable bit
 .set CR0_BIT_MP,2 # Monitor co-processor bit
 .set CR0_BIT_TS,8 # Task switched bit
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - exports
