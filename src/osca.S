@@ -226,7 +226,7 @@ lp1:
     movb $0x00,         4(%ebx)    # unused
     movb $0x8e,         5(%ebx)    # type_attrs p,pv0,!s,i32b
     movw %ax,           6(%ebx)    # offfset 16..31
-    add $IDT_ENTRY_SIZE,%ebx # increment by the size of the entry
+    add $IDT_ENTRY_SIZE,%ebx
 loop lp1
 # setup IRQ 1 (keyboard) and IRQ 8 (RTC timer)
 #  only the lower offset set, handlers within 64K
