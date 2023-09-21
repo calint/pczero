@@ -1,0 +1,53 @@
+Intel® 64 and IA-32 Architectures Software Developer’s Manual
+6-2 Vol. 3A
+6.3.1 External Interrupts
+Table 6-1. Protected-Mode Exceptions and Interrupts
+
+0 #DE Divide Error Fault No DIV and IDIV instructions.
+1 #DB Debug Exception Fault/ Trap No Instruction, data, and I/O breakpoints;
+single-step; and others.
+2 — NMI Interrupt Interrupt No Nonmaskable external interrupt.
+3 #BP Breakpoint Trap No INT3 instruction.
+4 #OF Overflow Trap No INTO instruction.
+5 #BR BOUND Range Exceeded Fault No BOUND instruction.
+6 #UD Invalid Opcode (Undefined Opcode) Fault No UD instruction or reserved opcode.
+7 #NM Device Not Available (No Math
+Coprocessor)
+Fault No Floating-point or WAIT/FWAIT instruction.
+8 #DF Double Fault Abort Yes
+(zero)
+Any instruction that can generate an
+exception, an NMI, or an INTR.
+9 Coprocessor Segment Overrun
+(reserved)
+Fault No Floating-point instruction.1
+10 #TS Invalid TSS Fault Yes Task switch or TSS access.
+11 #NP Segment Not Present Fault Yes Loading segment registers or accessing
+system segments.
+12 #SS Stack-Segment Fault Fault Yes Stack operations and SS register loads.
+13 #GP General Protection Fault Yes Any memory reference and other
+protection checks.
+14 #PF Page Fault Fault Yes Any memory reference.
+15 — (Intel reserved. Do not use.) No
+16 #MF x87 FPU Floating-Point Error (Math
+Fault)
+Fault No x87 FPU floating-point or WAIT/FWAIT
+instruction.
+17 #AC Alignment Check Fault Yes
+(Zero)
+Any data reference in memory.2
+18 #MC Machine Check Abort No Error codes (if any) and source are model
+dependent. 3
+19 #XM SIMD Floating-Point Exception Fault No SSE/SSE2/SSE3 floating-point
+instructions 4
+20 #VE Virtualization Exception Fault No EPT violations5
+21 #CP Control Protection Exception Fault Yes RET, IRET, RSTORSSP, and SETSSBSY
+instructions can generate this exception.
+When CET indirect branch tracking is
+enabled, this exception can be generated
+due to a missing ENDBRANCH instruction
+at target of an indirect call or jump.
+22-31 — Intel reserved. Do not use.
+32-255 — User Defined (Non-reserved)
+Interrupts
+Interrupt External interrupt or INT n instruction.

@@ -294,7 +294,7 @@ osca_yield: # switches to next task
   pushf # push flags. stack is now ..., EIP, EFLAGS
         # EFLAGS 'Interrupt enable flag' is off
         #  so popf in cli/sti section is safe
-  incl 0xa0000+320-12 # create output on screen
+  incl 0xa0000+320-16 # create output on screen
   # start task switching
   mov %eax,tmp_eax # save eax,ebx,ecx
   mov %ebx,tmp_ebx # ..
@@ -374,12 +374,13 @@ osca_yield_exit_without_task_switch:
 .align 4
 isr_tmr:
   cli # disable interrupts
-  incl 0xa0000+320-4 # create output on screen
+  incl 0xa0000+320-8 # create output on screen
   incl osca_tmr_lo    # increase lower 32 bits ticker
   adcl $0,osca_tmr_hi # add carry to upper 32 bits
   mov %eax,tmp_eax # save eax
   mov osca_tmr_lo,%eax # switch task every 8'th tick
   and $FREQ_DIV_AND,%eax # 1024/8 Hz
+#  jmp isr_tmr_acknowledge_and_return # never task switch
   jnz isr_tmr_acknowledge_and_return # if no task switch
   # start task switching
   mov %ebx,tmp_ebx # save ebx
@@ -479,7 +480,7 @@ isr_kbd:
   pusha # save registers
   in $0x60,%al # read keyboard port
   mov %al,osca_key # store
-  mov %al,0xa0000+320-8 # create output on screen
+  mov %al,0xa0000+320-1 # create output on screen
   call osca_keyb_ev # call keyboard handler C function
   mov $0x20,%al # ack interrupt
   out %al,$0x20 # ...
@@ -497,7 +498,7 @@ isr_fpu:
   cmp osca_active_fpu,%eax
   je isr_fpu_done
     # not same task, switch FPU state
-    incl 0xa0000+320-16 # on screen
+    incl 0xa0000+320-24 # on screen
     push %ebx
     mov osca_active_fpu,%ebx
     fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx) # save state

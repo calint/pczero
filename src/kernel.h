@@ -11,7 +11,20 @@ namespace osca{
 
 // called by the interrupt handler for events other than keyboard or timer
 extern "C" auto osca_exception()->void{
-	err.p("osca exception").spc();
+	unsigned top_of_stack;
+	err.p("osca exception").nl();
+	asm("mov (%%esp),%0":"=r"(top_of_stack));
+	err.spc().p_hex_32b(top_of_stack);
+	asm("mov 4(%%esp),%0":"=r"(top_of_stack));
+	err.spc().p_hex_32b(top_of_stack);
+	asm("mov 8(%%esp),%0":"=r"(top_of_stack));
+	err.spc().p_hex_32b(top_of_stack);
+	asm("mov 12(%%esp),%0":"=r"(top_of_stack));
+	err.spc().p_hex_32b(top_of_stack);
+	asm("mov 16(%%esp),%0":"=r"(top_of_stack));
+	err.spc().p_hex_32b(top_of_stack);
+	asm("mov 20(%%esp),%0":"=r"(top_of_stack));
+	err.spc().p_hex_32b(top_of_stack);
 	osca_hang();
 }
 
