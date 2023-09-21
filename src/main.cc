@@ -105,7 +105,7 @@ asm(".global tsk1");
 asm(".align 16");
 asm("tsk1:");
 asm("  incl 0xa0000+160");
-asm("  call osca_yield");
+//asm("  call osca_yield");
 asm("  jmp tsk1");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] auto tsk2()->void{
