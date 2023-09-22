@@ -216,9 +216,11 @@ in $0x71,%al
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
 # setup interrupt service routines
 # https://wiki.osdev.org/Interrupt_Descriptor_Table
+#
 # !!! asus zenbook hangs because an unknown interrupt is triggered
-#  for now disabled with an empty interrupt handler that just returns
-#  on qemu and virtualbox ok
+#  for now disabled with an empty interrupt handler that increases
+#  dots on screen (4th group of pixels from the right hand side)
+#  on qemu and virtualbox not same behaviour
 # mov $osca_exception,%eax # store the upper bits of the handler
 mov $isr_null,%eax # store the upper bits of the handler
 shr $16,%eax             #  in ax
@@ -472,6 +474,7 @@ isr_tmr_acknowledge_and_return:
 
 # empty interrupt
 isr_null:
+  incl 0xa0000+320-32 # on screen
   iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - keyboard
 .align 4
