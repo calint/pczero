@@ -12,20 +12,26 @@ namespace osca{
 
 // called by the interrupt handler for events other than keyboard or timer
 extern "C" auto osca_exception()->void{
-	unsigned top_of_stack;
+	static unsigned stack_0;
+	static unsigned stack_1;
+	static unsigned stack_2;
+	static unsigned stack_3;
+	static unsigned stack_4;
+	static unsigned stack_5;
+	asm("mov (%%esp),%0":"=r"(stack_0));
+	asm("mov 4(%%esp),%0":"=r"(stack_1));
+	asm("mov 8(%%esp),%0":"=r"(stack_2));
+	asm("mov 12(%%esp),%0":"=r"(stack_3));
+	asm("mov 16(%%esp),%0":"=r"(stack_4));
+	asm("mov 20(%%esp),%0":"=r"(stack_5));
+
 	err.p("osca exception").nl();
-	asm("mov (%%esp),%0":"=r"(top_of_stack));
-	err.spc().p_hex_32b(top_of_stack);
-	asm("mov 4(%%esp),%0":"=r"(top_of_stack));
-	err.spc().p_hex_32b(top_of_stack);
-	asm("mov 8(%%esp),%0":"=r"(top_of_stack));
-	err.spc().p_hex_32b(top_of_stack);
-	asm("mov 12(%%esp),%0":"=r"(top_of_stack));
-	err.spc().p_hex_32b(top_of_stack);
-	asm("mov 16(%%esp),%0":"=r"(top_of_stack));
-	err.spc().p_hex_32b(top_of_stack);
-	asm("mov 20(%%esp),%0":"=r"(top_of_stack));
-	err.spc().p_hex_32b(top_of_stack);
+	err.spc().p_hex_32b(stack_0);
+	err.spc().p_hex_32b(stack_1);
+	err.spc().p_hex_32b(stack_2);
+	err.spc().p_hex_32b(stack_3);
+	err.spc().p_hex_32b(stack_4);
+	err.spc().p_hex_32b(stack_5);
 	osca_hang();
 }
 

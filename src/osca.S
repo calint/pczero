@@ -216,25 +216,33 @@ in $0x71,%al
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
 # setup interrupt service routines
 # https://wiki.osdev.org/Interrupt_Descriptor_Table
-mov $osca_exception,%eax # store the upper bits of the handler
+# !!! asus zenbook hangs because an unknown interrupt is triggered
+#  for now disabled with an empty interrupt handler that just returns
+#  on qemu and virtualbox ok
+# mov $osca_exception,%eax # store the upper bits of the handler
+mov $isr_null,%eax # store the upper bits of the handler
 shr $16,%eax             #  in ax
 mov $IDT,%ebx # interrupt descriptor table address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
 lp1:
-    movw $osca_exception,(%ebx)    # offset 0..15
-    movw $0x0008,       2(%ebx)    # selector in gdt
-    movb $0x00,         4(%ebx)    # unused
-    movb $0x8e,         5(%ebx)    # type_attrs p,pv0,!s,i32b
-    movw %ax,           6(%ebx)    # offfset 16..31
+#    movw $osca_exception,(%ebx)    # offset 0..15
+    movw $isr_null,       (%ebx)    # offset 0..15
+    movw $0x0008,        2(%ebx)    # selector in gdt
+    movb $0x00,          4(%ebx)    # unused
+    movb $0x8e,          5(%ebx)    # type_attrs p,pv0,!s,i32b
+    movw %ax,            6(%ebx)    # offfset 16..31
     add $IDT_ENTRY_SIZE,%ebx
 loop lp1
 # setup IRQ 1 (keyboard) and IRQ 8 (RTC timer)
 #  only the lower offset set, handlers within 64K
-movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE # IRQ 1: keyboard
-movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE # IRQ 8: timer 1024 Hz
-movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE # exception 7: device not available,
-                                        #  triggered when a FPU task switch
-                                        #  might be needed
+movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE   # IRQ 1: keyboard
+movw       $0,IDT+(32+1)*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is within 64K)
+movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE   # IRQ 8: timer 1024 Hz
+movw       $0,IDT+(32+8)*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is within 64K)
+movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE   # exception 7: device not available,
+movw       $0,IDT+     7*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is within 64K)
+                                          #  triggered when a FPU task switch
+                                          #  might be needed
 lidt idtr # load the interrupt descriptor table register
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
 # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
@@ -266,17 +274,6 @@ popf # restore flags, no op that modifies flags after this
 mov (-TASK_STRUCT_OFFSET_EFLAGS_END+TASK_STRUCT_OFFSET_ESP)(%esp),%esp
 sti # enables interrupts after next instruction
 jmp *tmp_eip # jmp to saved eip (first task)
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
-.align 4
-osca_tmr_lo:.long 0 # 1024 Hz tick lower, exported
-osca_tmr_hi:.long 0 # 1024 Hz tick higher, exported
-osca_active_task:.long osca_tasks # pointer to active task, exported
-osca_active_fpu:.long osca_tasks # pointer to task that has the FPU
-tmp_eax:.long 0 # used in osca_yield and isr_tmr
-tmp_ebx:.long 0 # ...
-tmp_ecx:.long 0 # ...
-tmp_eip:.long 0 # ...
-osca_key:.byte 0 # last key event, exported
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partitions
 .space _start+436-.,0
 .space 10,0 # partition table
@@ -380,7 +377,6 @@ isr_tmr:
   mov %eax,tmp_eax # save eax
   mov osca_tmr_lo,%eax # switch task every 8'th tick
   and $FREQ_DIV_AND,%eax # 1024/8 Hz
-#  jmp isr_tmr_acknowledge_and_return # never task switch
   jnz isr_tmr_acknowledge_and_return # if no task switch
   # start task switching
   mov %ebx,tmp_ebx # save ebx
@@ -473,6 +469,10 @@ isr_tmr_acknowledge_and_return:
   mov tmp_eax,%eax # restore clobbered register
   sti # enables interrupts after next instruction
   iret
+
+# empty interrupt
+isr_null:
+  iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - keyboard
 .align 4
 isr_kbd:
@@ -512,5 +512,16 @@ isr_fpu_done:
   sti
   iret
 
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
+.align 4
+osca_tmr_lo:.long 0 # 1024 Hz tick lower, exported
+osca_tmr_hi:.long 0 # 1024 Hz tick higher, exported
+osca_active_task:.long osca_tasks # pointer to active task, exported
+osca_active_fpu:.long osca_tasks # pointer to task that has the FPU
+tmp_eax:.long 0 # used in osca_yield and isr_tmr
+tmp_ebx:.long 0 # ...
+tmp_ecx:.long 0 # ...
+tmp_eip:.long 0 # ...
+osca_key:.byte 0 # last key event, exported
 .space sector2+512-.,0
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
