@@ -6,8 +6,10 @@
 
 # resulting bootable image
 IMAGE=pczero.img
-# install on usb device
+
+# install on usb device, used in 'install'
 INSTALL_TO=/dev/sda
+
 # all files with source, used in 'print'
 FILES=src/osca.S src/main.cc src/osca.h src/kernel.h src/lib.h src/libge.h src/Game.h
 
