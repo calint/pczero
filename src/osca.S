@@ -160,6 +160,7 @@ mov %ax,%ss
 # enable access to odd megs
 # https://wiki.osdev.org/A20_Line
 #   enabled by default on non ancient pc?
+#   fast A20 gate (discouraged)
 in $0x92,%al
 or $2,%al
 out %al,$0x92
