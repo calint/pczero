@@ -473,6 +473,7 @@ isr_tmr_acknowledge_and_return:
   mov tmp_eax,%eax # restore clobbered register
   sti # enables interrupts after next instruction
   iret
+
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - keyboard
 .align 4
 isr_kbd:
@@ -487,6 +488,7 @@ isr_kbd:
   popa # restore registers
   sti # enables interrupts after next instruction
   iret
+
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu state switch
 .align 4
 isr_fpu:
@@ -511,6 +513,7 @@ isr_fpu_done:
   pop %eax
   sti
   iret
+
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - other
 .align 4
 isr_other:
