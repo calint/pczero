@@ -226,8 +226,8 @@ in $0x71,%al
 
 # mov $osca_exception,%eax # store the upper bits of the handler
 mov $isr_other,%eax # store the upper bits of the handler
-shr $16,%eax       #  in ax
-mov $IDT,%ebx      # interrupt descriptor table address
+shr $16,%eax        #  in ax
+mov $IDT,%ebx       # interrupt descriptor table address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
 lp1:
 #    movw $osca_exception,(%ebx)    # offset 0..15
