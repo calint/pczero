@@ -159,8 +159,8 @@ mov %ax,%ss
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - a20
 # enable access to odd megs
 # https://wiki.osdev.org/A20_Line
+# fast A20 gate method (since IBM PS/2)
 #   enabled by default on non ancient pc?
-#   fast A20 gate (discouraged)
 in $0x92,%al
 or $2,%al
 out %al,$0x92
@@ -245,8 +245,8 @@ movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE   # IRQ 8: timer 1024 Hz
 movw       $0,IDT+(32+8)*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is within 64K)
 movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE   # exception 7: device not available,
 movw       $0,IDT+     7*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is within 64K)
-                                          #  triggered when a FPU context switch
-                                          #  might be needed
+                                          #   triggered when a FPU context switch
+                                          #    might be needed
 lidt idtr # load the interrupt descriptor table register
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
 # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
