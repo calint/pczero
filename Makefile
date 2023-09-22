@@ -8,11 +8,8 @@
 IMAGE=pczero.img
 # install on usb device
 INSTALL_TO=/dev/sda
-# source files to be compiled
-SRC=src/osca.S src/main.cc
 # all files with source, used in 'print'
-FILES=$(SRC)
-FILES+=src/osca.h src/kernel.h src/lib.h src/libge.h src/Game.h
+FILES=src/osca.S src/main.cc src/osca.h src/kernel.h src/lib.h src/libge.h src/Game.h
 
 # as
 AF=-march=i386+387 --32
@@ -66,8 +63,6 @@ build:
 	@echo
 	$(CC) -c src/main.cc -o bin/src/main.o $(CF) $(CW)
 	@echo
-#	clang-tidy src/main.cc
-#	@echo
 	ld -o $(IMAGE) $(LF) && chmod -x $(IMAGE)
 	@echo
 	
