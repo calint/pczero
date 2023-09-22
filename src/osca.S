@@ -219,13 +219,15 @@ in $0x71,%al
 # https://wiki.osdev.org/Interrupt_Descriptor_Table
 #
 # !!! asus zenbook hangs because an unknown interrupt is triggered
+#  todo: find out which interrupt is triggered
 #  for now disabled with an empty interrupt handler that increases
-#  dots on screen (4th group of pixels from the right hand side)
+#   dots on screen (4th group of pixels from the right hand side)
 #  on qemu and virtualbox not same behaviour
+
 # mov $osca_exception,%eax # store the upper bits of the handler
 mov $isr_null,%eax # store the upper bits of the handler
-shr $16,%eax             #  in ax
-mov $IDT,%ebx # interrupt descriptor table address
+shr $16,%eax       #  in ax
+mov $IDT,%ebx      # interrupt descriptor table address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
 lp1:
 #    movw $osca_exception,(%ebx)    # offset 0..15
@@ -237,14 +239,13 @@ lp1:
     add $IDT_ENTRY_SIZE,%ebx
 loop lp1
 # setup IRQ 1 (keyboard) and IRQ 8 (RTC timer)
-#  only the lower offset set, handlers within 64K
 movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE   # IRQ 1: keyboard
 movw       $0,IDT+(32+1)*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is within 64K)
 movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE   # IRQ 8: timer 1024 Hz
 movw       $0,IDT+(32+8)*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is within 64K)
 movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE   # exception 7: device not available,
 movw       $0,IDT+     7*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is within 64K)
-                                          #  triggered when a FPU task switch
+                                          #  triggered when a FPU context switch
                                           #  might be needed
 lidt idtr # load the interrupt descriptor table register
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
