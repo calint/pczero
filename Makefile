@@ -6,7 +6,7 @@
 
 # resulting bootable image
 IMAGE=pczero.img
-# usb device
+# install on usb device
 INSTALL_TO=/dev/sda
 # source files to be compiled
 SRC=src/osca.S src/main.cc
