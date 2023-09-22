@@ -1,21 +1,23 @@
 # tools used:
-#   as       GNU assembler (GNU Binutils for Ubuntu) 2.39
-#   g++      (Ubuntu 12.2.0-3ubuntu1) 12.2.0
-#   clang++  Ubuntu clang version 15.0.6
-#   ld       GNU ld (GNU Binutils for Ubuntu) 2.39
+#   as       GNU assembler (GNU Binutils for Ubuntu) 2.40
+#   g++      (Ubuntu 12.3.0-1ubuntu1~23.04) 12.3.0
+#   clang++  Ubuntu clang version 15.0.7
+#   ld       GNU ld (GNU Binutils for Ubuntu) 2.40
 
 # resulting bootable image
 IMAGE=pczero.img
+# usb device
+INSTALL_TO=/dev/sda
 # source files to be compiled
 SRC=src/osca.S src/main.cc
 # all files with source, used in 'print'
 FILES=$(SRC)
 FILES+=src/osca.h src/kernel.h src/lib.h src/libge.h src/Game.h
 
-# GNU assembler (GNU Binutils for Ubuntu) 2.39
+# as
 AF=-march=i386+387 --32
 
-# g++ (Ubuntu 12.2.0-3ubuntu1) 12.2.0
+# g++
 #CC=g++ -std=c++2b # c++ 23
 #CW=-pedantic -pedantic-errors -Wall -Wextra -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
 #CW+=-Werror # warnings are errors
@@ -35,8 +37,7 @@ AF=-march=i386+387 --32
 #CF+=-fanalyzer
 #CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
-#Ubuntu clang version 15.0.6
-#Target: x86_64-pc-linux-gnu
+# clang++
 CC=clang++ -std=c++20
 CW=-Weverything
 CW+=-Werror # warnings are errors
@@ -53,11 +54,8 @@ CF=-Os -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threa
 CF+=-Wfatal-errors # stop at first error
 CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
-# GNU ld (GNU Binutils for Ubuntu) 2.39
+# ld
 LF=-Tlink.ld -melf_i386 -nostdlib
-
-# usb device
-INSTALL_TO=/dev/sda
 
 all:	clean build print display
 
