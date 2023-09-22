@@ -6,14 +6,17 @@
         {
             "label": "pczero make",
             "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
             "command": "make",
             "problemMatcher": [
                 "$gcc"
-            ],
-            "group": {
-				"kind": "build",
-				"isDefault": true
-			}
+            ]
         }
     ]
 }
