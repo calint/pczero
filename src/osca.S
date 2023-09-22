@@ -225,13 +225,13 @@ in $0x71,%al
 #  on qemu and virtualbox not same behaviour
 
 # mov $osca_exception,%eax # store the upper bits of the handler
-mov $isr_null,%eax # store the upper bits of the handler
+mov $isr_other,%eax # store the upper bits of the handler
 shr $16,%eax       #  in ax
 mov $IDT,%ebx      # interrupt descriptor table address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
 lp1:
 #    movw $osca_exception,(%ebx)    # offset 0..15
-    movw $isr_null,       (%ebx)    # offset 0..15
+    movw $isr_other,      (%ebx)    # offset 0..15
     movw $0x0008,        2(%ebx)    # selector in gdt
     movb $0x00,          4(%ebx)    # unused
     movb $0x8e,          5(%ebx)    # type_attrs p,pv0,!s,i32b
@@ -473,11 +473,6 @@ isr_tmr_acknowledge_and_return:
   mov tmp_eax,%eax # restore clobbered register
   sti # enables interrupts after next instruction
   iret
-
-# empty interrupt
-isr_null:
-  incl 0xa0000+320-32 # on screen
-  iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - keyboard
 .align 4
 isr_kbd:
@@ -515,6 +510,11 @@ isr_fpu:
 isr_fpu_done:
   pop %eax
   sti
+  iret
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - other
+.align 4
+isr_other:
+  incl 0xa0000+320-32 # on screen
   iret
 
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
