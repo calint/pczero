@@ -4,5 +4,6 @@ experiments with bootable image of x86 and protected mode 32 bit code for the i3
 written in assembler and C++
 
 contains:
-* minimal kernel supporting preemptive multiple tasks
-* sample toy application of a 2D game engine
+* minimal assembler kernel supporting preemptive multitasking (osca.S)
+* minimal C++ kernel (kernel.h)
+* sample toy application of a 2D game engine (lib.h, libge.h, Game.h)
