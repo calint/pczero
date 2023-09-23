@@ -4,5 +4,5 @@ experiments with bootable image of x86 and protected mode 32 bit code for the i3
 written in assembler and C++
 
 contains:
-* minimal kernel supporting multiple tasks
+* minimal kernel supporting preemptive multiple tasks
 * sample toy application of a 2D game engine
