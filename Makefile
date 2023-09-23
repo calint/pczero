@@ -10,8 +10,8 @@ IMAGE=pczero.img
 # install on usb device, used in 'install'
 INSTALL_TO=/dev/sda
 
-# all files with source, used in 'print'
-FILES=src/osca.S src/main.cc src/osca.h src/kernel.h src/lib.h src/libge.h src/Game.h
+# source files, used in 'print'
+SRC_FILES=src/osca.S src/main.cc src/osca.h src/kernel.h src/lib.h src/libge.h src/Game.h
 
 # as
 AF=-march=i386+387 --32
@@ -70,13 +70,13 @@ build:
 	
 print:
 	@echo sizes
-	@du -b $(IMAGE) $(FILES)
+	@du -b $(IMAGE) $(SRC_FILES)
 	@echo
 	@echo wc source
-	@wc $(FILES)
+	@wc $(SRC_FILES)
 	@echo
 	@echo "wc source | gzip"
-	@cat $(FILES)|gzip|wc
+	@cat $(SRC_FILES)|gzip|wc
 	@echo
 	@echo -n "calls: " && objdump -d bin/src/main.o | grep call | wc -l
 	@echo
