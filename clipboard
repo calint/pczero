@@ -23,7 +23,6 @@ https://stackoverflow.com/questions/3645803/bios-int-13h-with-ah-2-can-only-read
 
 #!/bin/sh
 cp ~/w/pczero/pczero.img .
-mv -f pczero.img pc.img
-truncate pc.img --size=1M
-rm pc.vdi
-VBoxManage convertfromraw --format VDI pc.img pc.vdi
+truncate pczero.img --size=1M
+rm pczero.vdi
+VBoxManage convertfromraw --format VDI pczero.img pczero.vdi

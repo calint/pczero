@@ -100,8 +100,8 @@ mov $0x0002,%cx
 xor %dh,%dh # head 0
 # %dl, drive number, is unchanged
 mov $0x07e0,%bx # to es:bx=7e00:0000
-mov %bx,%es
-xor %bx,%bx
+mov %bx,%es     #
+xor %bx,%bx     #
 int $0x13 # read disk
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - mode 13h
 # switch to vga mode 13h (320x200x8 bmp @ 0xa0000)
