@@ -13,4 +13,6 @@ contains:
 * minimal assembler kernel supporting preemptive multitasking (osca.S)
 * minimal c++ kernel (kernel.h)
 * sample toy application of a 2d game engine (lib.h, libge.h, Game.h)
+  - collision detection between convex shapes done with linear algebra
+  - simple targeting system of objects in motion (can easily be extended to 3d and non-linear trajectories)
 * sample tasks (main.cc)
