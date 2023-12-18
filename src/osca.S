@@ -1,4 +1,5 @@
 # tested on
+# * linux 6.5.0 qemu-system-i386 8.0.4
 # * linux 5.19 qemu 7.0.0
 # * linux 5.19 VirtualBox 6.1 (no enabled nested paging)
 # * asus zenbook
@@ -221,7 +222,8 @@ in $0x71,%al
 # !!! asus zenbook hangs because an unknown interrupt is triggered
 #  todo: find out which interrupt is triggered
 #  for now disabled with an empty interrupt handler that increases
-#   dots on screen (4th group of pixels from the right hand side)
+#   dots on screen (4th group of blinking pixels on top line from
+#   the right hand side). 
 #  on qemu and virtualbox not same behaviour
 
 # mov $osca_exception,%eax # store the upper bits of the handler
@@ -402,6 +404,12 @@ isr_tmr_next_task:
   jz isr_tmr_next_task # if not 'running' get next task
 
   # enable TS (Task switched) bit in cr0
+  # when this bit is enabled and a numeric (floating point)
+  # operation executes the cpu triggers exception 7 which
+  # calls 'isr_fpu' that restores, if necessary, fpu state 
+  # of current running task.
+  # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
+  # 7.1.2.1 COPROCESSOR CONTEXT SWITCHING page 122
   mov %cr0,%eax
   or $CR0_BIT_TS,%al
   mov %eax,%cr0
@@ -494,7 +502,7 @@ isr_kbd:
 isr_fpu:
   cli
   push %eax
-  clts # reset the TS flag in CR0
+  clts # reset the TS (Task Switched) flag in CR0
   # is the active task same as active FPU state?
   mov osca_active_task,%eax
   cmp osca_active_fpu,%eax

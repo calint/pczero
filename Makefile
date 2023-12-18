@@ -1,8 +1,8 @@
 # tools used:
-#   as       GNU assembler (GNU Binutils for Ubuntu) 2.40
-#   g++      (Ubuntu 12.3.0-1ubuntu1~23.04) 12.3.0
-#   clang++  Ubuntu clang version 15.0.7
-#   ld       GNU ld (GNU Binutils for Ubuntu) 2.40
+#   as       GNU assembler (GNU Binutils for Ubuntu) 2.41
+#   g++      (Ubuntu 13.2.0-4ubuntu3) 13.2.0
+#   clang++  Ubuntu clang version 16.0.6
+#   ld       GNU ld (GNU Binutils for Ubuntu) 2.41
 
 # resulting bootable image
 IMAGE=pczero.img
@@ -49,6 +49,7 @@ CW+=-Wno-weak-vtables # allow for source in include files
 CW+=-Wno-unused-function # allow for debugging
 CW+=-Wno-unused-parameter # allow for debugging
 CW+=-Wno-unused-variable # allow for debugging
+CW+=-Wno-unsafe-buffer-usage # allow pointer shenanigans
 CF=-Os -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
 CF+=-Wfatal-errors # stop at first error
 CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
