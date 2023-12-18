@@ -12,6 +12,9 @@ intention:
 contains:
 * minimal assembler kernel supporting preemptive multitasking (osca.S)
 * minimal c++ kernel (kernel.h)
+  - task switch (ctrl+tab)
+  - enabling/disabling tasks (ctrl+F1, F2 etc)
+  - keyboard focus on tasks that handle input
 * sample toy application of a 2d game engine (lib.h, libge.h, Game.h)
   - collision detection between convex shapes done with linear algebra
   - simple targeting system of objects in motion (can easily be extended to 3d and non-linear trajectories)
