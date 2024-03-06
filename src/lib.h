@@ -175,7 +175,7 @@ struct VectorT{
 		return*this;
 	}
 	// scales and returns this vector
-	inline constexpr auto scale(Scale s)->VectorT&{
+	inline constexpr auto scale(const Scale s)->VectorT&{
 		x*=s;
 		y*=s;
 		return*this;
@@ -186,9 +186,9 @@ struct VectorT{
 		y+=v.y;
 	}
 	// increases and returns this vector by v*scl
-	inline constexpr auto inc_by(const VectorT&v,const Real scl)->void{
-		x+=v.x*scl;
-		y+=v.y*scl;
+	inline constexpr auto inc_by(const VectorT&v,const Scale s)->void{
+		x+=v.x*s;
+		y+=v.y*s;
 	}
 	// negates and returns this vector
 	inline constexpr auto negate()->VectorT&{
@@ -234,14 +234,14 @@ class DimensionT{
 	T w_;
 	T h_;
 public:
-	inline constexpr DimensionT(const T&width,const T&height):w_{width},h_{height}{}
-	inline constexpr auto width()const->const T&{return w_;}
-	inline constexpr auto height()const->const T&{return h_;}
+	inline constexpr DimensionT(const T width,const T height):w_{width},h_{height}{}
+	inline constexpr auto width()const->const T{return w_;}
+	inline constexpr auto height()const->const T{return h_;}
 };
 
 using SizePx=int;
 using DimensionPx=DimensionT<SizePx>;
-using Color8b=char;
+using Color8b=unsigned char;
 
 namespace enable{
 	constexpr static bool draw_polygons_fill{false};
@@ -307,8 +307,11 @@ public:
 		AngleRad th=0;
 		AngleRad dth=2*PI/AngleRad(segments);
 		for(Count i=0;i<segments;i++){
-			const Coord x=p.x+r*cos(th); // ? use sin_and_cos()
-			const Coord y=p.y+r*sin(th);
+			Real fsin=0;
+			Real fcos=0;
+			sin_and_cos(th,fsin,fcos);
+			const Coord x=p.x+r*fcos;
+			const Coord y=p.y+r*fsin;
 			draw_dot({x,y},1);
 			th+=dth;
 		}
@@ -612,40 +615,26 @@ using CoordsChar=VectorT<int>;
 class PrinterToBitmap{ // ? bounds check on constexpr
 	Color8b*di_; // current pixel in bitmap
 	Color8b*dil_; // beginning of current line
-	Bitmap8b&b_; // ? C++ guidelines C.12
+	Bitmap8b*b_;
 	SizePx bmp_wi_;
 	SizePx ln_;
 	Color8b fg_{2};
 	Color8b bg_{0};
 	bool transparent_{false};
-	const char padding1{0};
+	char padding1{0};
 	static constexpr SizePx font_wi_{5};
 	static constexpr SizePx font_hi_{6};
 	static constexpr SizePx line_padding_{2}; // ? attribute
 public:
-	// ? C++ guidelines C.21
-	constexpr explicit PrinterToBitmap(Bitmap8b&b):
-		di_{static_cast<Color8b*>(b.data().address())},
+	constexpr explicit PrinterToBitmap(Bitmap8b*b):
+		di_{static_cast<Color8b*>(b->data().address())},
 		dil_{di_},
 		b_{b},
-		bmp_wi_{b.dim().width()},
+		bmp_wi_{b->dim().width()},
 		ln_{SizePx(bmp_wi_-font_wi_)}
 	{}
-	constexpr auto operator=(const PrinterToBitmap&o)->PrinterToBitmap&{
-//		if(this==&o)
-//			return*this;
-		di_=o.di_;
-		dil_=o.dil_;
-		b_=o.b_;
-		bmp_wi_=o.bmp_wi_;
-		ln_=o.ln_;
-		fg_=o.fg_;
-		bg_=o.bg_;
-		transparent_=o.transparent_;
-		return*this;
-	}
 	constexpr auto pos(const CoordsChar p)->PrinterToBitmap&{
-		di_=static_cast<Color8b*>(b_.data().address());
+		di_=static_cast<Color8b*>(b_->data().address());
 		di_+=bmp_wi_*p.y*(font_hi_+line_padding_)+p.x*font_wi_;
 		dil_=di_;
 		return*this;
@@ -772,7 +761,7 @@ Vga13h vga13h; // global initialized by osca_init
 
 class PrinterToVga:public PrinterToBitmap{
 public:
-	constexpr PrinterToVga():PrinterToBitmap{vga13h.bmp()}{}
+	constexpr PrinterToVga():PrinterToBitmap{&vga13h.bmp()}{}
 };
 
 // debugging to vga13h

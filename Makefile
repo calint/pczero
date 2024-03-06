@@ -87,7 +87,7 @@ clean:
 	@rm -fr bin/*
 
 display:
-	qemu-system-i386 -m 2M -drive file=$(IMAGE),format=raw
+	qemu-system-i386 -display gtk,zoom-to-fit=on -m 2M -drive file=$(IMAGE),format=raw
 	@echo
 
 install:
@@ -95,7 +95,7 @@ install:
 	sudo dd if=$(IMAGE) of=$(INSTALL_TO)&&sync
 
 dispusb:
-	sudo qemu-system-i386 -m 2M -drive file=$(INSTALL_TO),format=raw
+	sudo qemu-system-i386 -display gtk,zoom-to-fit=on -m 2M -drive file=$(INSTALL_TO),format=raw
 
 readusb:
 	sudo dd if=$(INSTALL_TO) count=2|hx|f 00000200
