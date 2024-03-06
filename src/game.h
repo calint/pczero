@@ -3,7 +3,7 @@
 #include"lib.h"
 #include"libge.h"
 
-namespace osca{
+namespace osca::game{
 class Ship;
 class Game{
 	inline static const PointPx play_area_top_left{0,50};
@@ -19,7 +19,10 @@ class Game{
 		AngleRad th=0;
 		AngleRad dth=2*PI/AngleRad(segments);
 		for(Count i=0;i<segments;i++){
-			pts[i]={cos(th),-sin(th)}; // CCW  ? use sin_and_cos()
+			Real fsin=0;
+			Real fcos=0;
+			sin_and_cos(th,fsin,fcos);
+			pts[i]={fcos,-fsin};
 			th+=dth;
 		}
 		return pts;

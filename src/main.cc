@@ -133,9 +133,9 @@ extern "C" [[noreturn]] auto tsk3()->void{
 	}
 }
 
-#include"Game.h"
+#include"game.h"
 extern "C" auto tsk4()->void{
-	osca::Game::start();
+	osca::game::Game::start();
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
