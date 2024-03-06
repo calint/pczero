@@ -166,7 +166,7 @@ using Scale=Real;
 
 template<typename T>
 struct VectorT{
-	T x{0},y{0};
+	T x{},y{};
 	// normalizes and returns this vector
 	inline auto normalize()->VectorT&{
 		const Real len=sqrt(x*x+y*y);
