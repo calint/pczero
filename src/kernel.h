@@ -197,26 +197,36 @@ inline static bool keyboard_ctrl_pressed{false};
 inline static Task*task_focused{nullptr};
 inline static TaskId task_focused_id{0};
 
+// declared in linker script 'link.ld' after code and data at first 64KB boundary
+extern "C" int free_mem_start_symbol;
+
 // called by osca before starting tasks
 // initiates globals
 extern "C" auto osca_init()->void{
 	using namespace osca;
 	// green dot on screen (top left)
 	*reinterpret_cast<char*>(0xa0000)=0x02;
+	
+	// total amount of contiguous free memory
+	Address free_mem_start=Address(&free_mem_start_symbol);
+	// size of free memory (to the vga address space that starts at 0xa'0000)
+	SizeBytes free_mem_size=0xa'0000-reinterpret_cast<SizeBytes>(free_mem_start);
 
-	// set 64 KB of 0x11 starting at 1 MB
-	pz_memset(Address(0x10'0000),0x11,0x1'0000);
+	pz_memset(free_mem_start,0,free_mem_size);
 
 	// initiate statics
 	vga13h=Vga13h{};
 	err=PrinterToVga{};
 	err.pos({1,1}).fg(4);
+	// err.p_hex_32b(unsigned(free_mem_start)).nl()
+	//    .p_hex_32b(unsigned(free_mem_size));
 	out=PrinterToVga{};
 	out.pos({1,2}).fg(2);
 	keyboard=Keyboard{};
 	task_focused=&osca_tasks[0];
 	task_focused_id=task_focused->get_id();
-	Heap::init_statics({Address(0x10'0000),320*100},World::nobjects_max);
+	// initiate heap with a size of 320*100 B
+	Heap::init_statics({free_mem_start,320*100},World::nobjects_max);
 	Heap::clear_buffer(0x12);
 	Heap::clear_heap_entries(3,5);
 	Object::init_statics();

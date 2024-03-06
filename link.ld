@@ -8,4 +8,6 @@ SECTIONS {
 	.data :{
 		*(.data);
 	}
+	. = ALIGN(0x10000);
+    free_mem_start_symbol = .;
 }
