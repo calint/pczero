@@ -207,11 +207,11 @@ extern "C" auto osca_init()->void{
 	// green dot on screen (top left)
 	*reinterpret_cast<char*>(0xa0000)=0x02;
 	
-	// total amount of contiguous free memory
+	// start of contiguous free memory
 	Address free_mem_start=Address(&free_mem_start_symbol);
 	// size of free memory (to the vga address space that starts at 0xa'0000)
 	SizeBytes free_mem_size=0xa'0000-reinterpret_cast<SizeBytes>(free_mem_start);
-
+	// clear free memory
 	pz_memset(free_mem_start,0,free_mem_size);
 
 	// initiate statics

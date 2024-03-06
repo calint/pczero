@@ -486,7 +486,7 @@ auto Game::create_boss()->void{
 	//----------------------------------------------------------
 	enemy_def={5,4,
 		new Point[]{ // points in model coordinates, negative Y is "forward"/"up"
-			{ 0,0},
+			{ 0,  0},
 			{-1,-.5},
 			{-1, .5},
 			{ 1, .5},
