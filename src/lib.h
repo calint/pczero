@@ -168,56 +168,28 @@ template<typename T>
 struct VectorT{
 	T x{},y{};
 	// normalizes and returns this vector
-	inline auto normalize()->VectorT&{
-		const Real len=sqrt(x*x+y*y);
-		x/=len;
-		y/=len;
-		return*this;
-	}
+	inline auto normalize()->VectorT&{const Real len=sqrt(x*x+y*y);x/=len;y/=len;return*this;}
 	// scales and returns this vector
-	inline constexpr auto scale(const Scale s)->VectorT&{
-		x*=s;
-		y*=s;
-		return*this;
-	}
+	inline constexpr auto scale(const Scale s)->VectorT&{x*=s;y*=s;return*this;}
 	// increases and returns this vector by v
-	inline constexpr auto inc_by(const VectorT&v)->void{
-		x+=v.x;
-		y+=v.y;
-	}
+	inline constexpr auto inc_by(const VectorT&v)->VectorT{x+=v.x;y+=v.y;return*this;}
 	// increases and returns this vector by v*scl
-	inline constexpr auto inc_by(const VectorT&v,const Scale s)->void{
-		x+=v.x*s;
-		y+=v.y*s;
-	}
+	inline constexpr auto inc_by(const VectorT&v,const Scale s)->void{x+=v.x*s;y+=v.y*s;}
 	// negates and returns this vector
-	inline constexpr auto negate()->VectorT&{
-		x=-x;
-		y=-y;
-		return*this;
-	}
+	inline constexpr auto negate()->VectorT&{x=-x;y=-y;return*this;}
 	// sets and returns this vector to absolute value of itself
-	inline auto absolute()->VectorT&{
-		x=abs(x);
-		y=abs(y);
-		return*this;
-	}
-	// returns dot product of this vector and v
-	inline constexpr auto dot(const VectorT&v)const->T{
-		return x*v.x+y*v.y;
-	}
+	inline auto absolute()->VectorT&{x=abs(x);y=abs(y);return*this;}
+	// returns dot product of this vector and 'v'
+	inline constexpr auto dot(const VectorT&v)const->T{return x*v.x+y*v.y;}
 	// returns the normal of this vector
 	inline constexpr auto normal()const->VectorT{return{-y,x};}
 	inline auto magnitude()const->T{return sqrt(x*x+y*y);}
+	// magnitude squared
 	inline constexpr auto magnitude2()const->T{return x*x+y*y;}
-//	auto operator<=>(const Vector2D&)const=default; // ? does not compile in clang++ without includes from std
+	// inline constexpr auto operator<=>(const VectorT&)const=default; // ? does not compile in clang++ without includes from std
 	inline constexpr auto operator==(const VectorT&)const->bool=default; // bitwise equality relevant
 	inline constexpr auto operator-(const VectorT&other)const->VectorT{return{x-other.x,y-other.y};}
 	inline constexpr auto operator+(const VectorT&other)const->VectorT{return{x+other.x,y+other.y};}
-
-//	inline static constexpr auto from_to(const Vector&from,const Vector&to)->Vector{
-//		return to-from;
-//	}
 };
 
 using Coord=Real; // a coordinate in real space
