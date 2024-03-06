@@ -1,3 +1,10 @@
+# reset to last commit
+git reset --hard HEAD
+
+# tag with date and time
+TAG=$(date "+%Y-%m-%d--%H-%M") && git tag $TAG && git push origin $TAG
+
+
 objdump -b binary -m i8086 -D pczero.img | less
 
 objdump -b binary -m i8086 -D pczero.img | grep call
