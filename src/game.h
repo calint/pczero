@@ -553,8 +553,6 @@ auto Game::create_boss()->void{
 	const Address clear_start_at_address=vga13h.bmp().address_offset({0,50});
 	const Address clear_copy_from_address=Heap::data().address();
 	const SizeBytes clear_copy_num_bytes=vga13h.bmp().dim().width()*100;
-//	const Address clear_copy_from_address=osca_tasks;
-//	const SizeBytes clear_copy_num_bytes=SizeBytes(osca_tasks_end-osca_tasks)*SizeBytes(sizeof(Task));
 
 	World::init_statics();
 
@@ -572,6 +570,7 @@ auto Game::create_boss()->void{
 
 	out.pos({12,1}).fg(6).p("keys: w a s d [space] f g x c [ctrl+tab] [ctrl+Fx]");
 
+	// game loop
 	while(true){
 		*reinterpret_cast<unsigned*>(0xa'0000+320*2+160)=osca_tmr_lo;
 
@@ -584,6 +583,7 @@ auto Game::create_boss()->void{
 			create_boss();
 		}
 
+		// print stats
 		out.pos({0,2}).fg(2);
 		out.p("i=").p_hex_8b(static_cast<unsigned char>(task_focused_id)).spc();
 		out.p("k=").p_hex_8b(static_cast<unsigned char>(osca_key)).spc();
@@ -599,7 +599,9 @@ auto Game::create_boss()->void{
 		out.p("f=").p_hex_16b(static_cast<unsigned short>(World::fps)).spc();
 
 		Ship*shp=Game::player;
+
 		if(task_focused_id==taskId){
+			// this task has keyboard focus, handle keyboard
 			while(const unsigned char sc=keyboard.get_next_scan_code()){
 				switch(sc){
 				case 0x11: // w pressed
@@ -664,7 +666,6 @@ auto Game::create_boss()->void{
 			if(!keyb[key_w]&&!keyb[key_s])shp->phy().vel={0,0};
 			if(keyb[key_spc])shp->fire();
 		}
-//		osca_yield();
 	}
 }
 

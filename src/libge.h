@@ -13,14 +13,6 @@ public:
 	Point*pts{nullptr}; // array of points used for rendering and bounding shape
 	PointIx*bnd{nullptr}; // array of indexes in pts that defines the bounding shape as a convex polygon CCW
 	Vector*nmls{nullptr}; // array of normals to the lines defined by bnd (calculated by init_normals())
-//	~ObjectDef(){
-//		if(pts)
-//			delete[]pts;
-//		if(bnd)
-//			delete[]bnd;
-//		if(nmls)
-//			delete[]nmls;
-//	}
 	// destructor should not happen and generates calls to __cxa_atexit __dso_handle
 	void operator delete(void*)=delete;
 

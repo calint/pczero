@@ -1,3 +1,4 @@
+[ ] libge.h: Object: allow change of ObjectDef
 [x] osca: is it necessary to do fwait on i386+387?
 [x]   "co-processors from 287 on do not need it"
 [x]     http://computer-programming-forum.com/46-asm/e6d7eab90bbcb1c2.htm
