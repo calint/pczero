@@ -40,9 +40,8 @@ AF=-march=i386+387 --32
 CC=clang++ -std=c++20
 CW=-Weverything
 CW+=-Werror # warnings are errors
-CW+=-Wno-c++98-compat
-CW+=-Wno-c++98-c++11-compat-binary-literal
-CW+=-Wno-c++98-compat-bind-to-temporary-copy
+CW+=-Wno-c++98-compat # ignore c++98 compatability issues
+CW+=-Wno-c++98-c++11-compat-binary-literal # allow 0xb..... literals
 CW+=-Wno-global-constructors # global constructors ok here
 CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
 CW+=-Wno-weak-vtables # allow for source in include files
@@ -53,7 +52,7 @@ CW+=-Wno-unused-private-field # allow for padding
 CW+=-Wno-unsafe-buffer-usage # allow pointer shenanigans
 CF=-Os -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
 CF+=-Wfatal-errors # stop at first error
-CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
+#CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
 # ld
 LF=-Tlink.ld -melf_i386 -nostdlib
