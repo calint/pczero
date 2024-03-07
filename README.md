@@ -16,6 +16,6 @@ contains:
   - enable/disable task (ctrl+F1, F2 etc)
   - keyboard focus on tasks that handle input
 * sample toy application of a 2d game engine (lib.h, libge.h, game.h)
-  - collision detection between convex shapes done with linear algebra
+  - collision detection between convex shapes using linear algebra
   - simple targeting system of objects in motion (can easily be extended to 3d and non-linear trajectories)
 * sample tasks (main.cc)
