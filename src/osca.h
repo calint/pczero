@@ -15,7 +15,7 @@ struct alignas(16) Task{
 	Register eip{0};
 	Register esp{0};
 	Register eflags{0};
-	TaskBits bits{0};
+	TaskBits bits{0}; // 1: accepts keyboard focus, 2: is running
 	TaskId id{0};
 	Register edi{0};
 	Register esi{0};
