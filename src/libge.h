@@ -174,9 +174,9 @@ namespace enable{
 	constexpr static bool draw_bounding_circle{true};
 }
 
-using SlotIx=short; // index in Object::freeSlots[]
+using SlotIx=short; // index in Object::used_ixes[] and Object::free_ixes[]
 
-// info that together with ~Object maintains usedSlots[]
+// info that together with ~Object maintains Object::used_ixes[] and Object::free_ixes[]
 struct SlotInfo{
 	Object**oix{nullptr}; // pointer to element in Object::all[]
 	Object*obj{nullptr}; // object owning this slot
