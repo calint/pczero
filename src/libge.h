@@ -180,23 +180,23 @@ using Scalar=Real;
 constexpr Scale sqrt_of_2=Real(1.414213562);
 class Object{
 	friend World;
-	TypeBits tb_; // object type that is usually a bit (32 object types supported)
-	TypeBits tb_col_msk_; // bits used to bitwise 'and' with other object's type_bits and if true then collision detection is done
-	PhysicsState*phy_; // kept in own buffer of states for better CPU cache utilization at update
+	TypeBits tb_{}; // object type that is usually a bit (32 object types supported)
+	TypeBits tb_col_msk_{}; // bits used to bitwise 'and' with other object's type_bits and if true then collision detection is done
+	PhysicsState*phy_{}; // kept in own buffer of states for better CPU cache utilization at update
 	                   // may change between frames (when objects are deleted)
-	Scale scl_; // scale that is used in transform from model to world coordinates
+	Scale scl_{}; // scale that is used in transform from model to world coordinates
 	const ObjectDef&def_; // contains the model definition
-	Point*pts_wld_; // transformed model to world points cache
-	Vector*nmls_wld_; // normals of boundingunsigned shape rotated to the world coordinates (not normalized if scale!=1)
+	Point*pts_wld_{}; // transformed model to world points cache
+	Vector*nmls_wld_{}; // normals of boundingunsigned shape rotated to the world coordinates (not normalized if scale!=1)
 	Matrix Mmw_{}; // model to world transform
 	Point Mmw_pos_{}; // current position used in transform matrix
 	AngleRad Mmw_agl_{}; // current angle used in transform matrix
 	Scale Mmw_scl_{};  // current scale used in transform matrix
-	Scalar br_; // bounding radius scl_*sqrt(2)
-	SlotIx used_ix_{0}; // index in used_ixes array. used at new and delete
-	Color8b color_;
-	Bits8 bits_{0}; // bit 1: is not alive
-	                     // bit 2: pts_wls_ don't need update
+	Scalar br_{}; // bounding radius scl_*sqrt(2)
+	SlotIx used_ix_{}; // index in used_ixes array. used at new and delete
+	Color8b color_{};
+	Bits8 bits_{}; // bit 1: is not alive
+	               // bit 2: pts_wls_ don't need update
 public:
 	constexpr Object()=delete;
 	constexpr Object(const Object&)=delete; // copy constructor
@@ -222,8 +222,8 @@ public:
 		phy_->obj=this;
 
 		// allocate index in all[] from free slots
-		if(!free_ixes_i){
-			err.p("out of free slots");
+		if(free_ixes_i==0){
+			err.p("Object:e1");
 			osca_hang();
 		}
 		// get the next free slot
@@ -237,7 +237,7 @@ public:
 		used_ixes_i++;
 	}
 	// called only by 'World' at 'commit_deleted()'
-	virtual~Object()noexcept{
+	virtual~Object(){
 		// free returns a pointer to the object that has had it's
 		// physics state moved to the newly freed physics location.
 		// set the pointer of that object's phy to the freed one
@@ -261,9 +261,8 @@ public:
 		if(nmls_wld_)
 			delete[]nmls_wld_;
 	}
-	// ? C++ guidelines C.21
-	inline constexpr auto type_bits()const->TypeBits{return tb_;}	// returns false if object is to be deleted
-	inline constexpr auto type_bits_collision_mask()const->TypeBits{return tb_col_msk_;}	// returns false if object is to be deleted
+	inline constexpr auto type_bits()const->TypeBits{return tb_;}
+	inline constexpr auto type_bits_collision_mask()const->TypeBits{return tb_col_msk_;}
 	inline constexpr auto phy()->PhysicsState&{return*phy_;}
 	// returns physics state as const (read only)
 	inline constexpr auto phy_ro()const->const PhysicsState&{return*phy_;}
@@ -319,7 +318,7 @@ private:
 	// same object more than once
 	inline constexpr auto set_is_alive(const bool v)->void{
 		if(v){ // alive bit is 0
-			bits_&=0xff-1;
+			bits_&=~1;
 		}else{ // not alive bit is 1
 			bits_|=1;
 		}
@@ -328,7 +327,7 @@ private:
 	inline constexpr auto is_wld_pts_need_update()const->bool{return!(bits_&2);}
 	inline constexpr auto set_wld_pts_need_update(const bool v)->void{
 		if(v){ // refresh_wld_pts bit is 0
-			bits_&=0xff-2;
+			bits_&=~2;
 		}else{ // refresh_wld_pts bit is 1
 			bits_|=2;
 		}

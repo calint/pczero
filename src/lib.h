@@ -191,7 +191,7 @@ struct VectorT{
 	// inline constexpr auto operator+(const VectorT&other)const->VectorT{return{x+other.x,y+other.y};}
 	// inline constexpr auto operator-(const VectorT&other)const->VectorT{return{x-other.x,y-other.y};}
 };
-template<typename T>inline constexpr auto operator==(const VectorT<T>&lhs,const VectorT<T>&rhs)noexcept->bool{
+template<typename T>inline constexpr auto operator==(const VectorT<T>&lhs,const VectorT<T>&rhs)->bool{
     return(lhs.x==rhs.x)&&(lhs.y==rhs.y);
 }
 template<typename T>inline constexpr auto operator+(const VectorT<T>&lhs,const VectorT<T>&rhs)->VectorT<T>{

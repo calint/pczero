@@ -70,13 +70,13 @@ public:
 		if(p.x>=Coord(play_area_top_left.x+play_area_dim.width())){
 			return false;
 		}
-		if(p.x<=Coord(play_area_top_left.x)){
+		if(p.x<Coord(play_area_top_left.x)){
 			return false;
 		}
 		if(p.y>=Coord(play_area_top_left.y+play_area_dim.height())){
 			return false;
 		}
-		if(p.y<=Coord(play_area_top_left.y)){
+		if(p.y<Coord(play_area_top_left.y)){
 			return false;
 		}
 		return true;
@@ -127,16 +127,21 @@ public:
 	[[noreturn]] static auto start()->void;
 };
 
+//
+// game objects
+//
+// type bits:
+// 'ships'   0b00'0001
+// 'bullets' 0b00'0010
+// 'enemies' 0b00'0100
+// 'walls'   0b00'1000
+// 'missiles'0b01'0000
+// 'bosses'  0b10'0000
+
 class Enemy final:public Object{
 	static constexpr Scale scl=5;
 	static constexpr Scale bounding_radius=scl*sqrt_of_2;
 public:
-	// 'ships'   0b00'0001
-	// 'bullets' 0b00'0010
-	// 'enemies' 0b00'0100
-	// 'walls'   0b00'1000
-	// 'missiles'0b01'0000
-	// 'bosses'  0b10'0000
 	Enemy(const Point&pos,const AngleRad agl):
 		Object{0b100,0b01'0010,Game::enemy_def,scl,bounding_radius,pos,agl,3}
 	{
@@ -169,12 +174,6 @@ public:
 	static constexpr TimeSec lifetime=10;
 
 	Bullet():
-		// 'ships'   0b00'0001
-		// 'bullets' 0b00'0010
-		// 'enemies' 0b00'0100
-		// 'walls'   0b00'1000
-		// 'missiles'0b01'0000
-		// 'bosses'  0b10'0000
 		Object{0b10,0b11'1101,Game::bullet_def,scl,bounding_radius,{0,0},0,4},
 		created_time{World::time}
 	{}
@@ -195,7 +194,7 @@ public:
 class Ship final:public Object{
 	static constexpr Scale scl=4;
 	static constexpr Scale bounding_radius=scl*sqrt_of_2;
-	static constexpr AngleRad dagl=90;
+	static constexpr AngleDeg dagl=90;
 	static constexpr Scalar speed=20;
 	TimeSec fire_t{0};
 public:
@@ -205,12 +204,6 @@ public:
 	const char padding3{0};
 
 	Ship():
-		// 'ships'   0b00'0001
-		// 'bullets' 0b00'0010
-		// 'enemies' 0b00'0100
-		// 'walls'   0b00'1000
-		// 'missiles'0b01'0000
-		// 'bosses'  0b10'0000
 		Object{0b1,0b11'1111,Game::ship_def,scl,bounding_radius,{0,0},0,2}
 	{
 		Game::player=this;
@@ -371,12 +364,6 @@ class Missile final:public Object{
 	static constexpr Scale scl=2;
 	static constexpr Scale bounding_radius=scl*sqrt_of_2;
 public:
-	// 'ships'   0b00'0001
-	// 'bullets' 0b00'0010
-	// 'enemies' 0b00'0100
-	// 'walls'   0b00'1000
-	// 'missiles'0b01'0000
-	// 'bosses'  0b10'0000
 	Missile():
 		Object{0b01'0000,0b11'1111,Game::missile_def,scl,bounding_radius,{0,0},0,4}
 	{}
@@ -400,12 +387,6 @@ class Boss final:public Object{
 	Count health{5};
 	TimeSec time_started{0};
 public:
-	// 'ships'   0b00'0001
-	// 'bullets' 0b00'0010
-	// 'enemies' 0b00'0100
-	// 'walls'   0b00'1000
-	// 'missiles'0b01'0000
-	// 'bosses'  0b10'0000
 	Boss():
 		Object{0b10'0000,0b01'0010,Game::boss_def,scl,bounding_radius,{0,0},0,0xe}
 	{
