@@ -1,5 +1,9 @@
 #pragma once
 
+//
+// osca game engine library
+//
+
 namespace osca{
 
 class ObjectDef final{

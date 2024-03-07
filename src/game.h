@@ -1,5 +1,9 @@
 #pragma once
 
+//
+// osca game
+//
+
 #include"osca.h"
 #include"lib.h"
 #include"libge.h"

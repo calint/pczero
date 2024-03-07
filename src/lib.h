@@ -1,5 +1,9 @@
 #pragma once
 
+//
+// osca library
+//
+
 // built-in functions replacements (used by clang++ -O0 and -Os)
 extern "C" void*memcpy(void*dest,const void*src,unsigned n);
 extern "C" void*memcpy(void*dest,const void*src,unsigned n){

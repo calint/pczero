@@ -1,5 +1,9 @@
 #pragma once
 
+//
+// osca kernel
+//
+
 #include"osca.h"
 #include"lib.h"
 
