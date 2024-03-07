@@ -87,7 +87,7 @@ print:
 	@if [ $(shell stat -c "%s" $(IMAGE)) -ge 65536 ]; then echo '!!!';echo '!!! IMAGE FILE GREATER THAN OSCA LOADS';echo '!!!';echo; fi
 	
 clean:
-	@rm -fr bin/*
+	@rm -fr bin/
 
 display:
 	qemu-system-i386 -display gtk,zoom-to-fit=on -m 1M -drive file=$(IMAGE),format=raw
