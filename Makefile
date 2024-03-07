@@ -51,7 +51,7 @@ CW+=-Wno-unsafe-buffer-usage # allow pointer shenanigans
 # ld
 LF=-Tlink.ld -melf_i386 -nostdlib
 
-all:	clean build print display
+all: clean build print display
 
 build:
 	@clear
