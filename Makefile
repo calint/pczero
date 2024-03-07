@@ -49,6 +49,7 @@ CW+=-Wno-weak-vtables # allow for source in include files
 CW+=-Wno-unused-function # allow for debugging
 CW+=-Wno-unused-parameter # allow for debugging
 CW+=-Wno-unused-variable # allow for debugging
+CW+=-Wno-unused-private-field # allow for padding
 CW+=-Wno-unsafe-buffer-usage # allow pointer shenanigans
 CF=-Os -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
 CF+=-Wfatal-errors # stop at first error

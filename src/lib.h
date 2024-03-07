@@ -187,10 +187,19 @@ struct VectorT{
 	// magnitude squared
 	inline constexpr auto magnitude2()const->T{return x*x+y*y;}
 	// inline constexpr auto operator<=>(const VectorT&)const=default; // ? does not compile in clang++ without includes from std
-	inline constexpr auto operator==(const VectorT&)const->bool=default; // bitwise equality relevant
-	inline constexpr auto operator-(const VectorT&other)const->VectorT{return{x-other.x,y-other.y};}
-	inline constexpr auto operator+(const VectorT&other)const->VectorT{return{x+other.x,y+other.y};}
+	// inline constexpr auto operator==(const VectorT&)const->bool=default; // bitwise equality relevant
+	// inline constexpr auto operator+(const VectorT&other)const->VectorT{return{x+other.x,y+other.y};}
+	// inline constexpr auto operator-(const VectorT&other)const->VectorT{return{x-other.x,y-other.y};}
 };
+template<typename T>inline constexpr auto operator==(const VectorT<T>&lhs,const VectorT<T>&rhs)noexcept->bool{
+    return(lhs.x==rhs.x)&&(lhs.y==rhs.y);
+}
+template<typename T>inline constexpr auto operator+(const VectorT<T>&lhs,const VectorT<T>&rhs)->VectorT<T>{
+	return{lhs.x+rhs.x,lhs.y+rhs.y};
+}
+template<typename T>inline constexpr auto operator-(const VectorT<T>&lhs,const VectorT<T>&rhs)->VectorT<T>{
+	return{lhs.x-rhs.x,lhs.y-rhs.y};
+}
 
 using Coord=Real; // a coordinate in real space
 using Vector=VectorT<Coord>; // a vector in real space

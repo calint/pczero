@@ -237,7 +237,7 @@ public:
 		used_ixes_i++;
 	}
 	// called only by 'World' at 'commit_deleted()'
-	virtual~Object(){
+	virtual~Object()noexcept{
 		// free returns a pointer to the object that has had it's
 		// physics state moved to the newly freed physics location.
 		// set the pointer of that object's phy to the freed one
