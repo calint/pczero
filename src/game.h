@@ -130,20 +130,24 @@ public:
 //
 // game objects
 //
-// type bits:
-// 'ships'   0b00'0001
-// 'bullets' 0b00'0010
-// 'enemies' 0b00'0100
-// 'walls'   0b00'1000
-// 'missiles'0b01'0000
-// 'bosses'  0b10'0000
+
+constexpr TypeBits tb_none = 0;
+constexpr TypeBits tb_ships = 1;
+constexpr TypeBits tb_bullets = 2;
+constexpr TypeBits tb_enemies = 4;
+constexpr TypeBits tb_walls = 8;
+constexpr TypeBits tb_missiles = 16;
+constexpr TypeBits tb_bosses = 32;
 
 class Enemy final:public Object{
 	static constexpr Scale scl=5;
 	static constexpr Scale bounding_radius=scl*sqrt_of_2;
 public:
 	Enemy(const Point&pos,const AngleRad agl):
-		Object{0b100,0b01'0010,Game::enemy_def,scl,bounding_radius,pos,agl,3}
+		Object{
+			tb_enemies,
+			tb_bullets|tb_missiles,
+			Game::enemy_def,scl,bounding_radius,pos,agl,3}
 	{
 		Game::enemies_alive++;
 	}
@@ -174,7 +178,10 @@ public:
 	static constexpr TimeSec lifetime=10;
 
 	Bullet():
-		Object{0b10,0b11'1101,Game::bullet_def,scl,bounding_radius,{0,0},0,4},
+		Object{
+			tb_bullets,
+			tb_bosses|tb_enemies|tb_ships|tb_walls,
+			Game::bullet_def,scl,bounding_radius,{0,0},0,4},
 		created_time{World::time}
 	{}
 
@@ -204,7 +211,10 @@ public:
 	const char padding3{0};
 
 	Ship():
-		Object{0b1,0b11'1111,Game::ship_def,scl,bounding_radius,{0,0},0,2}
+		Object{
+			tb_ships,
+			tb_bosses|tb_bullets|tb_enemies|tb_missiles|tb_ships|tb_walls,
+			Game::ship_def,scl,bounding_radius,{0,0},0,2}
 	{
 		Game::player=this;
 	}
@@ -355,7 +365,10 @@ private:
 class Wall final:public Object{
 public:
 	Wall(const Scale scl,const Point&pos,const AngleRad agl):
-		Object{0b00'1000,0,Game::wall_def,scl,scl*sqrt_of_2,pos,agl,3}
+		Object{
+			tb_walls,
+			tb_none,
+			Game::wall_def,scl,scl*sqrt_of_2,pos,agl,3}
 	{}
 };
 
@@ -365,7 +378,10 @@ class Missile final:public Object{
 	static constexpr Scale bounding_radius=scl*sqrt_of_2;
 public:
 	Missile():
-		Object{0b01'0000,0b11'1111,Game::missile_def,scl,bounding_radius,{0,0},0,4}
+		Object{
+			tb_missiles,
+			tb_bosses|tb_bullets|tb_enemies|tb_missiles|tb_ships|tb_walls,
+			Game::missile_def,scl,bounding_radius,{0,0},0,4}
 	{}
 
 	auto update()->bool override{
@@ -388,7 +404,10 @@ class Boss final:public Object{
 	TimeSec time_started{0};
 public:
 	Boss():
-		Object{0b10'0000,0b01'0010,Game::boss_def,scl,bounding_radius,{0,0},0,0xe}
+		Object{
+			tb_bosses,
+			tb_bullets|tb_missiles,
+			Game::boss_def,scl,bounding_radius,{0,0},0,0xe}
 	{
 		time_started=World::time;
 		Game::boss=this;

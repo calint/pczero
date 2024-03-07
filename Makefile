@@ -80,6 +80,8 @@ print:
 	@echo "wc source | gzip"
 	@cat $(SRC_FILES)|gzip|wc
 	@echo
+	@ls -la $(IMAGE)
+	@echo
 	@echo -n "calls: " && objdump -d bin/src/main.o | grep call | wc -l
 	@echo
 	@if [ $(shell stat -c "%s" $(IMAGE)) -ge 65536 ]; then echo '!!!';echo '!!! IMAGE FILE GREATER THAN OSCA LOADS';echo '!!!';echo; fi
