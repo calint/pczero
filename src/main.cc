@@ -29,10 +29,6 @@ extern "C" [[noreturn]] auto tsk0()->void{
 	const char*hello=reinterpret_cast<const char*>(eax);
 	PrinterToBitmap pb{&vga13h.bmp()};
 
-//	pb.pos({30,1});
-//	for(int i=0;i<16;i++){
-//		pb.p_hex(i);
-//	}
 	pb.fg(5).pos({13,3});
 	for(char i='0';i<='9';i++){
 		pb.p(i);
@@ -46,11 +42,7 @@ extern "C" [[noreturn]] auto tsk0()->void{
 		pb.p(i);
 	}
 
-//	pb.fg(2).pos({15,4}).p("hello world!").nl();
 	pb.fg(7).pos({13+10,5}).p("\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
-//	pb.fg(8).p(' ').p_hex_32b(sizeof(table_ascii_to_font)/sizeof(int));
-
-//	pb.pos({5,7}).fg(2).p('_');
 
 	pb.fg(0x66);
 	pb.pos({50,3}).p("./\\.");
@@ -92,7 +84,6 @@ extern "C" [[noreturn]] auto tsk0()->void{
 				ch&=~0x20; // to upper case
 			pb.backspace().p(ch).p('_');
 		}
-//		osca_nop();
 		osca_yield(); // ?! if it is only task running osca 'hangs'
 		              // because no interrupts get through due to
 		              // 'all' time spent in non-interruptable
