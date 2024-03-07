@@ -328,7 +328,7 @@ private:
 	// same object more than once
 	inline constexpr auto set_is_alive(const bool v)->void{
 		if(v){ // alive bit is 0
-			bits_&=~1;
+			bits_&=Bits8(~1);
 		}else{ // not alive bit is 1
 			bits_|=1;
 		}
@@ -337,7 +337,7 @@ private:
 	inline constexpr auto is_wld_pts_need_update()const->bool{return!(bits_&2);}
 	inline constexpr auto set_wld_pts_need_update(const bool v)->void{
 		if(v){ // refresh_wld_pts bit is 0
-			bits_&=~2;
+			bits_&=Bits8(~2);
 		}else{ // refresh_wld_pts bit is 1
 			bits_|=2;
 		}

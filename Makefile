@@ -18,28 +18,25 @@ AF=-march=i386+387 --32
 
 # g++
 #CC=g++ -std=c++2b # c++ 23
-#CW=-pedantic -pedantic-errors -Wall -Wextra -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
+#CF=-Os -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
+#CF+=-Wfatal-errors # stop at first error
+#CF+=-fanalyzer
 #CW+=-Werror # warnings are errors
+#CW=-pedantic -pedantic-errors -Wall -Wextra -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
 #CW+=-Wpadded # warn when complier pads a data structure
-#CW+=-Wsign-conversion 
 #CW+=-Wfloat-conversion 
-#CW+=-Wno-inline # don't warn about non-inlined functions
-#CW+=-Wold-style-cast
-#CW+=-Wno-analyzer-malloc-leak
+#CW+=-Wno-array-bounds # allow pointer shenanigans
 #CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
 #CW+=-Wno-unused-function # allow for debugging
 #CW+=-Wno-unused-variable # allow for debugging
 #CW+=-Wno-unused-parameter # allow for debugging
-#CF=-O2 -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
-#CF+=-Wfatal-errors # stop at first error
-#CF+=-fconserve-stack # try to inhibit excessive use of stack by optimizer
-#CF+=-fanalyzer
-#CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
 # clang++
 CC=clang++ -std=c++20
-CW=-Weverything
-CW+=-Werror # warnings are errors
+CF=-Os -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
+CF+=-Wfatal-errors # stop at first error
+CW=-Werror # warnings are errors
+CW+=-Weverything
 CW+=-Wno-c++98-compat # ignore c++98 compatability issues
 CW+=-Wno-c++98-c++11-compat-binary-literal # allow 0xb..... literals
 CW+=-Wno-global-constructors # global constructors ok here
@@ -50,9 +47,6 @@ CW+=-Wno-unused-parameter # allow for debugging
 CW+=-Wno-unused-variable # allow for debugging
 CW+=-Wno-unused-private-field # allow for padding
 CW+=-Wno-unsafe-buffer-usage # allow pointer shenanigans
-CF=-Os -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
-CF+=-Wfatal-errors # stop at first error
-#CF+=-fno-stack-protector # disable error: undefined reference to '__stack_chk_fail'.
 
 # ld
 LF=-Tlink.ld -melf_i386 -nostdlib
