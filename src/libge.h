@@ -49,8 +49,10 @@ namespace metrics{
 }
 
 class Object;
+
 using Time=Real;
 using TimeSec=Time;
+
 // update_all() and check_collisions() generate lists of objects to be deleted.
 // the delete happens when deleted_commit() is called
 class World{
@@ -81,6 +83,7 @@ public:
 using Velocity=Vector;
 using Acceleration=Vector;
 using AngularVelocity=AngleRad;
+
 class PhysicsState final{
 public:
 	Point pos{0,0};
@@ -168,6 +171,7 @@ namespace enable{
 }
 
 using SlotIx=short; // index in Object::freeSlots[]
+
 // info that together with ~Object maintains usedSlots[]
 struct SlotInfo{
 	Object**oix{nullptr}; // pointer to element in Object::all[]
@@ -177,7 +181,9 @@ struct SlotInfo{
 using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types.
 using Bits8=unsigned char;
 using Scalar=Real;
+
 constexpr Scale sqrt_of_2=Real(1.414213562);
+
 class Object{
 	friend World;
 	TypeBits tb_{}; // object type that is usually a bit (32 object types supported)

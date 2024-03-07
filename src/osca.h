@@ -1,9 +1,12 @@
 #pragma once
+
 namespace osca{
+
 using TaskBits=short;
 using TaskId=short;
 using Register=int;
 using Byte=char;
+
 struct alignas(16) Task{
 	Register eip{0};
 	Register esp{0};

@@ -1,10 +1,13 @@
 #pragma once
+
 #include"osca.h"
 #include"lib.h"
 #include"libge.h"
 
 namespace osca::game{
+
 class Ship;
+
 class Game{
 	inline static const PointPx play_area_top_left{0,50};
 	inline static const DimensionPx play_area_dim{320,100};

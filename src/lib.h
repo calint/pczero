@@ -826,5 +826,7 @@ public:
 	inline constexpr auto axis_x()const->VectorT<T>{return{xx,yx};} // math correct?
 	inline constexpr auto axis_y()const->VectorT<T>{return{xy,yy};} // math correct?
 };
+
 using Matrix=MatrixT<Coord>;
+
 } // end namespace osca
