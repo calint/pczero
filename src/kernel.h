@@ -3,6 +3,7 @@
 #include"osca.h"
 #include"lib.h"
 
+// sample tasks implemented in 'main.cc'
 extern "C" [[noreturn]] auto tsk0()->void;
 extern "C" [[noreturn]] auto tsk1()->void;
 extern "C" [[noreturn]] auto tsk2()->void;
@@ -51,29 +52,32 @@ alignas(16) struct Task osca_tasks[]{
 };
 Task*osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
 
-struct HeapEntry final{
-	void*ptr{nullptr}; // pointer to memory
-	unsigned size_bytes{0}; // size of allocated memory in bytes
-};
-using SizeCount=Size;
 class Heap final{
+	struct Entry final{
+		void*ptr{nullptr}; // pointer to memory
+		unsigned size_bytes{0}; // size of allocated memory in bytes
+	};
+
 	inline static Data d_{nullptr,0};
 	inline static char*ptr_{nullptr}; // pointer to free memory
 	inline static char*ptr_end_{nullptr}; // end of buffer (one past last valid address)
-	inline static HeapEntry*entry_used_start_{nullptr}; // beginning of vector containing used memory info
-	inline static HeapEntry*entry_used_next_{nullptr}; // next available slot
-	inline static HeapEntry*entry_used_end_{nullptr}; // limit of used entries memory
-	inline static HeapEntry*entry_free_start_{nullptr}; // beginning of vector containing freed memory info
-	inline static HeapEntry*entry_free_next_{nullptr};
-	inline static HeapEntry*entry_free_end_{nullptr};
-	inline static SizeCount nentries_max_{0};
+	inline static Entry*entry_used_start_{nullptr}; // beginning of vector containing used memory info
+	inline static Entry*entry_used_next_{nullptr}; // next available slot
+	inline static Entry*entry_used_end_{nullptr}; // limit of used entries memory
+	inline static Entry*entry_free_start_{nullptr}; // beginning of vector containing freed memory info
+	inline static Entry*entry_free_next_{nullptr};
+	inline static Entry*entry_free_end_{nullptr};
+	inline static Size nentries_max_{0};
 public:
-	static auto init_statics(const Data&d,const SizeCount nentries_max)->void{
+	static auto init_statics(const Data&d,const Size nentries_max)->void{
 		d_=d;
-		ptr_=reinterpret_cast<char*>(d.address());
 		nentries_max_=nentries_max;
 
-		entry_used_start_=static_cast<HeapEntry*>(d.end())-nentries_max;
+		// place start of free memory
+		ptr_=reinterpret_cast<char*>(d.address());
+
+		// place used entries area at top of the heap
+		entry_used_start_=static_cast<Entry*>(d.end())-nentries_max;
 		if(reinterpret_cast<char*>(entry_used_start_)<ptr_){
 			err.p("Heap.init_statics:1");
 			osca_hang();
@@ -81,26 +85,32 @@ public:
 		entry_used_next_=entry_used_start_;
 		entry_used_end_=entry_used_start_+nentries_max;
 
+		// place free entries area prior to used entries
 		entry_free_start_=entry_used_start_-nentries_max;
+		if(reinterpret_cast<char*>(entry_free_start_)<ptr_){
+			err.p("Heap.init_statics:2");
+			osca_hang();
+		}
 		entry_free_next_=entry_free_start_;
 		entry_free_end_=entry_free_start_+nentries_max;
-		ptr_end_=reinterpret_cast<char*>(entry_used_start_);
+
+		// place end of free heap memory to start of free entries area
+		ptr_end_=reinterpret_cast<char*>(entry_free_start_);
 	}
 	static inline auto data()->const Data&{
 		return d_;
 	}
 	// called by operator 'new'
 	static auto alloc(const unsigned size_bytes)->void*{
-//			err.p_hex_32b(size).spc();
-		// try to find a free slot with that size
-		HeapEntry*he=entry_free_start_;
+		// try to find a free slot of that size
+		Entry*he=entry_free_start_;
 		while(he<entry_free_end_){
 			if(he->size_bytes==size_bytes){
 				// found a matching size entry
 				void*p=he->ptr;
 				// move to used entries
 				if(entry_used_next_>=entry_used_end_){
-					err.p("Heap.alloc: 1");
+					err.p("Heap.alloc:1");
 					osca_hang();
 				}
 				*entry_used_next_=*he;
@@ -108,20 +118,21 @@ public:
 				// copy last free to this slot
 				entry_free_next_--;
 				*he=*entry_free_next_;
-				pz_memset(entry_free_next_,3,sizeof(HeapEntry));
+				// debugging
+				pz_memset(entry_free_next_,3,sizeof(Entry));
 				return p;
 			}
 			he++;
 		}
-		// did not find in free list
+		// did not find in free list, create new
 		char*p=ptr_;
 		ptr_+=size_bytes;
 		if(ptr_>ptr_end_){
-			err.p("Heap.alloc: 2");
+			err.p("Heap.alloc:2");
 			osca_hang();
 		}
 		if(entry_used_next_>=entry_used_end_){
-			err.p("Heap.alloc: 3");
+			err.p("Heap.alloc:3");
 			osca_hang();
 		}
 		// write to used list
@@ -131,15 +142,14 @@ public:
 	}
 	// called by operator 'delete'
 	static auto free(void*ptr)->void{
-//			err.p_hex_32b(reinterpret_cast<unsigned>(ptr)).spc();
 		// find the allocated memory in the used list
-		HeapEntry*hep=entry_used_start_;
+		Entry*hep=entry_used_start_;
 		while(hep<entry_used_next_){
 			if(hep->ptr==ptr){
 				// found the allocation entry
 				// copy entry from used to free
 				if(entry_free_next_>=entry_free_end_){
-					err.p("Heap.free: 1");
+					err.p("Heap.free:1");
 					osca_hang();
 				}
 				*entry_free_next_=*hep;
@@ -152,18 +162,18 @@ public:
 
 				// debugging
 				pz_memset(ptr,0xf,SizeBytes(size));
-				pz_memset(entry_used_next_,5,sizeof(HeapEntry));
+				pz_memset(entry_used_next_,5,sizeof(Entry));
 				return;
 			}
 			hep++;
 		}
 		// did not find the allocated memory. probably a double delete
-		err.p("Heap.free: 2");
+		err.p("Heap.free:2");
 		osca_hang();
 	}
 	static auto clear_buffer(const char b=0)->void{d_.clear(b);}
 	static auto clear_heap_entries(char free_area=0,char used_area=0)->void{
-		const SizeBytes hes=SizeBytes(sizeof(HeapEntry));
+		const SizeBytes hes=SizeBytes(sizeof(Entry));
 		pz_memset(entry_free_start_,free_area,nentries_max_*hes);
 		pz_memset(entry_used_start_,used_area,nentries_max_*hes);
 	}
@@ -192,13 +202,16 @@ public:
 		return ch;
 	}
 };
+
 extern Keyboard keyboard;
 Keyboard keyboard; // global initialized by osca_init
+
 inline static bool keyboard_ctrl_pressed{false};
 inline static Task*task_focused{nullptr};
 inline static TaskId task_focused_id{0};
 
 // declared in linker script 'link.ld' after code and data at first 64KB boundary
+// address of symbol marks start of contiguous memory
 extern "C" int free_mem_start_symbol;
 
 // called by osca before starting tasks
@@ -217,15 +230,20 @@ extern "C" auto osca_init()->void{
 
 	// initiate statics
 	vga13h=Vga13h{};
+	
 	err=PrinterToVga{};
 	err.pos({1,1}).fg(4);
 	// err.p_hex_32b(unsigned(free_mem_start)).nl()
 	//    .p_hex_32b(unsigned(free_mem_size));
+	
 	out=PrinterToVga{};
 	out.pos({1,2}).fg(2);
+	
 	keyboard=Keyboard{};
+	
 	task_focused=&osca_tasks[0];
 	task_focused_id=task_focused->get_id();
+	
 	// initiate heap with a size of 320*100 B
 	Heap::init_statics({free_mem_start,320*100},World::nobjects_max);
 	Heap::clear_buffer(0x12);
@@ -243,6 +261,7 @@ extern "C" auto osca_keyb_ev()->void{
 
 	if(osca_key==0x1d)keyboard_ctrl_pressed=true;
 	else if(osca_key==0x9d)keyboard_ctrl_pressed=false;
+	
 	// ? implement better task focus switch (same behaviour as alt+tab)
 	if(keyboard_ctrl_pressed){ // ctrl+tab
 		if(osca_key==0xf){ // tab pressed
@@ -252,14 +271,16 @@ extern "C" auto osca_keyb_ev()->void{
 				if(task_focused==osca_tasks_end){
 					task_focused=osca_tasks;
 				}
-				if(task_focused==prev_task_focused)
-					return;
+				if(task_focused==prev_task_focused){
+					return; // no new focusable task
+				}
 				if(task_focused->is_running()&&task_focused->is_grab_keyboard_focus()){
 					task_focused_id=task_focused->get_id();
 					return;
 				}
 			}
 		}
+
 		// if F1 through F12 pressed toggle running state of task
 		if(osca_key>=0x3b&&osca_key<=0x3b+12){
 			const unsigned char tsk=osca_key-static_cast<unsigned char>(0x3b);
@@ -272,9 +293,6 @@ extern "C" auto osca_keyb_ev()->void{
 
 	// to keyboard handler
 	keyboard.on_key(osca_key);
-
-//	static unsigned char*p=reinterpret_cast<unsigned char*>(0xa0000+320*49+100);
-//	*p++=osca_key;
 }
 } // end namespace osca
 
