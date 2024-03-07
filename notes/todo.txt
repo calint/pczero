@@ -7,7 +7,7 @@
 [x]     80386 System Software Writers Guide 1987: 7.1.2.1 COPROCESSOR CONTEXT SWITCHING
 [x]     80386 Programmer's Reference Manual -- Section 11.1
 [x]     Intel® 64 and IA-32 Architectures Software Developer’s Manual page 3-424 Vol. 2A: FSAVE/FNSAVE—Store x87 FPU State
-[ ] review 'using' Scale Coord Angle Vertex etc terminology
+[x] review 'using' Scale Coord Angle Vertex etc terminology
 [x] lib2d move Point to lib. Replace Coords.
 [ ] lib: cached transformed points without translation
 [x] osca: task_id (lower 16 bits of task.bits?)
@@ -17,10 +17,11 @@
 [x] struct TaskInfo{eip,eflags,bits,eax,ebx...}
 [x]   enable/disable task
 [ ] move draw_x into Bitmap?
-[ ] Osca::Game multiple instances
-[ ]   PhyicsStates instance
-[ ]   World instance
-[ ]   Game instance
+[-] Osca::Game multiple instances
+    => ok for toy application
+[-]   PhyicsStates instance
+[-]   World instance
+[-]   Game instance
 [x] libge: handle objects with null bounding points indexes, no normals
 [x] better clock, higher resolution than the default 18.2 Hz -> 1024 Hz RTC
 [ ] implement a unique_ptr<T>
@@ -33,11 +34,12 @@
 [o] render convex polygons
 [o]   ObjectDef: polygons with indexes to definition points
 [x]     step 1. use bounding shape polygon
-[ ]       review
+[x]       review
 [ ]     step 2. define {color,{npts,pts_ix[]}}
 [ ]   clip to viewport
 [x]   render lines -> polygon outline.
-[ ] multiple bounding shapes per object to allow non-convex shape
+[-] multiple bounding shapes per object to allow non-convex shape
+    => ok for toy application
 [o] input text
 [x]   step 1. one keyboard buffer for the system
 [x]   step 2. "osca_keyb_task" pointer to function that should read keyboard
@@ -58,10 +60,11 @@
 [x]   is enabled by default in qemu and on asus zenbook
 [x] bitmap
 [ ]   optimized for 32b memcpy?
-[o] sprite with transparency
-[ ]   collision detection
-[ ]     with background
-[ ]     with other sprites
+[-] sprite with transparency
+    => sprites not implemented
+[-]   collision detection
+[-]     with background
+[-]     with other sprites
 [o] 5x6 font (30 bits/character)
 [x]   c code generated from font file -> done manually
 [x] inline assembler character renderer -> written in C++
