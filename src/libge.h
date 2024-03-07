@@ -544,4 +544,4 @@ auto World::tick()->void{
 	World::commit_deleted();
 }
 
-}// end namespace
+} // end namespace osca

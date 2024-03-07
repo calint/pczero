@@ -669,4 +669,4 @@ auto Game::create_boss()->void{
 	}
 }
 
-} // end namespace
+} // end namespace osca::game
