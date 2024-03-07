@@ -11,7 +11,7 @@ IMAGE=pczero.img
 INSTALL_TO=/dev/sda
 
 # source files, used in 'print'
-SRC_FILES=src/osca.S src/main.cc src/osca.h src/kernel.h src/lib.h src/libge.h src/game.h
+SRC_FILES=src/osca.S src/osca.h src/kernel.h src/lib.h src/libge.h src/game.h src/main.cc
 
 # as
 AF=-march=i386+387 --32
@@ -78,13 +78,13 @@ print:
 	@wc $(SRC_FILES)
 	@echo
 	@echo "wc source | gzip"
-	@cat $(SRC_FILES)|gzip|wc
+	@cat $(SRC_FILES) | gzip | wc
+	@echo
+	@echo -n "assembler calls: " && objdump -d bin/src/main.o | grep call | wc -l
 	@echo
 	@ls -la $(IMAGE)
 	@echo
-	@echo -n "calls: " && objdump -d bin/src/main.o | grep call | wc -l
-	@echo
-	@if [ $(shell stat -c "%s" $(IMAGE)) -ge 65536 ]; then echo '!!!';echo '!!! IMAGE FILE GREATER THAN OSCA LOADS';echo '!!!';echo; fi
+	@if [ $(shell stat -c "%s" $(IMAGE)) -ge 65536 ]; then echo '!!!'; echo '!!! IMAGE FILE GREATER THAN OSCA LOADS'; echo '!!!'; echo; fi
 	
 clean:
 	@rm -fr bin/
@@ -94,11 +94,11 @@ display:
 	@echo
 
 install:
-	sudo dd if=/dev/zero of=$(INSTALL_TO) count=1000&&sync
-	sudo dd if=$(IMAGE) of=$(INSTALL_TO)&&sync
+	sudo dd if=/dev/zero of=$(INSTALL_TO) count=1000 && sync
+	sudo dd if=$(IMAGE) of=$(INSTALL_TO) && sync
 
 dispusb:
 	sudo qemu-system-i386 -display gtk,zoom-to-fit=on -m 1M -drive file=$(INSTALL_TO),format=raw
 
 readusb:
-	sudo dd if=$(INSTALL_TO) count=2|hx|f 00000200
+	sudo dd if=$(INSTALL_TO) count=2 | hx | f 00000200
