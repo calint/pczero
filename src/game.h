@@ -550,9 +550,9 @@ auto Game::create_boss()->void{
 	};
 	boss_def.init_normals();
 
-	const Address clear_start_at_address=vga13h.bmp().address_offset({50*320,0});
+	const Address clear_start_at_address=vga13h.bmp().address_offset({0,50});
 	const Address clear_copy_from_address=Heap::data().address();
-	const SizeBytes clear_copy_num_bytes=320*100;
+	const SizeBytes clear_copy_num_bytes=vga13h.bmp().dim().width()*100;
 //	const Address clear_copy_from_address=osca_tasks;
 //	const SizeBytes clear_copy_num_bytes=SizeBytes(osca_tasks_end-osca_tasks)*SizeBytes(sizeof(Task));
 

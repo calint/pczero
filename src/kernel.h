@@ -46,8 +46,8 @@ extern "C" auto osca_exception()->void{
 alignas(16) struct Task osca_tasks[]{
 	//                                       :-> 0b01 grabs keyboard focus, 0b10 active
 	//        eip   esp              eflags bits   id   edi  esi  ebp  esp0 ebx  edx  ecx  eax
-//	{Register(tsk1),0xa'0000+320*176,0     ,0b11  ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
-	{Register(tsk4),0xa'0000+320*180,0     ,0b11  ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
+	{Register(tsk4),0xa'0000+320*176,0     ,0b11  ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
+	{Register(tsk1),0xa'0000+320*180,0     ,0b11  ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
 	{Register(tsk0),0xa'0000+320*184,0     ,0b11  ,1   ,0xde,0xec,0xeb,0xe5,0xb ,0xd ,0xc ,Register("kernel osca")},
 	{Register(tsk2),0xa'0000+320*188,0     ,0b10  ,2   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
 	{Register(tsk3),0xa'0000+320*192,0     ,0b10  ,3   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,140 },
@@ -223,7 +223,7 @@ extern "C" int free_mem_start_symbol;
 extern "C" auto osca_init()->void{
 	using namespace osca;
 	// green dot on screen (top left)
-	*reinterpret_cast<char*>(0xa0000)=0x02;
+	*reinterpret_cast<char*>(0xa0000)=2;
 	
 	// start of contiguous free memory
 	Address free_mem_start=Address(&free_mem_start_symbol);
@@ -250,11 +250,11 @@ extern "C" auto osca_init()->void{
 	
 	// initiate heap with a size of 320*100 B
 	Heap::init_statics({free_mem_start,320*100},World::nobjects_max);
-	Heap::clear_buffer(0x12);
+	Heap::clear_buffer(0x16);
 	Heap::clear_heap_entries(3,5);
 	Object::init_statics();
 	PhysicsState::init_statics();
-	PhysicsState::clear_buffer(1);
+	PhysicsState::clear_buffer(0x0b);
 }
 // called by osca from the keyboard interrupt
 // there is no task switch during this function
