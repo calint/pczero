@@ -93,7 +93,7 @@ mov $_start,%sp # at 0x7c00
 #
 cld # clear direction (forward)
 # read 127 sectors * 512B = 65024 bytes
-#   assumes load from USB. floppy does support that many sectors.
+#   assumes load from USB. floppy does not support that many sectors.
 # command 2 (%ah), number of sectors to read (%al)
 mov $0x027f,%ax
 # from cylinder 0 (%ch), sector 2 (%cl) (sector starts from 1, not 0)
