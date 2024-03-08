@@ -10,9 +10,9 @@ class ObjectDef final{
 public:
 	PointIx npts{}; // number of points in pts // ? implement span
 	PointIx nbnd{}; // number of indexes in bnd // ? implement span
-	Point*pts{}; // array of points used for rendering and bounding shape
-	PointIx*bnd{}; // array of indexes in pts that defines the bounding shape as a convex polygon CCW
-	Vector*nmls{}; // array of normals to the lines defined by bnd (calculated by init_normals())
+	Point*pts{}; // list of points used for rendering and bounding shape
+	PointIx*bnd{}; // list of indexes in pts that defines the bounding shape as a convex polygon CCW
+	Vector*nmls{}; // list of normals to the lines defined by bnd (calculated by init_normals())
 	
 	// destructor cannot happen because object life time is program lifetime
 	// void operator delete(void*)=delete;
@@ -38,6 +38,7 @@ namespace metrics{
 	static Count matrix_set_transforms{};
 	static Count collisions_checks{};
 	static Count collisions_checks_bounding_shapes{};
+	
 	static auto reset()->void{
 		matrix_set_transforms=0;
 		collisions_checks=0;
@@ -52,7 +53,7 @@ constexpr static Size nobjects_max{256};
 
 using Velocity=Vector;
 using Acceleration=Vector;
-using AngularVelocity=AngleRad;
+using AngularVelocityRad=AngleRad;
 using Time=Real;
 using TimeSec=Time;
 
@@ -63,7 +64,7 @@ public:
 	Velocity vel{}; // velocity per second
 	Acceleration acc{}; // acceleration per second
 	AngleRad agl{}; // angle
-	AngularVelocity dagl{}; // angular velocity per second
+	AngularVelocityRad dagl{}; // angular velocity per second
 	Object*obj{}; // pointer to the object that owns this physics state
 	              // note. circular reference
 	inline auto update(const TimeSec dt)->void{
@@ -73,12 +74,13 @@ public:
 	}
 
 	//-----------------------------------------------------------
-	//-----------------------------------------------------------
+	//--- statics
 	//-----------------------------------------------------------
 
 	inline static PhysicsState*ls_all{};
 	inline static PhysicsState*ls_all_pos{};
 	inline static PhysicsState*ls_all_end{};
+	
 	static auto init_statics()->void{
 		ls_all=new PhysicsState[nobjects_max];
 		ls_all_pos=ls_all;
@@ -90,9 +92,9 @@ public:
 			err.p("PhysicsState:e1");
 			osca_hang();
 		}
-		PhysicsState*p=ls_all_pos;
+		PhysicsState*ptr=ls_all_pos;
 		ls_all_pos++;
-		return p;
+		return ptr;
 	}
 	// returns reference to object that has a new address for physics state
 	// this function works with ~Object() to relocate physics state
@@ -123,7 +125,7 @@ namespace enable{
 	constexpr static bool draw_bounding_circle{true};
 }
 
-using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types.
+using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types
 using Bits8=unsigned char;
 using Scalar=Real;
 
@@ -296,7 +298,7 @@ private:
 	}
 
 	//----------------------------------------------------------------
-	// statics
+	//-- statics
 	//----------------------------------------------------------------
 	constexpr static Real sec_per_tick{Real(1)/Real(1024)}; // the 1024 Hz clock
 
