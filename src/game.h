@@ -131,7 +131,7 @@ public:
 		return true;
 	}
 
-	[[noreturn]] static auto start()->void;
+	[[noreturn]] static auto run()->void;
 };
 
 //
@@ -150,11 +150,11 @@ class Enemy final:public Object{
 	static constexpr Scale scl=5;
 	static constexpr Scale bounding_radius=scl*sqrt_of_2;
 public:
-	Enemy(const Point&pos,const AngleRad agl):
+	Enemy():
 		Object{
 			tb_enemies,
 			tb_bullets|tb_missiles,
-			Game::enemy_def,scl,bounding_radius,pos,agl,3}
+			Game::enemy_def,scl,bounding_radius,{0,0},0,3}
 	{
 		Game::enemies_alive++;
 	}
@@ -189,12 +189,12 @@ public:
 			tb_bullets,
 			tb_bosses|tb_enemies|tb_ships|tb_walls,
 			Game::bullet_def,scl,bounding_radius,{0,0},0,4},
-		created_time{World::time}
+		created_time{time}
 	{}
 
 	auto update()->bool override{
 		Object::update();
-		if(lifetime<World::time-created_time)
+		if(lifetime<time-created_time)
 			return false;
 		return Game::is_in_play_area(*this);
 	}
@@ -256,10 +256,10 @@ public:
 	}
 
 	auto fire()->void{
-		const TimeSec dt=World::time-fire_t;
+		const TimeSec dt=time-fire_t;
 		if(dt<TimeSec(.2))
 			return;
-		fire_t=World::time;
+		fire_t=time;
 		Bullet*b=new Bullet;
 		Vector v=forward_vector().scale(Real(1.1));
 		v.scale(scale()); // place bullet in front of ship
@@ -412,9 +412,9 @@ public:
 		Object{
 			tb_bosses,
 			tb_bullets|tb_missiles,
-			Game::boss_def,scl,bounding_radius,{0,0},0,0xe}
+			Game::boss_def,scl,bounding_radius,{0,0},0,0x4}
 	{
-		time_started=World::time;
+		time_started=time;
 		Game::boss=this;
 	}
 
@@ -426,7 +426,7 @@ public:
 		Object::update();
 		if(!Game::is_in_play_area(*this))
 			return false;
-		if(World::time-time_started>boss_live_t)
+		if(time-time_started>boss_live_t)
 			return false;
 		return true;
 	}
@@ -442,36 +442,29 @@ public:
 
 auto Game::create_scene()->void{
 	for(Real i=30;i<300;i+=20){
-		Enemy*e=new Enemy({i,60},deg_to_rad(i));
-		e->phy().dagl=deg_to_rad(10);
-		e->phy().vel={0,2};
+		Enemy*o=new Enemy;
+		o->phy().pos={i,60};
+		o->phy().agl=deg_to_rad(i);
+		o->phy().dagl=deg_to_rad(10);
+		o->phy().vel={0,2};
 	}
 }
 
-auto Game::create_scene2()->void{
-	Object*o=new Wall(20,{160,100},0);
-	o->phy().dagl=deg_to_rad(1);
-}
-
-auto Game::create_scene3()->void{
-	new Enemy({160,100},0);
-}
-
 auto Game::create_player()->void{
-	Ship*shp=new Ship;
-	shp->phy().pos={160,130};
-	Game::player=shp;
+	Ship*o=new Ship;
+	o->phy().pos={160,130};
+	player=o;
 }
 
 auto Game::create_boss()->void{
 	Object*o=new Boss;
-	if(Game::boss_vel.y>20){
-		if(Game::boss_vel.x>0){
-			Game::boss_pos={300,60};
-			Game::boss_vel={-10,0};
+	if(boss_vel.y>20){
+		if(boss_vel.x>0){
+			boss_pos={300,60};
+			boss_vel={-10,0};
 		}else{
-			Game::boss_pos={20,60};
-			Game::boss_vel={10,0};
+			boss_pos={20,60};
+			boss_vel={10,0};
 		}
 	}
 	if(boss_vel.x>0){
@@ -480,22 +473,21 @@ auto Game::create_boss()->void{
 		boss_vel.inc_by({-5,2});
 	}
 	o->phy().pos=boss_pos;
-	o->phy().vel=Game::boss_vel;
+	o->phy().vel=boss_vel;
 	o->phy().dagl=deg_to_rad(25);
 }
 
-[[noreturn]] auto Game::start()->void{
-	const TaskId taskId=osca_active_task->get_id();
+[[noreturn]] auto Game::run()->void{
+	const TaskId task_id=osca_active_task->get_id();
 	
 	//----------------------------------------------------------
 	// init statics
 	//----------------------------------------------------------
 	
 	// framework
-	World::init_statics();
 	Object::init_statics();
 	PhysicsState::init_statics();
-	PhysicsState::clear_buffer(0x0b);
+	PhysicsState::clear(11);
 
 	//
 	// object definitions
@@ -574,18 +566,17 @@ auto Game::create_boss()->void{
 	constexpr unsigned char key_s=2;
 	constexpr unsigned char key_d=3;
 	constexpr unsigned char key_spc=4;
-	bool keyb[]{false,false,false,false,false}; // wasd and space pressed status
+	constexpr unsigned char key_j=5;
+	bool keyb[6]{}; // wasd j and space pressed status
 
-	out.pos({12,1}).fg(6).p("keys: w a s d [space] f g x c [ctrl+tab] [ctrl+Fx]");
+	out.pos({12,1}).fg(6).p("keys: w a s d j  f g x c [ctrl+tab] [ctrl+Fx]");
 
 	// game loop
 	while(true){
-		*reinterpret_cast<unsigned*>(0xa'0000+320*2+160)=osca_tmr_lo;
-
 		// clear game area
 		pz_memcpy(clear_start_at_address,clear_copy_from_address,clear_copy_num_bytes);
 
-		World::tick();
+		Object::tick();
 
 		if(!Game::boss){
 			create_boss();
@@ -601,13 +592,13 @@ auto Game::create_boss()->void{
 		out.p("b=").p_hex_8b(static_cast<unsigned char>(metrics::collisions_checks_bounding_shapes)).spc();
 		out.p("a=").p_hex_8b(static_cast<unsigned char>(Object::allocated_objects_count())).spc();
 		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_tmr_lo)).spc();
-		out.p("s=").p_hex_8b(static_cast<unsigned char>(World::time)).spc();
-		out.p("d=").p_hex_8b(static_cast<unsigned char>(World::time_dt*10'000)).spc();
-		out.p("f=").p_hex_16b(static_cast<unsigned short>(World::fps)).spc();
+		out.p("s=").p_hex_8b(static_cast<unsigned char>(Object::time)).spc();
+		out.p("d=").p_hex_8b(static_cast<unsigned char>(Object::time_dt*10'000)).spc();
+		out.p("f=").p_hex_16b(static_cast<unsigned short>(Object::fps)).spc();
 
 		Ship*shp=Game::player;
 
-		if(task_focused_id==taskId){
+		if(task_focused_id==task_id){
 			// this task has keyboard focus, handle keyboard
 			while(const unsigned char sc=keyboard.get_next_scan_code()){
 				switch(sc){
@@ -641,6 +632,12 @@ auto Game::create_boss()->void{
 				case 0xb9: // space released
 					keyb[key_spc]=false;
 					break;
+				case 0x24: // j pressed
+					keyb[key_j]=true;
+					break;
+				case 0xa4: // j released
+					keyb[key_j]=false;
+					break;
 				default:
 					break;
 				}
@@ -671,7 +668,7 @@ auto Game::create_boss()->void{
 				if(!keyb[key_a]&&!keyb[key_d])shp->turn_still();
 			}
 			if(!keyb[key_w]&&!keyb[key_s])shp->phy().vel={0,0};
-			if(keyb[key_spc])shp->fire();
+			if(keyb[key_j])shp->fire();
 		}
 	}
 }

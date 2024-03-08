@@ -47,34 +47,16 @@ namespace metrics{
 
 class Object;
 
-using Time=Real;
-using TimeSec=Time;
+// maximum number of objects
+constexpr static Size nobjects_max{256};
 
-// update_all() and check_collisions() generate lists of objects to be deleted.
-// the delete happens when deleted_commit() is called
-
-class World{
-public:
-	constexpr static Size nobjects_max{256}; // maximum number of objects
-	constexpr static Real sec_per_tick{Real(1)/Real(1024)}; // the 1024 Hz clock
-	inline static TimeSec time{};
-	inline static TimeSec time_dt{};
-	inline static TimeSec time_prv{};
-	inline static Count fps_frame_counter{};
-	inline static TimeSec fps_time_prv{};
-	inline static Count fps{};
-
-	static auto init_statics()->void{
-		fps_time_prv=time_prv=time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits can be problem
-	}
-	static auto tick()->void;
-};
-
-// physics states are kept in their own buffer for better CPU cache utilization at update
 using Velocity=Vector;
 using Acceleration=Vector;
 using AngularVelocity=AngleRad;
+using Time=Real;
+using TimeSec=Time;
 
+// physics states are kept in their own buffer for better CPU cache utilization at update
 class PhysicsState final{
 public:
 	Point pos{}; // position
@@ -84,10 +66,10 @@ public:
 	AngularVelocity dagl{}; // angular velocity per second
 	Object*obj{}; // pointer to the object that owns this physics state
 	              // note. circular reference
-	inline auto update()->void{
-		vel.inc_by(acc,World::time_dt);
-		pos.inc_by(vel,World::time_dt);
-		agl+=dagl*World::time_dt;
+	inline auto update(const TimeSec dt)->void{
+		vel.inc_by(acc,dt);
+		pos.inc_by(vel,dt);
+		agl+=dagl*dt;
 	}
 
 	//-----------------------------------------------------------
@@ -98,9 +80,9 @@ public:
 	inline static PhysicsState*ls_all_pos{};
 	inline static PhysicsState*ls_all_end{};
 	static auto init_statics()->void{
-		ls_all=new PhysicsState[World::nobjects_max];
+		ls_all=new PhysicsState[nobjects_max];
 		ls_all_pos=ls_all;
-		ls_all_end=ls_all+World::nobjects_max;
+		ls_all_end=ls_all+nobjects_max;
 	}
 	static auto alloc()->PhysicsState*{
 		// check buffer overrun
@@ -118,15 +100,15 @@ public:
 		ls_all_pos--;
 		Object&o=*(ls_all_pos->obj);
 		*phy=*ls_all_pos;
-		pz_memset(ls_all_pos,3,sizeof(PhysicsState)); // debugging (can be removed)
+		pz_memset(ls_all_pos,0x0f,sizeof(PhysicsState)); // debugging (can be removed)
 		return o;
 	}
-	static auto update_all()->void{
+	static auto update_all(const float dt_s)->void{
 		for(PhysicsState*it=ls_all;it<ls_all_pos;++it){
-			it->update();
+			it->update(dt_s);
 		}
 	}
-	static auto clear_buffer(char b=0)->void{
+	static auto clear(char b=0)->void{
 		const Address from=Address(ls_all);
 		const SizeBytes n=SizeBytes(ls_all_end)-SizeBytes(ls_all); // ? may break if pointer is bigger than 2G
 		pz_memset(from,b,n);
@@ -316,6 +298,8 @@ private:
 	//----------------------------------------------------------------
 	// statics
 	//----------------------------------------------------------------
+	constexpr static Real sec_per_tick{Real(1)/Real(1024)}; // the 1024 Hz clock
+
 	inline static Object**ls_all{}; // list of pointers to allocated objects
 	inline static Object**ls_all_pos{}; // next free object slot
 	inline static Object**ls_all_end{}; // end of list of pointers to allocated objects
@@ -323,20 +307,48 @@ private:
 	inline static Object**ls_deleted_pos{}; // next free object slot
 	inline static Object**ls_deleted_end{}; // end of list of pointers to deleted objects
 
-public:
-//	static inline auto hasFreeSlot()->bool{return free_ixes_i!=0;}
-	static auto init_statics()->void{
-		ls_all=new Object*[World::nobjects_max];
-		ls_all_pos=ls_all;
-		ls_all_end=ls_all+World::nobjects_max;
+	inline static TimeSec time_prv{};
+	inline static Count fps_frame_counter{};
+	inline static TimeSec fps_time_prv{};
 
-		ls_deleted=new Object*[World::nobjects_max];
+public:
+	inline static TimeSec time{};
+	inline static TimeSec time_dt{};
+	inline static Count fps{};
+
+	static auto init_statics()->void{
+		ls_all=new Object*[nobjects_max];
+		ls_all_pos=ls_all;
+		ls_all_end=ls_all+nobjects_max;
+
+		ls_deleted=new Object*[nobjects_max];
 		ls_deleted_pos=ls_deleted;
-		ls_deleted_end=ls_deleted+World::nobjects_max;
+		ls_deleted_end=ls_deleted+nobjects_max;
+
+		fps_time_prv=time_prv=time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits can be problem
 	}
 	static auto tick()->void{
+		metrics::reset();
+
+		// time
+		time_prv=time;
+		time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits is a problem. fix
+		time_dt=time-time_prv;
+		if(time_dt<0){ // ? is that once every 4 billionth tick?
+			time_dt=0;
+		}
+		// fps calculations
+		fps_frame_counter++;
+		const TimeSec dt=time-fps_time_prv;
+		if(dt>1){
+			fps=Count(TimeSec(fps_frame_counter)/dt);
+			fps_frame_counter=0;
+			fps_time_prv=time;
+		}
+
+		// draw and update
 		draw_all(vga13h.bmp());
-		PhysicsState::update_all();
+		PhysicsState::update_all(time_dt);
 		update_all();
 		check_collisions();
 		commit_deleted();
@@ -480,26 +492,5 @@ private:
 		return true;
 	}
 };
-
-inline auto World::tick()->void{
-	metrics::reset();
-
-	time_prv=time;
-	time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits is a problem. fix
-	time_dt=time-time_prv;
-	if(time_dt<0){ // ? is that once every 4 billionth tick?
-		time_dt=0;
-	}
-	// fps calculations
-	fps_frame_counter++;
-	const TimeSec dt=time-fps_time_prv;
-	if(dt>1){
-		fps=Count(TimeSec(fps_frame_counter)/dt);
-		fps_frame_counter=0;
-		fps_time_prv=time;
-	}
-
-	Object::tick();
-}
 
 } // end namespace osca
