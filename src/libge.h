@@ -342,24 +342,24 @@ public:
 		return unsigned(ls_all_pos-ls_all);
 	}
 	static auto update_all()->void{
-		for(Object**iter=ls_all;iter<ls_all_pos;++iter){
-			Object*o=*iter;
+		for(Object**it=ls_all;it<ls_all_pos;++it){
+			Object*o=*it;
 			if(!o->update()){
 				World::deleted_add(o);
 			}
 		}
 	}
 	static auto draw_all(Bitmap8b&dsp)->void{
-		for(Object**iter=ls_all;iter<ls_all_pos;++iter){
-			Object*o=*iter;
+		for(Object**it=ls_all;it<ls_all_pos;++it){
+			Object*o=*it;
 			o->draw(dsp);
 		}
 	}
 	static auto check_collisions()->void{
-		for(Object**iter1=ls_all;iter1<ls_all_pos-1;++iter1){
-			for(Object**iter2=iter1+1;iter2<ls_all_pos;++iter2){
-				Object*o1=*iter1;
-				Object*o2=*iter2;
+		for(Object**it1=ls_all;it1<ls_all_pos-1;++it1){
+			for(Object**it2=it1+1;it2<ls_all_pos;++it2){
+				Object*o1=*it1;
+				Object*o2=*it2;
 				// check if objects are interested in collision check
 				const bool o1_check_col_with_o2=o1->tb_col_msk_&o2->tb_;
 				const bool o2_check_col_with_o1=o2->tb_col_msk_&o1->tb_;
@@ -474,9 +474,9 @@ inline auto World::deleted_add(Object*o)->void{
 }
 
 inline auto World::commit_deleted()->void{
-	for(Object**iter=ls_deleted;iter<ls_deleted_pos;++iter){
-		delete *iter;
-		*iter=nullptr; // debugging (can be removed)
+	for(Object**it=ls_deleted;it<ls_deleted_pos;++it){
+		delete *it;
+		*it=nullptr; // debugging (can be removed)
 	}
 	ls_deleted_pos=ls_deleted;
 }

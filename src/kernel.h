@@ -59,19 +59,19 @@ Task*osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
 class Heap final{
 	struct Entry final{
 		void*ptr{}; // pointer to memory
-		unsigned size_bytes{}; // size of allocated memory in bytes
+		unsigned size_bytes{};
 	};
 
-	inline static Data d_{};
+	inline static Data d_{}; // location and size of heap
 	inline static char*ptr_{}; // pointer to free memory
 	inline static char*ptr_end_{}; // end of buffer (one past last valid address)
-	inline static Entry*entry_used_start_{}; // beginning of vector containing used memory info
+	inline static Entry*entry_used_start_{}; // beginning of list containing used memory info
 	inline static Entry*entry_used_next_{}; // next available slot
-	inline static Entry*entry_used_end_{}; // limit of used entries memory
-	inline static Entry*entry_free_start_{}; // beginning of vector containing freed memory info
-	inline static Entry*entry_free_next_{};
-	inline static Entry*entry_free_end_{};
-	inline static Size nentries_max_{};
+	inline static Entry*entry_used_end_{}; // end (on past) of used entries list
+	inline static Entry*entry_free_start_{}; // beginning of list containing freed memory info
+	inline static Entry*entry_free_next_{}; // next available slot
+	inline static Entry*entry_free_end_{}; // end (one past) of free entries list
+	inline static Size nentries_max_{}; // maximum slots
 public:
 	static auto init_statics(const Data&d,const Size nentries_max)->void{
 		d_=d;
@@ -107,26 +107,24 @@ public:
 	// called by operator 'new'
 	static auto alloc(const unsigned size_bytes)->void*{
 		// try to find a free slot of that size
-		Entry*he=entry_free_start_;
-		while(he<entry_free_end_){
-			if(he->size_bytes==size_bytes){
-				// found a matching size entry
-				void*p=he->ptr;
-				// move to used entries
-				if(entry_used_next_>=entry_used_end_){
-					err.p("Heap.alloc:1");
-					osca_hang();
-				}
-				*entry_used_next_=*he;
-				entry_used_next_++;
-				// copy last free to this slot
-				entry_free_next_--;
-				*he=*entry_free_next_;
-				// debugging
-				pz_memset(entry_free_next_,3,sizeof(Entry));
-				return p;
+		
+		for(Entry*ent=entry_free_start_;ent<entry_free_next_;ent++){
+			if(ent->size_bytes!=size_bytes)
+				continue;
+
+			// found a matching size entry
+			void*p=ent->ptr;
+			// move to used entries
+			if(entry_used_next_>=entry_used_end_){
+				err.p("Heap.alloc:1");
+				osca_hang();
 			}
-			he++;
+			*entry_used_next_=*ent;
+			entry_used_next_++;
+			entry_free_next_--;
+			*ent=*entry_free_next_;
+			pz_memset(entry_free_next_,3,sizeof(Entry)); // debugging (can be removed)
+			return p;
 		}
 		// did not find in free list, create new
 		char*p=ptr_;
@@ -147,29 +145,29 @@ public:
 	// called by operator 'delete'
 	static auto free(void*ptr)->void{
 		// find the allocated memory in the used list
-		Entry*hep=entry_used_start_;
-		while(hep<entry_used_next_){
-			if(hep->ptr==ptr){
-				// found the allocation entry
-				// copy entry from used to free
-				if(entry_free_next_>=entry_free_end_){
-					err.p("Heap.free:1");
-					osca_hang();
-				}
-				*entry_free_next_=*hep;
-				entry_free_next_++;
+		
+		for(Entry*ent=entry_used_start_;ent<entry_used_next_;ent++){
+			if(ent->ptr!=ptr)
+				continue;
 
-				// copy last entry from used list to this entry
-				entry_used_next_--;
-				const unsigned size=hep->size_bytes;
-				*hep=*entry_used_next_;
-
-				// debugging
-				pz_memset(ptr,0xf,SizeBytes(size));
-				pz_memset(entry_used_next_,5,sizeof(Entry));
-				return;
+			// found the allocation entry
+			// copy entry from used to free
+			if(entry_free_next_>=entry_free_end_){
+				err.p("Heap.free:1");
+				osca_hang();
 			}
-			hep++;
+			*entry_free_next_=*ent;
+			entry_free_next_++;
+
+			// copy last entry from used list to this entry
+			entry_used_next_--;
+			const unsigned size=ent->size_bytes;
+			*ent=*entry_used_next_;
+
+			// debugging
+			pz_memset(ptr,0xf,SizeBytes(size));
+			pz_memset(entry_used_next_,5,sizeof(Entry));
+			return;
 		}
 		// did not find the allocated memory. probably a double delete
 		err.p("Heap.free:2");
@@ -177,9 +175,9 @@ public:
 	}
 	static auto clear_buffer(const char b=0)->void{d_.clear(b);}
 	static auto clear_heap_entries(char free_area=0,char used_area=0)->void{
-		const SizeBytes hes=SizeBytes(sizeof(Entry));
-		pz_memset(entry_free_start_,free_area,nentries_max_*hes);
-		pz_memset(entry_used_start_,used_area,nentries_max_*hes);
+		const SizeBytes es=SizeBytes(sizeof(Entry));
+		pz_memset(entry_free_start_,free_area,nentries_max_*es);
+		pz_memset(entry_used_start_,used_area,nentries_max_*es);
 	}
 };
 

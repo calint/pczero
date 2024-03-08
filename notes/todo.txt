@@ -1,5 +1,6 @@
 [ ] libge.h: Object: allow change of ObjectDef
-[ ] improved Heap
+[ ] improved Heap that does not fragment (o1store?)
+[ ] move the heap and stack memory of the vga buffer for better performance 
 [ ] osca.S: read more sectors
 [x] osca: is it necessary to do fwait on i386+387?
 [x]   "co-processors from 287 on do not need it"
