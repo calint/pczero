@@ -17,18 +17,18 @@ auto pz_memset(Address to,char v,SizeBytes n)->void;
 using OffsetBytes=int;
 
 class Data{
-	Address a_{};
-	SizeBytes s_{};
+	Address address_{};
+	SizeBytes size_{};
 public:
-	inline constexpr Data(const Address a,const SizeBytes n):a_{a},s_{n}{}
+	inline constexpr Data(const Address a,const SizeBytes n):address_{a},size_{n}{}
 	inline constexpr Data()=default;
-	inline constexpr auto address()const->Address{return a_;}
-	inline constexpr auto size()const->SizeBytes{return s_;}
-	inline constexpr auto address_offset(const OffsetBytes ob)const->Address{return static_cast<Address>(static_cast<char*>(a_)+ob);}
-	inline auto to(const Data&d)const->void{pz_memcpy(d.address(),a_,s_);}
-	inline auto to(const Data&d,const SizeBytes sb)const->void{pz_memcpy(d.address(),a_,sb);}
-	inline auto clear(char byte=0)const->void{pz_memset(a_,byte,s_);}
-	inline constexpr auto end()const->Address{return static_cast<char*>(a_)+s_;}
+	inline constexpr auto address()const->Address{return address_;}
+	inline constexpr auto size()const->SizeBytes{return size_;}
+	inline constexpr auto address_offset(const OffsetBytes n)const->Address{return static_cast<char*>(address_)+n;}
+	inline auto to(const Data&d)const->void{pz_memcpy(d.address(),address_,size_);}
+	inline auto to(const Data&d,const SizeBytes n)const->void{pz_memcpy(d.address(),address_,n);}
+	inline auto clear(char byte=0)const->void{pz_memset(address_,byte,size_);}
+	inline constexpr auto end()const->Address{return static_cast<char*>(address_)+size_;}
 };
 
 using Real=float;
@@ -97,9 +97,9 @@ struct VectorT{
 	inline auto normalize()->VectorT&{const Real len=sqrt(x*x+y*y);x/=len;y/=len;return*this;}
 	// scales and returns this vector
 	inline constexpr auto scale(const Scale s)->VectorT&{x*=s;y*=s;return*this;}
-	// increases and returns this vector by v
+	// increases and returns this vector by 'v'
 	inline constexpr auto inc_by(const VectorT&v)->VectorT{x+=v.x;y+=v.y;return*this;}
-	// increases and returns this vector by v*scl
+	// increases by 'v' scaled by 's' and returns this vector
 	inline constexpr auto inc_by(const VectorT&v,const Scale s)->void{x+=v.x*s;y+=v.y*s;}
 	// negates and returns this vector
 	inline constexpr auto negate()->VectorT&{x=-x;y=-y;return*this;}
@@ -124,29 +124,30 @@ template<typename T>inline constexpr auto operator-(const VectorT<T>&lhs,const V
 	return{lhs.x-rhs.x,lhs.y-rhs.y};
 }
 
-using Coord=Real; // a coordinate in real space
-using Vector=VectorT<Coord>; // a vector in real space
-using Point=Vector; // a point in 2D
+using Coord=Real; // coordinate in real space
+using Vector=VectorT<Coord>; // vector in real space
+using Point=Vector; // point in 2D
 using PointIx=short; // index into a list of points
-using CoordPx=short; // a coordinate in pixel space
-using PointPx=VectorT<CoordPx>; // a point in pixel space
+using CoordPx=short; // coordinate in pixel space
+using PointPx=VectorT<CoordPx>; // point in pixel space
 using Count=Size; // used in loops
 
 template<typename T>
 class DimensionT{
-	T w_{};
-	T h_{};
+	T width_{};
+	T height_{};
 public:
-	inline constexpr DimensionT(const T width,const T height):w_{width},h_{height}{}
+	inline constexpr DimensionT(const T width,const T height):width_{width},height_{height}{}
 	inline constexpr DimensionT()=default;
-	inline constexpr auto width()const->const T{return w_;}
-	inline constexpr auto height()const->const T{return h_;}
+	inline constexpr auto width()const->const T{return width_;}
+	inline constexpr auto height()const->const T{return height_;}
 };
 
 using SizePx=int;
 using DimensionPx=DimensionT<SizePx>;
 using Color8b=unsigned char;
 
+// configuration of how the polygons are rendered
 namespace enable{
 	constexpr static bool draw_polygons_fill{};
 	constexpr static bool draw_polygons_edges{true};
@@ -154,25 +155,25 @@ namespace enable{
 
 template<typename T>
 class Bitmap{
-	DimensionPx d_{};
-	Data dt_{};
+	DimensionPx dim_{};
+	Data data_{};
 public:
-	inline constexpr Bitmap(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()*Size(sizeof(T))}{}
+	inline constexpr Bitmap(const Address a,const DimensionPx&d):dim_{d},data_{a,d.width()*d.height()*Size(sizeof(T))}{}
 	inline constexpr Bitmap()=default;
-	inline constexpr auto dim()const->const DimensionPx&{return d_;}
-	inline constexpr auto data()const->const Data&{return dt_;}
+	inline constexpr auto dim()const->const DimensionPx&{return dim_;}
+	inline constexpr auto data()const->const Data&{return data_;}
 	inline constexpr auto address_offset(const PointPx p)const->Address{
-		return dt_.address_offset(p.y*d_.width()*Size(sizeof(T))+p.x*Size(sizeof(T)));
+		return data_.address_offset(p.y*dim_.width()*Size(sizeof(T))+p.x*Size(sizeof(T)));
 	}
-	constexpr auto to(const Bitmap&dst,const PointPx&c)const->void{
-		T*si=static_cast<T*>(dt_.address());
-		T*di=static_cast<T*>(dst.dt_.address());
-		di+=c.y*dst.dim().width()+c.x;
-		const SizePx ln=dst.dim().width()-d_.width();
-		const SizePx h=d_.height();
-		const SizePx w=d_.width();
+	constexpr auto to(const Bitmap&dst,const PointPx&pos)const->void{
+		T*si=static_cast<T*>(data_.address());
+		T*di=static_cast<T*>(dst.data_.address());
+		di+=pos.y*dst.dim().width()+pos.x;
+		const SizePx ln=dst.dim().width()-dim_.width();
+		const SizePx h=dim_.height();
+		const SizePx w=dim_.width();
 		for(SizePx y=0;y<h;y++){
-			for(SizePx x=0;x<w;x++){ // ? pz_memcpy
+			for(SizePx x=0;x<w;x++){
 				*di=*si;
 				si++;
 				di++;
@@ -180,13 +181,13 @@ public:
 			di+=ln;
 		}
 	}
-	constexpr auto to_transparent(const Bitmap&dst,const PointPx&c)const->void{
-		T*si=static_cast<T*>(dt_.address());
-		T*di=static_cast<T*>(dst.dt_.address());
-		di+=c.y*dst.dim().width()+c.x;
-		const SizePx ln=dst.dim().width()-d_.width();
-		const SizePx h=d_.height();
-		const SizePx w=d_.width();
+	constexpr auto to_transparent(const Bitmap&dst,const PointPx&pos)const->void{
+		T*si=static_cast<T*>(data_.address());
+		T*di=static_cast<T*>(dst.data_.address());
+		di+=pos.y*dst.dim().width()+pos.x;
+		const SizePx ln=dst.dim().width()-dim_.width();
+		const SizePx h=dim_.height();
+		const SizePx w=dim_.width();
 		for(SizePx y=0;y<h;y++){
 			for(SizePx x=0;x<w;x++){
 				T v=*si;
@@ -198,31 +199,31 @@ public:
 			di+=ln;
 		}
 	}
-	constexpr auto draw_dot(const Point&p,const T value)->void{
-		const CoordPx xi=CoordPx(p.x);
-		const CoordPx yi=CoordPx(p.y);
-		if(xi<0||xi>d_.width())
+	constexpr auto draw_dot(const Point&pos,const T value)->void{
+		const CoordPx xi=CoordPx(pos.x);
+		const CoordPx yi=CoordPx(pos.y);
+		if(xi<0||xi>dim_.width())
 			return;
-		if(yi<0||yi>d_.height())
+		if(yi<0||yi>dim_.height())
 			return;
 		*static_cast<T*>(address_offset({xi,yi}))=value;
 	}
-	constexpr auto draw_bounding_circle(const Point&p,const Scale r)->void{
-		const Count segments=Count(5*r);
+	constexpr auto draw_bounding_circle(const Point&pos,const Scale radius)->void{
+		const Count segments=Count(5*radius);
 		AngleRad th=0;
 		AngleRad dth=2*PI/AngleRad(segments);
 		for(Count i=0;i<segments;i++){
 			Real fsin=0;
 			Real fcos=0;
 			sin_and_cos(th,fsin,fcos);
-			const Coord x=p.x+r*fcos;
-			const Coord y=p.y+r*fsin;
+			const Coord x=pos.x+radius*fcos;
+			const Coord y=pos.y+radius*fsin;
 			draw_dot({x,y},1);
 			th+=dth;
 		}
 	}
-	constexpr auto draw_polygon(const Point pts[],const PointIx npoly_ixs,const PointIx ix[],const T color)->void{
-		if(npoly_ixs<2){ // ? what if 0, 2 is a line
+	constexpr auto draw_polygon(const Point pts[],const PointIx ix_size,const PointIx ix[],const T color)->void{
+		if(ix_size<2){ // ? what if 0, 2 is a line
 			draw_dot(pts[0],color);
 			return;
 		}
@@ -232,7 +233,7 @@ public:
 		Coord topy=first_point.y;
 		// find top
 		PointIx i=1;
-		while(i<npoly_ixs){
+		while(i<ix_size){
 			const Point&p=pts[ix[i]]; // ? use pointer
 			const Coord y=p.y;
 			if(y<topy){
@@ -256,10 +257,10 @@ public:
 		Coord dy_rht=0;
 		Coord dy_lft=0;
 		Coord y=topy;
-		const CoordPx wi=CoordPx(d_.width());
+		const CoordPx wi=CoordPx(dim_.width());
 		const CoordPx y_scr=CoordPx(y);
-		T*pline=static_cast<T*>(dt_.address())+y_scr*wi;
-		const PointIx last_elem_ix=npoly_ixs-1;
+		T*pline=static_cast<T*>(data_.address())+y_scr*wi;
+		const PointIx last_elem_ix=ix_size-1;
 		while(true){
 			if(adv_lft){
 				if(ix_lft==last_elem_ix){
@@ -521,7 +522,7 @@ using CoordsChar=VectorT<int>;
 class PrinterToBitmap{
 	Color8b*di_{}; // current pixel in bitmap
 	Color8b*dil_{}; // beginning of current line
-	Bitmap8b*b_{};
+	Bitmap8b*bmp_{};
 	SizePx bmp_wi_{};
 	SizePx ln_{};
 	Color8b fg_{2};
@@ -532,15 +533,15 @@ class PrinterToBitmap{
 	static constexpr SizePx font_hi_{6};
 	static constexpr SizePx line_padding_{2}; // ? attribute
 public:
-	constexpr explicit PrinterToBitmap(Bitmap8b*b):
-		di_{static_cast<Color8b*>(b->data().address())},
+	constexpr explicit PrinterToBitmap(Bitmap8b*bmp):
+		di_{static_cast<Color8b*>(bmp->data().address())},
 		dil_{di_},
-		b_{b},
-		bmp_wi_{b->dim().width()},
+		bmp_{bmp},
+		bmp_wi_{bmp->dim().width()},
 		ln_{SizePx(bmp_wi_-font_wi_)}
 	{}
 	constexpr auto pos(const CoordsChar p)->PrinterToBitmap&{
-		di_=static_cast<Color8b*>(b_->data().address());
+		di_=static_cast<Color8b*>(bmp_->data().address());
 		di_+=bmp_wi_*p.y*(font_hi_+line_padding_)+p.x*font_wi_;
 		dil_=di_;
 		return*this;
@@ -656,10 +657,10 @@ private:
 
 // vga mode 13h bitmap at 0xa'0000 (320 x 200 x 8)
 class Vga13h{
-	Bitmap8b b_{};
+	Bitmap8b bmp_{};
 public:
-	inline Vga13h():b_{Address(0xa'0000),DimensionPx{320,200}}{}
-	inline constexpr auto bmp()->Bitmap8b&{return b_;}
+	inline Vga13h():bmp_{Address(0xa'0000),DimensionPx{320,200}}{}
+	inline constexpr auto bmp()->Bitmap8b&{return bmp_;}
 };
 
 extern Vga13h vga13h;
