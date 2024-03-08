@@ -252,9 +252,6 @@ extern "C" auto osca_init()->void{
 	Heap::init_statics({free_mem_start,320*100},World::nobjects_max);
 	Heap::clear_buffer(0x16);
 	Heap::clear_heap_entries(3,5);
-	Object::init_statics();
-	PhysicsState::init_statics();
-	PhysicsState::clear_buffer(0x0b);
 }
 // called by osca from the keyboard interrupt
 // there is no task switch during this function

@@ -55,8 +55,9 @@ class World{
 public:
 	constexpr static Size nobjects_max{256}; // maximum number of objects
 private:
-	inline static Object*deleted[nobjects_max]; // ? todo improve with lesser memory footprint
-	inline static int deleted_ix{0};
+	inline static Object**ls_deleted{}; // list of pointers of deleted objects
+	inline static Object**ls_deleted_pos{}; // next free slot
+	inline static Object**ls_deleted_end{}; // end of list
 public:
 //	constexpr static Real sec_per_tick{1/Real(18.2)}; // the default 18.2 Hz clock
 	constexpr static Real sec_per_tick{Real(1)/Real(1024)}; // the 1024 Hz clock
@@ -69,6 +70,10 @@ public:
 
 	static auto init_statics()->void{
 		fps_time_prv=time_prv=time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits can be problem
+		// initiate the deleted list members
+		ls_deleted=new Object*[nobjects_max];
+		ls_deleted_pos=ls_deleted;
+		ls_deleted_end=ls_deleted+nobjects_max;
 	}
 	static auto tick()->void;
 	static auto deleted_add(Object*o)->void;
@@ -82,23 +87,13 @@ using AngularVelocity=AngleRad;
 
 class PhysicsState final{
 public:
-	Point pos{0,0};
-	Velocity vel{0,0}; // velocity per sec
-	Acceleration acc{0,0}; // acceleration per sec
-	AngleRad agl{0};
-	AngularVelocity dagl{0}; // angular velocity per sec
-	Object*obj{nullptr}; // pointer to the object to which this physics state belongs to
-	                     // note. circular reference
-//	inline constexpr auto pos()const->const Point2D&{return pos_;}
-//	inline constexpr auto dpos()const->const Point2D&{return dpos_;}
-//	inline constexpr auto ddpos()const->const Point2D&{return ddpos_;}
-//	inline constexpr auto angle()const->Angle{return agl_;}
-//	inline constexpr auto dangle()const->Angle{return dagl_;}
-//	inline constexpr auto set_pos(const Point2D&p){pos_=p;}
-//	inline constexpr auto set_dpos(const Point2D&p){dpos_=p;}
-//	inline constexpr auto set_ddpos(const Point2D&p){ddpos_=p;}
-//	inline constexpr auto set_angle(const Angle rad){agl_=rad;}
-//	inline constexpr auto set_dangle(const Angle rad){dagl_=rad;}
+	Point pos{};
+	Velocity vel{}; // velocity per sec
+	Acceleration acc{}; // acceleration per sec
+	AngleRad agl{};
+	AngularVelocity dagl{}; // angular velocity per sec
+	Object*obj{}; // pointer to the object to which this physics state belongs to
+	              // note. circular reference
 	inline auto update()->void{
 		vel.inc_by(acc,World::time_dt);
 		pos.inc_by(vel,World::time_dt);
@@ -109,22 +104,22 @@ public:
 	//-----------------------------------------------------------
 	//-----------------------------------------------------------
 
-	inline static PhysicsState*mem_start{nullptr};
-	inline static PhysicsState*next_free{nullptr};
-	inline static PhysicsState*mem_end{nullptr};
+	inline static PhysicsState*ls_all{nullptr};
+	inline static PhysicsState*ls_all_pos{nullptr};
+	inline static PhysicsState*ls_all_end{nullptr};
 	static auto init_statics()->void{
-		mem_start=new PhysicsState[World::nobjects_max];
-		next_free=mem_start;
-		mem_end=reinterpret_cast<PhysicsState*>(mem_start+World::nobjects_max);
+		ls_all=new PhysicsState[World::nobjects_max];
+		ls_all_pos=ls_all;
+		ls_all_end=ls_all+World::nobjects_max;
 	}
 	static auto alloc()->PhysicsState*{
 		// check buffer overrun
-		if(next_free==mem_end){
+		if(ls_all_pos==ls_all_end){
 			err.p("PhysicsState:e1");
 			osca_hang();
 		}
-		PhysicsState*p=next_free;
-		next_free++;
+		PhysicsState*p=ls_all_pos;
+		ls_all_pos++;
 		return p;
 	}
 	// returns reference to object that has a new address for physics state
@@ -134,26 +129,22 @@ public:
 		// copy last state to the freed area
 		// return pointer to object that has had it's phy_ moved
 
-		// check buffer underflow
-//		if(next_free==mem_start){
-//			out.printer().p("PhysicsState:e2");
-//		}
-		next_free--;
-		Object&o=*next_free->obj;
-		*phy=*next_free;
-		pz_memset(next_free,3,sizeof(PhysicsState)); // ? debugging
+		ls_all_pos--;
+		Object&o=*(ls_all_pos->obj);
+		*phy=*ls_all_pos;
+		pz_memset(ls_all_pos,3,sizeof(PhysicsState)); // debugging (can be removed)
 		return o;
 	}
 	static auto update_all()->void{
-		PhysicsState*ptr=mem_start;
-		while(ptr<next_free){
+		PhysicsState*ptr=ls_all;
+		while(ptr<ls_all_pos){
 			ptr->update();
 			ptr++;
 		}
 	}
 	static auto clear_buffer(char b=0)->void{
-		const Address from=Address(mem_start);
-		const SizeBytes n=SizeBytes(mem_end)-SizeBytes(mem_start); // ? may break if pointer is bigger than 2G
+		const Address from=Address(ls_all);
+		const SizeBytes n=SizeBytes(ls_all_end)-SizeBytes(ls_all); // ? may break if pointer is bigger than 2G
 		pz_memset(from,b,n);
 	}
 };
@@ -182,6 +173,7 @@ constexpr Scale sqrt_of_2=Real(1.414213562);
 
 class Object{
 	friend World;
+	Object**all_ptr_{}; // pointer to element in 'all' list containing pointer to this object
 	TypeBits tb_{}; // object type that is usually a bit (32 object types supported)
 	TypeBits tb_col_msk_{}; // bits used to bitwise 'and' with other object's type_bits and if true then collision detection is done
 	PhysicsState*phy_{}; // kept in own buffer of states for better CPU cache utilization at update
@@ -195,10 +187,10 @@ class Object{
 	AngleRad Mmw_agl_{}; // current angle used in transform matrix
 	Scale Mmw_scl_{};  // current scale used in transform matrix
 	Scalar br_{}; // bounding radius scl_*sqrt(2)
-	SlotIx used_ix_{}; // index in used_ixes array. used at new and delete
-	Color8b color_{};
+	Color8b color_{}; // shape color
 	Bits8 bits_{}; // bit 1: is not alive
 	               // bit 2: pts_wls_ don't need update
+	char padding[2];
 public:
 	constexpr Object()=delete;
 	constexpr Object(const Object&)=delete; // copy constructor
@@ -224,19 +216,14 @@ public:
 		phy_->obj=this;
 
 		// allocate index in all[] from free slots
-		if(free_ixes_i==0){
+		if(ls_all_pos==ls_all_end){
 			err.p("Object:e1");
 			osca_hang();
 		}
-		// get the next free slot
-		Object**obj_ix_=free_ixes[free_ixes_i]; // pointer to element in all[]
-		free_ixes_i--;
-		// assign slot to this object
-		*obj_ix_=this;
-		// add the new slot to used objects
-		used_ixes[used_ixes_i]={obj_ix_,this};
-		used_ix_=used_ixes_i;
-		used_ixes_i++;
+		
+		*ls_all_pos=this;
+		all_ptr_=ls_all_pos;
+		ls_all_pos++;
 	}
 	// called only by 'World' at 'commit_deleted()'
 	virtual~Object(){
@@ -245,19 +232,12 @@ public:
 		// set the pointer of that object's phy to the freed one
 		PhysicsState::free(this->phy_).phy_=phy_;
 
-		// get slot info for this object
-		SlotInfo this_slot=used_ixes[used_ix_]; // ? this lookup can be optimized with a **Object in a field. speed vs space
-		*this_slot.oix=nullptr; // ? this is unnecessary
-		// add slot to free slots
-		free_ixes_i++;
-		free_ixes[free_ixes_i]=this_slot.oix;
-		// move last slot in 'used' array to the freed slot
-		used_ixes_i--;
-		SlotInfo movedSlot=used_ixes[used_ixes_i];
-		// update object used_ix_ to the freed slot index
-		movedSlot.obj->used_ix_=used_ix_;
-		// store it in the freed slot
-		used_ixes[used_ix_]=movedSlot;
+		ls_all_pos--;
+		// move the last object pointer in list to the slot this object had
+		*all_ptr_=*ls_all_pos;
+		*ls_all_pos=nullptr; // debugging (can be removed)
+		// adjust pointer to the slot in 'all' list
+		(*all_ptr_)->all_ptr_=all_ptr_;
 		// delete cached points
 		delete[]pts_wld_;
 		if(nmls_wld_)
@@ -360,41 +340,38 @@ private:
 	//----------------------------------------------------------------
 	// statics
 	//----------------------------------------------------------------
-	inline static Object*all[World::nobjects_max]; // array of pointers to allocated objects
-	inline static Object**free_ixes[World::nobjects_max]; // free indexes in all[]
-	inline static SlotIx free_ixes_i{0}; // index in freeSlots[] of next free slot
-	inline static SlotInfo used_ixes[World::nobjects_max]; // used indexes in all[]
-	inline static SlotIx used_ixes_i{0}; // index in freeSlots[] of next free slot
+	inline static Object**ls_all{}; // list of pointers to allocated objects
+	inline static Object**ls_all_pos{}; // next free object slot
+	inline static Object**ls_all_end{}; // end of list of pointers to allocated objects
 public:
-	static auto free_slots_count()->SlotIx{return free_ixes_i;}
-	static auto used_slots_count()->SlotIx{return used_ixes_i;}
 //	static inline auto hasFreeSlot()->bool{return free_ixes_i!=0;}
 	static auto init_statics()->void{
-		const SlotIx n=sizeof(free_ixes)/sizeof(Object**);
-		for(SlotIx i=0;i<n;i++){
-			free_ixes[i]=&all[i];
-		}
-		free_ixes_i=World::nobjects_max-1;
+		ls_all=new Object*[World::nobjects_max];
+		ls_all_pos=ls_all;
+		ls_all_end=ls_all+World::nobjects_max;
+	}
+	static auto allocated_objects_count()->unsigned{
+		return unsigned(ls_all_pos-ls_all);
 	}
 	static auto update_all()->void{
-		for(SlotIx i=0;i<used_ixes_i;i++){
-			Object*o=object_for_used_slot(i);
+		for(Object**iter=ls_all;iter<ls_all_pos;++iter){
+			Object*o=*iter;
 			if(!o->update()){
 				World::deleted_add(o);
 			}
 		}
 	}
 	static auto draw_all(Bitmap8b&dsp)->void{
-		for(SlotIx i=0;i<used_ixes_i;i++){
-			Object*o=object_for_used_slot(i);
+		for(Object**iter=ls_all;iter<ls_all_pos;++iter){
+			Object*o=*iter;
 			o->draw(dsp);
 		}
 	}
 	static auto check_collisions()->void{
-		for(SlotIx i=0;i<used_ixes_i-1;i++){
-			for(SlotIx j=i+1;j<used_ixes_i;j++){
-				Object*o1=used_ixes[i].obj;
-				Object*o2=used_ixes[j].obj;
+		for(Object**iter1=ls_all;iter1<ls_all_pos-1;++iter1){
+			for(Object**iter2=iter1+1;iter2<ls_all_pos;++iter2){
+				Object*o1=*iter1;
+				Object*o2=*iter2;
 				// check if objects are interested in collision check
 				const bool o1_check_col_with_o2=o1->tb_col_msk_&o2->tb_;
 				const bool o2_check_col_with_o1=o2->tb_col_msk_&o1->tb_;
@@ -433,15 +410,6 @@ public:
 	}
 
 private:
-	static inline auto object_for_used_slot(const SlotIx i)->Object*{
-		Object*o=used_ixes[i].obj;
-//		if(!o){
-//			err.p("null-pointer-exception [e1]");
-//			osca_hang();
-//		}
-		return o;
-	}
-
 	static auto is_bounding_circles_in_collision(Object&o1,Object&o2)->bool{
 		const Scalar r1=o1.bounding_radius();
 		const Scalar r2=o2.bounding_radius();
@@ -509,14 +477,19 @@ auto World::deleted_add(Object*o)->void{
 	if(!o->is_alive()) // check if object already deleted
 		return;
 	o->set_is_alive(false);
-	deleted[deleted_ix]=o;
-	deleted_ix++;
+	if(ls_deleted_pos==ls_deleted_end){
+		err.p("World::deleted_add:1");
+		osca_hang();
+	}
+	*ls_deleted_pos=o;
+	ls_deleted_pos++;
 }
 auto World::commit_deleted()->void{
-	for(int i=0;i<deleted_ix;i++){
-		delete deleted[i];
+	for(Object**iter=ls_deleted;iter<ls_deleted_pos;++iter){
+		delete *iter;
+		*iter=nullptr; // debugging (can be removed)
 	}
-	deleted_ix=0;
+	ls_deleted_pos=ls_deleted;
 }
 
 auto World::tick()->void{

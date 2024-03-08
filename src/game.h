@@ -488,9 +488,20 @@ auto Game::create_boss()->void{
 
 [[noreturn]] auto Game::start()->void{
 	const TaskId taskId=osca_active_task->get_id();
+	
 	//----------------------------------------------------------
 	// init statics
 	//----------------------------------------------------------
+	
+	// framework
+	World::init_statics();
+	Object::init_statics();
+	PhysicsState::init_statics();
+	PhysicsState::clear_buffer(0x0b);
+
+	//
+	// object definitions
+	//	
 	enemy_def={5,4,
 		new Point[]{ // points in model coordinates, negative Y is "forward"/"up"
 			{ 0,  0},
@@ -550,11 +561,10 @@ auto Game::create_boss()->void{
 	};
 	boss_def.init_normals();
 
+	// clear screen by copying ram to vga
 	const Address clear_start_at_address=vga13h.bmp().address_offset({0,50});
 	const Address clear_copy_from_address=Heap::data().address();
 	const SizeBytes clear_copy_num_bytes=vga13h.bmp().dim().width()*100;
-
-	World::init_statics();
 
 	create_player();
 //	create_scene3();
@@ -591,8 +601,7 @@ auto Game::create_boss()->void{
 		out.p("m=").p_hex_8b(static_cast<unsigned char>(metrics::matrix_set_transforms)).spc();
 		out.p("c=").p_hex_8b(static_cast<unsigned char>(metrics::collisions_checks)).spc();
 		out.p("b=").p_hex_8b(static_cast<unsigned char>(metrics::collisions_checks_bounding_shapes)).spc();
-		out.p("f=").p_hex_8b(static_cast<unsigned char>(Object::free_slots_count())).spc();
-		out.p("u=").p_hex_8b(static_cast<unsigned char>(Object::used_slots_count())).spc();
+		out.p("a=").p_hex_8b(static_cast<unsigned char>(Object::allocated_objects_count())).spc();
 		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_tmr_lo)).spc();
 		out.p("s=").p_hex_8b(static_cast<unsigned char>(World::time)).spc();
 		out.p("d=").p_hex_8b(static_cast<unsigned char>(World::time_dt*10'000)).spc();
