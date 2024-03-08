@@ -58,20 +58,20 @@ Task*osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
 
 class Heap final{
 	struct Entry final{
-		void*ptr{nullptr}; // pointer to memory
-		unsigned size_bytes{0}; // size of allocated memory in bytes
+		void*ptr{}; // pointer to memory
+		unsigned size_bytes{}; // size of allocated memory in bytes
 	};
 
-	inline static Data d_{nullptr,0};
-	inline static char*ptr_{nullptr}; // pointer to free memory
-	inline static char*ptr_end_{nullptr}; // end of buffer (one past last valid address)
-	inline static Entry*entry_used_start_{nullptr}; // beginning of vector containing used memory info
-	inline static Entry*entry_used_next_{nullptr}; // next available slot
-	inline static Entry*entry_used_end_{nullptr}; // limit of used entries memory
-	inline static Entry*entry_free_start_{nullptr}; // beginning of vector containing freed memory info
-	inline static Entry*entry_free_next_{nullptr};
-	inline static Entry*entry_free_end_{nullptr};
-	inline static Size nentries_max_{0};
+	inline static Data d_{};
+	inline static char*ptr_{}; // pointer to free memory
+	inline static char*ptr_end_{}; // end of buffer (one past last valid address)
+	inline static Entry*entry_used_start_{}; // beginning of vector containing used memory info
+	inline static Entry*entry_used_next_{}; // next available slot
+	inline static Entry*entry_used_end_{}; // limit of used entries memory
+	inline static Entry*entry_free_start_{}; // beginning of vector containing freed memory info
+	inline static Entry*entry_free_next_{};
+	inline static Entry*entry_free_end_{};
+	inline static Size nentries_max_{};
 public:
 	static auto init_statics(const Data&d,const Size nentries_max)->void{
 		d_=d;
@@ -185,8 +185,8 @@ public:
 
 class Keyboard{
 	unsigned char buf[2<<4]{}; // minimum size 2 and a power of 2, max size 256
-	unsigned char s{0}; // next event index
-	unsigned char e{0}; // last event index +1 & roll
+	unsigned char s{}; // next event index
+	unsigned char e{}; // last event index +1 & roll
 public:
 	// called by osca_keyb_ev
 	constexpr auto on_key(unsigned char ch)->void{
@@ -210,9 +210,9 @@ public:
 extern Keyboard keyboard;
 Keyboard keyboard; // global initialized by osca_init
 
-inline static bool keyboard_ctrl_pressed{false};
-inline static Task*task_focused{nullptr};
-inline static TaskId task_focused_id{0};
+inline static bool keyboard_ctrl_pressed{};
+inline static Task*task_focused{};
+inline static TaskId task_focused_id{};
 
 // declared in linker script 'link.ld' after code and data at first 64KB boundary
 // address of symbol marks start of contiguous memory
@@ -298,12 +298,11 @@ extern "C" auto osca_keyb_ev()->void{
 } // end namespace osca
 
 // called by C++ to allocate and free memory
-void operator delete(void*ptr,unsigned size)noexcept;
-void operator delete[](void*ptr,unsigned size)noexcept;
-
 void*operator new[](unsigned count){return osca::Heap::alloc(count);}
 void*operator new(unsigned count){return osca::Heap::alloc(count);}
 void operator delete(void*ptr)noexcept{osca::Heap::free(ptr);}
+void operator delete(void*ptr,unsigned size)noexcept;
 void operator delete(void*ptr,unsigned size)noexcept{osca::Heap::free(ptr);}
 void operator delete[](void*ptr)noexcept{osca::Heap::free(ptr);}
+void operator delete[](void*ptr,unsigned size)noexcept;
 void operator delete[](void*ptr,unsigned size)noexcept{osca::Heap::free(ptr);}

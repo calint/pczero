@@ -67,9 +67,9 @@ public:
 	inline static ObjectDef missile_def{};
 	inline static ObjectDef boss_def{};
 
-	inline static Ship*player{nullptr};
-	inline static Object*boss{nullptr};
-	inline static Count enemies_alive{0};
+	inline static Ship*player{};
+	inline static Object*boss{};
+	inline static Count enemies_alive{};
 	inline static Point boss_pos{20,60};
 	inline static Vector boss_vel{10,0};
 
@@ -111,7 +111,7 @@ public:
 
 	static auto is_in_play_area(const Object&o)->bool{
 		const Real bounding_radius=o.bounding_radius();
-		const PhysicsState&phy=o.phy_ro();
+		const PhysicsState&phy=o.phy_const();
 		const Real xmax=Real(Game::play_area_top_left.x+Game::play_area_dim.width());
 		const Real xmin=Real(Game::play_area_top_left.x);
 		const Real ymax=Real(Game::play_area_top_left.y+Game::play_area_dim.height());
@@ -213,9 +213,7 @@ class Ship final:public Object{
 	TimeSec fire_t{0};
 public:
 	bool auto_aim_at_boss{false};
-	const char padding1{0};
-	const char padding2{0};
-	const char padding3{0};
+	const char padding[3]{};
 
 	Ship():
 		Object{
@@ -273,7 +271,7 @@ private:
 	auto attack_target_current_location(const Object&target,const bool draw_trajectory=false)->void{
 		// aim and shoot at targets' current location
 		constexpr Real margin_of_error=Real(0.01);
-		Vector v_tgt=target.phy_ro().pos-phy_ro().pos;
+		Vector v_tgt=target.phy_const().pos-phy_const().pos;
 		v_tgt.normalize();
 		Vector v_fwd=forward_vector();
 		// draw trajectory of bullet
@@ -321,9 +319,9 @@ private:
 	// ? move to TargetingSystem class
 	auto find_aim_vector_for_moving_target(const Object&tgt,const Real eval_t,const Real eval_dt,const Real error_margin_t,const bool draw_trajectory=false)->Vector{
 		Real t=0;
-		Point p_tgt=tgt.phy_ro().pos;
-		Vector v_tgt=tgt.phy_ro().vel;
-		const Vector a_tgt=tgt.phy_ro().acc;
+		Point p_tgt=tgt.phy_const().pos;
+		Vector v_tgt=tgt.phy_const().vel;
+		const Vector a_tgt=tgt.phy_const().acc;
 		while(true){
 			t+=eval_dt;
 			if(t>eval_t)
@@ -337,7 +335,7 @@ private:
 			}
 
 			// aim vector to the expected location
-			const Vector v_aim=p_tgt-phy_ro().pos;
+			const Vector v_aim=p_tgt-phy_const().pos;
 			// get t for bullet to reach expected location
 			const Real t_bullet=v_aim.magnitude()/Bullet::speed;
 			// note. optimizing away sqrt() in magnitude() reduces precision when
@@ -357,7 +355,7 @@ private:
 					// draw aim vector
 					Vector v3=v_aim;
 					v3.normalize().scale(Bullet::speed);
-					Game::draw_trajectory(phy_ro().pos,v3,t_bullet,Real(.2),2);
+					Game::draw_trajectory(phy_const().pos,v3,t_bullet,Real(.2),2);
 //					err.pos({1,1}).p_hex_32b(unsigned(t_aim*100));
 				}
 				return v_aim;
@@ -408,7 +406,7 @@ class Boss final:public Object{
 	static constexpr TimeSec boss_live_t{10};
 
 	Count health{5};
-	TimeSec time_started{0};
+	TimeSec time_started{};
 public:
 	Boss():
 		Object{

@@ -28,10 +28,7 @@ struct alignas(16) Task{
 	// note. The FSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
 	//       first byte of the structure needed to be aligned on a 16-byte boundary.
 	alignas(16) Byte fpu_state[108]{};
-	Byte padding0{0};
-	Byte padding1{0};
-	Byte padding2{0};
-	Byte padding3{0};
+	Byte padding[4]{};
 
 	constexpr inline auto get_id()const->TaskId{return id;}
 	constexpr inline auto is_grab_keyboard_focus()const->bool{return bits&1;}

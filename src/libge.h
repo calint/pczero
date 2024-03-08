@@ -8,13 +8,14 @@ namespace osca{
 
 class ObjectDef final{
 public:
-	PointIx npts{0}; // number of points in pts // ? implement span
-	PointIx nbnd{0}; // number of indexes in bnd // ? implement span
-	Point*pts{nullptr}; // array of points used for rendering and bounding shape
-	PointIx*bnd{nullptr}; // array of indexes in pts that defines the bounding shape as a convex polygon CCW
-	Vector*nmls{nullptr}; // array of normals to the lines defined by bnd (calculated by init_normals())
-	// destructor should not happen and generates calls to __cxa_atexit __dso_handle
-	void operator delete(void*)=delete;
+	PointIx npts{}; // number of points in pts // ? implement span
+	PointIx nbnd{}; // number of indexes in bnd // ? implement span
+	Point*pts{}; // array of points used for rendering and bounding shape
+	PointIx*bnd{}; // array of indexes in pts that defines the bounding shape as a convex polygon CCW
+	Vector*nmls{}; // array of normals to the lines defined by bnd (calculated by init_normals())
+	
+	// destructor cannot happen because object life time is program lifetime
+	// void operator delete(void*)=delete;
 
 	constexpr auto init_normals()->void{
 		if(nbnd<3){ // not enough points for a shape
@@ -34,9 +35,9 @@ public:
 
 namespace metrics{
 	constexpr static bool enabled{true};
-	static Count matrix_set_transforms{0};
-	static Count collisions_checks{0};
-	static Count collisions_checks_bounding_shapes{0};
+	static Count matrix_set_transforms{};
+	static Count collisions_checks{};
+	static Count collisions_checks_bounding_shapes{};
 	static auto reset()->void{
 		matrix_set_transforms=0;
 		collisions_checks=0;
@@ -51,22 +52,22 @@ using TimeSec=Time;
 
 // update_all() and check_collisions() generate lists of objects to be deleted.
 // the delete happens when deleted_commit() is called
+
 class World{
 public:
 	constexpr static Size nobjects_max{256}; // maximum number of objects
 private:
-	inline static Object**ls_deleted{}; // list of pointers of deleted objects
+	inline static Object**ls_deleted{}; // list of pointers to deleted objects
 	inline static Object**ls_deleted_pos{}; // next free slot
 	inline static Object**ls_deleted_end{}; // end of list
 public:
-//	constexpr static Real sec_per_tick{1/Real(18.2)}; // the default 18.2 Hz clock
 	constexpr static Real sec_per_tick{Real(1)/Real(1024)}; // the 1024 Hz clock
-	inline static TimeSec time{0};
-	inline static TimeSec time_dt{0};
-	inline static TimeSec time_prv{0};
-	inline static Count fps_frame_counter{0};
-	inline static TimeSec fps_time_prv{0};
-	inline static Count fps{0};
+	inline static TimeSec time{};
+	inline static TimeSec time_dt{};
+	inline static TimeSec time_prv{};
+	inline static Count fps_frame_counter{};
+	inline static TimeSec fps_time_prv{};
+	inline static Count fps{};
 
 	static auto init_statics()->void{
 		fps_time_prv=time_prv=time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits can be problem
@@ -87,12 +88,12 @@ using AngularVelocity=AngleRad;
 
 class PhysicsState final{
 public:
-	Point pos{};
-	Velocity vel{}; // velocity per sec
-	Acceleration acc{}; // acceleration per sec
-	AngleRad agl{};
-	AngularVelocity dagl{}; // angular velocity per sec
-	Object*obj{}; // pointer to the object to which this physics state belongs to
+	Point pos{}; // position
+	Velocity vel{}; // velocity per second
+	Acceleration acc{}; // acceleration per second
+	AngleRad agl{}; // angle
+	AngularVelocity dagl{}; // angular velocity per second
+	Object*obj{}; // pointer to the object that owns this physics state
 	              // note. circular reference
 	inline auto update()->void{
 		vel.inc_by(acc,World::time_dt);
@@ -104,9 +105,9 @@ public:
 	//-----------------------------------------------------------
 	//-----------------------------------------------------------
 
-	inline static PhysicsState*ls_all{nullptr};
-	inline static PhysicsState*ls_all_pos{nullptr};
-	inline static PhysicsState*ls_all_end{nullptr};
+	inline static PhysicsState*ls_all{};
+	inline static PhysicsState*ls_all_pos{};
+	inline static PhysicsState*ls_all_end{};
 	static auto init_statics()->void{
 		ls_all=new PhysicsState[World::nobjects_max];
 		ls_all_pos=ls_all;
@@ -125,10 +126,6 @@ public:
 	// returns reference to object that has a new address for physics state
 	// this function works with ~Object() to relocate physics state
 	static auto free(PhysicsState*phy)->Object&{
-		// decrement next_free to point to last state in heap
-		// copy last state to the freed area
-		// return pointer to object that has had it's phy_ moved
-
 		ls_all_pos--;
 		Object&o=*(ls_all_pos->obj);
 		*phy=*ls_all_pos;
@@ -136,10 +133,8 @@ public:
 		return o;
 	}
 	static auto update_all()->void{
-		PhysicsState*ptr=ls_all;
-		while(ptr<ls_all_pos){
-			ptr->update();
-			ptr++;
+		for(PhysicsState*it=ls_all;it<ls_all_pos;++it){
+			it->update();
 		}
 	}
 	static auto clear_buffer(char b=0)->void{
@@ -153,17 +148,9 @@ namespace enable{
 	constexpr static bool draw_dots{true};
 	constexpr static bool draw_polygons{true};
 	constexpr static bool draw_normals{true};
-	constexpr static bool draw_collision_check{false};
+	constexpr static bool draw_collision_check{};
 	constexpr static bool draw_bounding_circle{true};
 }
-
-using SlotIx=short; // index in Object::used_ixes[] and Object::free_ixes[]
-
-// info that together with ~Object maintains Object::used_ixes[] and Object::free_ixes[]
-struct SlotInfo{
-	Object**oix{nullptr}; // pointer to element in Object::all[]
-	Object*obj{nullptr}; // object owning this slot
-};
 
 using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types.
 using Bits8=unsigned char;
@@ -173,7 +160,7 @@ constexpr Scale sqrt_of_2=Real(1.414213562);
 
 class Object{
 	friend World;
-	Object**all_ptr_{}; // pointer to element in 'all' list containing pointer to this object
+	Object**ls_all_pos_{}; // pointer to element in 'all' list containing pointer to this object
 	TypeBits tb_{}; // object type that is usually a bit (32 object types supported)
 	TypeBits tb_col_msk_{}; // bits used to bitwise 'and' with other object's type_bits and if true then collision detection is done
 	PhysicsState*phy_{}; // kept in own buffer of states for better CPU cache utilization at update
@@ -188,15 +175,10 @@ class Object{
 	Scale Mmw_scl_{};  // current scale used in transform matrix
 	Scalar br_{}; // bounding radius scl_*sqrt(2)
 	Color8b color_{}; // shape color
-	Bits8 bits_{}; // bit 1: is not alive
+	Bits8 flags_{}; // bit 1: is not alive
 	               // bit 2: pts_wls_ don't need update
-	char padding[2];
+	char padding[2]{};
 public:
-	constexpr Object()=delete;
-	constexpr Object(const Object&)=delete; // copy constructor
-	constexpr Object&operator=(const Object&)=delete; // copy assignment
-	constexpr Object(Object&&)=delete; // move constructor
-	constexpr Object&operator=(Object&&)=delete; // move assignment
 	Object(const TypeBits tb,const TypeBits tb_col_msk,const ObjectDef&def,const Scale scl,const Scalar bounding_radius,const Point&pos,const AngleRad rad,const Color8b color):
 		tb_{tb},
 		tb_col_msk_{tb_col_msk},
@@ -222,7 +204,7 @@ public:
 		}
 		
 		*ls_all_pos=this;
-		all_ptr_=ls_all_pos;
+		ls_all_pos_=ls_all_pos;
 		ls_all_pos++;
 	}
 	// called only by 'World' at 'commit_deleted()'
@@ -234,29 +216,39 @@ public:
 
 		ls_all_pos--;
 		// move the last object pointer in list to the slot this object had
-		*all_ptr_=*ls_all_pos;
+		*ls_all_pos_=*ls_all_pos;
 		*ls_all_pos=nullptr; // debugging (can be removed)
 		// adjust pointer to the slot in 'all' list
-		(*all_ptr_)->all_ptr_=all_ptr_;
+		(*ls_all_pos_)->ls_all_pos_=ls_all_pos_;
 		// delete cached points
 		delete[]pts_wld_;
 		if(nmls_wld_)
 			delete[]nmls_wld_;
 	}
+
+	constexpr Object()=delete;
+	constexpr Object(const Object&)=delete; // copy constructor
+	constexpr Object&operator=(const Object&)=delete; // copy assignment
+	constexpr Object(Object&&)=delete; // move constructor
+	constexpr Object&operator=(Object&&)=delete; // move assignment
+
 	inline constexpr auto type_bits()const->TypeBits{return tb_;}
 	inline constexpr auto type_bits_collision_mask()const->TypeBits{return tb_col_msk_;}
 	inline constexpr auto phy()->PhysicsState&{return*phy_;}
-	// returns physics state as const (read only)
-	inline constexpr auto phy_ro()const->const PhysicsState&{return*phy_;}
+	inline constexpr auto phy_const()const->const PhysicsState&{return*phy_;}
 	inline constexpr auto scale()const->Scale{return scl_;}
 	inline constexpr auto set_scale(const Scale s)->void{scl_=s;}
 	inline constexpr auto def()const->const ObjectDef&{return def_;}
-	auto forward_vector()->Vector{
+	inline constexpr auto is_alive()const->bool{return!(flags_&1);}
+	inline constexpr auto bounding_radius()const->Scalar{return br_;}
+	inline auto forward_vector()->Vector{
 		refresh_Mmw_if_invalid();
 		return Mmw_.axis_y().negate().normalize(); // ? not negated (if positive y is up)
 	}
+	
 	// returns false if object is to be deleted
 	virtual auto update()->bool{return true;}
+	
 	virtual auto draw(Bitmap8b&dsp)->void{
 		refresh_wld_points();
 		if(enable::draw_dots){
@@ -284,34 +276,30 @@ public:
 			}
 		}
 		if(enable::draw_bounding_circle){
-			dsp.draw_bounding_circle(phy_ro().pos,bounding_radius());
+			dsp.draw_bounding_circle(phy_const().pos,bounding_radius());
 		}
 	}
 
 	// returns false if object is to be deleted
 	virtual auto on_collision(Object&other)->bool{return true;}
 
-	inline constexpr auto is_alive()const->bool{return!(bits_&1);}
-
-	inline constexpr auto bounding_radius()const->Scalar{return br_;}
-
 private:
 	// set to false by 'World' add 'deleted_add' and used to avoid deleting
 	// same object more than once
-	inline constexpr auto set_is_alive(const bool v)->void{
-		if(v){ // alive bit is 0
-			bits_&=Bits8(~1);
+	inline constexpr auto set_is_alive(const bool b)->void{
+		if(b){ // alive bit is 0
+			flags_&=Bits8(~1);
 		}else{ // not alive bit is 1
-			bits_|=1;
+			flags_|=1;
 		}
 	}
 
-	inline constexpr auto is_wld_pts_need_update()const->bool{return!(bits_&2);}
-	inline constexpr auto set_wld_pts_need_update(const bool v)->void{
-		if(v){ // refresh_wld_pts bit is 0
-			bits_&=Bits8(~2);
+	inline constexpr auto is_wld_pts_need_update()const->bool{return!(flags_&2);}
+	inline constexpr auto set_wld_pts_need_update(const bool b)->void{
+		if(b){ // refresh_wld_pts bit is 0
+			flags_&=Bits8(~2);
 		}else{ // refresh_wld_pts bit is 1
-			bits_|=2;
+			flags_|=2;
 		}
 	}
 
@@ -473,7 +461,7 @@ private:
 	}
 };
 
-auto World::deleted_add(Object*o)->void{
+inline auto World::deleted_add(Object*o)->void{
 	if(!o->is_alive()) // check if object already deleted
 		return;
 	o->set_is_alive(false);
@@ -484,7 +472,8 @@ auto World::deleted_add(Object*o)->void{
 	*ls_deleted_pos=o;
 	ls_deleted_pos++;
 }
-auto World::commit_deleted()->void{
+
+inline auto World::commit_deleted()->void{
 	for(Object**iter=ls_deleted;iter<ls_deleted_pos;++iter){
 		delete *iter;
 		*iter=nullptr; // debugging (can be removed)
@@ -492,7 +481,7 @@ auto World::commit_deleted()->void{
 	ls_deleted_pos=ls_deleted;
 }
 
-auto World::tick()->void{
+inline auto World::tick()->void{
 	metrics::reset();
 
 	time_prv=time;

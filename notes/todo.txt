@@ -1,4 +1,5 @@
 [ ] libge.h: Object: allow change of ObjectDef
+[ ] improved Heap
 [ ] osca.S: read more sectors
 [x] osca: is it necessary to do fwait on i386+387?
 [x]   "co-processors from 287 on do not need it"

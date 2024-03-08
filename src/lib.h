@@ -4,102 +4,24 @@
 // osca library
 //
 
-// built-in functions replacements (used by clang++ -O0 and -Os)
-extern "C" void*memcpy(void*dest,const void*src,unsigned n);
-extern "C" void*memcpy(void*dest,const void*src,unsigned n){
-	char*d=static_cast<char*>(dest);
-	const char*s=static_cast<const char*>(src);
-	while(n--)
-		*d++=*s++;
-	return dest;
-}
-extern "C" void*memset(void*str,int c,unsigned n);
-extern "C" void*memset(void*str,int c,unsigned n){
-	unsigned char ch=static_cast<unsigned char>(c);
-	unsigned char*d=static_cast<unsigned char*>(str);
-	while(n--)
-		*d++=ch;
-	return str;
-}
-//extern "C" void*memcpy(void*to,void*from,unsigned n);
-//extern "C" void*memcpy(void*to,void*from,unsigned n){
-//	// ? optimize movsb a times,movsd b times,movsb c times
-//	asm("mov %0,%%esi;"
-//		"mov %1,%%edi;"
-//		"mov %2,%%ecx;"
-//		"rep movsb;"
-//		:
-//		:"r"(from),"r"(to),"r"(n)
-//		:"%esi","%edi","%ecx","memory" // ? clobbers memory?
-//	);
-//	return to;
-//}
-//extern "C" void*memset(void*to,unsigned c,unsigned n);
-//extern "C" void*memset(void*to,unsigned c,unsigned n){
-//	unsigned char ch=static_cast<unsigned char>(c);
-//	// ? optimize stosb a times,stosd b times,stosb c times
-//	asm("mov %0,%%edi;"
-//		"mov %1,%%al;"
-//		"mov %2,%%ecx;"
-//		"rep stosb;"
-//		:
-//		:"r"(to),"r"(ch),"r"(n)
-//		:"%edi","%al","%ecx","memory" // ? clobbers memory?
-//	);
-//	return to;
-//}
-
 namespace osca{
 
 using Address=void*;
 using Size=int;
 using SizeBytes=Size;
 
-//inline auto pz_memcpy(Address to,Address from,SizeBytes n)->void{
-//	// ? optimize movsb a times,movsd b times,movsb c times
-//	asm("mov %0,%%esi;"
-//		"mov %1,%%edi;"
-//		"mov %2,%%ecx;"
-//		"rep movsb;"
-//		:
-//		:"r"(from),"r"(to),"r"(n)
-//		:"%esi","%edi","%ecx","memory" // ? clobbers memory?
-//	);
-//}
-//
-//inline auto pz_memset(Address to,char v,SizeBytes n)->void{
-//	// ? optimize stosb a times,stosd b times,stosb c times
-//	asm("mov %0,%%edi;"
-//		"mov %1,%%al;"
-//		"mov %2,%%ecx;"
-//		"rep stosb;"
-//		:
-//		:"r"(to),"r"(v),"r"(n)
-//		:"%edi","%al","%ecx","memory" // ? clobbers memory?
-//	);
-//}
-
+// forward declaration of memory copy and set functions
 auto pz_memcpy(Address to,Address from,SizeBytes n)->void;
-auto pz_memcpy(Address to,Address from,SizeBytes n)->void{
-	char*d=static_cast<char*>(to);
-	char*s=static_cast<char*>(from);
-	while(n--)
-		*d++=*s++;
-}
-
 auto pz_memset(Address to,char v,SizeBytes n)->void;
-auto pz_memset(Address to,char v,SizeBytes n)->void{
-	char*d=static_cast<char*>(to);
-	while(n--)
-		*d++=v;
-}
 
 using OffsetBytes=int;
-class Data{ // ? bounds check on constexpr
-	Address a_;
-	SizeBytes s_;
+
+class Data{
+	Address a_{};
+	SizeBytes s_{};
 public:
 	inline constexpr Data(const Address a,const SizeBytes n):a_{a},s_{n}{}
+	inline constexpr Data()=default;
 	inline constexpr auto address()const->Address{return a_;}
 	inline constexpr auto size()const->SizeBytes{return s_;}
 	inline constexpr auto address_offset(const OffsetBytes ob)const->Address{return static_cast<Address>(static_cast<char*>(a_)+ob);}
@@ -131,7 +53,7 @@ inline auto cos(const AngleRad radians)->Real{
 	return v;
 }
 
-// puts sin and cos value of 'radians' in 'fsin' and 'fcos'
+// sets sin and cos value of 'radians' in 'fsin' and 'fcos'
 inline auto sin_and_cos(const AngleRad radians,Real&fsin,Real&fcos)->void{
 	asm("fsincos"
 		:"=t"(fcos),"=u"(fsin) // "u" : Second floating point register
@@ -191,9 +113,6 @@ struct VectorT{
 	// magnitude squared
 	inline constexpr auto magnitude2()const->T{return x*x+y*y;}
 	// inline constexpr auto operator<=>(const VectorT&)const=default; // ? does not compile in clang++ without includes from std
-	// inline constexpr auto operator==(const VectorT&)const->bool=default; // bitwise equality relevant
-	// inline constexpr auto operator+(const VectorT&other)const->VectorT{return{x+other.x,y+other.y};}
-	// inline constexpr auto operator-(const VectorT&other)const->VectorT{return{x-other.x,y-other.y};}
 };
 template<typename T>inline constexpr auto operator==(const VectorT<T>&lhs,const VectorT<T>&rhs)->bool{
     return(lhs.x==rhs.x)&&(lhs.y==rhs.y);
@@ -211,15 +130,15 @@ using Point=Vector; // a point in 2D
 using PointIx=short; // index into a list of points
 using CoordPx=short; // a coordinate in pixel space
 using PointPx=VectorT<CoordPx>; // a point in pixel space
-using Count=Size;
-using Position=Point;
+using Count=Size; // used in loops
 
 template<typename T>
 class DimensionT{
-	T w_;
-	T h_;
+	T w_{};
+	T h_{};
 public:
 	inline constexpr DimensionT(const T width,const T height):w_{width},h_{height}{}
+	inline constexpr DimensionT()=default;
 	inline constexpr auto width()const->const T{return w_;}
 	inline constexpr auto height()const->const T{return h_;}
 };
@@ -229,16 +148,17 @@ using DimensionPx=DimensionT<SizePx>;
 using Color8b=unsigned char;
 
 namespace enable{
-	constexpr static bool draw_polygons_fill{false};
+	constexpr static bool draw_polygons_fill{};
 	constexpr static bool draw_polygons_edges{true};
 }
 
 template<typename T>
-class Bitmap{ // ? bounds check on constexpr
-	DimensionPx d_;
-	Data dt_;
+class Bitmap{
+	DimensionPx d_{};
+	Data dt_{};
 public:
-	constexpr Bitmap(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()*Size(sizeof(T))}{}
+	inline constexpr Bitmap(const Address a,const DimensionPx&px):d_{px},dt_{a,px.width()*px.height()*Size(sizeof(T))}{}
+	inline constexpr Bitmap()=default;
 	inline constexpr auto dim()const->const DimensionPx&{return d_;}
 	inline constexpr auto data()const->const Data&{return dt_;}
 	inline constexpr auto address_offset(const PointPx p)const->Address{
@@ -597,16 +517,17 @@ static constexpr unsigned table_ascii_to_font[]{
 };
 
 using CoordsChar=VectorT<int>;
-class PrinterToBitmap{ // ? bounds check on constexpr
-	Color8b*di_; // current pixel in bitmap
-	Color8b*dil_; // beginning of current line
-	Bitmap8b*b_;
-	SizePx bmp_wi_;
-	SizePx ln_;
+
+class PrinterToBitmap{
+	Color8b*di_{}; // current pixel in bitmap
+	Color8b*dil_{}; // beginning of current line
+	Bitmap8b*b_{};
+	SizePx bmp_wi_{};
+	SizePx ln_{};
 	Color8b fg_{2};
-	Color8b bg_{0};
-	bool transparent_{false};
-	char padding1{0};
+	Color8b bg_{};
+	bool transparent_{};
+	char padding[1]{};
 	static constexpr SizePx font_wi_{5};
 	static constexpr SizePx font_hi_{6};
 	static constexpr SizePx line_padding_{2}; // ? attribute
@@ -638,7 +559,7 @@ public:
 		return*this;
 	}
 	constexpr auto p_hex(const int hex_number_4b)->PrinterToBitmap&{
-		draw(table_hex_to_font[hex_number_4b&0xf]); // ? error if not 0..15
+		draw(table_hex_to_font[hex_number_4b&0xf]);
 		return*this;
 	}
 	constexpr auto p_hex_8b(unsigned char v)->PrinterToBitmap&{
@@ -698,7 +619,7 @@ public:
 		di_-=font_wi_;
 		return*this;
 	}
-	auto spc()->PrinterToBitmap&{p(' ');return*this;}
+	constexpr auto spc()->PrinterToBitmap&{p(' ');return*this;}
 private:
 	constexpr auto draw_with_bg(unsigned bmp_5x6)->PrinterToBitmap&{ // make inline assembler?
 		constexpr unsigned mask=1u<<31;
@@ -733,33 +654,34 @@ private:
 
 };
 
+// vga mode 13h bitmap at 0xa'0000 (320 x 200 x 8)
 class Vga13h{
-	Bitmap8b b_;
+	Bitmap8b b_{};
 public:
-	Vga13h():b_{Address(0xa'0000),DimensionPx{320,200}}{}
+	inline Vga13h():b_{Address(0xa'0000),DimensionPx{320,200}}{}
 	inline constexpr auto bmp()->Bitmap8b&{return b_;}
 };
 
-// the vga 13h bitmap
 extern Vga13h vga13h;
-Vga13h vga13h; // global initialized by osca_init
+Vga13h vga13h; // initialized by osca_init
 
 class PrinterToVga:public PrinterToBitmap{
 public:
-	constexpr PrinterToVga():PrinterToBitmap{&vga13h.bmp()}{}
+	inline constexpr PrinterToVga():PrinterToBitmap{&vga13h.bmp()}{}
 };
 
 // debugging to vga13h
 extern PrinterToVga out;
-PrinterToVga out; // global initialized by osca_init
+PrinterToVga out; // initialized by osca_init
+
 extern PrinterToVga err;
-PrinterToVga err; // global initialized by osca_init
+PrinterToVga err; // initialized by osca_init
 
 template<typename T>
 class MatrixT{
-	T xx{0},xy{0},xt{0};
-	T yx{0},yy{0},yt{0};
-	T ux{0},uy{0},id{0};
+	T xx{},xy{},xt{};
+	T yx{},yy{},yt{};
+	T ux{},uy{},id{};
 public:
 	auto set_transform(const Scale scale,const AngleRad rotation,const VectorT<T>&translation)->void{
 		T fcos,fsin;
@@ -770,8 +692,8 @@ public:
 		yx=sn;yy= cs;yt=translation.y;
 		ux= 0;uy=  0;id=1;
 	}
-	constexpr auto transform(const VectorT<T>src[],VectorT<T>dst[],const Count n)const->void{
-		for(Count i=0;i<n;i++){
+	constexpr auto transform(const VectorT<T>src[],VectorT<T>dst[],Count n)const->void{
+		while(n--){
 			dst->x=xx*src->x+xy*src->y+xt;
 			dst->y=yx*src->x+yy*src->y+yt;
 			src++;
@@ -779,8 +701,8 @@ public:
 		}
 	}
 	// does the rotation part of the transform
-	constexpr auto rotate(const VectorT<T>src[],VectorT<T>dst[],const Count n)const->void{
-		for(Count i=0;i<n;i++){
+	constexpr auto rotate(const VectorT<T>src[],VectorT<T>dst[],Count n)const->void{
+		while(n--){
 			dst->x=xx*src->x+xy*src->y;
 			dst->y=yx*src->x+yy*src->y;
 			src++;
@@ -793,4 +715,85 @@ public:
 
 using Matrix=MatrixT<Coord>;
 
+//inline auto pz_memcpy(Address to,Address from,SizeBytes n)->void{
+//	// ? optimize movsb a times,movsd b times,movsb c times
+//	asm("mov %0,%%esi;"
+//		"mov %1,%%edi;"
+//		"mov %2,%%ecx;"
+//		"rep movsb;"
+//		:
+//		:"r"(from),"r"(to),"r"(n)
+//		:"%esi","%edi","%ecx","memory" // ? clobbers memory?
+//	);
+//}
+//
+//inline auto pz_memset(Address to,char v,SizeBytes n)->void{
+//	// ? optimize stosb a times,stosd b times,stosb c times
+//	asm("mov %0,%%edi;"
+//		"mov %1,%%al;"
+//		"mov %2,%%ecx;"
+//		"rep stosb;"
+//		:
+//		:"r"(to),"r"(v),"r"(n)
+//		:"%edi","%al","%ecx","memory" // ? clobbers memory?
+//	);
+//}
+
+auto pz_memcpy(Address to,Address from,SizeBytes n)->void{
+	char*d=static_cast<char*>(to);
+	char*s=static_cast<char*>(from);
+	while(n--)
+		*d++=*s++;
+}
+
+auto pz_memset(Address to,char v,SizeBytes n)->void{
+	char*d=static_cast<char*>(to);
+	while(n--)
+		*d++=v;
+}
 } // end namespace osca
+
+// built-in functions replacements (used by clang++ -O0 and -Os)
+extern "C" void*memcpy(void*dest,const void*src,unsigned n);
+extern "C" void*memcpy(void*dest,const void*src,unsigned n){
+	char*d=static_cast<char*>(dest);
+	const char*s=static_cast<const char*>(src);
+	while(n--)
+		*d++=*s++;
+	return dest;
+}
+extern "C" void*memset(void*str,int c,unsigned n);
+extern "C" void*memset(void*str,int c,unsigned n){
+	unsigned char ch=static_cast<unsigned char>(c);
+	unsigned char*d=static_cast<unsigned char*>(str);
+	while(n--)
+		*d++=ch;
+	return str;
+}
+//extern "C" void*memcpy(void*to,void*from,unsigned n);
+//extern "C" void*memcpy(void*to,void*from,unsigned n){
+//	// ? optimize movsb a times,movsd b times,movsb c times
+//	asm("mov %0,%%esi;"
+//		"mov %1,%%edi;"
+//		"mov %2,%%ecx;"
+//		"rep movsb;"
+//		:
+//		:"r"(from),"r"(to),"r"(n)
+//		:"%esi","%edi","%ecx","memory" // ? clobbers memory?
+//	);
+//	return to;
+//}
+//extern "C" void*memset(void*to,unsigned c,unsigned n);
+//extern "C" void*memset(void*to,unsigned c,unsigned n){
+//	unsigned char ch=static_cast<unsigned char>(c);
+//	// ? optimize stosb a times,stosd b times,stosb c times
+//	asm("mov %0,%%edi;"
+//		"mov %1,%%al;"
+//		"mov %2,%%ecx;"
+//		"rep stosb;"
+//		:
+//		:"r"(to),"r"(ch),"r"(n)
+//		:"%edi","%al","%ecx","memory" // ? clobbers memory?
+//	);
+//	return to;
+//}
