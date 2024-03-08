@@ -56,11 +56,6 @@ using TimeSec=Time;
 class World{
 public:
 	constexpr static Size nobjects_max{256}; // maximum number of objects
-private:
-	inline static Object**ls_deleted{}; // list of pointers to deleted objects
-	inline static Object**ls_deleted_pos{}; // next free slot
-	inline static Object**ls_deleted_end{}; // end of list
-public:
 	constexpr static Real sec_per_tick{Real(1)/Real(1024)}; // the 1024 Hz clock
 	inline static TimeSec time{};
 	inline static TimeSec time_dt{};
@@ -71,14 +66,8 @@ public:
 
 	static auto init_statics()->void{
 		fps_time_prv=time_prv=time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits can be problem
-		// initiate the deleted list members
-		ls_deleted=new Object*[nobjects_max];
-		ls_deleted_pos=ls_deleted;
-		ls_deleted_end=ls_deleted+nobjects_max;
 	}
 	static auto tick()->void;
-	static auto deleted_add(Object*o)->void;
-	static auto commit_deleted()->void;
 };
 
 // physics states are kept in their own buffer for better CPU cache utilization at update
@@ -159,7 +148,6 @@ using Scalar=Real;
 constexpr Scale sqrt_of_2=Real(1.414213562);
 
 class Object{
-	friend World;
 	Object**ls_all_pos_{}; // pointer to element in 'all' list containing pointer to this object
 	TypeBits tb_{}; // object type that is usually a bit (32 object types supported)
 	TypeBits tb_col_msk_{}; // bits used to bitwise 'and' with other object's type_bits and if true then collision detection is done
@@ -168,7 +156,7 @@ class Object{
 	Scale scl_{}; // scale that is used in transform from model to world coordinates
 	const ObjectDef&def_; // contains the model definition
 	Point*pts_wld_{}; // transformed model to world points cache
-	Vector*nmls_wld_{}; // normals of boundingunsigned shape rotated to the world coordinates (not normalized if scale!=1)
+	Vector*nmls_wld_{}; // normals of bounding shape rotated to the world coordinates (not normalized if scale!=1)
 	Matrix Mmw_{}; // model to world transform
 	Point Mmw_pos_{}; // current position used in transform matrix
 	AngleRad Mmw_agl_{}; // current angle used in transform matrix
@@ -293,8 +281,9 @@ private:
 			flags_|=1;
 		}
 	}
-
-	inline constexpr auto is_wld_pts_need_update()const->bool{return!(flags_&2);}
+	inline constexpr auto is_wld_pts_need_update()const->bool{
+		return!(flags_&2);
+	}
 	inline constexpr auto set_wld_pts_need_update(const bool b)->void{
 		if(b){ // refresh_wld_pts bit is 0
 			flags_&=Bits8(~2);
@@ -302,7 +291,6 @@ private:
 			flags_|=2;
 		}
 	}
-
 	constexpr auto refresh_wld_points()->void{
 		refresh_Mmw_if_invalid();
 		if(!is_wld_pts_need_update())
@@ -331,21 +319,55 @@ private:
 	inline static Object**ls_all{}; // list of pointers to allocated objects
 	inline static Object**ls_all_pos{}; // next free object slot
 	inline static Object**ls_all_end{}; // end of list of pointers to allocated objects
+	inline static Object**ls_deleted{}; // list of pointers to deleted objects
+	inline static Object**ls_deleted_pos{}; // next free object slot
+	inline static Object**ls_deleted_end{}; // end of list of pointers to deleted objects
+
 public:
 //	static inline auto hasFreeSlot()->bool{return free_ixes_i!=0;}
 	static auto init_statics()->void{
 		ls_all=new Object*[World::nobjects_max];
 		ls_all_pos=ls_all;
 		ls_all_end=ls_all+World::nobjects_max;
+
+		ls_deleted=new Object*[World::nobjects_max];
+		ls_deleted_pos=ls_deleted;
+		ls_deleted_end=ls_deleted+World::nobjects_max;
+	}
+	static auto tick()->void{
+		draw_all(vga13h.bmp());
+		PhysicsState::update_all();
+		update_all();
+		check_collisions();
+		commit_deleted();
 	}
 	static auto allocated_objects_count()->unsigned{
 		return unsigned(ls_all_pos-ls_all);
+	}
+private:
+	static auto deleted_add(Object*o)->void{
+		if(!o->is_alive()) // check if object already deleted
+			return;
+		o->set_is_alive(false);
+		if(ls_deleted_pos==ls_deleted_end){
+			err.p("World::deleted_add:1");
+			osca_hang();
+		}
+		*ls_deleted_pos=o;
+		ls_deleted_pos++;
+	}
+	static auto commit_deleted()->void{
+		for(Object**it=ls_deleted;it<ls_deleted_pos;++it){
+			delete *it;
+			*it=nullptr; // debugging (can be removed)
+		}
+		ls_deleted_pos=ls_deleted;
 	}
 	static auto update_all()->void{
 		for(Object**it=ls_all;it<ls_all_pos;++it){
 			Object*o=*it;
 			if(!o->update()){
-				World::deleted_add(o);
+				deleted_add(o);
 			}
 		}
 	}
@@ -384,20 +406,18 @@ public:
 				if(o1_check_col_with_o2){
 					// o1 type wants to handle collisions with o2 type
 					if(!o1->on_collision(*o2)){
-						World::deleted_add(o1);
+						deleted_add(o1);
 					}
 				}
 				if(o2_check_col_with_o1){
 					// o2 type wants to handle collisions with o1 type
 					if(!o2->on_collision(*o1)){
-						World::deleted_add(o2);
+						deleted_add(o2);
 					}
 				}
 			}
 		}
 	}
-
-private:
 	static auto is_bounding_circles_in_collision(Object&o1,Object&o2)->bool{
 		const Scalar r1=o1.bounding_radius();
 		const Scalar r2=o2.bounding_radius();
@@ -461,26 +481,6 @@ private:
 	}
 };
 
-inline auto World::deleted_add(Object*o)->void{
-	if(!o->is_alive()) // check if object already deleted
-		return;
-	o->set_is_alive(false);
-	if(ls_deleted_pos==ls_deleted_end){
-		err.p("World::deleted_add:1");
-		osca_hang();
-	}
-	*ls_deleted_pos=o;
-	ls_deleted_pos++;
-}
-
-inline auto World::commit_deleted()->void{
-	for(Object**it=ls_deleted;it<ls_deleted_pos;++it){
-		delete *it;
-		*it=nullptr; // debugging (can be removed)
-	}
-	ls_deleted_pos=ls_deleted;
-}
-
 inline auto World::tick()->void{
 	metrics::reset();
 
@@ -499,11 +499,7 @@ inline auto World::tick()->void{
 		fps_time_prv=time;
 	}
 
-	Object::draw_all(vga13h.bmp());
-	PhysicsState::update_all();
-	Object::update_all();
-	Object::check_collisions();
-	World::commit_deleted();
+	Object::tick();
 }
 
 } // end namespace osca
