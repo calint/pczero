@@ -12,19 +12,19 @@ using Register=int;
 using Byte=char;
 
 struct alignas(16) Task{
-	Register eip{0};
-	Register esp{0};
-	Register eflags{0};
-	TaskBits bits{0}; // 1: accepts keyboard focus, 2: is running
-	TaskId id{0};
-	Register edi{0};
-	Register esi{0};
-	Register ebp{0};
-	Register esp_unused{0};
-	Register ebx{0};
-	Register edx{0};
-	Register ecx{0};
-	Register eax{0};
+	Register eip{};
+	Register esp{};
+	Register eflags{};
+	TaskBits bits{}; // 1: accepts keyboard focus, 2: is running
+	TaskId id{};
+	Register edi{};
+	Register esi{};
+	Register ebp{};
+	Register esp_unused{};
+	Register ebx{};
+	Register edx{};
+	Register ecx{};
+	Register eax{};
 	// note. The FSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
 	//       first byte of the structure needed to be aligned on a 16-byte boundary.
 	alignas(16) Byte fpu_state[108]{};
@@ -39,7 +39,7 @@ struct alignas(16) Task{
 // tasks list implemented in kernel.h
 // used from osca.S in '_main', 'osca_yield', 'isr_tmr' and 'isr_fpu'
 extern "C" struct Task osca_tasks[];
-// pointer to end of tasks (last entry + 1)
+// pointer to end of tasks (1 past last entry)
 extern "C" struct Task*osca_tasks_end;
 
 // hangs the system
