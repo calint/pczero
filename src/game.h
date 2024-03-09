@@ -15,10 +15,9 @@ class Ship;
 class Game{
 	inline static const PointPx play_area_top_left{0,50};
 	inline static const DimensionPx play_area_dim{320,100};
-	static auto create_scene()->void;
-	static auto create_scene2()->void;
-	static auto create_scene3()->void;
+
 	static auto create_player()->void;
+	static auto create_scene()->void;
 	static auto create_boss()->void;
 
 	static auto create_circle(const Count segments)->Point*{
@@ -546,7 +545,6 @@ auto Game::create_boss()->void{
 	const SizeBytes clear_copy_num_bytes=vga13h.bmp().dim().width()*100;
 
 	create_player();
-//	create_scene3();
 	create_scene();
 	create_boss();
 
