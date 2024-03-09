@@ -68,10 +68,10 @@ class Heap final{
 	inline static char*mem_end_{}; // end of heap memory (1 past last)
 	inline static Entry*ls_used_{}; // list of used memory entries
 	inline static Entry*ls_used_pos_{}; // next available slot
-	inline static Entry*ls_used_end_{}; // end (1 past) of used entries list
+	inline static Entry*ls_used_end_{}; // end (1 past last) of used entries list
 	inline static Entry*ls_free_{}; // list of freed memory entries
 	inline static Entry*ls_free_pos_{}; // next available slot
-	inline static Entry*ls_free_end_{}; // end (1 past) of free entries list
+	inline static Entry*ls_free_end_{}; // end (1 past last) of free entries list
 	inline static Size nentries_max_{}; // maximum slots
 public:
 	static auto init_statics(const Data&d,const Size nentries_max)->void{
