@@ -64,7 +64,7 @@ class Heap final{
 	};
 
 	inline static Data data_{}; // location and size of heap
-	inline static char*mem_pos_{}; // start of heap memory
+	inline static char*mem_pos_{}; // position in heap to contiguous memory
 	inline static char*mem_end_{}; // end of heap memory (1 past last)
 	inline static Entry*ls_used_{}; // list of used memory entries
 	inline static Entry*ls_used_pos_{}; // next available slot
