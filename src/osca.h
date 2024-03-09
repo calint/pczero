@@ -9,7 +9,7 @@ namespace osca{
 using TaskBits=short;
 using TaskId=short;
 using Register=int;
-using Byte=char;
+using Byte=unsigned char;
 
 struct alignas(16) Task{
 	Register eip{};
