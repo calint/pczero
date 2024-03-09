@@ -61,7 +61,7 @@ inline auto osca_enable_interrupts()->void{asm("sti");}
 // callbacks from osca.S
 //
 
-// called from osca.S before starting tasks
+// called before starting tasks
 extern "C" auto osca_init()->void;
 
 // called from 'isr_kbd'
