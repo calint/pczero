@@ -1,4 +1,5 @@
 #pragma once
+// reviewed: 2024-03-09
 
 //
 // osca kernel
@@ -58,19 +59,19 @@ Task*osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
 
 class Heap final{
 	struct Entry final{
-		void*mem{}; // pointer to memory
+		void*ptr{};
 		unsigned size_bytes{};
 	};
 
 	inline static Data data_{}; // location and size of heap
-	inline static char*mem_{}; // start of heap memory
-	inline static char*mem_end_{}; // end of heap memory (one past last)
-	inline static Entry*entry_used_start_{}; // beginning of list containing used memory info
-	inline static Entry*entry_used_next_{}; // next available slot
-	inline static Entry*entry_used_end_{}; // end (on past) of used entries list
-	inline static Entry*entry_free_start_{}; // beginning of list containing freed memory info
-	inline static Entry*entry_free_next_{}; // next available slot
-	inline static Entry*entry_free_end_{}; // end (one past) of free entries list
+	inline static char*mem_pos_{}; // start of heap memory
+	inline static char*mem_end_{}; // end of heap memory (1 past last)
+	inline static Entry*entry_used_{}; // list of used memory entries
+	inline static Entry*entry_used_pos_{}; // next available slot
+	inline static Entry*entry_used_end_{}; // end (1 past) of used entries list
+	inline static Entry*entry_free_{}; // list of freed memory entries
+	inline static Entry*entry_free_pos_{}; // next available slot
+	inline static Entry*entry_free_end_{}; // end (1 past) of free entries list
 	inline static Size nentries_max_{}; // maximum slots
 public:
 	static auto init_statics(const Data&d,const Size nentries_max)->void{
@@ -78,119 +79,119 @@ public:
 		nentries_max_=nentries_max;
 
 		// place start of free memory
-		mem_=reinterpret_cast<char*>(d.address());
+		mem_pos_=reinterpret_cast<char*>(d.address());
 
 		// place used entries area at top of the heap
-		entry_used_start_=static_cast<Entry*>(d.end())-nentries_max;
-		if(reinterpret_cast<char*>(entry_used_start_)<mem_){
-			err.p("Heap.init_statics:1");
+		entry_used_=static_cast<Entry*>(d.end())-nentries_max;
+		if(reinterpret_cast<char*>(entry_used_)<mem_pos_){
+			err.p("Heap:init_statics:1");
 			osca_hang();
 		}
-		entry_used_next_=entry_used_start_;
-		entry_used_end_=entry_used_start_+nentries_max;
+		entry_used_pos_=entry_used_;
+		entry_used_end_=entry_used_+nentries_max;
 
-		// place free entries area prior to used entries
-		entry_free_start_=entry_used_start_-nentries_max;
-		if(reinterpret_cast<char*>(entry_free_start_)<mem_){
-			err.p("Heap.init_statics:2");
+		// place free entries area before used entries
+		entry_free_=entry_used_-nentries_max;
+		if(reinterpret_cast<char*>(entry_free_)<mem_pos_){
+			err.p("Heap:init_statics:2");
 			osca_hang();
 		}
-		entry_free_next_=entry_free_start_;
-		entry_free_end_=entry_free_start_+nentries_max;
+		entry_free_pos_=entry_free_;
+		entry_free_end_=entry_free_+nentries_max;
 
 		// place end of free heap memory to start of free entries area
-		mem_end_=reinterpret_cast<char*>(entry_free_start_);
+		mem_end_=reinterpret_cast<char*>(entry_free_);
 	}
-	static inline auto data()->const Data&{
-		return data_;
-	}
+	static inline auto data()->const Data&{return data_;	}
 	// called by operator 'new'
 	static auto alloc(const unsigned size_bytes)->void*{
 		// try to find a free slot of that size
 		
-		for(Entry*ent=entry_free_start_;ent<entry_free_next_;ent++){
-			if(ent->size_bytes!=size_bytes)
+		for(Entry*ent=entry_free_;ent<entry_free_pos_;ent++){
+			if(ent->size_bytes!=size_bytes){
 				continue;
+			}
 
 			// found a matching size entry
-			void*ptr=ent->mem;
+			void*ptr=ent->ptr;
 			// move to used entries
-			if(entry_used_next_>=entry_used_end_){
-				err.p("Heap.alloc:1");
+			if(entry_used_pos_>=entry_used_end_){
+				err.p("Heap:alloc:1");
 				osca_hang();
 			}
-			*entry_used_next_=*ent;
-			entry_used_next_++;
-			entry_free_next_--;
-			*ent=*entry_free_next_;
-			pz_memset(entry_free_next_,0x0f,sizeof(Entry)); // debugging (can be removed)
+			*entry_used_pos_=*ent;
+			entry_used_pos_++;
+			entry_free_pos_--;
+			*ent=*entry_free_pos_;
+			pz_memset(entry_free_pos_,0x0f,sizeof(Entry)); // debugging (can be removed)
 			return ptr;
 		}
 		// did not find in free list, create new
-		char*ptr=mem_;
-		mem_+=size_bytes;
-		if(mem_>mem_end_){
-			err.p("Heap.alloc:2");
+		char*ptr=mem_pos_;
+		mem_pos_+=size_bytes;
+		if(mem_pos_>mem_end_){
+			err.p("Heap:alloc:2");
 			osca_hang();
 		}
-		if(entry_used_next_>=entry_used_end_){
-			err.p("Heap.alloc:3");
+		if(entry_used_pos_>=entry_used_end_){
+			err.p("Heap:alloc:3");
 			osca_hang();
 		}
 		// write to used list
-		*entry_used_next_={ptr,size_bytes};
-		entry_used_next_++;
+		*entry_used_pos_={ptr,size_bytes};
+		entry_used_pos_++;
 		return ptr;
 	}
 	// called by operator 'delete'
 	static auto free(void*ptr)->void{
 		// find the allocated memory in the used list
 		
-		for(Entry*ent=entry_used_start_;ent<entry_used_next_;ent++){
-			if(ent->mem!=ptr)
+		for(Entry*ent=entry_used_;ent<entry_used_pos_;ent++){
+			if(ent->ptr!=ptr){
 				continue;
+			}
 
 			// found the allocation entry
 			// copy entry from used to free
-			if(entry_free_next_>=entry_free_end_){
-				err.p("Heap.free:1");
+			if(entry_free_pos_>=entry_free_end_){
+				err.p("Heap:free:1");
 				osca_hang();
 			}
-			*entry_free_next_=*ent;
-			entry_free_next_++;
+			*entry_free_pos_=*ent;
+			entry_free_pos_++;
 
 			// copy last entry from used list to this entry
-			entry_used_next_--;
+			entry_used_pos_--;
 			const unsigned size=ent->size_bytes;
-			*ent=*entry_used_next_;
+			*ent=*entry_used_pos_;
 
 			// debugging (can be removed)
 			pz_memset(ptr,0x0f,SizeBytes(size));
-			pz_memset(entry_used_next_,0x0f,sizeof(Entry));
+			pz_memset(entry_used_pos_,0x0f,sizeof(Entry));
 			return;
 		}
 		// did not find the allocated memory. probably a double delete
-		err.p("Heap.free:2");
+		err.p("Heap:free:2");
 		osca_hang();
 	}
 	static auto clear(const Byte b=0)->void{data_.clear(b);}
 	static auto clear_heap_entries(const Byte free_area=0,const Byte used_area=0)->void{
 		const SizeBytes es=SizeBytes(sizeof(Entry));
-		pz_memset(entry_free_start_,free_area,nentries_max_*es);
-		pz_memset(entry_used_start_,used_area,nentries_max_*es);
+		pz_memset(entry_free_,free_area,nentries_max_*es);
+		pz_memset(entry_used_,used_area,nentries_max_*es);
 	}
 };
 
 class Keyboard{
-	Byte buf[2<<4]{}; // minimum size 2 and a power of 2, max size 256
+	Byte buf[2<<3]{}; // minimum size 2 and a power of 2, max size 256
 	Byte s{}; // next event index
 	Byte e{}; // last event index +1 & roll
 public:
-	// called by osca_keyb_ev
-	constexpr auto on_key(Byte ch)->void{
-		const Byte ne=(e+1)&(sizeof(buf)-1);// next "end" index
+	// called by 'osca_keyb_ev'
+	constexpr auto on_key(const Byte ch)->void{
+		const Byte ne=(e+1)&(sizeof(buf)-1); // next end index
 		if(ne==s){ // check overrun
-			return; // write would overwrite. display on status line?
+			return; // write would overwrite unhandled key. display on status line?
 		}
 		buf[e]=ch;
 		e=ne;
@@ -208,11 +209,11 @@ public:
 };
 
 extern Keyboard keyboard;
-Keyboard keyboard; // global initialized by osca_init
+Keyboard keyboard; // global initialized by 'osca_init'
 
 inline static bool keyboard_ctrl_pressed{};
-inline static Task*task_focused{};
-inline static TaskId task_focused_id{};
+inline Task*task_focused{};
+inline TaskId task_focused_id{};
 
 // declared in linker script 'link.ld' after code and data at first 64KB boundary
 // address of symbol marks start of contiguous memory
@@ -282,7 +283,7 @@ extern "C" auto osca_keyb_ev()->void{
 
 		// if F1 through F12 pressed toggle running state of task
 		if(osca_key>=0x3b && osca_key<=0x3b+12){
-			const Byte tsk=osca_key-static_cast<Byte>(0x3b);
+			const Byte tsk=osca_key-0x3b;
 			if(sizeof(osca_tasks)/sizeof(Task)>tsk){
 				osca_tasks[tsk].set_running(!osca_tasks[tsk].is_running());
 			}

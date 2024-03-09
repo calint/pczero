@@ -39,6 +39,7 @@ CW=-Werror # warnings are errors
 CW+=-Weverything
 CW+=-Wno-c++98-compat # ignore c++98 compatability issues
 CW+=-Wno-c++98-c++11-compat-binary-literal # allow 0xb..... literals
+CW+=-Wno-c++11-narrowing
 CW+=-Wno-global-constructors # global constructors ok here
 CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
 CW+=-Wno-weak-vtables # allow for source in include files

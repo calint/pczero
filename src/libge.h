@@ -1,4 +1,5 @@
 #pragma once
+// reviewed: 2024-03-09
 
 //
 // osca game engine library
@@ -8,11 +9,11 @@ namespace osca{
 
 class ObjectDef final{
 public:
-	PointIx npts{}; // number of points in pts // ? implement span
-	PointIx nbnd{}; // number of indexes in bnd // ? implement span
+	PointIx npts{}; // number of points in 'pts'
+	PointIx nbnd{}; // number of indexes in 'bnd'
 	Point*pts{}; // list of points used for rendering and bounding shape
 	PointIx*bnd{}; // list of indexes in pts that defines the bounding shape as a convex polygon CCW
-	Vector*nmls{}; // list of normals to the lines defined by bnd (calculated by init_normals())
+	Vector*nmls{}; // list of normals to the lines defined by 'bnd' (calculated by 'init_normals()')
 	
 	// destructor cannot happen because object life time is program lifetime
 	// void operator delete(void*)=delete;
@@ -48,7 +49,7 @@ namespace metrics{
 
 class Object;
 
-// maximum number of objects
+// maximum number of objects (note: also used in kernel.h when initiating heap)
 constexpr Size nobjects_max{256};
 
 using Velocity=Vector;
@@ -57,13 +58,13 @@ using AngularVelocityRad=AngleRad;
 using Time=Real;
 using TimeSec=Time;
 
-// physics states are kept in their own buffer for better CPU cache utilization at update
+// physics states are kept in their own buffer for better cpu cache utilization at update
 class PhysicsState final{
 public:
 	Point pos{}; // position
 	Velocity vel{}; // velocity per second
 	Acceleration acc{}; // acceleration per second
-	AngleRad agl{}; // angle
+	AngleRad agl{}; // angle in radians
 	AngularVelocityRad dagl{}; // angular velocity per second
 	Object*obj{}; // pointer to the object that owns this physics state
 	              // note: circular reference
@@ -96,11 +97,11 @@ public:
 		ls_all_pos++;
 		return ptr;
 	}
-	// returns reference to object that has a new address for physics state
-	// this function works with ~Object() to relocate physics state
-	static auto free(PhysicsState*phy)->Object&{
+	// returns reference to the object that has a new address for physics state
+	// this function works with '~Object()' to relocate physics state
+	static auto free(PhysicsState*phy)->Object*{
 		ls_all_pos--;
-		Object&o=*(ls_all_pos->obj);
+		Object*o=ls_all_pos->obj;
 		*phy=*ls_all_pos;
 		pz_memset(ls_all_pos,0x0f,sizeof(PhysicsState)); // debugging (can be removed)
 		return o;
@@ -112,7 +113,7 @@ public:
 	}
 	static auto clear(unsigned char b=0)->void{
 		const Address from=Address(ls_all);
-		const SizeBytes n=SizeBytes(ls_all_end)-SizeBytes(ls_all); // ? may break if pointer is bigger than 2G
+		const SizeBytes n=SizeBytes(ls_all_end)-SizeBytes(ls_all);
 		pz_memset(from,b,n);
 	}
 };
@@ -125,8 +126,8 @@ namespace enable{
 	constexpr static bool draw_bounding_circle{true};
 }
 
-using TypeBits=unsigned; // used by Object to declare 'type' as a bit and interests in collision with other types
-using Bits8=unsigned char;
+using TypeBits=unsigned; // used by 'Object' to declare 'type' as a bit and interests in collision with other types
+using Flags8b=Byte;
 using Scalar=Real;
 
 constexpr Scale sqrt_of_2=Real(1.414213562);
@@ -134,21 +135,21 @@ constexpr Scale sqrt_of_2=Real(1.414213562);
 class Object{
 	Object**ls_all_pos_{}; // pointer to element in 'all' list containing pointer to this object
 	TypeBits tb_{}; // object type that is usually a bit (32 object types supported)
-	TypeBits tb_col_msk_{}; // bits used to bitwise 'and' with other object's type_bits and if true then collision detection is done
-	PhysicsState*phy_{}; // kept in own buffer of states for better CPU cache utilization at update
-	                     // may change between frames (when objects are deleted)
-	Scale scl_{}; // scale that is used in transform from model to world coordinates
+	TypeBits tb_col_msk_{}; // bits used to bitwise 'and' with other object's 'tb_' and if true then collision detection is done
+	PhysicsState*phy_{}; // kept in own buffer of states for better cpu cache utilization at update
+	                     // may change between frames (when objects are deleted and 'phy_' relocated)
+	Scale scl_{}; // scale that is used in model to world transform
 	const ObjectDef&def_; // contains the model definition
 	Point*pts_wld_{}; // transformed model to world points cache
 	Vector*nmls_wld_{}; // normals of bounding shape rotated to the world coordinates (not normalized if scale!=1)
 	Matrix Mmw_{}; // model to world transform
-	Point Mmw_pos_{}; // current position used in transform matrix
-	AngleRad Mmw_agl_{}; // current angle used in transform matrix
-	Scale Mmw_scl_{};  // current scale used in transform matrix
+	Point Mmw_pos_{}; // position used in 'Mmw_'
+	AngleRad Mmw_agl_{}; // angle used in 'Mmw_'
+	Scale Mmw_scl_{};  // scale used in 'Mmw_'
 	Scalar br_{}; // bounding radius scl_*sqrt(2)
 	Color8b color_{}; // shape color
-	Bits8 flags_{}; // bit 1: is not alive
-	                // bit 2: pts_wls_ don't need update
+	Flags8b flags_{}; // bit 1: is not alive
+	                  // bit 2: 'pts_wld_' don't need update
 	Byte padding[2]{};
 public:
 	Object(
@@ -158,7 +159,7 @@ public:
 		const Scale scl,
 		const Scalar bounding_radius,
 		const Point&pos,
-		const AngleRad rad,
+		const AngleRad agl,
 		const Color8b color
 	):
 		tb_{tb},
@@ -175,10 +176,10 @@ public:
 		// initiate physics state
 		*phy_=PhysicsState{};
 		phy_->pos=pos;
-		phy_->agl=rad;
+		phy_->agl=agl;
 		phy_->obj=this;
 
-		// allocate index in all[] from free slots
+		// allocate index in 'all[]' from free slots
 		if(ls_all_pos==ls_all_end){
 			err.p("Object:e1");
 			osca_hang();
@@ -188,12 +189,12 @@ public:
 		ls_all_pos_=ls_all_pos;
 		ls_all_pos++;
 	}
-	// called only by 'World' at 'commit_deleted()'
+	// called only in 'commit_deleted()'
 	virtual~Object(){
 		// free returns a pointer to the object that has had it's
 		// physics state moved to the newly freed physics location.
-		// set the pointer of that object's phy to the freed one
-		PhysicsState::free(this->phy_).phy_=phy_;
+		// set the pointer of that object's 'phy_' to the new location
+		PhysicsState::free(this->phy_)->phy_=phy_;
 
 		// move the last object pointer in list to the slot this object had
 		ls_all_pos--;
@@ -202,7 +203,7 @@ public:
 		// adjust pointer to the freed slot in 'all' list
 		(*ls_all_pos_)->ls_all_pos_=ls_all_pos_;
 
-		// delete cached points
+		// delete cache
 		delete[]pts_wld_;
 		if(nmls_wld_){
 			delete[]nmls_wld_;
@@ -210,10 +211,10 @@ public:
 	}
 
 	constexpr Object()=delete;
-	constexpr Object(const Object&)=delete; // copy constructor
-	constexpr Object&operator=(const Object&)=delete; // copy assignment
-	constexpr Object(Object&&)=delete; // move constructor
-	constexpr Object&operator=(Object&&)=delete; // move assignment
+	constexpr Object(const Object&)=delete;
+	constexpr Object&operator=(const Object&)=delete;
+	constexpr Object(Object&&)=delete;
+	constexpr Object&operator=(Object&&)=delete;
 
 	inline constexpr auto type_bits()const->TypeBits{return tb_;}
 	inline constexpr auto type_bits_collision_mask()const->TypeBits{return tb_col_msk_;}
@@ -226,14 +227,15 @@ public:
 	inline constexpr auto bounding_radius()const->Scalar{return br_;}
 	inline auto forward_vector()->Vector{
 		refresh_Mmw_if_invalid();
-		return Mmw_.axis_y().negate().normalize(); // ? not negated (if positive y is up)
+		return Mmw_.axis_y().negate().normalize(); // not negated if positive y is up
 	}
 	
-	// returns false if object is to be deleted
+	// returns false if object died
 	virtual auto update()->bool{return true;}
 	
 	virtual auto draw(Bitmap8b&dsp)->void{
 		refresh_wld_points();
+
 		if(enable::draw_dots){
 			const Point*pt=pts_wld_;
 			for(PointIx i=0;i<def_.npts;i++){
@@ -246,6 +248,10 @@ public:
 			dsp.draw_polygon(pts_wld_,def_.nbnd,def_.bnd,color_);
 		}
 
+		if(enable::draw_bounding_circle){
+			dsp.draw_bounding_circle(phy_const().pos,bounding_radius());
+		}
+
 		if(enable::draw_normals){
 			if(nmls_wld_){ // check if there are any normals defined
 				const Point*nml=nmls_wld_;
@@ -253,27 +259,22 @@ public:
 					Vector v=*nml;
 					v.normalize().scale(3);
 					Point p=pts_wld_[def_.bnd[i]];
-					Vector v1{p.x+nml->x,p.y+nml->y};
+					Vector v1{p+v};
 					dsp.draw_dot(v1,0xf); // white dot
 					nml++;
 				}
 			}
 		}
-
-		if(enable::draw_bounding_circle){
-			dsp.draw_bounding_circle(phy_const().pos,bounding_radius());
-		}
 	}
 
-	// returns false if object is to be deleted
+	// returns false if object has died
 	virtual auto on_collision(Object&other)->bool{return true;}
 
 private:
-	// set to false by 'World' add 'deleted_add' and used to avoid deleting
-	// same object more than once
+	// set to false at 'add_deleted'
 	inline constexpr auto set_is_alive(const bool b)->void{
 		if(b){ // alive bit is 0
-			flags_&=Bits8(~1);
+			flags_&=Flags8b(~1);
 		}else{ // not alive bit is 1
 			flags_|=1;
 		}
@@ -282,9 +283,9 @@ private:
 		return!(flags_&2);
 	}
 	inline constexpr auto set_wld_pts_need_update(const bool b)->void{
-		if(b){ // refresh_wld_pts bit is 0
-			flags_&=Bits8(~2);
-		}else{ // refresh_wld_pts bit is 1
+		if(b){
+			flags_&=Flags8b(~2);
+		}else{
 			flags_|=2;
 		}
 	}
@@ -314,6 +315,7 @@ private:
 		}
 
 		set_wld_pts_need_update(true);
+
 		Mmw_.set_transform(scl_,phy().agl,phy().pos);
 		Mmw_scl_=scl_;
 		Mmw_agl_=phy().agl;
@@ -323,14 +325,14 @@ private:
 	//----------------------------------------------------------------
 	//-- statics
 	//----------------------------------------------------------------
-	constexpr static Real sec_per_tick{Real(1)/Real(1024)}; // the 1024 Hz clock
+	constexpr static Real sec_per_tick{Real(1)/Real(1024)}; //? the 1024 Hz clock used by osca.S
 
 	inline static Object**ls_all{}; // list of pointers to allocated objects
-	inline static Object**ls_all_pos{}; // next free object slot
-	inline static Object**ls_all_end{}; // end of list of pointers to allocated objects
+	inline static Object**ls_all_pos{}; // next free slot
+	inline static Object**ls_all_end{}; // end of list (1 past last)
 	inline static Object**ls_deleted{}; // list of pointers to deleted objects
-	inline static Object**ls_deleted_pos{}; // next free object slot
-	inline static Object**ls_deleted_end{}; // end of list of pointers to deleted objects
+	inline static Object**ls_deleted_pos{}; // next free slot
+	inline static Object**ls_deleted_end{}; // end of list (1 past last)
 
 	inline static TimeSec time_prv{};
 	inline static Count fps_frame_counter{};
@@ -359,14 +361,14 @@ public:
 		time_prv=time;
 		time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits is a problem. fix
 		dt=time-time_prv;
-		if(dt<0){ // ? is that once every 2 billionth tick?
+		if(dt<0){ // ? once every 2 billionth tick?
 			dt=0;
 		}
 
 		// fps calculations
 		fps_frame_counter++;
 		const TimeSec fps_dt=time-fps_time_prv;
-		if(fps_dt>1){
+		if(fps_dt>1){ // recalculate fps every second
 			fps=Count(TimeSec(fps_frame_counter)/fps_dt);
 			fps_frame_counter=0;
 			fps_time_prv=time;
@@ -383,15 +385,15 @@ public:
 		return unsigned(ls_all_pos-ls_all);
 	}
 private:
-	static auto deleted_add(Object*obj)->void{
+	static auto add_deleted(Object*obj)->void{
 		if(!obj->is_alive()){ // debugging (can be removed)
-			err.p("double free");
+			err.p("Object::add_deleted:1");
 			osca_hang();
 		}
 
 		obj->set_is_alive(false);
 		if(ls_deleted_pos==ls_deleted_end){
-			err.p("World::deleted_add:1");
+			err.p("Object::add_deleted:2");
 			osca_hang();
 		}
 		*ls_deleted_pos=obj;
@@ -408,7 +410,7 @@ private:
 		for(Object**it=ls_all;it<ls_all_pos;++it){
 			Object*o=*it;
 			if(!o->update()){
-				deleted_add(o);
+				add_deleted(o);
 			}
 		}
 	}
@@ -456,13 +458,13 @@ private:
 				if(o1_check_col_with_o2){
 					// o1 type wants to handle collisions with o2 type
 					if(!o1->on_collision(*o2)){
-						deleted_add(o1);
+						add_deleted(o1);
 					}
 				}
 				if(o2_check_col_with_o1){
 					// o2 type wants to handle collisions with o1 type
 					if(!o2->on_collision(*o1)){
-						deleted_add(o2);
+						add_deleted(o2);
 					}
 				}
 			}
@@ -472,22 +474,20 @@ private:
 		const Scalar r1=o1.bounding_radius();
 		const Scalar r2=o2.bounding_radius();
 		
-		const Point p1=o1.phy().pos;
-		const Point p2=o2.phy().pos;
+		const Point p1=o1.phy_const().pos;
+		const Point p2=o2.phy_const().pos;
 
 		// check if: sqrt(dx*dx+dy*dy)<=r1+r2
 		//                dx*dx+dy*dy <=(r1+r2)²
 		const Real dist_check=r1+r2;
 		const Real dist2_check=dist_check*dist_check; // (r1+r2)²
-		Vector v{p2-p1}; // dx,dy
-		v.x*=v.x;
-		v.y*=v.y;
-		const Real dist2=v.x+v.y;
+		const Vector v=p2-p1; // dx,dy
+		const Real dist2=v.dot(v);
 		return dist2<=dist2_check;
 	}
 	// checks if any o1 bounding points are in o2 bounding shape
 	static auto is_in_collision(const Object&o1,const Object&o2)->bool{
-		// for each point in o1 check if behind every normal of o2
+		// for each point in 'o1' check if behind every normal of 'o2'
 		// if behind every normal then within the convex bounding shape thus collision
 
 		// if o2 has no bounding shape (at least 3 points) return false
@@ -495,8 +495,8 @@ private:
 			return false;
 		}
 
-		// for each point in o1 bounding shape
-		const PointIx*bndptr=o1.def_.bnd; // bounding point index of o1
+		// for each point in 'o1' bounding shape
+		const PointIx*bndptr=o1.def_.bnd; // bounding points indexes of 'o1'
 		PointIx nbnd=o1.def_.nbnd;
 		while(nbnd--){
 			const Point&p1=o1.pts_wld_[*bndptr];
@@ -508,10 +508,10 @@ private:
 		return false;
 	}
 	inline static auto is_point_in_bounding_shape(const Point&p0,const Object&o)->bool{
-		const PointIx nbnd{o.def_.nbnd};
-		const PointIx*bnd_ix_ptr{o.def_.bnd}; // bounding point index
-		const Vector*nml_ptr{o.nmls_wld_}; // normals
-		for(PointIx j=0;j<nbnd;j++){
+		const PointIx*bnd_ix_ptr=o.def_.bnd; // bounding points indexes
+		const Vector*nml_ptr=o.nmls_wld_; // normals
+		PointIx nbnd=o.def_.nbnd;
+		while(nbnd--){
 			const Vector&p{o.pts_wld_[*bnd_ix_ptr]};
 			bnd_ix_ptr++;
 
@@ -519,8 +519,8 @@ private:
 				vga13h.bmp().draw_dot(p,5);
 			}
 
-			const Vector v{p0-p}; // vector from point on line to point to check
-			if(v.dot(*nml_ptr)>0){ // use abs(v)<0.0001f (example)?
+			const Vector v=p0-p; // vector from point on line to point to check
+			if(v.dot(*nml_ptr)>0){
 				// p is 'in front' of line, cannot be collision
 				return false;
 			}

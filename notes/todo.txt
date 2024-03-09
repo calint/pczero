@@ -1,4 +1,8 @@
 [ ] libge.h: Object: allow change of ObjectDef
+[ ] lib.h: Data::address_offset: check if within bounds?
+[ ] lib.h: Data::to: check if within bounds?
+[ ] lib.h: Bitmap::address_offset: check if within bounds?
+[ ] lib.h: Bitmap::address_offset: (...)*sizeof(T) can overflow?
 [ ] improved Heap that does not fragment (o1store?)
 [ ] move the heap and stack memory of the vga buffer for better performance 
 [ ] osca.S: read more sectors

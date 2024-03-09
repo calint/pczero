@@ -1,4 +1,5 @@
 #pragma once
+// reviewed: 2024-03-09
 
 //
 // osca library
@@ -209,16 +210,16 @@ public:
 		*static_cast<T*>(address_offset({x,y}))=value;
 	}
 	constexpr auto draw_bounding_circle(const Point&pos,const Scale radius)->void{
-		const Count segments=Count(5*radius); // ? magic number
+		Count segments=Count(5*radius); // ? magic number
 		AngleRad th=0;
 		AngleRad dth=2*PI/AngleRad(segments);
-		for(Count i=0;i<segments;i++){
+		while(segments--){
 			Real fsin=0;
 			Real fcos=0;
 			sin_and_cos(th,fsin,fcos);
 			const Coord x=pos.x+radius*fcos;
 			const Coord y=pos.y+radius*fsin;
-			draw_dot({x,y},1);
+			draw_dot({x,y},1); // blue dot
 			th+=dth;
 		}
 	}
@@ -520,9 +521,9 @@ static constexpr unsigned table_ascii_to_font[]{
 using CoordsChar=VectorT<short>;
 
 class PrinterToBitmap{
-	Color8b*di_{}; // current pixel in bitmap
-	Color8b*dil_{}; // beginning of current line
 	Bitmap8b*bmp_{}; // destination bitmap
+	Color8b*di_{}; // current pixel in bitmap
+	Color8b*dil_{}; // beginning of current line in bitmap
 	SizePx bmp_wi_{}; // bitmap width
 	SizePx ln_{}; // offset from font line to next line
 	Color8b fg_{2}; // foreground
@@ -534,11 +535,11 @@ class PrinterToBitmap{
 	static constexpr SizePx line_padding_{2}; // ? attribute
 public:
 	constexpr explicit PrinterToBitmap(Bitmap8b*bmp):
+		bmp_{bmp},
 		di_{static_cast<Color8b*>(bmp->data().address())},
 		dil_{di_},
-		bmp_{bmp},
 		bmp_wi_{bmp->dim().width()},
-		ln_{SizePx(bmp_wi_-font_wi_)}
+		ln_{bmp_wi_-font_wi_}
 	{}
 	constexpr auto pos(const CoordsChar p)->PrinterToBitmap&{
 		di_=static_cast<Color8b*>(bmp_->data().address());
@@ -572,10 +573,10 @@ public:
 	}
 	constexpr auto p_hex_16b(unsigned short v)->PrinterToBitmap&{
 		// ? ugly code. remake
-		const int ch1=v&0xf;v>>=4;
-		const int ch2=v&0xf;v>>=4;
-		const int ch3=v&0xf;v>>=4;
-		const int ch4=v&0xf;
+		const int ch1= v     &0xf;
+		const int ch2=(v>> 4)&0xf;
+		const int ch3=(v>> 8)&0xf;
+		const int ch4=(v>>12)&0xf;
 		p_hex(ch4);
 		p_hex(ch3);
 		p_hex(ch2);
@@ -584,14 +585,14 @@ public:
 	}
 	constexpr auto p_hex_32b(unsigned v)->PrinterToBitmap&{
 		// ? ugly code. remake
-		const int ch1=v&0xf;v>>=4;
-		const int ch2=v&0xf;v>>=4;
-		const int ch3=v&0xf;v>>=4;
-		const int ch4=v&0xf;v>>=4;
-		const int ch5=v&0xf;v>>=4;
-		const int ch6=v&0xf;v>>=4;
-		const int ch7=v&0xf;v>>=4;
-		const int ch8=v&0xf;
+		const int ch1= v     &0xf;
+		const int ch2=(v>> 4)&0xf;
+		const int ch3=(v>> 8)&0xf;
+		const int ch4=(v>>12)&0xf;
+		const int ch5=(v>>16)&0xf;
+		const int ch6=(v>>20)&0xf;
+		const int ch7=(v>>24)&0xf;
+		const int ch8=(v>>28)&0xf;
 		p_hex(ch8);
 		p_hex(ch7);
 		p_hex(ch6);
@@ -607,10 +608,10 @@ public:
 		draw(table_ascii_to_font[unsigned(ch)]);
 		return*this;
 	}
-	constexpr auto p(const char*cstr)->PrinterToBitmap&{
-		while(*cstr){
-			p(*cstr);
-			cstr++;
+	constexpr auto p(const char*czstr)->PrinterToBitmap&{
+		while(*czstr){
+			p(*czstr);
+			czstr++;
 		}
 		return*this;
 	}
@@ -622,7 +623,7 @@ public:
 	}
 	constexpr auto spc()->PrinterToBitmap&{p(' ');return*this;}
 private:
-	constexpr auto draw_with_bg(unsigned bmp_5x6)->PrinterToBitmap&{ // make inline assembler?
+	constexpr auto draw_with_bg(unsigned bmp_5x6)->PrinterToBitmap&{
 		constexpr unsigned mask=1u<<31;
 		for(SizePx y=0;y<font_hi_;y++){
 			for(SizePx x=0;x<font_wi_;x++){
@@ -636,7 +637,7 @@ private:
 		di_=di_-bmp_wi_*font_hi_+font_wi_;
 		return*this;
 	}
-	constexpr auto draw_transparent(unsigned bmp_5x6)->PrinterToBitmap&{ // make inline assembler?
+	constexpr auto draw_transparent(unsigned bmp_5x6)->PrinterToBitmap&{
 		constexpr unsigned mask=1u<<31;
 		for(SizePx y=0;y<font_hi_;y++){
 			for(SizePx x=0;x<font_wi_;x++){
@@ -671,11 +672,11 @@ public:
 	inline constexpr PrinterToVga():PrinterToBitmap{&vga13h.bmp()}{}
 };
 
-// debug prtint to vga13h
+// print debug to vga13h
 extern PrinterToVga out;
 PrinterToVga out; // initialized by 'osca_init'
 
-// error print to vga13h
+// print error to vga13h
 extern PrinterToVga err;
 PrinterToVga err; // initialized by 'osca_init'
 

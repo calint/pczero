@@ -58,6 +58,7 @@ class Game{
 		const Vector yaxis=R.axis_y().normalize().scale(7);
 		dsp.draw_dot({yaxis.x+160,yaxis.y+100},2);
 	}
+
 public:
 	inline static ObjectDef enemy_def{};
 	inline static ObjectDef ship_def{};
@@ -73,19 +74,10 @@ public:
 	inline static Vector boss_vel{10,0};
 
 	static auto is_in_play_area(const Point&p)->bool{
-		if(p.x>=Coord(play_area_top_left.x+play_area_dim.width())){
-			return false;
-		}
-		if(p.x<Coord(play_area_top_left.x)){
-			return false;
-		}
-		if(p.y>=Coord(play_area_top_left.y+play_area_dim.height())){
-			return false;
-		}
-		if(p.y<Coord(play_area_top_left.y)){
-			return false;
-		}
-		return true;
+		return!(p.x>=Coord(play_area_top_left.x+play_area_dim.width()) || 
+		        p.x<Coord(play_area_top_left.x) || 
+		        p.y>=Coord(play_area_top_left.y+play_area_dim.height())||
+		        p.y<Coord(play_area_top_left.y));
 	}
 
 	static auto draw_dot(const Point&p,const Color8b color)->void{
@@ -114,8 +106,10 @@ public:
 		const Real xmin=Real(Game::play_area_top_left.x);
 		const Real ymax=Real(Game::play_area_top_left.y+Game::play_area_dim.height());
 		const Real ymin=Real(Game::play_area_top_left.y);
-		return !(phy.pos.x>=xmax-bounding_radius || phy.pos.x<=xmin+bounding_radius ||
-	             phy.pos.y>=ymax-bounding_radius || phy.pos.y<=ymin+bounding_radius);
+		return !(phy.pos.x>=xmax-bounding_radius ||
+		         phy.pos.x<=xmin+bounding_radius ||
+	             phy.pos.y>=ymax-bounding_radius ||
+				 phy.pos.y<=ymin+bounding_radius);
 	}
 
 	[[noreturn]] static auto run()->void;
