@@ -41,7 +41,7 @@ extern "C" auto osca_exception()->void{
 	osca_hang();
 }
 
-// note. The FSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
+// note: The FSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
 //       first byte of the field needed to be aligned on a 16-byte boundary.
 alignas(16) struct Task osca_tasks[]{
 	//                                       :-> 0b01 grabs keyboard focus, 0b10 active
@@ -173,8 +173,8 @@ public:
 		err.p("Heap.free:2");
 		osca_hang();
 	}
-	static auto clear(const unsigned char b=0)->void{data_.clear(b);}
-	static auto clear_heap_entries(unsigned char free_area=0,unsigned char used_area=0)->void{
+	static auto clear(const Byte b=0)->void{data_.clear(b);}
+	static auto clear_heap_entries(const Byte free_area=0,const Byte used_area=0)->void{
 		const SizeBytes es=SizeBytes(sizeof(Entry));
 		pz_memset(entry_free_start_,free_area,nentries_max_*es);
 		pz_memset(entry_used_start_,used_area,nentries_max_*es);
@@ -182,25 +182,27 @@ public:
 };
 
 class Keyboard{
-	unsigned char buf[2<<4]{}; // minimum size 2 and a power of 2, max size 256
-	unsigned char s{}; // next event index
-	unsigned char e{}; // last event index +1 & roll
+	Byte buf[2<<4]{}; // minimum size 2 and a power of 2, max size 256
+	Byte s{}; // next event index
+	Byte e{}; // last event index +1 & roll
 public:
 	// called by osca_keyb_ev
-	constexpr auto on_key(unsigned char ch)->void{
-		const unsigned char ne=(e+1)&(sizeof(buf)-1);// next "end" index
-		if(ne==s)// check overrun
-			return;// write would overwrite. display on status line?
+	constexpr auto on_key(Byte ch)->void{
+		const Byte ne=(e+1)&(sizeof(buf)-1);// next "end" index
+		if(ne==s){ // check overrun
+			return; // write would overwrite. display on status line?
+		}
 		buf[e]=ch;
 		e=ne;
 	}
 	// returns keyboard scan code or 0 if no more events.
-	constexpr auto get_next_scan_code()->unsigned char{
-		if(s==e)
+	constexpr auto get_next_scan_code()->Byte{
+		if(s==e){
 			return 0; // no more events
-		const unsigned char ch=buf[s];
+		}
+		const Byte ch=buf[s];
 		s++;
-		s&=sizeof(buf)-1;// roll
+		s&=sizeof(buf)-1; // roll
 		return ch;
 	}
 };
@@ -254,7 +256,7 @@ extern "C" auto osca_init()->void{
 extern "C" auto osca_keyb_ev()->void{
 	using namespace osca;
 	// on screen
-	*reinterpret_cast<unsigned char*>(0xa0000+4)=osca_key;
+	*reinterpret_cast<Byte*>(0xa0000+4)=osca_key;
 
 	if(osca_key==0x1d)keyboard_ctrl_pressed=true;
 	else if(osca_key==0x9d)keyboard_ctrl_pressed=false;
@@ -280,7 +282,7 @@ extern "C" auto osca_keyb_ev()->void{
 
 		// if F1 through F12 pressed toggle running state of task
 		if(osca_key>=0x3b && osca_key<=0x3b+12){
-			const unsigned char tsk=osca_key-static_cast<unsigned char>(0x3b);
+			const Byte tsk=osca_key-static_cast<Byte>(0x3b);
 			if(sizeof(osca_tasks)/sizeof(Task)>tsk){
 				osca_tasks[tsk].set_running(!osca_tasks[tsk].is_running());
 			}

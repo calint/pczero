@@ -66,7 +66,7 @@ public:
 	AngleRad agl{}; // angle
 	AngularVelocityRad dagl{}; // angular velocity per second
 	Object*obj{}; // pointer to the object that owns this physics state
-	              // note. circular reference
+	              // note: circular reference
 	inline auto update(const TimeSec dt)->void{
 		vel.inc_by(acc,dt);
 		pos.inc_by(vel,dt);
@@ -136,7 +136,7 @@ class Object{
 	TypeBits tb_{}; // object type that is usually a bit (32 object types supported)
 	TypeBits tb_col_msk_{}; // bits used to bitwise 'and' with other object's type_bits and if true then collision detection is done
 	PhysicsState*phy_{}; // kept in own buffer of states for better CPU cache utilization at update
-	                   // may change between frames (when objects are deleted)
+	                     // may change between frames (when objects are deleted)
 	Scale scl_{}; // scale that is used in transform from model to world coordinates
 	const ObjectDef&def_; // contains the model definition
 	Point*pts_wld_{}; // transformed model to world points cache
@@ -148,12 +148,21 @@ class Object{
 	Scalar br_{}; // bounding radius scl_*sqrt(2)
 	Color8b color_{}; // shape color
 	Bits8 flags_{}; // bit 1: is not alive
-	               // bit 2: pts_wls_ don't need update
+	                // bit 2: pts_wls_ don't need update
 	Byte padding[2]{};
 public:
-	Object(const TypeBits tb,const TypeBits tb_col_msk,const ObjectDef&def,const Scale scl,const Scalar bounding_radius,const Point&pos,const AngleRad rad,const Color8b color):
+	Object(
+		const TypeBits tb,
+		const TypeBits tb_collision_mask,
+		const ObjectDef&def,
+		const Scale scl,
+		const Scalar bounding_radius,
+		const Point&pos,
+		const AngleRad rad,
+		const Color8b color
+	):
 		tb_{tb},
-		tb_col_msk_{tb_col_msk},
+		tb_col_msk_{tb_collision_mask},
 		phy_{PhysicsState::alloc()},
 		scl_{scl},
 		def_{def},
@@ -195,8 +204,9 @@ public:
 
 		// delete cached points
 		delete[]pts_wld_;
-		if(nmls_wld_)
+		if(nmls_wld_){
 			delete[]nmls_wld_;
+		}
 	}
 
 	constexpr Object()=delete;
@@ -231,9 +241,11 @@ public:
 				pt++;
 			}
 		}
+
 		if(enable::draw_polygons){
 			dsp.draw_polygon(pts_wld_,def_.nbnd,def_.bnd,color_);
 		}
+
 		if(enable::draw_normals){
 			if(nmls_wld_){ // check if there are any normals defined
 				const Point*nml=nmls_wld_;
@@ -247,6 +259,7 @@ public:
 				}
 			}
 		}
+
 		if(enable::draw_bounding_circle){
 			dsp.draw_bounding_circle(phy_const().pos,bounding_radius());
 		}
@@ -277,19 +290,29 @@ private:
 	}
 	constexpr auto refresh_wld_points()->void{
 		refresh_Mmw_if_invalid();
-		if(!is_wld_pts_need_update())
+
+		if(!is_wld_pts_need_update()){
 			return;
-		if(metrics::enabled)
+		}
+
+		if(metrics::enabled){
 			metrics::matrix_set_transforms++;
+		}
+
 		// matrix has been updated, update cached points
 		Mmw_.transform(def_.pts,pts_wld_,def_.npts);
-		if(def_.nmls) // check if there are any meaningful normals
+
+		if(def_.nmls){ // check if there are any meaningful normals
 			Mmw_.rotate(def_.nmls,nmls_wld_,def_.nbnd);
+		}
+	
 		set_wld_pts_need_update(false);
 	}
 	constexpr auto refresh_Mmw_if_invalid()->void{
-		if(phy().agl==Mmw_agl_ && phy().pos==Mmw_pos_ && scl_==Mmw_scl_)
+		if(phy().agl==Mmw_agl_ && phy().pos==Mmw_pos_ && scl_==Mmw_scl_){
 			return;
+		}
+
 		set_wld_pts_need_update(true);
 		Mmw_.set_transform(scl_,phy().agl,phy().pos);
 		Mmw_scl_=scl_;
@@ -339,6 +362,7 @@ public:
 		if(dt<0){ // ? is that once every 2 billionth tick?
 			dt=0;
 		}
+
 		// fps calculations
 		fps_frame_counter++;
 		const TimeSec fps_dt=time-fps_time_prv;
@@ -404,25 +428,30 @@ private:
 				const bool o1_check_col_with_o2=o1->tb_col_msk_&o2->tb_ && o1->is_alive();
 				const bool o2_check_col_with_o1=o2->tb_col_msk_&o1->tb_ && o2->is_alive();
 				
-				if(!o1_check_col_with_o2 && !o2_check_col_with_o1)
+				if(!o1_check_col_with_o2 && !o2_check_col_with_o1){
 					continue;
+				}
 
-				if(metrics::enabled)
+				if(metrics::enabled){
 					metrics::collisions_checks++;
+				}
 
-				if(!Object::is_bounding_circles_in_collision(*o1,*o2))
+				if(!Object::is_bounding_circles_in_collision(*o1,*o2)){
 					continue;
+				}
 
-				if(metrics::enabled)
+				if(metrics::enabled){
 					metrics::collisions_checks_bounding_shapes++;
+				}
 
 				// refresh world coordinates
 				o1->refresh_wld_points();
 				o2->refresh_wld_points();
 
 				// check if o1 points in o2 bounding shape or o2 points in o1 bounding shape
-				if(!Object::is_in_collision(*o1,*o2) && !Object::is_in_collision(*o2,*o1))
+				if(!Object::is_in_collision(*o1,*o2) && !Object::is_in_collision(*o2,*o1)){
 					continue;
+				}
 
 				if(o1_check_col_with_o2){
 					// o1 type wants to handle collisions with o2 type
@@ -462,16 +491,18 @@ private:
 		// if behind every normal then within the convex bounding shape thus collision
 
 		// if o2 has no bounding shape (at least 3 points) return false
-		if(!o2.def_.nmls)
+		if(!o2.def_.nmls){
 			return false;
+		}
 
 		// for each point in o1 bounding shape
 		const PointIx*bndptr=o1.def_.bnd; // bounding point index of o1
 		PointIx nbnd=o1.def_.nbnd;
 		while(nbnd--){
 			const Point&p1=o1.pts_wld_[*bndptr];
-			if(is_point_in_bounding_shape(p1,o2))
+			if(is_point_in_bounding_shape(p1,o2)){
 				return true;
+			}
 			bndptr++;
 		}
 		return false;
@@ -484,8 +515,9 @@ private:
 			const Vector&p{o.pts_wld_[*bnd_ix_ptr]};
 			bnd_ix_ptr++;
 
-			if(enable::draw_collision_check)
+			if(enable::draw_collision_check){
 				vga13h.bmp().draw_dot(p,5);
+			}
 
 			const Vector v{p0-p}; // vector from point on line to point to check
 			if(v.dot(*nml_ptr)>0){ // use abs(v)<0.0001f (example)?

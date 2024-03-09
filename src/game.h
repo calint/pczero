@@ -46,11 +46,11 @@ class Game{
 	static auto draw_axis(Bitmap8b&dsp)->void{
 		static AngleDeg deg=0;
 		static Matrix R;
-		if(deg>360)
+		if(deg>360){ // ? what if deg=730
 			deg-=360;
+		}
 		deg+=5;
 		const AngleRad rotation=deg_to_rad(deg);
-	//		shp3->set_angle(rotation);
 		R.set_transform(5,rotation,{160,100});
 		// dot axis
 		dsp.draw_dot({160,100},0xf);
@@ -90,8 +90,9 @@ public:
 	}
 
 	static auto draw_dot(const Point&p,const Color8b color)->void{
-		if(!is_in_play_area(p))
+		if(!is_in_play_area(p)){
 			return;
+		}
 		const CoordPx xi=CoordPx(p.x);
 		const CoordPx yi=CoordPx(p.y);
 		*static_cast<Color8b*>(vga13h.bmp().address_offset({xi,yi}))=color;
@@ -100,12 +101,10 @@ public:
 	static auto draw_trajectory(const Point&p0,const Vector&vel,const TimeSec t_s,const TimeSec t_inc_s,const Color8b color)->void{
 		TimeSec t=0;
 		Point p{p0};
-		while(true){
+		while(t<t_s){
 			t+=t_inc_s;
 			p.inc_by(vel,t_inc_s);
 			draw_dot(p,color);
-			if(t>t_s)
-				return;
 		}
 	}
 
@@ -116,19 +115,8 @@ public:
 		const Real xmin=Real(Game::play_area_top_left.x);
 		const Real ymax=Real(Game::play_area_top_left.y+Game::play_area_dim.height());
 		const Real ymin=Real(Game::play_area_top_left.y);
-		if(phy.pos.x>=xmax-bounding_radius){
-			return false;
-		}
-		if(phy.pos.x<=xmin+bounding_radius){
-			return false;
-		}
-		if(phy.pos.y>=ymax-bounding_radius){
-			return false;
-		}
-		if(phy.pos.y<=ymin+bounding_radius){
-			return false;
-		}
-		return true;
+		return !(phy.pos.x>=xmax-bounding_radius || phy.pos.x<=xmin+bounding_radius ||
+	             phy.pos.y>=ymax-bounding_radius || phy.pos.y<=ymin+bounding_radius);
 	}
 
 	[[noreturn]] static auto run()->void;
@@ -210,6 +198,7 @@ class Ship final:public Object{
 	static constexpr Scale bounding_radius=scl*sqrt_of_2;
 	static constexpr AngleDeg dagl=90;
 	static constexpr Scalar speed=20;
+	static constexpr TimeSec fire_rate=TimeSec(.2);
 	TimeSec fire_t{0};
 public:
 	bool auto_aim_at_boss{false};
@@ -239,8 +228,9 @@ public:
 		if(!Game::is_in_play_area(*this)){
 			phy().vel={0,0};
 		}
-		if(!auto_aim_at_boss)
+		if(!auto_aim_at_boss){
 			return true;
+		}
 		if(!Game::boss){
 			turn_still();
 			return true;
@@ -257,8 +247,9 @@ public:
 
 	auto fire()->void{
 		const TimeSec dt=time-fire_t;
-		if(dt<TimeSec(.2))
+		if(dt<fire_rate){
 			return;
+		}
 		fire_t=time;
 		Bullet*b=new Bullet;
 		Vector v=forward_vector().scale(Real(1.1));
@@ -322,10 +313,8 @@ private:
 		Point p_tgt=tgt.phy_const().pos;
 		Vector v_tgt=tgt.phy_const().vel;
 		const Vector a_tgt=tgt.phy_const().acc;
-		while(true){
+		while(t<eval_t){
 			t+=eval_dt;
-			if(t>eval_t)
-				break;
 			// get expected position of target
 			v_tgt.inc_by(a_tgt,eval_dt);
 			p_tgt.inc_by(v_tgt,eval_dt);
@@ -338,8 +327,8 @@ private:
 			const Vector v_aim=p_tgt-phy_const().pos;
 			// get t for bullet to reach expected location
 			const Real t_bullet=v_aim.magnitude()/Bullet::speed;
-			// note. optimizing away sqrt() in magnitude() reduces precision when
-			// aiming at far targets since t_aim grows in a "non-linear" way
+			// note: optimizing away sqrt() in magnitude() reduces precision when
+			//       aiming at far targets since t_aim grows in a "non-linear" way
 
 			// difference between target and bullet intersection t
 			const Real t_aim=abs(t_bullet-t);
@@ -424,19 +413,19 @@ public:
 
 	auto update()->bool override{
 		Object::update();
-		if(!Game::is_in_play_area(*this))
+		if(!Game::is_in_play_area(*this)){
 			return false;
-		if(time-time_started>boss_live_t)
+		}
+		if(time-time_started>boss_live_t){
 			return false;
+		}
 		return true;
 	}
 
 	// returns false if object is to be deleted
 	auto on_collision(Object&other)->bool override{
 		health--;
-		if(health<=0)
-			return false;
-		return true;
+		return health>0;
 	}
 };
 
@@ -561,12 +550,12 @@ auto Game::create_boss()->void{
 	create_scene();
 	create_boss();
 
-	constexpr unsigned char key_w=0;
-	constexpr unsigned char key_a=1;
-	constexpr unsigned char key_s=2;
-	constexpr unsigned char key_d=3;
-	constexpr unsigned char key_spc=4;
-	constexpr unsigned char key_j=5;
+	constexpr Byte key_w=0;
+	constexpr Byte key_a=1;
+	constexpr Byte key_s=2;
+	constexpr Byte key_d=3;
+	constexpr Byte key_spc=4;
+	constexpr Byte key_j=5;
 	bool keyb[6]{}; // wasd j and space pressed status
 
 	out.pos({12,1}).fg(6).p("keys: w a s d j  f g x c [ctrl+tab] [ctrl+Fx]");
@@ -584,21 +573,21 @@ auto Game::create_boss()->void{
 
 		// print stats
 		out.pos({10,2}).fg(2);
-		out.p("i=").p_hex_8b(static_cast<unsigned char>(task_focused_id)).spc();
+		out.p("i=").p_hex_8b(static_cast<Byte>(task_focused_id)).spc();
 		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_tmr_lo)).spc();
-		out.p("k=").p_hex_8b(static_cast<unsigned char>(osca_key)).spc();
-		out.p("m=").p_hex_8b(static_cast<unsigned char>(metrics::matrix_set_transforms)).spc();
-		out.p("c=").p_hex_8b(static_cast<unsigned char>(metrics::collisions_checks)).spc();
-		out.p("b=").p_hex_8b(static_cast<unsigned char>(metrics::collisions_checks_bounding_shapes)).spc();
-		out.p("a=").p_hex_8b(static_cast<unsigned char>(Object::allocated_objects_count())).spc();
-		out.p("s=").p_hex_8b(static_cast<unsigned char>(Object::time)).spc();
+		out.p("k=").p_hex_8b(static_cast<Byte>(osca_key)).spc();
+		out.p("m=").p_hex_8b(static_cast<Byte>(metrics::matrix_set_transforms)).spc();
+		out.p("c=").p_hex_8b(static_cast<Byte>(metrics::collisions_checks)).spc();
+		out.p("b=").p_hex_8b(static_cast<Byte>(metrics::collisions_checks_bounding_shapes)).spc();
+		out.p("a=").p_hex_8b(static_cast<Byte>(Object::allocated_objects_count())).spc();
+		out.p("s=").p_hex_8b(static_cast<Byte>(Object::time)).spc();
 		out.p("f=").p_hex_16b(static_cast<unsigned short>(Object::fps)).spc();
 
 		Ship*shp=Game::player;
 
 		if(task_focused_id==task_id){
 			// this task has keyboard focus, handle keyboard
-			while(const unsigned char sc=keyboard.get_next_scan_code()){
+			while(const Byte sc=keyboard.get_next_scan_code()){
 				switch(sc){
 				case 0x11: // w pressed
 					keyb[key_w]=true;

@@ -27,7 +27,7 @@ public:
 	inline constexpr auto address_offset(const OffsetBytes n)const->Address{return static_cast<char*>(address_)+n;}
 	inline auto to(const Data&d)const->void{pz_memcpy(d.address(),address_,size_);}
 	inline auto to(const Data&d,const SizeBytes n)const->void{pz_memcpy(d.address(),address_,n);}
-	inline auto clear(unsigned char byte=0)const->void{pz_memset(address_,byte,size_);}
+	inline auto clear(Byte byte=0)const->void{pz_memset(address_,byte,size_);}
 	inline constexpr auto end()const->Address{return static_cast<char*>(address_)+size_;}
 };
 
@@ -191,8 +191,9 @@ public:
 		while(hi--){
 			while(wi--){
 				T v=*si;
-				if(v)
+				if(v){
 					*di=v;
+				}
 				si++;
 				di++;
 			}
@@ -202,10 +203,9 @@ public:
 	constexpr auto draw_dot(const Point&pos,const T value)->void{
 		const CoordPx x=CoordPx(pos.x);
 		const CoordPx y=CoordPx(pos.y);
-		if(x<0||x>=dim_.width())
+		if(x<0 || x>=dim_.width() || y<0 || y>=dim_.height()){
 			return;
-		if(y<0||y>=dim_.height())
-			return;
+		}
 		*static_cast<T*>(address_offset({x,y}))=value;
 	}
 	constexpr auto draw_bounding_circle(const Point&pos,const Scale radius)->void{
@@ -303,12 +303,14 @@ public:
 				adv_rht=false;
 			}
 			while(true){
-				if(scan_lines_until_next_turn<=0)
+				if(scan_lines_until_next_turn<=0){
 					break;
+				}
 				T*p_lft=pline+CoordPx(x_lft);
 				const T*p_rht=pline+CoordPx(x_rht);
-				if(p_lft>p_rht) // ? can happen?
+				if(p_lft>p_rht){ // ? can happen?
 					break;
+				}
 				scan_lines_until_next_turn--;
 				const CoordPx npx=CoordPx(p_rht-p_lft);
 				if(enable::draw_polygons_fill){
@@ -326,8 +328,9 @@ public:
 				x_lft+=dxdy_lft;
 				x_rht+=dxdy_rht;
 			}
-			if(ix_lft==ix_rht) // ? render dot or line?
+			if(ix_lft==ix_rht){ // ? render dot or line?
 				break;
+			}
 			if(adv_lft){
 				x_lft=x_nxt_lft;
 				y=y_nxt_lft;
@@ -560,7 +563,7 @@ public:
 		draw(table_hex_to_font[hex_number_4b&0xf]);
 		return*this;
 	}
-	constexpr auto p_hex_8b(unsigned char v)->PrinterToBitmap&{
+	constexpr auto p_hex_8b(Byte v)->PrinterToBitmap&{
 		const int ch1=v&0xf;
 		const int ch2=(v>>4)&0xf;
 		p_hex(ch2);
@@ -741,33 +744,39 @@ using Matrix=MatrixT<Coord>;
 auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
 	char*d=static_cast<char*>(dst);
 	char*s=static_cast<char*>(src);
-	while(n--)
+	while(n--){
 		*d++=*s++;
+	}
 }
 
 auto pz_memset(Address dst,Byte byte,SizeBytes n)->void{
-	unsigned char*d=static_cast<unsigned char*>(dst);
-	while(n--)
+	Byte*d=static_cast<Byte*>(dst);
+	while(n--){
 		*d++=byte;
+	}
 }
 } // end namespace osca
 
 // built-in functions replacements (used by clang++ -O0 and -Os)
-extern "C" void*memcpy(void*dest,const void*src,unsigned n);
-extern "C" void*memcpy(void*dest,const void*src,unsigned n){
-	char*d=static_cast<char*>(dest);
-	const char*s=static_cast<const char*>(src);
-	while(n--)
+extern "C" void*memcpy(void*dst,const void*src,unsigned n);
+extern "C" void*memcpy(void*dst,const void*src,unsigned n){
+	using namespace osca;
+	Byte*d=static_cast<Byte*>(dst);
+	const Byte*s=static_cast<const Byte*>(src);
+	while(n--){
 		*d++=*s++;
-	return dest;
+	}
+	return dst;
 }
-extern "C" void*memset(void*str,int c,unsigned n);
-extern "C" void*memset(void*str,int c,unsigned n){
-	unsigned char ch=static_cast<unsigned char>(c);
-	unsigned char*d=static_cast<unsigned char*>(str);
-	while(n--)
+extern "C" void*memset(void*dst,int byte,unsigned n);
+extern "C" void*memset(void*dst,int byte,unsigned n){
+	using namespace osca;
+	Byte ch=static_cast<Byte>(byte);
+	Byte*d=static_cast<Byte*>(dst);
+	while(n--){
 		*d++=ch;
-	return str;
+	}
+	return dst;
 }
 //extern "C" void*memcpy(void*to,void*from,unsigned n);
 //extern "C" void*memcpy(void*to,void*from,unsigned n){

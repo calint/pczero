@@ -25,7 +25,7 @@ struct alignas(16) Task{
 	Register edx{};
 	Register ecx{};
 	Register eax{};
-	// note. The FSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
+	// note: The FSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
 	//       first byte of the structure needed to be aligned on a 16-byte boundary.
 	alignas(16) Byte fpu_state[108]{};
 	Byte padding[4]{};
@@ -78,7 +78,7 @@ extern "C" auto osca_exception()->void;
 extern "C" Task*osca_active_task;
 
 // last received scan code
-extern "C" volatile const unsigned char osca_key;
+extern "C" volatile const Byte osca_key;
 
 // time lower 32b
 extern "C" volatile const unsigned osca_tmr_lo;
