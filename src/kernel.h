@@ -66,12 +66,12 @@ class Heap final{
 	inline static Data data_{}; // location and size of heap
 	inline static char*mem_pos_{}; // start of heap memory
 	inline static char*mem_end_{}; // end of heap memory (1 past last)
-	inline static Entry*entry_used_{}; // list of used memory entries
-	inline static Entry*entry_used_pos_{}; // next available slot
-	inline static Entry*entry_used_end_{}; // end (1 past) of used entries list
-	inline static Entry*entry_free_{}; // list of freed memory entries
-	inline static Entry*entry_free_pos_{}; // next available slot
-	inline static Entry*entry_free_end_{}; // end (1 past) of free entries list
+	inline static Entry*ls_used_{}; // list of used memory entries
+	inline static Entry*ls_used_pos_{}; // next available slot
+	inline static Entry*ls_used_end_{}; // end (1 past) of used entries list
+	inline static Entry*ls_free_{}; // list of freed memory entries
+	inline static Entry*ls_free_pos_{}; // next available slot
+	inline static Entry*ls_free_end_{}; // end (1 past) of free entries list
 	inline static Size nentries_max_{}; // maximum slots
 public:
 	static auto init_statics(const Data&d,const Size nentries_max)->void{
@@ -82,32 +82,32 @@ public:
 		mem_pos_=reinterpret_cast<char*>(d.address());
 
 		// place used entries area at top of the heap
-		entry_used_=static_cast<Entry*>(d.end())-nentries_max;
-		if(reinterpret_cast<char*>(entry_used_)<mem_pos_){
+		ls_used_=static_cast<Entry*>(d.end())-nentries_max;
+		if(reinterpret_cast<char*>(ls_used_)<mem_pos_){
 			err.p("Heap:init_statics:1");
 			osca_hang();
 		}
-		entry_used_pos_=entry_used_;
-		entry_used_end_=entry_used_+nentries_max;
+		ls_used_pos_=ls_used_;
+		ls_used_end_=ls_used_+nentries_max;
 
 		// place free entries area before used entries
-		entry_free_=entry_used_-nentries_max;
-		if(reinterpret_cast<char*>(entry_free_)<mem_pos_){
+		ls_free_=ls_used_-nentries_max;
+		if(reinterpret_cast<char*>(ls_free_)<mem_pos_){
 			err.p("Heap:init_statics:2");
 			osca_hang();
 		}
-		entry_free_pos_=entry_free_;
-		entry_free_end_=entry_free_+nentries_max;
+		ls_free_pos_=ls_free_;
+		ls_free_end_=ls_free_+nentries_max;
 
 		// place end of free heap memory to start of free entries area
-		mem_end_=reinterpret_cast<char*>(entry_free_);
+		mem_end_=reinterpret_cast<char*>(ls_free_);
 	}
 	static inline auto data()->const Data&{return data_;	}
 	// called by operator 'new'
 	static auto alloc(const unsigned size_bytes)->void*{
 		// try to find a free slot of that size
 		
-		for(Entry*ent=entry_free_;ent<entry_free_pos_;ent++){
+		for(Entry*ent=ls_free_;ent<ls_free_pos_;ent++){
 			if(ent->size_bytes!=size_bytes){
 				continue;
 			}
@@ -115,15 +115,15 @@ public:
 			// found a matching size entry
 			void*ptr=ent->ptr;
 			// move to used entries
-			if(entry_used_pos_>=entry_used_end_){
+			if(ls_used_pos_>=ls_used_end_){
 				err.p("Heap:alloc:1");
 				osca_hang();
 			}
-			*entry_used_pos_=*ent;
-			entry_used_pos_++;
-			entry_free_pos_--;
-			*ent=*entry_free_pos_;
-			pz_memset(entry_free_pos_,0x0f,sizeof(Entry)); // debugging (can be removed)
+			*ls_used_pos_=*ent;
+			ls_used_pos_++;
+			ls_free_pos_--;
+			*ent=*ls_free_pos_;
+			pz_memset(ls_free_pos_,0x0f,sizeof(Entry)); // debugging (can be removed)
 			return ptr;
 		}
 		// did not find in free list, create new
@@ -133,41 +133,41 @@ public:
 			err.p("Heap:alloc:2");
 			osca_hang();
 		}
-		if(entry_used_pos_>=entry_used_end_){
+		if(ls_used_pos_>=ls_used_end_){
 			err.p("Heap:alloc:3");
 			osca_hang();
 		}
 		// write to used list
-		*entry_used_pos_={ptr,size_bytes};
-		entry_used_pos_++;
+		*ls_used_pos_={ptr,size_bytes};
+		ls_used_pos_++;
 		return ptr;
 	}
 	// called by operator 'delete'
 	static auto free(void*ptr)->void{
 		// find the allocated memory in the used list
 		
-		for(Entry*ent=entry_used_;ent<entry_used_pos_;ent++){
+		for(Entry*ent=ls_used_;ent<ls_used_pos_;ent++){
 			if(ent->ptr!=ptr){
 				continue;
 			}
 
 			// found the allocation entry
 			// copy entry from used to free
-			if(entry_free_pos_>=entry_free_end_){
+			if(ls_free_pos_>=ls_free_end_){
 				err.p("Heap:free:1");
 				osca_hang();
 			}
-			*entry_free_pos_=*ent;
-			entry_free_pos_++;
+			*ls_free_pos_=*ent;
+			ls_free_pos_++;
 
 			// copy last entry from used list to this entry
-			entry_used_pos_--;
+			ls_used_pos_--;
 			const unsigned size=ent->size_bytes;
-			*ent=*entry_used_pos_;
+			*ent=*ls_used_pos_;
 
 			// debugging (can be removed)
 			pz_memset(ptr,0x0f,SizeBytes(size));
-			pz_memset(entry_used_pos_,0x0f,sizeof(Entry));
+			pz_memset(ls_used_pos_,0x0f,sizeof(Entry));
 			return;
 		}
 		// did not find the allocated memory. probably a double delete
@@ -177,8 +177,8 @@ public:
 	static auto clear(const Byte b=0)->void{data_.clear(b);}
 	static auto clear_heap_entries(const Byte free_area=0,const Byte used_area=0)->void{
 		const SizeBytes es=SizeBytes(sizeof(Entry));
-		pz_memset(entry_free_,free_area,nentries_max_*es);
-		pz_memset(entry_used_,used_area,nentries_max_*es);
+		pz_memset(ls_free_,free_area,nentries_max_*es);
+		pz_memset(ls_used_,used_area,nentries_max_*es);
 	}
 };
 
