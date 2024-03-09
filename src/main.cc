@@ -65,11 +65,13 @@ extern "C" [[noreturn]] auto tsk0()->void{
 	while(true){
 		// handle keyboard events
 		while(true){
-			if(task_focused_id!=taskId)
+			if(task_focused_id!=taskId){
 				break;
+			}
 			const unsigned char sc=keyboard.get_next_scan_code();
-			if(!sc)
+			if(!sc){
 				break;
+			}
 			if(sc==0xe){ // backspace
 				pb.backspace().backspace().p('_');
 				continue;
@@ -79,10 +81,12 @@ extern "C" [[noreturn]] auto tsk0()->void{
 				continue;
 			}
 			char ch=table_scancode_to_ascii[sc];
-			if(!ch) // not an ascii. probably key release
+			if(!ch){ // not an ascii. probably key release
 				continue;
-			if(ch>='a' && ch<='z')
+			}
+			if(ch>='a' && ch<='z'){
 				ch&=~0x20; // to upper case
+			}
 			pb.backspace().p(ch).p('_');
 		}
 		osca_yield(); // ?! if it is only task running osca 'hangs'
