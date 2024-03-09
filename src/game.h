@@ -583,17 +583,15 @@ auto Game::create_boss()->void{
 		}
 
 		// print stats
-		out.pos({0,2}).fg(2);
+		out.pos({10,2}).fg(2);
 		out.p("i=").p_hex_8b(static_cast<unsigned char>(task_focused_id)).spc();
+		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_tmr_lo)).spc();
 		out.p("k=").p_hex_8b(static_cast<unsigned char>(osca_key)).spc();
-		out.p("e=").p_hex_8b(static_cast<unsigned char>(Game::enemies_alive)).spc();
 		out.p("m=").p_hex_8b(static_cast<unsigned char>(metrics::matrix_set_transforms)).spc();
 		out.p("c=").p_hex_8b(static_cast<unsigned char>(metrics::collisions_checks)).spc();
 		out.p("b=").p_hex_8b(static_cast<unsigned char>(metrics::collisions_checks_bounding_shapes)).spc();
 		out.p("a=").p_hex_8b(static_cast<unsigned char>(Object::allocated_objects_count())).spc();
-		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_tmr_lo)).spc();
 		out.p("s=").p_hex_8b(static_cast<unsigned char>(Object::time)).spc();
-		out.p("d=").p_hex_8b(static_cast<unsigned char>(Object::time_dt*10'000)).spc();
 		out.p("f=").p_hex_16b(static_cast<unsigned short>(Object::fps)).spc();
 
 		Ship*shp=Game::player;

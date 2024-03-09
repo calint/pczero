@@ -12,7 +12,7 @@ using SizeBytes=Size;
 
 // forward declaration of memory copy and set functions
 auto pz_memcpy(Address dst,Address src,SizeBytes n)->void;
-auto pz_memset(Address dst,unsigned char byte,SizeBytes n)->void;
+auto pz_memset(Address dst,Byte byte,SizeBytes n)->void;
 
 using OffsetBytes=int;
 
@@ -745,7 +745,7 @@ auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
 		*d++=*s++;
 }
 
-auto pz_memset(Address dst,unsigned char byte,SizeBytes n)->void{
+auto pz_memset(Address dst,Byte byte,SizeBytes n)->void{
 	unsigned char*d=static_cast<unsigned char*>(dst);
 	while(n--)
 		*d++=byte;
