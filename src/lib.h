@@ -115,7 +115,7 @@ struct VectorT{
 	// inline constexpr auto operator<=>(const VectorT&)const=default; // ? does not compile in clang++ without includes from std
 };
 template<typename T>inline constexpr auto operator==(const VectorT<T>&lhs,const VectorT<T>&rhs)->bool{
-    return(lhs.x==rhs.x)&&(lhs.y==rhs.y);
+    return lhs.x==rhs.x && lhs.y==rhs.y;
 }
 template<typename T>inline constexpr auto operator+(const VectorT<T>&lhs,const VectorT<T>&rhs)->VectorT<T>{
 	return{lhs.x+rhs.x,lhs.y+rhs.y};
@@ -145,7 +145,7 @@ public:
 
 using SizePx=short; // size in pixel space
 using DimensionPx=DimensionT<SizePx>; // dimension in pixel space
-using Color8b=unsigned char; // 8 bit index in color palette
+using Color8b=Byte; // 8 bit index in color palette
 
 // configuration of polygon rendering
 namespace enable{

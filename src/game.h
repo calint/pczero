@@ -296,7 +296,7 @@ private:
 	auto attack_target_expected_location(const Object&target,const bool draw_trajectory=false)->void{
 		constexpr Real margin_of_error_t=Real(0.25);
 		Vector v_aim=find_aim_vector_for_moving_target(target,Bullet::lifetime,Real(.2),margin_of_error_t,draw_trajectory);
-		if(v_aim.x==0&&v_aim.y==0){
+		if(v_aim.x==0 && v_aim.y==0){
 			// did not find aim vector
 			turn_still();
 			return;
@@ -663,9 +663,9 @@ auto Game::create_boss()->void{
 			if(!shp->auto_aim_at_boss){
 				if(keyb[key_a])shp->turn_left();
 				if(keyb[key_d])shp->turn_right();
-				if(!keyb[key_a]&&!keyb[key_d])shp->turn_still();
+				if(!keyb[key_a] && !keyb[key_d])shp->turn_still();
 			}
-			if(!keyb[key_w]&&!keyb[key_s])shp->phy().vel={0,0};
+			if(!keyb[key_w] && !keyb[key_s])shp->phy().vel={0,0};
 			if(keyb[key_j])shp->fire();
 		}
 	}

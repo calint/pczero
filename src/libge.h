@@ -186,12 +186,13 @@ public:
 		// set the pointer of that object's phy to the freed one
 		PhysicsState::free(this->phy_).phy_=phy_;
 
-		ls_all_pos--;
 		// move the last object pointer in list to the slot this object had
+		ls_all_pos--;
 		*ls_all_pos_=*ls_all_pos;
 		*ls_all_pos=nullptr; // debugging (can be removed)
-		// adjust pointer to the slot in 'all' list
+		// adjust pointer to the freed slot in 'all' list
 		(*ls_all_pos_)->ls_all_pos_=ls_all_pos_;
+
 		// delete cached points
 		delete[]pts_wld_;
 		if(nmls_wld_)
@@ -226,7 +227,6 @@ public:
 		if(enable::draw_dots){
 			const Point*pt=pts_wld_;
 			for(PointIx i=0;i<def_.npts;i++){
-//				dot(dsp,pt->x,pt->y,color_);
 				dsp.draw_dot(*pt,0xe); // yellow dot
 				pt++;
 			}
@@ -242,7 +242,7 @@ public:
 					v.normalize().scale(3);
 					Point p=pts_wld_[def_.bnd[i]];
 					Vector v1{p.x+nml->x,p.y+nml->y};
-					dsp.draw_dot(v1,0xf);
+					dsp.draw_dot(v1,0xf); // white dot
 					nml++;
 				}
 			}
@@ -288,7 +288,7 @@ private:
 		set_wld_pts_need_update(false);
 	}
 	constexpr auto refresh_Mmw_if_invalid()->void{
-		if(phy().agl==Mmw_agl_&&phy().pos==Mmw_pos_&&scl_==Mmw_scl_)
+		if(phy().agl==Mmw_agl_ && phy().pos==Mmw_pos_ && scl_==Mmw_scl_)
 			return;
 		set_wld_pts_need_update(true);
 		Mmw_.set_transform(scl_,phy().agl,phy().pos);
@@ -315,7 +315,7 @@ private:
 
 public:
 	inline static TimeSec time{};
-	inline static TimeSec time_dt{};
+	inline static TimeSec dt{};
 	inline static Count fps{};
 
 	static auto init_statics()->void{
@@ -335,22 +335,22 @@ public:
 		// time
 		time_prv=time;
 		time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits is a problem. fix
-		time_dt=time-time_prv;
-		if(time_dt<0){ // ? is that once every 4 billionth tick?
-			time_dt=0;
+		dt=time-time_prv;
+		if(dt<0){ // ? is that once every 2 billionth tick?
+			dt=0;
 		}
 		// fps calculations
 		fps_frame_counter++;
-		const TimeSec dt=time-fps_time_prv;
-		if(dt>1){
-			fps=Count(TimeSec(fps_frame_counter)/dt);
+		const TimeSec fps_dt=time-fps_time_prv;
+		if(fps_dt>1){
+			fps=Count(TimeSec(fps_frame_counter)/fps_dt);
 			fps_frame_counter=0;
 			fps_time_prv=time;
 		}
 
 		// draw and update
 		draw_all(vga13h.bmp());
-		PhysicsState::update_all(time_dt);
+		PhysicsState::update_all(dt);
 		update_all();
 		check_collisions();
 		commit_deleted();
@@ -359,15 +359,18 @@ public:
 		return unsigned(ls_all_pos-ls_all);
 	}
 private:
-	static auto deleted_add(Object*o)->void{
-		if(!o->is_alive()) // check if object already deleted
-			return;
-		o->set_is_alive(false);
+	static auto deleted_add(Object*obj)->void{
+		if(!obj->is_alive()){ // debugging (can be removed)
+			err.p("double free");
+			osca_hang();
+		}
+
+		obj->set_is_alive(false);
 		if(ls_deleted_pos==ls_deleted_end){
 			err.p("World::deleted_add:1");
 			osca_hang();
 		}
-		*ls_deleted_pos=o;
+		*ls_deleted_pos=obj;
 		ls_deleted_pos++;
 	}
 	static auto commit_deleted()->void{
@@ -397,15 +400,18 @@ private:
 				Object*o1=*it1;
 				Object*o2=*it2;
 				// check if objects are interested in collision check
-				const bool o1_check_col_with_o2=o1->tb_col_msk_&o2->tb_;
-				const bool o2_check_col_with_o1=o2->tb_col_msk_&o1->tb_;
-				if(!o1_check_col_with_o2&&!o2_check_col_with_o1)
+				const bool o1_check_col_with_o2=o1->tb_col_msk_&o2->tb_ && o1->is_alive();
+				const bool o2_check_col_with_o1=o2->tb_col_msk_&o1->tb_ && o2->is_alive();
+				
+				if(!o1_check_col_with_o2 && !o2_check_col_with_o1)
 					continue;
-//				out.p("chk ").p_hex_8b(static_cast<unsigned char>(tb1)).p(' ').p_hex_8b(static_cast<unsigned char>(tb2)).p(' ');
+
 				if(metrics::enabled)
 					metrics::collisions_checks++;
+
 				if(!Object::is_bounding_circles_in_collision(*o1,*o2))
 					continue;
+
 				if(metrics::enabled)
 					metrics::collisions_checks_bounding_shapes++;
 
@@ -414,7 +420,7 @@ private:
 				o2->refresh_wld_points();
 
 				// check if o1 points in o2 bounding shape or o2 points in o1 bounding shape
-				if(!Object::is_in_collision(*o1,*o2)&&!Object::is_in_collision(*o2,*o1))
+				if(!Object::is_in_collision(*o1,*o2) && !Object::is_in_collision(*o2,*o1))
 					continue;
 
 				if(o1_check_col_with_o2){

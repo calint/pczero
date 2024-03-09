@@ -64,8 +64,7 @@ inline auto osca_enable_interrupts()->void{asm("sti");}
 // called before starting tasks
 extern "C" auto osca_init()->void;
 
-// called from 'isr_kbd'
-// keyboard interrupt when new scan code from keyboard
+// called from 'isr_kbd' when new scan code from keyboard
 extern "C" auto osca_keyb_ev()->void;
 
 // called when interrupt other than keyboard or timer

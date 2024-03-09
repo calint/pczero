@@ -81,7 +81,7 @@ extern "C" [[noreturn]] auto tsk0()->void{
 			char ch=table_scancode_to_ascii[sc];
 			if(!ch) // not an ascii. probably key release
 				continue;
-			if(ch>='a'&&ch<='z')
+			if(ch>='a' && ch<='z')
 				ch&=~0x20; // to upper case
 			pb.backspace().p(ch).p('_');
 		}

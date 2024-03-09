@@ -271,7 +271,7 @@ extern "C" auto osca_keyb_ev()->void{
 				if(task_focused==prev_task_focused){
 					return; // no new focusable task
 				}
-				if(task_focused->is_running()&&task_focused->is_grab_keyboard_focus()){
+				if(task_focused->is_running() && task_focused->is_grab_keyboard_focus()){
 					task_focused_id=task_focused->get_id();
 					return;
 				}
@@ -279,7 +279,7 @@ extern "C" auto osca_keyb_ev()->void{
 		}
 
 		// if F1 through F12 pressed toggle running state of task
-		if(osca_key>=0x3b&&osca_key<=0x3b+12){
+		if(osca_key>=0x3b && osca_key<=0x3b+12){
 			const unsigned char tsk=osca_key-static_cast<unsigned char>(0x3b);
 			if(sizeof(osca_tasks)/sizeof(Task)>tsk){
 				osca_tasks[tsk].set_running(!osca_tasks[tsk].is_running());
