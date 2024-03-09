@@ -399,6 +399,7 @@ private:
 			for(Object**it2=it1+1;it2<ls_all_pos;++it2){
 				Object*o1=*it1;
 				Object*o2=*it2;
+
 				// check if objects are interested in collision check
 				const bool o1_check_col_with_o2=o1->tb_col_msk_&o2->tb_ && o1->is_alive();
 				const bool o2_check_col_with_o1=o2->tb_col_msk_&o1->tb_ && o2->is_alive();
@@ -441,6 +442,7 @@ private:
 	static auto is_bounding_circles_in_collision(Object&o1,Object&o2)->bool{
 		const Scalar r1=o1.bounding_radius();
 		const Scalar r2=o2.bounding_radius();
+		
 		const Point p1=o1.phy().pos;
 		const Point p2=o2.phy().pos;
 
@@ -452,9 +454,7 @@ private:
 		v.x*=v.x;
 		v.y*=v.y;
 		const Real dist2=v.x+v.y;
-		if(dist2>dist2_check)
-			return false;
-		return true;
+		return dist2<=dist2_check;
 	}
 	// checks if any o1 bounding points are in o2 bounding shape
 	static auto is_in_collision(const Object&o1,const Object&o2)->bool{
@@ -462,18 +462,17 @@ private:
 		// if behind every normal then within the convex bounding shape thus collision
 
 		// if o2 has no bounding shape (at least 3 points) return false
-		if(!o2.def_.nmls) // ? check if points equal? with floats?
+		if(!o2.def_.nmls)
 			return false;
 
 		// for each point in o1 bounding shape
-		const PointIx nbnd=o1.def_.nbnd;
 		const PointIx*bndptr=o1.def_.bnd; // bounding point index of o1
-		for(PointIx i=0;i<nbnd;i++){
-			// reference pts_pts_wld_[bnd[i]]
+		PointIx nbnd=o1.def_.nbnd;
+		while(nbnd--){
 			const Point&p1=o1.pts_wld_[*bndptr];
-			bndptr++;
 			if(is_point_in_bounding_shape(p1,o2))
 				return true;
+			bndptr++;
 		}
 		return false;
 	}
@@ -484,15 +483,18 @@ private:
 		for(PointIx j=0;j<nbnd;j++){
 			const Vector&p{o.pts_wld_[*bnd_ix_ptr]};
 			bnd_ix_ptr++;
-			if(enable::draw_collision_check){
+
+			if(enable::draw_collision_check)
 				vga13h.bmp().draw_dot(p,5);
-			}
+
 			const Vector v{p0-p}; // vector from point on line to point to check
 			if(v.dot(*nml_ptr)>0){ // use abs(v)<0.0001f (example)?
-				// p "in front" of line, cannot be collision
+				// p is 'in front' of line, cannot be collision
 				return false;
 			}
+
 			nml_ptr++;
+
 			if(enable::draw_collision_check){
 				vga13h.bmp().draw_dot(p,0xe);
 			}
