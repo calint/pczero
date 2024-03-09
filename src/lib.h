@@ -11,8 +11,8 @@ using Size=int;
 using SizeBytes=Size;
 
 // forward declaration of memory copy and set functions
-auto pz_memcpy(Address to,Address from,SizeBytes n)->void;
-auto pz_memset(Address to,char v,SizeBytes n)->void;
+auto pz_memcpy(Address dst,Address src,SizeBytes n)->void;
+auto pz_memset(Address dst,unsigned char byte,SizeBytes n)->void;
 
 using OffsetBytes=int;
 
@@ -27,7 +27,7 @@ public:
 	inline constexpr auto address_offset(const OffsetBytes n)const->Address{return static_cast<char*>(address_)+n;}
 	inline auto to(const Data&d)const->void{pz_memcpy(d.address(),address_,size_);}
 	inline auto to(const Data&d,const SizeBytes n)const->void{pz_memcpy(d.address(),address_,n);}
-	inline auto clear(char byte=0)const->void{pz_memset(address_,byte,size_);}
+	inline auto clear(unsigned char byte=0)const->void{pz_memset(address_,byte,size_);}
 	inline constexpr auto end()const->Address{return static_cast<char*>(address_)+size_;}
 };
 
@@ -38,7 +38,7 @@ using AngleRad=Angle;
 inline auto sin(const AngleRad radians)->Real{
 	Real v;
 	asm("fsin"
-		:"=t"(v) // "t": first (top of stack) floating point register
+		:"=t"(v) // 't': first (top of stack) floating point register
 		:"0"(radians)
 	);
 	return v;
@@ -47,7 +47,7 @@ inline auto sin(const AngleRad radians)->Real{
 inline auto cos(const AngleRad radians)->Real{
 	Real v;
 	asm("fcos"
-		:"=t"(v) // "t": first (top of stack) floating point register
+		:"=t"(v) // 't': first (top of stack) floating point register
 		:"0"(radians)
 	);
 	return v;
@@ -56,7 +56,7 @@ inline auto cos(const AngleRad radians)->Real{
 // sets sin and cos value of 'radians' in 'fsin' and 'fcos'
 inline auto sin_and_cos(const AngleRad radians,Real&fsin,Real&fcos)->void{
 	asm("fsincos"
-		:"=t"(fcos),"=u"(fsin) // "u" : Second floating point register
+		:"=t"(fcos),"=u"(fsin) // 'u' : Second floating point register
 		:"0"(radians)
 	);
 }
@@ -64,7 +64,7 @@ inline auto sin_and_cos(const AngleRad radians,Real&fsin,Real&fcos)->void{
 inline auto sqrt(const Real in)->Real{
 	Real v;
 	asm("fsqrt"
-		:"=t"(v) // "t": first (top of stack) floating point register
+		:"=t"(v) // 't': first (top of stack) floating point register
 		:"0"(in)
 	);
 	return v;
@@ -73,7 +73,7 @@ inline auto sqrt(const Real in)->Real{
 inline auto abs(const Real in)->Real{
 	Real v;
 	asm("fabs"
-		:"=t"(v) // "t": first (top of stack) floating point register
+		:"=t"(v) // 't': first (top of stack) floating point register
 		:"0"(in)
 	);
 	return v;
@@ -103,7 +103,7 @@ struct VectorT{
 	inline constexpr auto inc_by(const VectorT&v,const Scale s)->void{x+=v.x*s;y+=v.y*s;}
 	// negates and returns this vector
 	inline constexpr auto negate()->VectorT&{x=-x;y=-y;return*this;}
-	// sets and returns this vector to absolute value of itself
+	// sets and returns this vector to absolute value
 	inline auto absolute()->VectorT&{x=abs(x);y=abs(y);return*this;}
 	// returns dot product of this vector and 'v'
 	inline constexpr auto dot(const VectorT&v)const->T{return x*v.x+y*v.y;}
@@ -125,8 +125,8 @@ template<typename T>inline constexpr auto operator-(const VectorT<T>&lhs,const V
 }
 
 using Coord=Real; // coordinate in real space
-using Vector=VectorT<Coord>; // vector in real space
-using Point=Vector; // point in 2D
+using Vector=VectorT<Coord>; // vector in 2d real space coordinates
+using Point=Vector; // point in 2d
 using PointIx=short; // index into a list of points
 using CoordPx=short; // coordinate in pixel space
 using PointPx=VectorT<CoordPx>; // point in pixel space
@@ -143,11 +143,11 @@ public:
 	inline constexpr auto height()const->const T{return height_;}
 };
 
-using SizePx=int;
-using DimensionPx=DimensionT<SizePx>;
-using Color8b=unsigned char;
+using SizePx=short; // size in pixel space
+using DimensionPx=DimensionT<SizePx>; // dimension in pixel space
+using Color8b=unsigned char; // 8 bit index in color palette
 
-// configuration of how the polygons are rendered
+// configuration of polygon rendering
 namespace enable{
 	constexpr static bool draw_polygons_fill{};
 	constexpr static bool draw_polygons_edges{true};
@@ -170,10 +170,10 @@ public:
 		T*di=static_cast<T*>(dst.data_.address());
 		di+=pos.y*dst.dim().width()+pos.x;
 		const SizePx ln=dst.dim().width()-dim_.width();
-		const SizePx h=dim_.height();
-		const SizePx w=dim_.width();
-		for(SizePx y=0;y<h;y++){
-			for(SizePx x=0;x<w;x++){
+		SizePx hi=dim_.height();
+		SizePx wi=dim_.width();
+		while(hi--){
+			while(wi--){
 				*di=*si;
 				si++;
 				di++;
@@ -186,10 +186,10 @@ public:
 		T*di=static_cast<T*>(dst.data_.address());
 		di+=pos.y*dst.dim().width()+pos.x;
 		const SizePx ln=dst.dim().width()-dim_.width();
-		const SizePx h=dim_.height();
-		const SizePx w=dim_.width();
-		for(SizePx y=0;y<h;y++){
-			for(SizePx x=0;x<w;x++){
+		SizePx hi=dim_.height();
+		SizePx wi=dim_.width();
+		while(hi--){
+			while(wi--){
 				T v=*si;
 				if(v)
 					*di=v;
@@ -200,16 +200,16 @@ public:
 		}
 	}
 	constexpr auto draw_dot(const Point&pos,const T value)->void{
-		const CoordPx xi=CoordPx(pos.x);
-		const CoordPx yi=CoordPx(pos.y);
-		if(xi<0||xi>dim_.width())
+		const CoordPx x=CoordPx(pos.x);
+		const CoordPx y=CoordPx(pos.y);
+		if(x<0||x>=dim_.width())
 			return;
-		if(yi<0||yi>dim_.height())
+		if(y<0||y>=dim_.height())
 			return;
-		*static_cast<T*>(address_offset({xi,yi}))=value;
+		*static_cast<T*>(address_offset({x,y}))=value;
 	}
 	constexpr auto draw_bounding_circle(const Point&pos,const Scale radius)->void{
-		const Count segments=Count(5*radius);
+		const Count segments=Count(5*radius); // ? magic number
 		AngleRad th=0;
 		AngleRad dth=2*PI/AngleRad(segments);
 		for(Count i=0;i<segments;i++){
@@ -223,10 +223,7 @@ public:
 		}
 	}
 	constexpr auto draw_polygon(const Point pts[],const PointIx ix_size,const PointIx ix[],const T color)->void{
-		if(ix_size<2){ // ? what if 0, 2 is a line
-			draw_dot(pts[0],color);
-			return;
-		}
+		// ? what if ix_size<4
 		PointIx topy_ix=0;
 		const Point&first_point=pts[ix[0]];
 		Coord topx=first_point.x;
@@ -517,18 +514,18 @@ static constexpr unsigned table_ascii_to_font[]{
 		0,0,0,0,0,
 };
 
-using CoordsChar=VectorT<int>;
+using CoordsChar=VectorT<short>;
 
 class PrinterToBitmap{
 	Color8b*di_{}; // current pixel in bitmap
 	Color8b*dil_{}; // beginning of current line
-	Bitmap8b*bmp_{};
-	SizePx bmp_wi_{};
-	SizePx ln_{};
-	Color8b fg_{2};
-	Color8b bg_{};
-	bool transparent_{};
-	char padding[1]{};
+	Bitmap8b*bmp_{}; // destination bitmap
+	SizePx bmp_wi_{}; // bitmap width
+	SizePx ln_{}; // offset from font line to next line
+	Color8b fg_{2}; // foreground
+	Color8b bg_{}; // background
+	bool transparent_{}; // true if transparent
+	char padding[1]{}; // unused
 	static constexpr SizePx font_wi_{5};
 	static constexpr SizePx font_hi_{6};
 	static constexpr SizePx line_padding_{2}; // ? attribute
@@ -607,10 +604,10 @@ public:
 		draw(table_ascii_to_font[unsigned(ch)]);
 		return*this;
 	}
-	constexpr auto p(const char*s)->PrinterToBitmap&{
-		while(*s){
-			p(*s);
-			s++;
+	constexpr auto p(const char*cstr)->PrinterToBitmap&{
+		while(*cstr){
+			p(*cstr);
+			cstr++;
 		}
 		return*this;
 	}
@@ -626,9 +623,9 @@ private:
 		constexpr unsigned mask=1u<<31;
 		for(SizePx y=0;y<font_hi_;y++){
 			for(SizePx x=0;x<font_wi_;x++){
-				const bool px=bmp_5x6&mask; // ? !=0
-				bmp_5x6<<=1;
+				const bool px=bmp_5x6&mask;
 				*di_=px?fg_:bg_;
+				bmp_5x6<<=1;
 				di_++;
 			}
 			di_+=ln_;
@@ -641,10 +638,10 @@ private:
 		for(SizePx y=0;y<font_hi_;y++){
 			for(SizePx x=0;x<font_wi_;x++){
 				const bool px=bmp_5x6&mask;
-				bmp_5x6<<=1;
 				if(px){
 					*di_=fg_;
 				}
+				bmp_5x6<<=1;
 				di_++;
 			}
 			di_+=ln_;
@@ -664,19 +661,20 @@ public:
 };
 
 extern Vga13h vga13h;
-Vga13h vga13h; // initialized by osca_init
+Vga13h vga13h; // initialized by 'osca_init'
 
 class PrinterToVga:public PrinterToBitmap{
 public:
 	inline constexpr PrinterToVga():PrinterToBitmap{&vga13h.bmp()}{}
 };
 
-// debugging to vga13h
+// debug prtint to vga13h
 extern PrinterToVga out;
-PrinterToVga out; // initialized by osca_init
+PrinterToVga out; // initialized by 'osca_init'
 
+// error print to vga13h
 extern PrinterToVga err;
-PrinterToVga err; // initialized by osca_init
+PrinterToVga err; // initialized by 'osca_init'
 
 template<typename T>
 class MatrixT{
@@ -740,17 +738,17 @@ using Matrix=MatrixT<Coord>;
 //	);
 //}
 
-auto pz_memcpy(Address to,Address from,SizeBytes n)->void{
-	char*d=static_cast<char*>(to);
-	char*s=static_cast<char*>(from);
+auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
+	char*d=static_cast<char*>(dst);
+	char*s=static_cast<char*>(src);
 	while(n--)
 		*d++=*s++;
 }
 
-auto pz_memset(Address to,char v,SizeBytes n)->void{
-	char*d=static_cast<char*>(to);
+auto pz_memset(Address dst,unsigned char byte,SizeBytes n)->void{
+	unsigned char*d=static_cast<unsigned char*>(dst);
 	while(n--)
-		*d++=v;
+		*d++=byte;
 }
 } // end namespace osca
 

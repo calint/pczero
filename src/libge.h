@@ -110,7 +110,7 @@ public:
 			it->update(dt_s);
 		}
 	}
-	static auto clear(char b=0)->void{
+	static auto clear(unsigned char b=0)->void{
 		const Address from=Address(ls_all);
 		const SizeBytes n=SizeBytes(ls_all_end)-SizeBytes(ls_all); // ? may break if pointer is bigger than 2G
 		pz_memset(from,b,n);

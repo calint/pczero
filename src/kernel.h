@@ -173,8 +173,8 @@ public:
 		err.p("Heap.free:2");
 		osca_hang();
 	}
-	static auto clear(const char b=0)->void{data_.clear(b);}
-	static auto clear_heap_entries(char free_area=0,char used_area=0)->void{
+	static auto clear(const unsigned char b=0)->void{data_.clear(b);}
+	static auto clear_heap_entries(unsigned char free_area=0,unsigned char used_area=0)->void{
 		const SizeBytes es=SizeBytes(sizeof(Entry));
 		pz_memset(entry_free_start_,free_area,nentries_max_*es);
 		pz_memset(entry_used_start_,used_area,nentries_max_*es);
