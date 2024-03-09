@@ -213,7 +213,7 @@ class Ship final:public Object{
 	TimeSec fire_t{0};
 public:
 	bool auto_aim_at_boss{false};
-	const char padding[3]{};
+	Byte padding[3]{};
 
 	Ship():
 		Object{

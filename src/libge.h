@@ -49,7 +49,7 @@ namespace metrics{
 class Object;
 
 // maximum number of objects
-constexpr static Size nobjects_max{256};
+constexpr Size nobjects_max{256};
 
 using Velocity=Vector;
 using Acceleration=Vector;
@@ -149,7 +149,7 @@ class Object{
 	Color8b color_{}; // shape color
 	Bits8 flags_{}; // bit 1: is not alive
 	               // bit 2: pts_wls_ don't need update
-	char padding[2]{};
+	Byte padding[2]{};
 public:
 	Object(const TypeBits tb,const TypeBits tb_col_msk,const ObjectDef&def,const Scale scl,const Scalar bounding_radius,const Point&pos,const AngleRad rad,const Color8b color):
 		tb_{tb},

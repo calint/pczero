@@ -525,7 +525,7 @@ class PrinterToBitmap{
 	Color8b fg_{2}; // foreground
 	Color8b bg_{}; // background
 	bool transparent_{}; // true if transparent
-	char padding[1]{}; // unused
+	Byte padding[1]{}; // unused
 	static constexpr SizePx font_wi_{5};
 	static constexpr SizePx font_hi_{6};
 	static constexpr SizePx line_padding_{2}; // ? attribute
