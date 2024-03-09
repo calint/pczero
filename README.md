@@ -4,7 +4,7 @@ experiments with bootable image of x86 and protected mode 32 bit code for the i3
 written in assembler and C++
 
 intention:
-* travel back to the 80's when the 32 bit intel 386 with math co-processor appeared
+* travel back to the 80's when the 32 bit intel 386 with math co-processor appeared, equipped with c++ from the future
 * write a micro kernel (1 KB) in assembler that does preemptive multitasking
 * handle multiple tasks and keyboard with a simple kernel written in c++
 * write a small 2d framework for a toy application
