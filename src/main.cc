@@ -1,3 +1,5 @@
+// reviewed: 2024-03-09
+
 #include"osca.h"
 #include"lib.h"
 #include"libge.h"
@@ -68,7 +70,7 @@ extern "C" [[noreturn]] auto tsk0()->void{
 			if(task_focused_id!=taskId){
 				break;
 			}
-			const unsigned char sc=keyboard.get_next_scan_code();
+			const Byte sc=keyboard.get_next_scan_code();
 			if(!sc){
 				break;
 			}
@@ -91,7 +93,7 @@ extern "C" [[noreturn]] auto tsk0()->void{
 		}
 		osca_yield(); // ?! if it is only task running osca 'hangs'
 		              // because no interrupts get through due to
-		              // 'all' time spent in non-interruptable
+		              // almost all time spent in non-interruptable
 		              // osca_yield code
 //		osca_halt(); // pauses task until next interrupt
 	}

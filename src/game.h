@@ -1,11 +1,10 @@
 #pragma once
+// reviewed: 2024-03-09
 
 //
 // osca game
 //
 
-#include"osca.h"
-#include"lib.h"
 #include"libge.h"
 
 namespace osca::game{
@@ -23,7 +22,7 @@ class Game{
 	static auto create_circle(const Count segments)->Point*{
 		Point*pts=new Point[unsigned(segments)];
 		AngleRad th=0;
-		AngleRad dth=2*PI/AngleRad(segments);
+		const AngleRad dth=2*PI/AngleRad(segments);
 		for(Count i=0;i<segments;i++){
 			Real fsin=0;
 			Real fcos=0;
@@ -44,7 +43,7 @@ class Game{
 
 	static auto draw_axis(Bitmap8b&dsp)->void{
 		static AngleDeg deg=0;
-		static Matrix R;
+		static Matrix R{};
 		if(deg>360){ // ? what if deg=730
 			deg-=360;
 		}
@@ -91,7 +90,7 @@ public:
 
 	static auto draw_trajectory(const Point&p0,const Vector&vel,const TimeSec t_s,const TimeSec t_inc_s,const Color8b color)->void{
 		TimeSec t=0;
-		Point p{p0};
+		Point p=p0;
 		while(t<t_s){
 			t+=t_inc_s;
 			p.inc_by(vel,t_inc_s);
@@ -100,16 +99,16 @@ public:
 	}
 
 	static auto is_in_play_area(const Object&o)->bool{
-		const Real bounding_radius=o.bounding_radius();
+		const Scale bounding_radius=o.bounding_radius();
 		const PhysicsState&phy=o.phy_const();
 		const Real xmax=Real(Game::play_area_top_left.x+Game::play_area_dim.width());
 		const Real xmin=Real(Game::play_area_top_left.x);
 		const Real ymax=Real(Game::play_area_top_left.y+Game::play_area_dim.height());
 		const Real ymin=Real(Game::play_area_top_left.y);
 		return !(phy.pos.x>=xmax-bounding_radius ||
-		         phy.pos.x<=xmin+bounding_radius ||
+		         phy.pos.x< xmin+bounding_radius ||
 	             phy.pos.y>=ymax-bounding_radius ||
-				 phy.pos.y<=ymin+bounding_radius);
+				 phy.pos.y< ymin+bounding_radius);
 	}
 
 	[[noreturn]] static auto run()->void;
@@ -135,7 +134,13 @@ public:
 		Object{
 			tb_enemies,
 			tb_bullets|tb_missiles,
-			Game::enemy_def,scl,bounding_radius,{0,0},0,3}
+			Game::enemy_def,
+			scl,
+			bounding_radius,
+			{0,0},
+			0,
+			3
+		}
 	{
 		Game::enemies_alive++;
 	}
@@ -144,6 +149,7 @@ public:
 		Game::enemies_alive--;
 	}
 
+	// returns false if object is dead
 	auto update()->bool override{
 		if(!Game::is_in_play_area(*this)){
 			phy().vel.y=-phy().vel.y;
@@ -151,9 +157,9 @@ public:
 		return true;
 	}
 
-	// returns false if object is to be deleted
+	// returns false if object is dead
 	auto on_collision(Object&other)->bool override{
-		return false; // collision with type 'bullet'
+		return false; // collision with 'Bullet' or 'Missile'
 	}
 };
 
@@ -169,18 +175,26 @@ public:
 		Object{
 			tb_bullets,
 			tb_bosses|tb_enemies|tb_ships|tb_walls,
-			Game::bullet_def,scl,bounding_radius,{0,0},0,4},
+			Game::bullet_def,
+			scl,
+			bounding_radius,
+			{0,0},
+			0,
+			4
+		},
 		created_time{time}
 	{}
 
+	// returns false if object is dead
 	auto update()->bool override{
 		Object::update();
-		if(lifetime<time-created_time)
+		if(lifetime<time-created_time){
 			return false;
+		}
 		return Game::is_in_play_area(*this);
 	}
 
-	// returns false if object is to be deleted
+	// returns false if object is dead
 	auto on_collision(Object&other)->bool override{
 		return false;
 	}
@@ -201,7 +215,13 @@ public:
 		Object{
 			tb_ships,
 			tb_bosses|tb_bullets|tb_enemies|tb_missiles|tb_ships|tb_walls,
-			Game::ship_def,scl,bounding_radius,{0,0},0,2}
+			Game::ship_def,
+			scl,
+			bounding_radius,
+			{0,0},
+			0,
+			2
+		}
 	{
 		Game::player=this;
 	}
@@ -216,6 +236,7 @@ public:
 	auto thrust_fwd()->void{phy().vel=forward_vector().scale(speed);}
 	auto thrust_rev()->void{phy().vel=forward_vector().negate().scale(speed);}
 
+	// returns false if object is dead
 	auto update()->bool override{
 		Object::update();
 		if(!Game::is_in_play_area(*this)){
@@ -232,9 +253,8 @@ public:
 		return true;
 	}
 
-	// returns false if object is to be deleted
+	// returns false if object is dead
 	auto on_collision(Object&other)->bool override{
-		// collision with 'wall'
 		return false;
 	}
 
@@ -245,7 +265,7 @@ public:
 		}
 		fire_t=time;
 		Bullet*b=new Bullet;
-		Vector v=forward_vector().scale(Real(1.1));
+		Vector v=forward_vector().scale(Scale(1.1));
 		v.scale(scale()); // place bullet in front of ship
 		b->phy().pos=phy().pos+v;
 		b->phy().vel=v.normalize().scale(Bullet::speed);
@@ -279,7 +299,13 @@ private:
 	// aim and shoot at targets' expected location
 	auto attack_target_expected_location(const Object&target,const bool draw_trajectory=false)->void{
 		constexpr Real margin_of_error_t=Real(0.25);
-		Vector v_aim=find_aim_vector_for_moving_target(target,Bullet::lifetime,Real(.2),margin_of_error_t,draw_trajectory);
+		Vector v_aim=find_aim_vector_for_moving_target(
+			target,
+			Bullet::lifetime,
+			Real(.2),
+			margin_of_error_t,
+			draw_trajectory
+		);
 		if(v_aim.x==0 && v_aim.y==0){
 			// did not find aim vector
 			turn_still();
@@ -301,7 +327,13 @@ private:
 	}
 
 	// ? move to TargetingSystem class
-	auto find_aim_vector_for_moving_target(const Object&tgt,const Real eval_t,const Real eval_dt,const Real error_margin_t,const bool draw_trajectory=false)->Vector{
+	auto find_aim_vector_for_moving_target(
+		const Object&tgt,
+		const Real eval_t,
+		const Real eval_dt,
+		const Real error_margin_t,
+		const bool draw_trajectory=false
+	)->Vector{
 		Real t=0;
 		Point p_tgt=tgt.phy_const().pos;
 		Vector v_tgt=tgt.phy_const().vel;
@@ -321,15 +353,10 @@ private:
 			// get t for bullet to reach expected location
 			const Real t_bullet=v_aim.magnitude()/Bullet::speed;
 			// note: optimizing away sqrt() in magnitude() reduces precision when
-			//       aiming at far targets since t_aim grows in a "non-linear" way
+			//       aiming at far targets since t_aim grows in a non-linear way
 
 			// difference between target and bullet intersection t
 			const Real t_aim=abs(t_bullet-t);
-
-			// draw evaluated aim vector
-//			Vector v2=v_aim;
-//			v2.normalize().scale(Bullet::speed);
-//			Game::draw_trajectory(phy_ro().pos,v2,t_bullet,Real(.1),0xe);
 
 			// if t within error margin return aim vector
 			if(t_aim<error_margin_t){
@@ -338,7 +365,6 @@ private:
 					Vector v3=v_aim;
 					v3.normalize().scale(Bullet::speed);
 					Game::draw_trajectory(phy_const().pos,v3,t_bullet,Real(.2),2);
-//					err.pos({1,1}).p_hex_32b(unsigned(t_aim*100));
 				}
 				return v_aim;
 			}
@@ -355,7 +381,13 @@ public:
 		Object{
 			tb_walls,
 			tb_none,
-			Game::wall_def,scl,scl*sqrt_of_2,pos,agl,3}
+			Game::wall_def,
+			scl,
+			scl*sqrt_of_2,
+			pos,
+			agl,
+			3
+		}
 	{}
 };
 
@@ -368,15 +400,22 @@ public:
 		Object{
 			tb_missiles,
 			tb_bosses|tb_bullets|tb_enemies|tb_missiles|tb_ships|tb_walls,
-			Game::missile_def,scl,bounding_radius,{0,0},0,4}
+			Game::missile_def,
+			scl,
+			bounding_radius,
+			{0,0},
+			0,
+			4
+		}
 	{}
 
+	// returns false if object is dead
 	auto update()->bool override{
 		Object::update();
 		return Game::is_in_play_area(*this);
 	}
 
-	// returns false if object is to be deleted
+	// returns false if object is dead
 	auto on_collision(Object&other)->bool override{
 		return false;
 	}
@@ -394,7 +433,13 @@ public:
 		Object{
 			tb_bosses,
 			tb_bullets|tb_missiles,
-			Game::boss_def,scl,bounding_radius,{0,0},0,0x4}
+			Game::boss_def,
+			scl,
+			bounding_radius,
+			{0,0},
+			0,
+			4
+		}
 	{
 		time_started=time;
 		Game::boss=this;
@@ -404,6 +449,7 @@ public:
 		Game::boss=nullptr;
 	}
 
+	// returns false if object is dead
 	auto update()->bool override{
 		Object::update();
 		if(!Game::is_in_play_area(*this)){
@@ -415,7 +461,7 @@ public:
 		return true;
 	}
 
-	// returns false if object is to be deleted
+	// returns false if object is dead
 	auto on_collision(Object&other)->bool override{
 		health--;
 		return health>0;
@@ -493,7 +539,7 @@ auto Game::create_boss()->void{
 			{-1,.5},
 			{ 1,.5},
 		},
-		new PointIx[]{1,2,3} // bounding convex polygon CCW
+		new PointIx[]{1,2,3}
 	};
 	ship_def.init_normals();
 
@@ -501,18 +547,18 @@ auto Game::create_boss()->void{
 		new Point[]{
 			{0,0},
 		},
-		new PointIx[]{0} // bounding points and convex polygon CCW
+		new PointIx[]{0}
 	};
 	bullet_def.init_normals();
 
 	wall_def={4,4,
-		new Point[]{ // points in model coordinates, negative Y is "forward"
+		new Point[]{
 			{-1,-1},
 			{-1, 1},
 			{ 1, 1},
 			{ 1,-1},
 		},
-		new PointIx[]{0,1,2,3} // bounding convex polygon CCW
+		new PointIx[]{0,1,2,3}
 	};
 	wall_def.init_normals();
 
@@ -522,7 +568,7 @@ auto Game::create_boss()->void{
 			{-1,.5},
 			{ 1,.5},
 		},
-		new PointIx[]{0,1,2} // bounding convex polygon CCW
+		new PointIx[]{0,1,2}
 	};
 	missile_def.init_normals();
 

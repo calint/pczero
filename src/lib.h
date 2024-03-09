@@ -687,7 +687,8 @@ class MatrixT{
 	T ux{},uy{},id{};
 public:
 	auto set_transform(const Scale scale,const AngleRad rotation,const VectorT<T>&translation)->void{
-		T fcos,fsin;
+		T fcos=0;
+		T fsin=0;
 		sin_and_cos(rotation,fsin,fcos);
 		const T cs=scale*fcos;
 		const T sn=scale*fsin;

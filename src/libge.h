@@ -146,7 +146,7 @@ class Object{
 	Point Mmw_pos_{}; // position used in 'Mmw_'
 	AngleRad Mmw_agl_{}; // angle used in 'Mmw_'
 	Scale Mmw_scl_{};  // scale used in 'Mmw_'
-	Scalar br_{}; // bounding radius scl_*sqrt(2)
+	Scale br_{}; // bounding radius scl_*sqrt(2)
 	Color8b color_{}; // shape color
 	Flags8b flags_{}; // bit 1: is not alive
 	                  // bit 2: 'pts_wld_' don't need update
@@ -224,7 +224,7 @@ public:
 	inline constexpr auto set_scale(const Scale s)->void{scl_=s;}
 	inline constexpr auto def()const->const ObjectDef&{return def_;}
 	inline constexpr auto is_alive()const->bool{return!(flags_&1);}
-	inline constexpr auto bounding_radius()const->Scalar{return br_;}
+	inline constexpr auto bounding_radius()const->Scale{return br_;}
 	inline auto forward_vector()->Vector{
 		refresh_Mmw_if_invalid();
 		return Mmw_.axis_y().negate().normalize(); // not negated if positive y is up
