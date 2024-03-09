@@ -37,7 +37,7 @@ struct alignas(16) Task{
 };
 
 // tasks list implemented in kernel.h
-// used by osca.S in start, osca_yield, isr_tmr and isr_fpu
+// used from osca.S in '_main', 'osca_yield', 'isr_tmr' and 'isr_fpu'
 extern "C" struct Task osca_tasks[];
 // pointer to end of tasks (last entry + 1)
 extern "C" struct Task*osca_tasks_end;
@@ -64,7 +64,7 @@ inline auto osca_enable_interrupts()->void{asm("sti");}
 // called from osca.S before starting tasks
 extern "C" auto osca_init()->void;
 
-// called from osca.S:isr_kbd
+// called from 'isr_kbd'
 // keyboard interrupt when new scan code from keyboard
 extern "C" auto osca_keyb_ev()->void;
 
@@ -88,9 +88,9 @@ extern "C" volatile const unsigned osca_tmr_lo;
 extern "C" volatile const unsigned osca_tmr_hi;
 
 // switches to next task
-// note. single small task yielding in a tight loop might inhibit
-// interrupts due to most time being spent in non-interruptable
-// task switching code
+// note: single small task yielding in a tight loop might inhibit
+//       interrupts due to most time being spent in non-interruptable
+//       task switching code
 extern "C" auto osca_yield()->void;
 
 } // end namespace osca
