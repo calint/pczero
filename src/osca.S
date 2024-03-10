@@ -70,8 +70,8 @@ _main:
 #mov %dl,osca_boot_drive # save boot drive
 xor %bx,%bx # clear bx
 mov %bx,%ds # data segment
-mov %bx,%ss # setup stack
-mov $_start,%sp # at 0x7c00
+mov %bx,%ss     # setup stack
+mov $_start,%sp #  at 0x7c00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
 # https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)
 # Reading sectors with a CHS address
@@ -126,9 +126,9 @@ int $0x10
 # https://wiki.osdev.org/Protected_Mode
 cli # done with bios, disable interrupts
 lgdt gdtr # load global descriptor tables
-mov %cr0,%eax # enter 32b protected mode
-or $CR0_BIT_PE,%al     #  set 'Protection Enable' bit
-mov %eax,%cr0 #  in CR0 (Control Register 0)
+mov %cr0,%eax      # enter 32b protected mode
+or $CR0_BIT_PE,%al #  set 'Protection Enable' bit
+mov %eax,%cr0      #   in CR0 (Control Register 0)
 # far jump to selector 08h (offset into GDT, pointing at
 # a 32bit PM code segment descriptor) to load CS with
 # proper PM32 descriptor
@@ -227,7 +227,7 @@ in $0x71,%al
 #  on qemu and virtualbox not same behaviour
 
 # mov $osca_exception,%eax # store the upper bits of the handler
-mov $isr_other,%eax # store the upper bits of the handler
+mov $isr_other,%eax # store the upper 16 bits of the handler address
 shr $16,%eax        #  in ax
 mov $IDT,%ebx       # interrupt descriptor table address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
@@ -253,14 +253,14 @@ lidt idtr # load the interrupt descriptor table register
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
 # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
 # 7.1.2.1 COPROCESSOR CONTEXT SWITCHING page 122
-mov %cr0,%eax # enable MP (Monitor co-processor) bit in CR0
+mov %cr0,%eax      # enable MP (Monitor co-processor) bit in CR0
 or $CR0_BIT_MP,%al #  if TS (Task switched) bit is set and a FPU
-mov %eax,%cr0 #  instruction is used then exception 7 is triggered
+mov %eax,%cr0      #   instruction is used then exception 7 is triggered
 # initiate the tasks' FPU state with initial values
 fninit # initiate FPU
 mov $osca_tasks,%ebx
 lp2:
-  fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx)
+  fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx) # store initiated fpu state
   add $TASK_STRUCT_SIZE,%ebx
   cmp osca_tasks_end,%ebx
   jl lp2
@@ -319,6 +319,12 @@ osca_yield_next_task:
   jz osca_yield_next_task
 
   # enable TS (Task switched) bit in cr0
+  # when this bit is enabled and a numeric (floating point)
+  # operation executes the cpu triggers exception 7 which
+  # calls 'isr_fpu' that restores, if necessary, fpu state 
+  # of current running task.
+  # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
+  # 7.1.2.1 COPROCESSOR CONTEXT SWITCHING page 122
   mov %cr0,%eax
   or $CR0_BIT_TS,%al
   mov %eax,%cr0
@@ -404,12 +410,7 @@ isr_tmr_next_task:
   jz isr_tmr_next_task # if not 'running' get next task
 
   # enable TS (Task switched) bit in cr0
-  # when this bit is enabled and a numeric (floating point)
-  # operation executes the cpu triggers exception 7 which
-  # calls 'isr_fpu' that restores, if necessary, fpu state 
-  # of current running task.
-  # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
-  # 7.1.2.1 COPROCESSOR CONTEXT SWITCHING page 122
+  # (see comment in osca_yield_next_task)
   mov %cr0,%eax
   or $CR0_BIT_TS,%al
   mov %eax,%cr0
@@ -457,10 +458,10 @@ isr_tmr_next_task:
   push %ax # save to be clobbered ax
   mov $0x0c,%al # read register C in ISR
   out %al,$0x70 #  to keep getting
-  in $0x71,%al  #  irq 8
+  in $0x71,%al  #   irq 8
   mov $0x20,%al # acknowledge interrupt (EOI) to
   out %al,$0xa0 #  second controller PIC1
-  out %al,$0x20 #  main controller PIC0
+  out %al,$0x20 #   main controller PIC0
   pop %ax # restore ax
   sti # enables interrupts after next instruction
   jmp *tmp_eip # jmp to restored eip
@@ -474,10 +475,10 @@ isr_tmr_acknowledge_and_return:
   # acknowledge interrupt and exit
   mov $0x0c,%al # read register C in ISR
   out %al,$0x70 #  to keep getting
-  in $0x71,%al  #  irq 8
+  in $0x71,%al  #   irq 8
   mov $0x20,%al # acknowledge interrupt (EOI) to
   out %al,$0xa0 #  second controller PIC1
-  out %al,$0x20 #  main controller PIC0
+  out %al,$0x20 #   main controller PIC0
   mov tmp_eax,%eax # restore clobbered register
   sti # enables interrupts after next instruction
   iret
