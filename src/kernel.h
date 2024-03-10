@@ -51,9 +51,9 @@ alignas(16) struct Task osca_tasks[]{
 	{Register(tsk1),0xa'0000+320*180,0     ,0b10  ,1   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
 	{Register(tsk0),0xa'0000+320*184,0     ,0b11  ,2   ,0xde,0xec,0xeb,0xe5,0xb ,0xd ,0xc ,Register("kernel osca")},
 	{Register(tsk2),0xa'0000+320*188,0     ,0b10  ,3   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
-	{Register(tsk3),0xa'0000+320*192,0     ,0b10  ,4   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,140 },
-	{Register(tsk3),0xa'0000+320*196,0     ,0b10  ,5   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,160 },
-	{Register(tsk3),0xa'0000+320*200,0     ,0b10  ,6   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,180 },
+	{Register(tsk3),0xa'0000+320*192,0     ,0b10  ,4   ,0   ,0   ,0   ,0   ,0   ,0   ,1   ,140 },
+	{Register(tsk3),0xa'0000+320*196,0     ,0b10  ,5   ,0   ,0   ,0   ,0   ,0   ,0   ,2   ,160 },
+	{Register(tsk3),0xa'0000+320*200,0     ,0b10  ,6   ,0   ,0   ,0   ,0   ,0   ,0   ,4   ,180 },
 };
 Task*osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
 
@@ -212,7 +212,7 @@ extern Keyboard keyboard;
 Keyboard keyboard; // global initialized by 'osca_init'
 
 // focused task that should read keyboard
-inline Task*task_focused{};
+inline Task*osca_task_focused{};
 
 // declared in linker script 'link.ld' after code and data at first 64KB boundary
 // address of symbol marks start of contiguous memory
@@ -243,7 +243,7 @@ extern "C" auto osca_init()->void{
 	
 	keyboard=Keyboard{};
 	
-	task_focused=&osca_tasks[0];
+	osca_task_focused=&osca_tasks[0];
 	
 	// initiate heap with a size of 320*100 B
 	Heap::init_statics({free_mem_start,320*100},nobjects_max);
@@ -265,16 +265,16 @@ extern "C" auto osca_keyb_ev()->void{
 	// ? implement better task focus switch (same behaviour as alt+tab)
 	if(keyboard_ctrl_pressed){ // ctrl+tab
 		if(osca_key==0xf){ // tab pressed
-			const Task*prev_task_focused=task_focused;
+			const Task*prev_task_focused=osca_task_focused;
 			while(true){
-				task_focused++;
-				if(task_focused==osca_tasks_end){
-					task_focused=osca_tasks;
+				osca_task_focused++;
+				if(osca_task_focused==osca_tasks_end){
+					osca_task_focused=osca_tasks;
 				}
-				if(task_focused==prev_task_focused){
+				if(osca_task_focused==prev_task_focused){
 					return; // no new focusable task
 				}
-				if(task_focused->is_running() && task_focused->is_grab_keyboard_focus()){
+				if(osca_task_focused->is_running() && osca_task_focused->is_grab_keyboard_focus()){
 					// task is running and requests keyboard
 					return;
 				}

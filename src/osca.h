@@ -76,7 +76,7 @@ extern "C" auto osca_exception()->void;
 //
 
 // current active task
-extern "C" Task*osca_active_task;
+extern "C" Task*osca_task_active;
 
 // last received scan code
 extern "C" volatile const Byte osca_key;

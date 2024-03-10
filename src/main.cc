@@ -10,8 +10,8 @@ using namespace osca;
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] auto tsk0()->void{
 	osca_disable_interrupts();
-	const Task*this_task=osca_active_task;
-	const Register eax=osca_active_task->eax;
+	const Task*this_task=osca_task_active;
+	const Register eax=osca_task_active->eax;
 //	Register ebx=osca_active_task->ebx;
 //	Register ecx=osca_active_task->ecx;
 //	Register edx=osca_active_task->edx;
@@ -67,7 +67,7 @@ extern "C" [[noreturn]] auto tsk0()->void{
 	while(true){
 		// handle keyboard events
 		while(true){
-			if(task_focused!=this_task){
+			if(osca_task_focused!=this_task){
 				break;
 			}
 			const Byte sc=keyboard.get_next_scan_code();
@@ -119,11 +119,12 @@ extern "C" [[noreturn]] auto tsk2()->void{
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] auto tsk3()->void{
 	osca_disable_interrupts();
-	const Register eax=osca_active_task->eax;
+	const Register eax=osca_task_active->eax;
+	const Register ecx=osca_task_active->ecx;
 	osca_enable_interrupts();
 
 	while(true){
-		const float f=float(osca_tmr_lo)*.5f;
+		const float f=float(osca_tmr_lo)/float(ecx);
 		*static_cast<unsigned*>(vga13h.bmp().address_offset({CoordPx(eax),0}))=unsigned(f);
 		osca_yield();
 	}

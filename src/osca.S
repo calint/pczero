@@ -59,7 +59,7 @@
 .global osca_tmr_lo # 1024 Hz timer low bits
 .global osca_tmr_hi # 1024 Hz timer high bits
 .global osca_yield # export function
-.global osca_active_task # pointer to active task
+.global osca_task_active # pointer to active task
 .global _start # export entry point
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - bpb
 .code16 # boot in 16 bit mode
@@ -272,7 +272,7 @@ lp2:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 call osca_init # calls C function declared in osca.h
 # restore cpu state for first task
-mov osca_active_task,%ebx # ebx points to first task
+mov osca_task_active,%ebx # ebx points to first task
 mov TASK_STRUCT_OFFSET_EIP(%ebx),%esp  # save task.eip for jump
 mov %esp,tmp_eip
 # position esp for popa of registers
@@ -307,7 +307,7 @@ osca_yield: # switches to next task
   mov %eax,tmp_eax # save eax,ebx,ecx
   mov %ebx,tmp_ebx # ..
   mov %ecx,tmp_ecx # ..
-  mov osca_active_task,%ebx # ebx points to current active task
+  mov osca_task_active,%ebx # ebx points to current active task
   mov %ebx,%ecx # ecx will point to the next task
   # find next task and store it in %ecx
 osca_yield_next_task:
@@ -343,14 +343,14 @@ osca_yield_next_task:
   mov %esp,TASK_STRUCT_OFFSET_ESP(%ebx)
   # save gprs. move esp to end of gprs then pusha
   lea TASK_STRUCT_OFFSET_GPRS_END(%ebx),%esp
-  mov %ecx,osca_active_task # save pointer to next task record
+  mov %ecx,osca_task_active # save pointer to next task record
   mov tmp_eax,%eax # restore eax
   mov tmp_ebx,%ebx # restore ebx
   mov tmp_ecx,%ecx # restore ecx
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
 
   # restore cpu state of task pointed by ecx
-  mov osca_active_task,%ecx
+  mov osca_task_active,%ecx
   mov TASK_STRUCT_OFFSET_EIP(%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
   # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
@@ -398,7 +398,7 @@ isr_tmr:
   # start task switching
   mov %ebx,tmp_ebx # save ebx
   mov %ecx,tmp_ecx # save ecx
-  mov osca_active_task,%ebx # ebx points to current active task
+  mov osca_task_active,%ebx # ebx points to current active task
   mov %ebx,%ecx # ecx will point to the next task
   # find next task and store it in ecx
 isr_tmr_next_task:
@@ -432,13 +432,13 @@ isr_tmr_next_task:
   mov %esp,TASK_STRUCT_OFFSET_ESP(%ebx)
   # save gprs. move esp to end of gprs then pusha
   lea TASK_STRUCT_OFFSET_GPRS_END(%ebx),%esp
-  mov %ecx,osca_active_task # save pointer to next task record
+  mov %ecx,osca_task_active # save pointer to next task record
   mov tmp_eax,%eax # save proper eax
   mov tmp_ebx,%ebx # save proper ebx
   mov tmp_ecx,%ecx # save proper ecx
   pusha # pushes eax,ecx,edx,ebx,esp0,ebp,esi,edi to task record
   # restore cpu state of task pointed by ecx
-  mov osca_active_task,%ecx
+  mov osca_task_active,%ecx
   mov TASK_STRUCT_OFFSET_EIP(%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
   # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
@@ -510,7 +510,7 @@ isr_fpu:
   push %eax
   clts # reset the TS (Task Switched) flag in CR0
   # is the active task same as active FPU state?
-  mov osca_active_task,%eax
+  mov osca_task_active,%eax
   cmp osca_active_fpu,%eax
   je isr_fpu_done
     # not same task, switch FPU state
@@ -518,8 +518,7 @@ isr_fpu:
     push %ebx
     mov osca_active_fpu,%ebx
     fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx) # save state
-    mov %eax,%ebx # osca_active_task to ebx
-    frstor TASK_STRUCT_OFFSET_FPU_STATE(%ebx) # restore state
+    frstor TASK_STRUCT_OFFSET_FPU_STATE(%eax) # restore state
     mov %eax,osca_active_fpu # set the active FPU task
     pop %ebx
 
@@ -538,7 +537,7 @@ isr_other:
 .align 4
 osca_tmr_lo:.long 0 # 1024 Hz tick lower, exported
 osca_tmr_hi:.long 0 # 1024 Hz tick higher, exported
-osca_active_task:.long osca_tasks # pointer to active task, exported
+osca_task_active:.long osca_tasks # pointer to active task, exported
 osca_active_fpu:.long osca_tasks # pointer to task that has the FPU
 tmp_eax:.long 0 # used in osca_yield and isr_tmr
 tmp_ebx:.long 0 # ...

@@ -520,7 +520,7 @@ auto Game::create_boss()->void{
 
 [[noreturn]] auto Game::run()->void{
 	osca_disable_interrupts();
-	const Task*this_task=osca_active_task;
+	const Task*this_task=osca_task_active;
 	osca_enable_interrupts();
 	
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
@@ -632,7 +632,7 @@ auto Game::create_boss()->void{
 
 		// print stats
 		out.pos({10,2}).fg(2);
-		out.p("i=").p_hex_8b(static_cast<Byte>(task_focused->id)).spc();
+		out.p("i=").p_hex_8b(static_cast<Byte>(osca_task_focused->id)).spc();
 		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_tmr_lo)).spc();
 		out.p("k=").p_hex_8b(static_cast<Byte>(osca_key)).spc();
 		out.p("m=").p_hex_8b(static_cast<Byte>(metrics::matrix_set_transforms)).spc();
@@ -644,7 +644,7 @@ auto Game::create_boss()->void{
 
 		Ship*shp=Game::player;
 
-		if(task_focused==this_task){
+		if(osca_task_focused==this_task){
 			// this task has keyboard focus, handle keyboard
 			while(const Byte sc=keyboard.get_next_scan_code()){
 				switch(sc){
