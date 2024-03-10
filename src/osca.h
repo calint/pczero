@@ -63,7 +63,7 @@ inline auto osca_enable_interrupts()->void{asm("sti");}
 //
 
 // current active task
-extern "C" const Task*osca_task_active;
+extern "C" Task*osca_task_active;
 
 // time lower 32b
 extern "C" volatile const unsigned osca_tmr_lo;

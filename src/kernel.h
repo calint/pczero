@@ -212,7 +212,7 @@ extern Keyboard keyboard;
 Keyboard keyboard; // global initialized by 'osca_init'
 
 // focused task that should read keyboard
-inline const Task*osca_task_focused{};
+inline Task*osca_task_focused{};
 
 // declared in linker script 'link.ld' after code and data at first 64KB boundary
 // address of symbol marks start of contiguous memory
