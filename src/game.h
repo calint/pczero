@@ -59,13 +59,15 @@ class Game{
 	}
 
 public:
-	inline static ObjectDef enemy_def{};
-	inline static ObjectDef ship_def{};
-	inline static ObjectDef bullet_def{};
-	inline static ObjectDef wall_def{};
-	inline static ObjectDef missile_def{};
-	inline static ObjectDef boss_def{};
+	// object definitions initialized in 'run'
+	inline static ObjectDef enemy_def;
+	inline static ObjectDef ship_def;
+	inline static ObjectDef bullet_def;
+	inline static ObjectDef wall_def;
+	inline static ObjectDef missile_def;
+	inline static ObjectDef boss_def;
 
+	// game state
 	inline static Ship*player{};
 	inline static Object*boss{};
 	inline static Count enemies_alive{};
@@ -74,9 +76,22 @@ public:
 
 	static auto is_in_play_area(const Point&p)->bool{
 		return!(p.x>=Coord(play_area_top_left.x+play_area_dim.width()) || 
-		        p.x<Coord(play_area_top_left.x) || 
+		        p.x< Coord(play_area_top_left.x) || 
 		        p.y>=Coord(play_area_top_left.y+play_area_dim.height())||
-		        p.y<Coord(play_area_top_left.y));
+		        p.y< Coord(play_area_top_left.y));
+	}
+
+	static auto is_in_play_area(const Object&o)->bool{
+		const Scale bounding_radius=o.bounding_radius();
+		const PhysicsState&phy=o.phy_const();
+		const Real xmax=Real(Game::play_area_top_left.x+Game::play_area_dim.width());
+		const Real xmin=Real(Game::play_area_top_left.x);
+		const Real ymax=Real(Game::play_area_top_left.y+Game::play_area_dim.height());
+		const Real ymin=Real(Game::play_area_top_left.y);
+		return !(phy.pos.x>=xmax-bounding_radius ||
+		         phy.pos.x< xmin+bounding_radius ||
+	             phy.pos.y>=ymax-bounding_radius ||
+				 phy.pos.y< ymin+bounding_radius);
 	}
 
 	static auto draw_dot(const Point&p,const Color8b color)->void{
@@ -98,19 +113,6 @@ public:
 		}
 	}
 
-	static auto is_in_play_area(const Object&o)->bool{
-		const Scale bounding_radius=o.bounding_radius();
-		const PhysicsState&phy=o.phy_const();
-		const Real xmax=Real(Game::play_area_top_left.x+Game::play_area_dim.width());
-		const Real xmin=Real(Game::play_area_top_left.x);
-		const Real ymax=Real(Game::play_area_top_left.y+Game::play_area_dim.height());
-		const Real ymin=Real(Game::play_area_top_left.y);
-		return !(phy.pos.x>=xmax-bounding_radius ||
-		         phy.pos.x< xmin+bounding_radius ||
-	             phy.pos.y>=ymax-bounding_radius ||
-				 phy.pos.y< ymin+bounding_radius);
-	}
-
 	[[noreturn]] static auto run()->void;
 };
 
@@ -126,6 +128,7 @@ constexpr TypeBits tb_walls = 8;
 constexpr TypeBits tb_missiles = 16;
 constexpr TypeBits tb_bosses = 32;
 
+//--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - - 
 class Enemy final:public Object{
 	static constexpr Scale scl=5;
 	static constexpr Scale bounding_radius=scl*sqrt_of_2;
@@ -163,6 +166,8 @@ public:
 	}
 };
 
+//--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - - 
+
 class Bullet final:public Object{
 	static constexpr Scale scl=0.5;
 	static constexpr Scale bounding_radius=scl*sqrt_of_2;
@@ -199,6 +204,8 @@ public:
 		return false;
 	}
 };
+
+//--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - - 
 
 class Ship final:public Object{
 	static constexpr Scale scl=4;
@@ -374,6 +381,7 @@ private:
 	}
 };
 
+//--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - - 
 
 class Wall final:public Object{
 public:
@@ -391,6 +399,7 @@ public:
 	{}
 };
 
+//--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - - 
 
 class Missile final:public Object{
 	static constexpr Scale scl=2;
@@ -420,6 +429,8 @@ public:
 		return false;
 	}
 };
+
+//--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - - 
 
 class Boss final:public Object{
 	static constexpr Scale scl=3;
@@ -468,6 +479,8 @@ public:
 	}
 };
 
+//--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - - 
+
 auto Game::create_scene()->void{
 	for(Real i=30;i<300;i+=20){
 		Enemy*o=new Enemy;
@@ -506,11 +519,13 @@ auto Game::create_boss()->void{
 }
 
 [[noreturn]] auto Game::run()->void{
-	const TaskId task_id=osca_active_task->get_id();
+	osca_disable_interrupts();
+	const Task*this_task=osca_active_task;
+	osca_enable_interrupts();
 	
-	//----------------------------------------------------------
+	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	// init statics
-	//----------------------------------------------------------
+	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	
 	// framework
 	Object::init_statics();
@@ -520,6 +535,7 @@ auto Game::create_boss()->void{
 	//
 	// object definitions
 	//	
+	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	enemy_def={5,4,
 		new Point[]{ // points in model coordinates, negative Y is "forward"/"up"
 			{ 0,  0},
@@ -531,7 +547,7 @@ auto Game::create_boss()->void{
 		new PointIx[]{1,2,3,4} // bounding convex polygon CCW
 	};
 	enemy_def.init_normals();
-
+	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	ship_def={4,3,
 		new Point[]{
 			{ 0, 0},
@@ -542,7 +558,7 @@ auto Game::create_boss()->void{
 		new PointIx[]{1,2,3}
 	};
 	ship_def.init_normals();
-
+	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	bullet_def={1,1, // at least one bounding point for collision detection
 		new Point[]{
 			{0,0},
@@ -550,7 +566,7 @@ auto Game::create_boss()->void{
 		new PointIx[]{0}
 	};
 	bullet_def.init_normals();
-
+	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	wall_def={4,4,
 		new Point[]{
 			{-1,-1},
@@ -561,7 +577,7 @@ auto Game::create_boss()->void{
 		new PointIx[]{0,1,2,3}
 	};
 	wall_def.init_normals();
-
+	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	missile_def={4,3,
 		new Point[]{
 			{ 0,-1},
@@ -571,38 +587,43 @@ auto Game::create_boss()->void{
 		new PointIx[]{0,1,2}
 	};
 	missile_def.init_normals();
-
+	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	constexpr Count segments=6;
 	boss_def={segments,segments,
 		create_circle(segments),
 		create_circle_ix(segments),
 	};
 	boss_def.init_normals();
+	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 
-	// clear screen by copying ram to vga
+	// constants used to clear screen by copying ram to vga
 	const Address clear_start_at_address=vga13h.bmp().address_offset({0,50});
 	const Address clear_copy_from_address=Heap::data().address();
 	const SizeBytes clear_copy_num_bytes=vga13h.bmp().dim().width()*100;
 
-	create_player();
-	create_scene();
-	create_boss();
+	// print keys
+	out.pos({12,1}).fg(6).p("keys: w a s d j  f g x c [ctrl+tab] [ctrl+Fx]");
 
+	// keyboard state
 	constexpr Byte key_w=0;
 	constexpr Byte key_a=1;
 	constexpr Byte key_s=2;
 	constexpr Byte key_d=3;
 	constexpr Byte key_spc=4;
 	constexpr Byte key_j=5;
-	bool keyb[6]{}; // wasd j and space pressed status
+	bool keyb[6]{}; // 'wasd space j' pressed status
 
-	out.pos({12,1}).fg(6).p("keys: w a s d j  f g x c [ctrl+tab] [ctrl+Fx]");
+	// crate scene
+	create_player();
+	create_scene();
+	create_boss();
 
 	// game loop
 	while(true){
 		// clear game area
 		pz_memcpy(clear_start_at_address,clear_copy_from_address,clear_copy_num_bytes);
 
+		// advance game a time step
 		Object::tick();
 
 		if(!Game::boss){
@@ -611,7 +632,7 @@ auto Game::create_boss()->void{
 
 		// print stats
 		out.pos({10,2}).fg(2);
-		out.p("i=").p_hex_8b(static_cast<Byte>(task_focused_id)).spc();
+		out.p("i=").p_hex_8b(static_cast<Byte>(task_focused->id)).spc();
 		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_tmr_lo)).spc();
 		out.p("k=").p_hex_8b(static_cast<Byte>(osca_key)).spc();
 		out.p("m=").p_hex_8b(static_cast<Byte>(metrics::matrix_set_transforms)).spc();
@@ -623,7 +644,7 @@ auto Game::create_boss()->void{
 
 		Ship*shp=Game::player;
 
-		if(task_focused_id==task_id){
+		if(task_focused==this_task){
 			// this task has keyboard focus, handle keyboard
 			while(const Byte sc=keyboard.get_next_scan_code()){
 				switch(sc){
@@ -666,6 +687,7 @@ auto Game::create_boss()->void{
 				default:
 					break;
 				}
+
 				switch(table_scancode_to_ascii[sc]){
 				case'x':
 					if(Game::enemies_alive==0)create_scene();

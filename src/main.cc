@@ -10,7 +10,7 @@ using namespace osca;
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] auto tsk0()->void{
 	osca_disable_interrupts();
-	const TaskId taskId=osca_active_task->get_id();
+	const Task*this_task=osca_active_task;
 	const Register eax=osca_active_task->eax;
 //	Register ebx=osca_active_task->ebx;
 //	Register ecx=osca_active_task->ecx;
@@ -67,7 +67,7 @@ extern "C" [[noreturn]] auto tsk0()->void{
 	while(true){
 		// handle keyboard events
 		while(true){
-			if(task_focused_id!=taskId){
+			if(task_focused!=this_task){
 				break;
 			}
 			const Byte sc=keyboard.get_next_scan_code();
