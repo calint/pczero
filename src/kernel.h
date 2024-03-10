@@ -201,10 +201,10 @@ public:
 		if(s==e){
 			return 0; // no more events
 		}
-		const Byte ch=buf[s];
+		const Byte scan_code=buf[s];
 		s++;
 		s&=sizeof(buf)-1; // roll
-		return ch;
+		return scan_code;
 	}
 };
 
