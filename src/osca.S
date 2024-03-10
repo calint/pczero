@@ -63,8 +63,8 @@ _start:
 # jump over BIOS Parameter Block (BPB) because
 # that memory may be written to by BIOS when booting from USB
 jmp _main
-.space 3-(.-_start),0x90 # support 2 or 3 bytes encoded jmp
-.space 59,0 # BPB area that may be written to by BIOS
+.space 3-(.-_start),0x90 # support 2 or 3 bytes encoded jmp, space with 'nop'
+.space 59,0x90 # BPB area that may be written to by BIOS, space with 'nop'
 _main:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - setup
 #mov %dl,osca_boot_drive # save boot drive

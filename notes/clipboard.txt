@@ -4,12 +4,16 @@ git reset --hard HEAD
 # tag with date and time
 TAG=$(date "+%Y-%m-%d--%H-%M") && git tag $TAG && git push origin $TAG
 
+# print 16 bit assembler code
+objdump -m i8086 -D bin/src/osca.o | less
 
+# print assembler with source (compile with option -g for source)
+objdump -dS bin/src/main.o | less
+
+# print 16 bit assembler code
 objdump -b binary -m i8086 -D pczero.img | less
 
 objdump -b binary -m i8086 -D pczero.img | grep call
-
-objdump -dS bin/src/main.o | less
 
 objdump -d bin/src/main.o | grep call
 
