@@ -1,16 +1,21 @@
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 
+# kernel osca
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - info
+# reviewed: 2024-03-09
 # tested on
 # * linux 6.5.0 qemu-system-i386 8.0.4
+# * asus zenbook
 # * linux 5.19 qemu 7.0.0
 # * linux 5.19 VirtualBox 6.1 (no enabled nested paging)
-# * asus zenbook
 #
+# memory map
 # 00000-003FF  IVT (Interrupt Vector Table)
 # 00400-005FF  BDA (BIOS Data Area)
 # 00600-9FFFF  Ordinary application RAM
 # 00600-0077F    osca IDT (Interrupt Descriptor Table)
 # 00780-07BFF    free
 # 07C00-07FFF    osca kernel
-# 08000-         application
+# 08000-9FFFF    application
 # A0000-BFFFF  Video memory
 # C0000-EFFFF  Optional ROMs (The VGA ROM is usually located at C0000)
 # F0000-FFFFF  BIOS ROM
@@ -258,7 +263,7 @@ or $CR0_BIT_MP,%al #  if TS (Task switched) bit is set and a FPU
 mov %eax,%cr0      #   instruction is used then exception 7 is triggered
 # initiate the tasks' FPU state with initial values
 fninit # initiate FPU
-mov $osca_tasks,%ebx
+mov $osca_tasks,%ebx # for each task
 lp2:
   fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx) # store initiated fpu state
   add $TASK_STRUCT_SIZE,%ebx
@@ -378,7 +383,7 @@ osca_yield_exit_without_task_switch:
 # task's TSS is still marked busy, which would cause a general-protection
 # (#GP) exception."
 #
-#—Intel Software Developer Manual
+# —Intel Software Developer Manual
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 1024Hz timer
 .align 4
 isr_tmr:
