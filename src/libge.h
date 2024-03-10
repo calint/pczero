@@ -205,9 +205,7 @@ public:
 
 		// delete cache
 		delete[]pts_wld_;
-		if(nmls_wld_){
-			delete[]nmls_wld_;
-		}
+		delete[]nmls_wld_;
 	}
 
 	constexpr Object()=delete;
