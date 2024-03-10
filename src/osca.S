@@ -55,7 +55,6 @@
 .set CR0_BIT_MP,2 # Monitor co-processor bit
 .set CR0_BIT_TS,8 # Task switched bit
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - exports
-.global osca_key # last received keyboard scan code
 .global osca_tmr_lo # 1024 Hz timer low bits
 .global osca_tmr_hi # 1024 Hz timer high bits
 .global osca_yield # export function
@@ -493,10 +492,12 @@ isr_tmr_acknowledge_and_return:
 isr_kbd:
   cli # disable interrupts
   pusha # save registers
+  xor %eax,%eax # clear eax
   in $0x60,%al # read keyboard port
-  mov %al,osca_key # store
   mov %al,0xa0000+320-1 # create output on screen
-  call osca_key_changed # call keyboard handler C function
+  push %eax # function argument
+  call osca_on_key #  callback c function
+  pop %eax # restore stack
   mov $0x20,%al # ack interrupt
   out %al,$0x20 # ...
   popa # restore registers
@@ -543,6 +544,5 @@ tmp_eax:.long 0 # used in osca_yield and isr_tmr
 tmp_ebx:.long 0 # ...
 tmp_ecx:.long 0 # ...
 tmp_eip:.long 0 # ...
-osca_key:.byte 0 # last key event, exported
 .space sector2+512-.,0
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done

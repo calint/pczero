@@ -70,7 +70,7 @@ extern "C" [[noreturn]] auto tsk0()->void{
 			if(osca_task_focused!=this_task){
 				break;
 			}
-			const Byte sc=keyboard.get_next_scan_code();
+			const Byte sc=keyboard.get_next_key();
 			if(!sc){
 				break;
 			}

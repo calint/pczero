@@ -187,17 +187,17 @@ class Keyboard{
 	Byte s{}; // next event index
 	Byte e{}; // last event index +1 & roll
 public:
-	// called by 'osca_key_changed'
-	constexpr auto on_key(const Byte ch)->void{
+	// called by 'osca_on_key'
+	constexpr auto on_key(const Byte scan_code)->void{
 		const Byte ne=(e+1)&(sizeof(buf)-1); // next end index
 		if(ne==s){ // check overrun
-			return; // write would overwrite unhandled key. display on status line?
+			return; // write would overwrite unhandled scan_code. display on status line?
 		}
-		buf[e]=ch;
+		buf[e]=scan_code;
 		e=ne;
 	}
 	// returns keyboard scan code or 0 if no more events.
-	constexpr auto get_next_scan_code()->Byte{
+	constexpr auto get_next_key()->Byte{
 		if(s==e){
 			return 0; // no more events
 		}
@@ -252,19 +252,19 @@ extern "C" auto osca_init()->void{
 }
 // called by osca from the keyboard interrupt
 // there is no task switch during this function
-extern "C" auto osca_key_changed()->void{
+extern "C" auto osca_on_key(unsigned scan_code)->void{
 	static bool keyboard_ctrl_pressed{};
 
 	using namespace osca;
 	// on screen
-	*reinterpret_cast<Byte*>(0xa0000+4)=osca_key;
+	*reinterpret_cast<unsigned*>(0xa0000+4)=scan_code;
 
-	if(osca_key==0x1d)keyboard_ctrl_pressed=true;
-	else if(osca_key==0x9d)keyboard_ctrl_pressed=false;
+	if(scan_code==0x1d)keyboard_ctrl_pressed=true;
+	else if(scan_code==0x9d)keyboard_ctrl_pressed=false;
 	
 	// ? implement better task focus switch (same behaviour as alt+tab)
 	if(keyboard_ctrl_pressed){ // ctrl+tab
-		if(osca_key==0xf){ // tab pressed
+		if(scan_code==0xf){ // tab pressed
 			const Task*prev_task_focused=osca_task_focused;
 			while(true){
 				osca_task_focused++;
@@ -282,8 +282,8 @@ extern "C" auto osca_key_changed()->void{
 		}
 
 		// if F1 through F12 pressed toggle running state of task
-		if(osca_key>=0x3b && osca_key<=0x3b+12){
-			const Byte tsk=osca_key-0x3b;
+		if(scan_code>=0x3b && scan_code<=0x3b+12){
+			const Byte tsk=Byte(scan_code)-0x3b;
 			if(sizeof(osca_tasks)/sizeof(Task)>tsk){
 				osca_tasks[tsk].set_running(!osca_tasks[tsk].is_running());
 			}
@@ -291,8 +291,8 @@ extern "C" auto osca_key_changed()->void{
 		}
 	}
 
-	// to keyboard handler
-	keyboard.on_key(osca_key);
+	// to keyboard buffer
+	keyboard.on_key(Byte(scan_code));
 }
 } // end namespace osca
 

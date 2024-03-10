@@ -65,9 +65,6 @@ inline auto osca_enable_interrupts()->void{asm("sti");}
 // current active task
 extern "C" const Task*osca_task_active;
 
-// last received scan code
-extern "C" volatile const Byte osca_key;
-
 // time lower 32b
 extern "C" volatile const unsigned osca_tmr_lo;
 
@@ -87,8 +84,8 @@ extern "C" auto osca_yield()->void;
 // called before starting tasks
 extern "C" auto osca_init()->void;
 
-// called from 'isr_kbd' when 'osca_key' changed
-extern "C" auto osca_key_changed()->void;
+// called from 'isr_kbd' when a key is pressed or released
+extern "C" auto osca_on_key(unsigned scan_code)->void;
 
 // called when interrupt other than keyboard or timer
 extern "C" auto osca_exception()->void;
