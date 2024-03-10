@@ -1,13 +1,25 @@
-[ ] libge.h: Object: allow change of ObjectDef
-[ ] lib.h: Data::address_offset: check if within bounds?
-[ ] lib.h: Data::to: check if within bounds?
-[ ] lib.h: Bitmap::address_offset: check if within bounds?
-[ ] lib.h: Bitmap::address_offset: (...)*sizeof(T) can overflow?
+[ ] libge: Object: allow change of ObjectDef
+[ ] lib: Data::address_offset: check if within bounds?
+[ ] lib: Data::to: check if within bounds?
+[ ] lib: Bitmap::address_offset: check if within bounds?
+[ ] lib: Bitmap::address_offset: (...)*sizeof(T) can overflow?
 [ ] improved Heap that does not fragment (o1store?)
 [ ] move the heap and stack memory of the vga buffer for better performance 
-[ ] osca.S: read more sectors
-[ ] default initializing objects with '{}' is superfluous
-    => built in types receive undefined values
+[ ] osca: read more sectors
+[ ] libge: cached transformed points without translation
+[ ] move draw_x into Bitmap?
+[ ] implement a unique_ptr<T>
+[o] heap
+[x]   step 1. a vector of [*ptr,size] elements pointing to freed memory. O(n) free, O(n) alloc
+[ ]   step 2. hash table on size with vectors [*ptr,size]. O(n/x)
+[ ]   step 3. libge heap optimized for Object. O(1) free, O(n/x) alloc
+[ ]      override 'void* operator new(size_t s)' and 'void operator delete(void*)'
+[ ]      [*heptr,*obj] heap entry pointer to used slot, pointer to object that is updated when the slot is moved
+[ ] review const correctness regarding const bmp().data().address() then write to pointer
+[ ]   const Bitmap&dbmp=dsp.bmp(); then mutate data in const dbmp
+[ ] lib: PrinterToBitmap pos in pixels
+[ ] lib: PrinterToConsole pos in characters
+------------------------------------------------------------------------------
 [x] osca: is it necessary to do fwait on i386+387?
 [x]   "co-processors from 287 on do not need it"
 [x]     http://computer-programming-forum.com/46-asm/e6d7eab90bbcb1c2.htm
@@ -19,14 +31,12 @@
 [x]     Intel® 64 and IA-32 Architectures Software Developer’s Manual page 3-424 Vol. 2A: FSAVE/FNSAVE—Store x87 FPU State
 [x] review 'using' Scale Coord Angle Vertex etc terminology
 [x] lib2d move Point to lib. Replace Coords.
-[ ] lib: cached transformed points without translation
 [x] osca: task_id (lower 16 bits of task.bits?)
 [x]   keyboard_focus
 [x] review default values and where it is necessary to specify
 [x]   although redundant, initializing to 0, false, nullptr is ok. initialize everything.
 [x] struct TaskInfo{eip,eflags,bits,eax,ebx...}
 [x]   enable/disable task
-[ ] move draw_x into Bitmap?
 [-] Osca::Game multiple instances
     => ok for toy application
 [-]   PhyicsStates instance
@@ -34,66 +44,61 @@
 [-]   Game instance
 [x] libge: handle objects with null bounding points indexes, no normals
 [x] better clock, higher resolution than the default 18.2 Hz -> 1024 Hz RTC
-[ ] implement a unique_ptr<T>
-[o] heap
-[x]   step 1. a vector of [*ptr,size] elements pointing to freed memory. O(n) free, O(n) alloc
-[ ]   step 2. hash table on size with vectors [*ptr,size]. O(n/x)
-[ ]   step 3. libge heap optimized for Object. O(1) free, O(n/x) alloc
-[ ]      override 'void* operator new(size_t s)' and 'void operator delete(void*)'
-[ ]      [*heptr,*obj] heap entry pointer to used slot, pointer to object that is updated when the slot is moved
-[o] render convex polygons
-[o]   ObjectDef: polygons with indexes to definition points
-[x]     step 1. use bounding shape polygon
-[x]       review
-[ ]     step 2. define {color,{npts,pts_ix[]}}
-[ ]   clip to viewport
-[x]   render lines -> polygon outline.
-[-] multiple bounding shapes per object to allow non-convex shape
-    => ok for toy application
-[o] input text
-[x]   step 1. one keyboard buffer for the system
-[x]   step 2. "osca_keyb_task" pointer to function that should read keyboard
-[ ]     a non-hack implementation
-[x]   step 3. a way to switch keyboard focus to other tasks
-[x] investigate why any -O other than -O0,-O1,-Og breaks osca_keyb.next_scan_code() -> osca did not load the whole program
-[ ] review const correctness regarding const bmp().data().address() then write to pointer
-[ ]   const Bitmap&dbmp=dsp.bmp(); then mutate data in const dbmp
-[ ] lib: PrinterToBitmap pos in pixels
-[ ] lib: PrinterToConsole pos in characters
 [x] osca: time_ms -> implemented in World
 [x] extract boot.cc to boot.S
 [x] use link.ld to build binary? ok.
-[x] inline assembler for pz_memcpy
-[ ]   clobbers memory?
-[ ]   movsl,movsw,movsb optimization?
+[x] investigate why any -O other than -O0,-O1,-Og breaks osca_keyb.next_scan_code()
+    => osca did not load the whole program
 [x] test writing to second meg to confirm enabling of a20 line
 [x]   is enabled by default in qemu and on asus zenbook
-[x] bitmap
-[ ]   optimized for 32b memcpy?
+[x] 5x6 font (30 bits/character)
+[x]   c code generated from font file 
+      => done manually
+[x] inline assembler character renderer
+    => written in C++
+[x] print hex numbers
+[x] scan code to ascii
+[x] input text
+[x]   step 1. one keyboard buffer for the system
+[x]   step 2. "osca_keyb_task" pointer to function that should read keyboard
+[-]     a non-hack implementation
+        => good enough for toy application
+[x]   step 3. a way to switch keyboard focus to other tasks
 [-] sprite with transparency
     => sprites not implemented
 [-]   collision detection
 [-]     with background
 [-]     with other sprites
-[o] 5x6 font (30 bits/character)
-[x]   c code generated from font file -> done manually
-[x] inline assembler character renderer -> written in C++
-[x] print hex numbers
-[x] scan code to ascii
-[o] bmp printer
+[-] pointing device
+[-]   events
+[-]     {byte event=move,byte pad,short x,short y} 6B
+[-]     {byte event=click,byte btn} 2B
+[-] kernel events to task
+[-]   pointer to task record of focused task
+[-]   in task record - pointer to ring buffer of events
+[-]   keyboard event
+[-]     {byte event=key,byte scan_code} 2B
+[-] task event loop
+[-]   task.next_event()->byte* // pointer to next event or 0 if done
+[x] bitmap
+[-]   optimized for 32b memcpy?
+[x] bmp printer
 [x]   hex
 [x]   characters
 [x]   strings
-[ ]   integers
-[ ]   floats
-[ ] pointing device
-[ ]   events
-[ ]     {byte event=move,byte pad,short x,short y} 6B
-[ ]     {byte event=click,byte btn} 2B
-[ ] kernel events to task
-[ ]   pointer to task record of focused task
-[ ]   in task record - pointer to ring buffer of events
-[ ]   keyboard event
-[ ]     {byte event=key,byte scan_code} 2B
-[ ] task event loop
-[ ]   task.next_event()->byte* // pointer to next event or 0 if done
+[x]   integers
+[-]   floats
+[x] render convex polygons
+[x]   ObjectDef: polygons with indexes to definition points
+[x]     step 1. use bounding shape polygon
+[x]       review
+[-]     step 2. define {color,{npts,pts_ix[]}}
+[-]   clip to viewport
+[x]   render lines -> polygon outline.
+[-] multiple bounding shapes per object to allow non-convex shape
+    => ok for toy application
+[x] default initializing objects with '{}' is superfluous
+    => built in types receive undefined values
+[x] inline assembler for pz_memcpy
+[x]   clobbers memory?
+[-]   movsl,movsw,movsb optimization?

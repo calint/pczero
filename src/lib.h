@@ -719,91 +719,36 @@ public:
 
 using Matrix=MatrixT<Coord>;
 
-//inline auto pz_memcpy(Address to,Address from,SizeBytes n)->void{
-//	// ? optimize movsb a times,movsd b times,movsb c times
-//	asm("mov %0,%%esi;"
-//		"mov %1,%%edi;"
-//		"mov %2,%%ecx;"
-//		"rep movsb;"
-//		:
-//		:"r"(from),"r"(to),"r"(n)
-//		:"%esi","%edi","%ecx","memory" // ? clobbers memory?
-//	);
-//}
-//
-//inline auto pz_memset(Address to,char v,SizeBytes n)->void{
-//	// ? optimize stosb a times,stosd b times,stosb c times
-//	asm("mov %0,%%edi;"
-//		"mov %1,%%al;"
-//		"mov %2,%%ecx;"
-//		"rep stosb;"
-//		:
-//		:"r"(to),"r"(v),"r"(n)
-//		:"%edi","%al","%ecx","memory" // ? clobbers memory?
-//	);
-//}
-
-auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
-	char*d=static_cast<char*>(dst);
-	char*s=static_cast<char*>(src);
-	while(n--){
-		*d++=*s++;
-	}
+inline auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
+    asm(
+        "cld;"
+        "rep movsb;"
+        :"=D"(dst),"=S"(src),"=c"(n)
+        :"0"(dst),"1"(src),"2"(n)
+        :"memory"
+    );
 }
 
-auto pz_memset(Address dst,Byte byte,SizeBytes n)->void{
-	Byte*d=static_cast<Byte*>(dst);
-	while(n--){
-		*d++=byte;
-	}
+inline auto pz_memset(Address dst,Byte value,SizeBytes n)->void{
+    asm(
+        "cld;"
+        "rep stosb;"
+        :"=D"(dst),"=c"(n)
+        :"0"(dst),"1"(n),"a"(value)
+        :"memory"
+    );
 }
-} // end namespace osca
 
 // built-in functions replacements (used by clang++ -O0 and -Os)
 extern "C" void*memcpy(void*dst,const void*src,unsigned n);
-extern "C" void*memcpy(void*dst,const void*src,unsigned n){
-	using namespace osca;
-	Byte*d=static_cast<Byte*>(dst);
-	const Byte*s=static_cast<const Byte*>(src);
-	while(n--){
-		*d++=*s++;
-	}
-	return dst;
+extern "C" void*memset(void* dst, int value,unsigned n);
+void*memcpy(void*dst,const void*src,unsigned n){
+	pz_memcpy(Address(dst),Address(src),SizeBytes(n));
+    return dst;
 }
-extern "C" void*memset(void*dst,int byte,unsigned n);
-extern "C" void*memset(void*dst,int byte,unsigned n){
-	using namespace osca;
-	Byte ch=static_cast<Byte>(byte);
-	Byte*d=static_cast<Byte*>(dst);
-	while(n--){
-		*d++=ch;
-	}
-	return dst;
+void*memset(void* dst,int value,unsigned n){
+	pz_memset(Address(dst),Byte(value),SizeBytes(n));
+    return dst;
 }
-//extern "C" void*memcpy(void*to,void*from,unsigned n);
-//extern "C" void*memcpy(void*to,void*from,unsigned n){
-//	// ? optimize movsb a times,movsd b times,movsb c times
-//	asm("mov %0,%%esi;"
-//		"mov %1,%%edi;"
-//		"mov %2,%%ecx;"
-//		"rep movsb;"
-//		:
-//		:"r"(from),"r"(to),"r"(n)
-//		:"%esi","%edi","%ecx","memory" // ? clobbers memory?
-//	);
-//	return to;
-//}
-//extern "C" void*memset(void*to,unsigned c,unsigned n);
-//extern "C" void*memset(void*to,unsigned c,unsigned n){
-//	unsigned char ch=static_cast<unsigned char>(c);
-//	// ? optimize stosb a times,stosd b times,stosb c times
-//	asm("mov %0,%%edi;"
-//		"mov %1,%%al;"
-//		"mov %2,%%ecx;"
-//		"rep stosb;"
-//		:
-//		:"r"(to),"r"(ch),"r"(n)
-//		:"%edi","%al","%ecx","memory" // ? clobbers memory?
-//	);
-//	return to;
-//}
+
+} // end namespace osca
