@@ -187,7 +187,7 @@ class Keyboard{
 	Byte s{}; // next event index
 	Byte e{}; // last event index +1 & roll
 public:
-	// called by 'osca_keyb_ev'
+	// called by 'osca_key_changed'
 	constexpr auto on_key(const Byte ch)->void{
 		const Byte ne=(e+1)&(sizeof(buf)-1); // next end index
 		if(ne==s){ // check overrun
@@ -252,7 +252,7 @@ extern "C" auto osca_init()->void{
 }
 // called by osca from the keyboard interrupt
 // there is no task switch during this function
-extern "C" auto osca_keyb_ev()->void{
+extern "C" auto osca_key_changed()->void{
 	static bool keyboard_ctrl_pressed{};
 
 	using namespace osca;

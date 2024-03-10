@@ -496,7 +496,7 @@ isr_kbd:
   in $0x60,%al # read keyboard port
   mov %al,osca_key # store
   mov %al,0xa0000+320-1 # create output on screen
-  call osca_keyb_ev # call keyboard handler C function
+  call osca_key_changed # call keyboard handler C function
   mov $0x20,%al # ack interrupt
   out %al,$0x20 # ...
   popa # restore registers
