@@ -212,7 +212,7 @@ extern Keyboard keyboard;
 Keyboard keyboard; // global initialized by 'osca_init'
 
 // focused task that should read keyboard
-inline Task*osca_task_focused{};
+inline const Task*osca_task_focused{};
 
 // declared in linker script 'link.ld' after code and data at first 64KB boundary
 // address of symbol marks start of contiguous memory
@@ -272,10 +272,10 @@ extern "C" auto osca_key_changed()->void{
 					osca_task_focused=osca_tasks;
 				}
 				if(osca_task_focused==prev_task_focused){
-					return; // no new focusable task
+					return; // found no new focusable task
 				}
 				if(osca_task_focused->is_running() && osca_task_focused->is_grab_keyboard_focus()){
-					// task is running and requests keyboard
+					// task is running and requests keyboard focus
 					return;
 				}
 			}
