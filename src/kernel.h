@@ -196,7 +196,7 @@ public:
 		buf[e]=scan_code;
 		e=ne;
 	}
-	// returns keyboard scan code or 0 if no more events.
+	// returns keyboard scan code or 0 if no more events
 	constexpr auto get_next_key()->Byte{
 		if(s==e){
 			return 0; // no more events
@@ -252,7 +252,7 @@ extern "C" auto osca_init()->void{
 }
 // called by osca from the keyboard interrupt
 // there is no task switch during this function
-extern "C" auto osca_on_key(unsigned scan_code)->void{
+extern "C" auto osca_on_key(const Byte scan_code)->void{
 	static bool keyboard_ctrl_pressed{};
 
 	using namespace osca;
@@ -292,7 +292,7 @@ extern "C" auto osca_on_key(unsigned scan_code)->void{
 	}
 
 	// to keyboard buffer
-	keyboard.on_key(Byte(scan_code));
+	keyboard.on_key(scan_code);
 }
 } // end namespace osca
 

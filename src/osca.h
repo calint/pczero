@@ -85,7 +85,7 @@ extern "C" auto osca_yield()->void;
 extern "C" auto osca_init()->void;
 
 // called from 'isr_kbd' when a key is pressed or released
-extern "C" auto osca_on_key(unsigned scan_code)->void;
+extern "C" auto osca_on_key(Byte scan_code)->void;
 
 // called when interrupt other than keyboard or timer
 extern "C" auto osca_exception()->void;
