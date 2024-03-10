@@ -14,7 +14,7 @@
 # 00600-9FFFF  Ordinary application RAM
 # 00600-0077F    osca IDT (Interrupt Descriptor Table)
 # 00780-07BFF    free
-# 07C00-07FFF    osca kernel
+# 07C00-07FFF    kernel osca
 # 08000-9FFFF    application
 # A0000-BFFFF  Video memory
 # C0000-EFFFF  Optional ROMs (The VGA ROM is usually located at C0000)
