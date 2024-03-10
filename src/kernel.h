@@ -55,7 +55,7 @@ alignas(16) struct Task osca_tasks[]{
 	{Register(tsk3),0xa'0000+320*196,0     ,0b10  ,5   ,0   ,0   ,0   ,0   ,0   ,0   ,2   ,160 },
 	{Register(tsk3),0xa'0000+320*200,0     ,0b10  ,6   ,0   ,0   ,0   ,0   ,0   ,0   ,4   ,180 },
 };
-Task*osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
+const Task* const osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
 
 class Heap final{
 	struct Entry final{
