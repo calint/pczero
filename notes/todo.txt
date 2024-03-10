@@ -4,19 +4,16 @@
 [ ] lib: Bitmap::address_offset: check if within bounds?
 [ ] lib: Bitmap::address_offset: (...)*sizeof(T) can overflow?
 [ ] improved Heap that does not fragment (o1store?)
-[ ] move the heap and stack memory of the vga buffer for better performance 
 [ ] osca: read more sectors
 [ ] libge: cached transformed points without translation
-[ ] move draw_x into Bitmap?
 [ ] implement a unique_ptr<T>
 [o] heap
 [x]   step 1. a vector of [*ptr,size] elements pointing to freed memory. O(n) free, O(n) alloc
 [ ]   step 2. hash table on size with vectors [*ptr,size]. O(n/x)
-[ ]   step 3. libge heap optimized for Object. O(1) free, O(n/x) alloc
-[ ]      override 'void* operator new(size_t s)' and 'void operator delete(void*)'
-[ ]      [*heptr,*obj] heap entry pointer to used slot, pointer to object that is updated when the slot is moved
-[ ] review const correctness regarding const bmp().data().address() then write to pointer
-[ ]   const Bitmap&dbmp=dsp.bmp(); then mutate data in const dbmp
+      => if 'size' is not arbitrary then there is a set of sizes depending on the program
+         example. cached world coordinates depend on the compile time known sizes
+[x]   step 3. libge heap optimized for Objects. O(1) free, O(1) alloc
+              => 'o1store' from "https://github.com/calint/glos"
 [ ] lib: PrinterToBitmap pos in pixels
 [ ] lib: PrinterToConsole pos in characters
 ------------------------------------------------------------------------------
@@ -102,3 +99,9 @@
 [x] inline assembler for pz_memcpy
 [x]   clobbers memory?
 [-]   movsl,movsw,movsb optimization?
+[x] review const correctness regarding const bmp().data().address() then write to pointer
+[x]   const Bitmap&dbmp=dsp.bmp(); then mutate data in const bmp
+      => ok
+[x] move draw_x into Bitmap?
+[-] move the stack memory of the vga buffer for better performance (vga is slow)
+    => toy application done. displaying heap and stack on screen is nice
