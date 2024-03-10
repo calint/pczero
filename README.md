@@ -21,4 +21,4 @@ contains:
 * sample tasks (main.cc)
 
 
-![screenshot](https://github.com/calint/pczero/assets/1920811/00afdb23-8a76-4390-a7cc-df34f018f979)
+![screenshot](https://github.com/calint/pczero/assets/1920811/409c9152-a3aa-486d-ac26-0df128f20db9)
