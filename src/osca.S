@@ -525,7 +525,7 @@ isr_fpu:
 
 isr_fpu_done:
   pop %eax
-  sti
+  sti # enables interrupts after next instruction
   iret
 
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - other
