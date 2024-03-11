@@ -72,17 +72,16 @@ extern "C" Task*osca_task_active;
 // timer ticks - 64 bits
 extern "C" volatile const uint64 osca_tick;
 
-// timer ticks - lower 32b
+// timer ticks - lower 32 bits
 extern "C" volatile const uint32 osca_tick_lo;
 
-// timer ticks - higher 32b
+// timer ticks - higher 32 bits
 extern "C" volatile const uint32 osca_tick_hi;
 
 // seconds per timer tick
 constexpr float osca_tick_per_sec=1.0f/1024; // 1024 Hz
 
-
-// switches to next task
+// switches to next running task
 // note: single small task yielding in a tight loop might inhibit
 //       interrupts due to most time being spent in non-interruptable
 //       task switching code
