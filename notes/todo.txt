@@ -1,4 +1,7 @@
 [x] osca: don't use current task stack to push/pop
+    => isr_kbd uses osca stack
+    => osca_yield does one 32 bit push/pop on current task stack
+    => isr_tmr does one 16 bit push/pop on current task stack
 [ ] libge: Object: allow change of ObjectDef
 [ ] lib: Data::address_offset: check if within bounds?
 [ ] lib: Data::to: check if within bounds?

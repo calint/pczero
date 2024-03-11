@@ -108,15 +108,25 @@ asm("  jmp tsk1");
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] auto tsk2()->void{
 	while(true){
+		// draw red line
+		pz_memset(Address(0xa'0000+320*150),4,320);
+
 		// copy kernel and osca stack to screen
 		constexpr int kernel_size=512*2;
-		Data src=Data(Address(0x7c00),kernel_size); // kernel binary
-		Data dst=Data(Address(0xa'0000+320*150),kernel_size); // on screen
-		src.to(dst);
+		Data src_kernel=Data(Address(0x7c00),kernel_size); // kernel binary
+		Data dst_kernel=Data(Address(0xa'0000+320*151),kernel_size); // on screen
+		src_kernel.to(dst_kernel);
 
+		// draw red line
+		pz_memset(Address(0xa'0000+320*155),4,320);
+
+		// copy osca stack
 		Data src_stk=Data(Address(0x7b00),256);
-		Data dst_stk=Data(Address(0xa'0000+320*153),256); // on screen
+		Data dst_stk=Data(Address(0xa'0000+320*156),256); // on screen
 		src_stk.to(dst_stk);
+
+		// draw red line
+		pz_memset(Address(0xa'0000+320*157),4,320);
 
 		osca_yield();
 	}
