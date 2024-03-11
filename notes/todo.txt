@@ -20,6 +20,8 @@
               => 'o1store' from "https://github.com/calint/glos"
 [ ] lib: PrinterToBitmap pos in pixels
 [ ] lib: PrinterToConsole pos in characters
+[x] osca: get EBDA usable memory setting application top of memory
+    => using safe method of avoiding EBDA
 ------------------------------------------------------------------------------
 [x] osca: is it necessary to do fwait on i386+387?
 [x]   "co-processors from 287 on do not need it"

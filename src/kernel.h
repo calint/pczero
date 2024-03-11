@@ -222,15 +222,9 @@ extern "C" int free_mem_start_symbol;
 // initiates globals
 extern "C" auto osca_init()->void{
 	using namespace osca;
+
 	// green dot on screen (top left)
 	*reinterpret_cast<char*>(0xa'0000)=2;
-	
-	// start of contiguous free memory
-	Address free_mem_start=Address(&free_mem_start_symbol);
-	// size of free memory (to the vga address space that starts at 0xa'0000)
-	SizeBytes free_mem_size=0x8'0000-reinterpret_cast<SizeBytes>(free_mem_start);
-	// clear free memory
-	pz_memset(free_mem_start,0,free_mem_size);
 
 	// initiate globals
 	vga13h=Vga13h{};
@@ -244,6 +238,29 @@ extern "C" auto osca_init()->void{
 	keyboard=Keyboard{};
 	
 	osca_task_focused=&osca_tasks[0];
+
+	//
+	// setup heap
+	//
+
+	// start of contiguous free memory
+	const Address free_mem_start=Address(&free_mem_start_symbol);
+	
+	// usable memory before EBDA. see https://wiki.osdev.org/Memory_Map_(x86)
+	// const unsigned short usable_kb_before_ebda = *reinterpret_cast<unsigned short*>(0x413);
+	// size of free memory (to beginning of EBDA)
+	// const Address start_of_ebda=Address(usable_kb_before_ebda<<10);
+	// debugging
+	// err.p_hex_32b(unsigned(start_of_ebda));
+	// size of free memory
+	// const SizeBytes free_mem_size=SizeBytes(start_of_ebda)-SizeBytes(free_mem_start);
+	
+	// safe version does not use unused EBDA memory 
+	const SizeBytes free_mem_size=SizeBytes(0x8'0000)-SizeBytes(free_mem_start);
+	// err.p_hex_32b(unsigned(free_mem_size));
+
+	// clear free memory
+	pz_memset(free_mem_start,0,free_mem_size);
 	
 	// initiate heap with a size of 320*100 B
 	Heap::init_statics({free_mem_start,320*100},nobjects_max);
