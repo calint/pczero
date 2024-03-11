@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-js"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>Memory Map (x86) - OSDev Wiki</title>
+<meta charset="UTF-8">
+<meta name="generator" content="MediaWiki 1.18.0">
+<link rel="shortcut icon" href="https://wiki.osdev.org/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="https://wiki.osdev.org/opensearch_desc.php" title="OSDev Wiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.osdev.org/api.php?action=rsd">
+<link rel="alternate" type="application/atom+xml" title="OSDev Wiki Atom feed" href="https://wiki.osdev.org/index.php?title=Special:RecentChanges&amp;feed=atom">
+<link rel="stylesheet" href="Memory%20Map%20(x86)%20-%20OSDev%20Wiki_files/load.css">
+<style type="text/css" media="all">.mw-collapsible-toggle{float:right} li .mw-collapsible-toggle{float:none} .mw-collapsible-toggle-li{list-style:none}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:4250852ed2349a0d4d0fc6509a3e7d4c */
+</style><style type="text/css" media="all">.js-messagebox{margin:1em 5%;padding:0.5em 2.5%;border:1px solid #ccc;background-color:#fcfcfc;font-size:0.8em}.js-messagebox .js-messagebox-group{margin:1px;padding:0.5em 2.5%;border-bottom:1px solid #ddd}.js-messagebox .js-messagebox-group:last-child{border-bottom:thin none transparent}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:8b08bdc91c52a9ffba396dccfb5b473c */
+</style><meta name="ResourceLoaderDynamicStyles" content="">
+<link rel="stylesheet" href="Memory%20Map%20(x86)%20-%20OSDev%20Wiki_files/load_002.css">
+<style>a:lang(ar),a:lang(ckb),a:lang(fa),a:lang(kk-arab),a:lang(mzn),a:lang(ps),a:lang(ur){text-decoration:none}a.new,#quickbar a.new{color:#ba0000}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:c88e2bcd56513749bec09a7e29cb3ffa */
+</style>
+<script src="Memory%20Map%20(x86)%20-%20OSDev%20Wiki_files/load_006.es"></script><script src="Memory%20Map%20(x86)%20-%20OSDev%20Wiki_files/load.es"></script>
+<script>if(window.mw){
+	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "Memory_Map_(x86)", "wgTitle": "Memory Map (x86)", "wgCurRevisionId": 28292, "wgArticleId": 2278, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["X86", "Physical Memory"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
+}
+</script><script>if(window.mw){
+	mw.loader.load(["mediawiki.page.startup"]);
+}
+</script><script type="text/javascript" src="Memory%20Map%20(x86)%20-%20OSDev%20Wiki_files/load_004.es"></script>
+<!--[if lt IE 7]><style type="text/css">body{behavior:url("/skins/vector/csshover.min.htc")}</style><![endif]--></head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Memory_Map_x86 action-view skin-vector">
+		<div id="mw-page-base" class="noprint"></div>
+		<div id="mw-head-base" class="noprint"></div>
+		<!-- content -->
+		<div id="content">
+			<a id="top"></a>
+			<div id="mw-js-message" style="display:none;" class="js-messagebox"></div>
+						<!-- firstHeading -->
+			<h1 id="firstHeading" class="firstHeading">Memory Map (x86)</h1>
+			<!-- /firstHeading -->
+			<!-- bodyContent -->
+			<div id="bodyContent">
+								<!-- tagline -->
+				<div id="siteSub">From OSDev Wiki</div>
+				<!-- /tagline -->
+								<!-- subtitle -->
+				<div id="contentSub"></div>
+				<!-- /subtitle -->
+																<!-- jumpto -->
+				<div id="jump-to-nav">
+					Jump to: <a href="#mw-head">navigation</a>,
+					<a href="#p-search">search</a>
+				</div>
+				<!-- /jumpto -->
+								<!-- bodycontent -->
+				<div lang="en" dir="ltr" class="mw-content-ltr"><p>This article describes the contents of the computer's physical memory at the moment that the BIOS jumps to your bootloader code.
+</p>
+<table id="toc" class="toc"><tbody><tr><td><div id="toctitle"><h2>Contents</h2><span class="toctoggle">&nbsp;[<a href="#" class="internal" id="togglelink">hide</a>]&nbsp;</span></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Real_mode_address_space_.28.3C_1_MiB.29"><span class="tocnumber">1</span> <span class="toctext">Real mode address space (&lt; 1 MiB)</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Overview"><span class="tocnumber">1.1</span> <span class="toctext">Overview</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#BIOS_Data_Area_.28BDA.29"><span class="tocnumber">1.2</span> <span class="toctext">BIOS Data Area (BDA)</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Extended_BIOS_Data_Area_.28EBDA.29"><span class="tocnumber">1.3</span> <span class="toctext">Extended BIOS Data Area (EBDA)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#Extended_Memory_.28.3E_1_MiB.29"><span class="tocnumber">2</span> <span class="toctext">Extended Memory (&gt; 1 MiB)</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#See_Also"><span class="tocnumber">3</span> <span class="toctext">See Also</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#External_Links"><span class="tocnumber">3.1</span> <span class="toctext">External Links</span></a></li>
+</ul>
+</li>
+</ul>
+</td></tr></tbody></table>
+<h2> <span class="mw-headline" id="Real_mode_address_space_.28.3C_1_MiB.29"> Real mode address space (&lt; 1 MiB)</span></h2>
+<p>When a typical x86 PC boots it will be in <a href="https://wiki.osdev.org/Real_Mode" title="Real Mode">Real Mode</a>, with an active <a href="https://wiki.osdev.org/BIOS" title="BIOS">BIOS</a>.
+ During the time the CPU remains in Real Mode, IRQ0 (the clock)
+will fire repeatedly, and the hardware that is used to boot the PC 
+(floppy, hard disk, CD, Network card, USB) will also generate IRQs.
+This means that during the PC boot process, the Real Mode IVT (see 
+below) must be carefully preserved, because it is being used.
+</p><p>When the <a href="https://wiki.osdev.org/IVT" title="IVT" class="mw-redirect">IVT</a> is activated by an <a href="https://wiki.osdev.org/IRQ" title="IRQ" class="mw-redirect">IRQ</a>, it will call a BIOS routine to handle the IRQ.
+Bootloaders will also access <a href="https://wiki.osdev.org/BIOS#BIOS_functions" title="BIOS">BIOS functions</a>.
+ This means that the two memory workspaces that the BIOS uses (the BDA 
+and the EBDA) must also
+be carefully preserved during boot. Also, every time the BIOS handles an
+ IRQ0 (18 times a second), several bytes in the BDA get overwritten by 
+the BIOS
+-- so do not attempt to store anything there while IRQs are active in 
+Real Mode.
+</p><p>After all the BIOS functions have been called, and your kernel is
+ loaded into memory somewhere, the bootloader or kernel may exit Real 
+Mode
+forever (often by going into 32bit <a href="https://wiki.osdev.org/Protected_Mode" title="Protected Mode">Protected Mode</a>). If the kernel never uses Real Mode again, then the first 0x500 bytes of memory in the
+PC may be reused and overwritten. (However, it is very common to temporarily return to Real Mode in order to change the <a href="https://wiki.osdev.org/How_do_I_set_a_graphics_mode" title="How do I set a graphics mode">Video Display Mode</a>.)
+</p><p>When the CPU is in Protected Mode, <a href="https://wiki.osdev.org/System_Management_Mode" title="System Management Mode">System Management Mode</a> (SMM) is still invisibly active, and cannot be shut off. SMM also seems to
+use the EBDA. So the EBDA memory area should <b>never</b> be overwritten.
+</p><p>Note: the EBDA is a variable-sized memory area (on different 
+BIOSes). If it exists, it is always immediately below 0xA0000 in memory.
+It is absolutely guaranteed to be at most 128 KiB in size. Older 
+computers typically uses 1 KiB from 0x9FC00 - 0x9FFFF, modern firmware 
+can be found using significantly more.
+You can determine the size of the EBDA by using BIOS function <a href="https://wiki.osdev.org/Detecting_Memory_(x86)#Detecting_Low_Memory" title="Detecting Memory (x86)">INT 12h</a>, or by examining the word at 0x413 in the BDA (see below).
+Both of those methods will tell you how much conventional memory is usable before the EBDA.
+</p><p>It should also be noted that your bootloader code is loaded and 
+running in memory at physical addresses 0x7C00 through 0x7DFF. So that 
+memory
+area is likely to also be unusable until execution has been transferred 
+to a second stage bootloader, or to your kernel.
+</p>
+<h3> <span class="mw-headline" id="Overview">Overview</span></h3>
+<table border="2" cellpadding="4" cellspacing="0" style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}">
+
+<tbody><tr>
+<th> start
+</th>
+<th> end
+</th>
+<th> size
+</th>
+<th> description
+</th>
+<th colspan="2"> type
+</th></tr>
+<tr>
+<th colspan="6"> Real mode address space (the first MiB)
+</th></tr>
+<tr>
+<td> 0x00000000
+</td>
+<td> 0x000003FF
+</td>
+<td> 1 KiB
+</td>
+<td> Real Mode IVT (Interrupt Vector Table)
+</td>
+<td rowspan="2"> unusable in real mode
+</td>
+<td rowspan="6"> 640 KiB RAM ("Low memory")
+</td></tr>
+<tr>
+<td> 0x00000400
+</td>
+<td> 0x000004FF
+</td>
+<td> 256 bytes
+</td>
+<td> BDA (BIOS data area)
+</td></tr>
+<tr>
+<td> 0x00000500
+</td>
+<td> 0x00007BFF
+</td>
+<td> 29.75 KiB
+</td>
+<td> Conventional memory
+</td>
+<td rowspan="3"> usable memory
+</td></tr>
+<tr>
+<td> 0x00007C00
+</td>
+<td> 0x00007DFF
+</td>
+<td> 512 bytes
+</td>
+<td> Your OS BootSector
+</td></tr>
+<tr>
+<td> 0x00007E00
+</td>
+<td> 0x0007FFFF
+</td>
+<td> 480.5 KiB
+</td>
+<td> Conventional memory
+</td></tr>
+<tr>
+<td> 0x00080000
+</td>
+<td> 0x0009FFFF
+</td>
+<td> 128 KiB
+</td>
+<td> EBDA (Extended BIOS Data Area)
+</td>
+<td> partially used by the EBDA
+</td></tr>
+<tr>
+<td> 0x000A0000
+</td>
+<td> 0x000BFFFF
+</td>
+<td> 128 KiB
+</td>
+<td> Video display memory
+</td>
+<td> hardware mapped
+</td>
+<td rowspan="4"> 384 KiB System / Reserved ("Upper Memory")
+</td></tr>
+<tr>
+<td> 0x000C0000
+</td>
+<td> 0x000C7FFF
+</td>
+<td> 32 KiB (typically)
+</td>
+<td> Video BIOS
+</td>
+<td rowspan="3"> ROM and hardware mapped / Shadow RAM
+</td></tr>
+<tr>
+<td> 0x000C8000
+</td>
+<td> 0x000EFFFF
+</td>
+<td> 160 KiB (typically)
+</td>
+<td> BIOS Expansions
+</td></tr>
+<tr>
+<td> 0x000F0000
+</td>
+<td> 0x000FFFFF
+</td>
+<td> 64 KiB
+</td>
+<td> Motherboard BIOS
+</td></tr></tbody></table>
+<h3> <span class="mw-headline" id="BIOS_Data_Area_.28BDA.29">BIOS Data Area (BDA)</span></h3>
+<p>The BDA is only partially standardized and mostly relevant for real mode BIOS operations.
+The following is a partial list. See the External Links references below for more detail.
+</p>
+<table border="2" cellpadding="4" cellspacing="0" style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}">
+
+<tbody><tr>
+<th> address (size)
+</th>
+<th> description
+</th></tr>
+<tr>
+<td> 0x0400 (4 words)
+</td>
+<td> IO ports for COM1-COM4 serial (each address is 1 word, zero if none)
+</td></tr>
+<tr>
+<td> 0x0408 (3 words)
+</td>
+<td> IO ports for LPT1-LPT3 parallel (each address is 1 word, zero if none)
+</td></tr>
+<tr>
+<td> 0x040E (word)
+</td>
+<td> EBDA base address &gt;&gt; 4 (<b>usually!</b>)
+</td></tr>
+<tr>
+<td> 0x0410 (word)
+</td>
+<td> packed bit flags for detected hardware
+</td></tr>
+<tr>
+<td> 0x0413 (word)
+</td>
+<td> Number of kilobytes before EBDA / unusable memory
+</td></tr>
+<tr>
+<td> 0x0417 (word)
+</td>
+<td> keyboard state flags
+</td></tr>
+<tr>
+<td> 0x041E (32 bytes)
+</td>
+<td> keyboard buffer
+</td></tr>
+<tr>
+<td> 0x0449 (byte)
+</td>
+<td> Display Mode
+</td></tr>
+<tr>
+<td> 0x044A (word)
+</td>
+<td> number of columns in text mode
+</td></tr>
+<tr>
+<td> 0x0463 (2 bytes, taken as a word)
+</td>
+<td> base IO port for video
+</td></tr>
+<tr>
+<td> 0x046C (word)
+</td>
+<td> # of IRQ0 timer ticks since boot
+</td></tr>
+<tr>
+<td> 0x0475 (byte)
+</td>
+<td> # of hard disk drives detected
+</td></tr>
+<tr>
+<td> 0x0480 (word)
+</td>
+<td> keyboard buffer start
+</td></tr>
+<tr>
+<td> 0x0482 (word)
+</td>
+<td> keyboard buffer end
+</td></tr>
+<tr>
+<td> 0x0497 (byte)
+</td>
+<td> last keyboard LED/Shift key state
+</td></tr></tbody></table>
+<h3> <span class="mw-headline" id="Extended_BIOS_Data_Area_.28EBDA.29">Extended BIOS Data Area (EBDA)</span></h3>
+<p>You may see "maps" of the EBDA if you search the web. However, those 
+maps are for the original IBM BIOS EBDA. Current BIOS might use a 
+different map. The EBDA area is not standardized.
+</p>
+<h2> <span class="mw-headline" id="Extended_Memory_.28.3E_1_MiB.29">Extended Memory (&gt; 1 MiB)</span></h2>
+<p>The region of RAM above 1 MiB is not standardized, well-defined, or contiguous. There are likely to be regions of it that
+contain memory mapped hardware, that nothing but a device driver should ever access. There are likely to be regions of it
+that contain ACPI tables which your initialization code will probably want to read, and that then can be overwritten and reused.
+Some ACPI areas cannot be "reclaimed" this way. Some of the computer's RAM may extend above 4 GiB.
+</p><p>Use the BIOS function <a href="https://wiki.osdev.org/Detecting_Memory_(x86)#BIOS_Function:_INT_0x15.2C_EAX_.3D_0xE820" title="Detecting Memory (x86)">INT 15h, EAX=0xE820</a> to get a reliable map of Extended Memory.
+</p><p><br>
+</p>
+<table border="2" cellpadding="4" cellspacing="0" style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}">
+
+<tbody><tr>
+<th> start
+</th>
+<th> end
+</th>
+<th> size
+</th>
+<th> region/exception
+</th>
+<th> description
+</th></tr>
+<tr>
+<th colspan="5"> High Memory
+</th></tr>
+<tr>
+<td> 0x00100000
+</td>
+<td> 0x00EFFFFF
+</td>
+<td> 0x00E00000 (14 MiB)
+</td>
+<td> RAM -- free for use (if it exists)
+</td>
+<td> Extended memory <sup>1, 2</sup>
+</td></tr>
+<tr>
+<td> 0x00F00000
+</td>
+<td> 0x00FFFFFF
+</td>
+<td> 0x00100000 (1 MiB)
+</td>
+<td> Possible memory mapped hardware
+</td>
+<td> ISA Memory Hole 15-16MB <sup>3</sup>
+</td></tr>
+<tr>
+<td> 0x01000000
+</td>
+<td>&nbsp;????????
+</td>
+<td>&nbsp;???????? (whatever exists)
+</td>
+<td> RAM -- free for use
+</td>
+<td> More Extended memory <sup>1</sup>
+</td></tr>
+<tr>
+<td> 0xC0000000 (sometimes, depends on motherboard and devices)
+</td>
+<td> 0xFFFFFFFF
+</td>
+<td> 0x40000000 (1 GiB)
+</td>
+<td> various (typically reserved for memory mapped devices)
+</td>
+<td> Memory mapped PCI devices, PnP NVRAM?, IO APIC/s, local APIC/s, BIOS, ...
+</td></tr>
+<tr>
+<td> 0x0000000100000000 (possible memory above 4 GiB)
+</td>
+<td>&nbsp;????????????????
+</td>
+<td>&nbsp;???????????????? (whatever exists)
+</td>
+<td> RAM -- free for use (PAE/64bit)
+</td>
+<td> More Extended memory <sup>1</sup>
+</td></tr>
+<tr>
+<td>&nbsp;????????????????
+</td>
+<td>&nbsp;????????????????
+</td>
+<td>&nbsp;????????????????
+</td>
+<td> Possible memory mapped hardware
+</td>
+<td> Potentially usable for memory mapped PCI devices in modern hardware (but typically not, due to backward compatibility)
+</td></tr></tbody></table>
+<p><sup>1</sup>: Different computers have different amounts of RAM, 
+therefore the amount of extended memory you might find will vary and may
+ be anything from "none" (e.g. an old 80386 system) to "lots".
+</p><p><sup>2</sup>: Free for use except that your bootloader (ie. GRUB)
+ may have loaded your "modules" here, and you don't want to overwrite 
+those.
+</p><p><sup>3</sup>: The "ISA Memory Hole" (from 0x00F00000 to 
+0x00FFFFFF) was used for memory mapped ISA devices (e.g. video cards). 
+Modern computers have no need for this hole, but some chipsets still 
+support it (as an optional feature) and some motherboards may still 
+allow it to be enabled with BIOS options, so it may exist in a modern 
+computers with no ISA devices.
+</p><p><br>
+</p>
+<h2> <span class="mw-headline" id="See_Also">See Also</span></h2>
+<ul><li> <a href="https://wiki.osdev.org/Detecting_Memory_(x86)" title="Detecting Memory (x86)">Detecting Memory (x86)</a>
+</li></ul>
+<h3> <span class="mw-headline" id="External_Links">External Links</span></h3>
+<ul><li> <a rel="nofollow" class="external free" href="https://web.archive.org/web/20120130052813/http://www.nondot.org/sabre/os/files/Booting/BIOS_SEG.txt">https://web.archive.org/web/20120130052813/http://www.nondot.org/sabre/os/files/Booting/BIOS_SEG.txt</a> -- detailed BIOS Data Area map
+</li><li> <a rel="nofollow" class="external free" href="http://www.bioscentral.com/misc/bda.htm">http://www.bioscentral.com/misc/bda.htm</a> -- another detailed BIOS Data Area map
+</li><li> <a rel="nofollow" class="external text" href="http://files.osdev.org/mirrors/geezer/osd/ram/index.htm#layout">Geezer's memory layout description</a>
+</li><li> <a rel="nofollow" class="external free" href="http://stanislavs.org/helppc/bios_data_area.html">http://stanislavs.org/helppc/bios_data_area.html</a>
+</li></ul>
+
+<!-- 
+NewPP limit report
+Preprocessor node count: 68/1000000
+Post-expand include size: 486/2097152 bytes
+Template argument size: 0/2097152 bytes
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key wikidb:pcache:idhash:2278-0!*!0!!en!*!* and timestamp 20240311133831 -->
+</div>				<!-- /bodycontent -->
+								<!-- printfooter -->
+				<div class="printfooter">
+				Retrieved from "<a href="https://wiki.osdev.org/index.php?title=Memory_Map_(x86)&amp;oldid=28292">https://wiki.osdev.org/index.php?title=Memory_Map_(x86)&amp;oldid=28292</a>"				</div>
+				<!-- /printfooter -->
+												<!-- catlinks -->
+				<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks"><a href="https://wiki.osdev.org/Special:Categories" title="Special:Categories">Categories</a>: <ul><li><a href="https://wiki.osdev.org/Category:X86" title="Category:X86">X86</a></li><li><a href="https://wiki.osdev.org/Category:Physical_Memory" title="Category:Physical Memory">Physical Memory</a></li></ul></div></div>				<!-- /catlinks -->
+												<div class="visualClear"></div>
+				<!-- debughtml -->
+								<!-- /debughtml -->
+			</div>
+			<!-- /bodyContent -->
+		</div>
+		<!-- /content -->
+		<!-- header -->
+		<div id="mw-head" class="noprint">
+			
+<!-- 0 -->
+<div id="p-personal" class="">
+	<h5>Personal tools</h5>
+	<ul>
+		<li id="pt-login"><a href="https://wiki.osdev.org/index.php?title=Special:UserLogin&amp;returnto=Memory_Map_%28x86%29" title="You are encouraged to log in; however, it is not mandatory [alt-shift-o]" accesskey="o">Log in</a></li>
+	</ul>
+</div>
+
+<!-- /0 -->
+			<div id="left-navigation">
+				
+<!-- 0 -->
+<div id="p-namespaces" class="vectorTabs">
+	<h5>Namespaces</h5>
+	<ul>
+					<li id="ca-nstab-main" class="selected"><span><a href="https://wiki.osdev.org/Memory_Map_(x86)" title="View the content page [alt-shift-c]" accesskey="c">Page</a></span></li>
+					<li id="ca-talk"><span><a href="https://wiki.osdev.org/Talk:Memory_Map_(x86)" title="Discussion about the content page [alt-shift-t]" accesskey="t">Discussion</a></span></li>
+			</ul>
+</div>
+
+<!-- /0 -->
+
+<!-- 1 -->
+<div id="p-variants" class="vectorMenu emptyPortlet">
+		<h5><span>Variants</span><a href="#"></a></h5>
+	<div class="menu">
+		<ul>
+					</ul>
+	</div>
+</div>
+
+<!-- /1 -->
+			</div>
+			<div id="right-navigation">
+				
+<!-- 0 -->
+<div id="p-views" class="vectorTabs">
+	<h5>Views</h5>
+	<ul>
+					<li id="ca-view" class="selected"><span><a href="https://wiki.osdev.org/Memory_Map_(x86)">Read</a></span></li>
+					<li id="ca-viewsource"><span><a href="https://wiki.osdev.org/index.php?title=Memory_Map_(x86)&amp;action=edit" title="This page is protected.
+You can view its source [alt-shift-e]" accesskey="e">View source</a></span></li>
+					<li id="ca-history" class="collapsible"><span><a href="https://wiki.osdev.org/index.php?title=Memory_Map_(x86)&amp;action=history" title="Past revisions of this page [alt-shift-h]" accesskey="h">View history</a></span></li>
+			</ul>
+</div>
+
+<!-- /0 -->
+
+<!-- 1 -->
+<div id="p-cactions" class="vectorMenu emptyPortlet">
+	<h5><span>Actions</span><a href="#"></a></h5>
+	<div class="menu">
+		<ul>
+					</ul>
+	</div>
+</div>
+
+<!-- /1 -->
+
+<!-- 2 -->
+<div id="p-search">
+	<h5><label for="searchInput">Search</label></h5>
+	<form action="/index.php" id="searchform">
+		<input type="hidden" name="title" value="Special:Search">
+				<input type="search" name="search" title="Search OSDev Wiki [alt-shift-f]" accesskey="f" id="searchInput">		<input type="submit" name="go" value="Go" title="Go to a page with this exact name if exists" id="searchGoButton" class="searchButton">		<input type="submit" name="fulltext" value="Search" title="Search the pages for this text" id="mw-searchButton" class="searchButton">			</form>
+</div>
+
+<!-- /2 -->
+			</div>
+		</div>
+		<!-- /header -->
+		<!-- panel -->
+			<div id="mw-panel" class="noprint">
+				<!-- logo -->
+					<div id="p-logo"><a style="background-image: url(/skins/common/images/osdev.png);" href="https://wiki.osdev.org/Main_Page" title="Visit the main page"></a></div>
+				<!-- /logo -->
+				
+<!-- navigation -->
+<div class="portal" id="p-navigation">
+	<h5>Navigation</h5>
+	<div class="body">
+		<ul>
+			<li id="n-mainpage"><a href="https://wiki.osdev.org/Main_Page" title="Visit the main page [alt-shift-z]" accesskey="z">Main Page</a></li>
+			<li id="n-portal"><a href="http://forum.osdev.org/" rel="nofollow" title="About the project, what you can do, where to find things">Forums</a></li>
+			<li id="n-FAQ"><a href="https://wiki.osdev.org/Category:FAQ">FAQ</a></li>
+			<li id="n-OS-Projects"><a href="https://wiki.osdev.org/Projects">OS Projects</a></li>
+			<li id="n-randompage"><a href="https://wiki.osdev.org/Special:Random" title="Load a random page [alt-shift-x]" accesskey="x">Random page</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /navigation -->
+
+<!-- about -->
+<div class="portal" id="p-about">
+	<h5>About</h5>
+	<div class="body">
+		<ul>
+			<li id="n-This-site"><a href="https://wiki.osdev.org/OSDevWiki:About">This site</a></li>
+			<li id="n-Joining"><a href="https://wiki.osdev.org/OSDevWiki:Joining">Joining</a></li>
+			<li id="n-Editing-help"><a href="https://wiki.osdev.org/OSDevWiki:Editing">Editing help</a></li>
+			<li id="n-recentchanges"><a href="https://wiki.osdev.org/Special:RecentChanges" title="A list of recent changes in the wiki [alt-shift-r]" accesskey="r">Recent changes</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /about -->
+
+<!-- SEARCH -->
+
+<!-- /SEARCH -->
+
+<!-- TOOLBOX -->
+<div class="portal" id="p-tb">
+	<h5>Toolbox</h5>
+	<div class="body">
+		<ul>
+			<li id="t-whatlinkshere"><a href="https://wiki.osdev.org/Special:WhatLinksHere/Memory_Map_(x86)" title="A list of all wiki pages that link here [alt-shift-j]" accesskey="j">What links here</a></li>
+			<li id="t-recentchangeslinked"><a href="https://wiki.osdev.org/Special:RecentChangesLinked/Memory_Map_(x86)" title="Recent changes in pages linked from this page [alt-shift-k]" accesskey="k">Related changes</a></li>
+			<li id="t-specialpages"><a href="https://wiki.osdev.org/Special:SpecialPages" title="A list of all special pages [alt-shift-q]" accesskey="q">Special pages</a></li>
+			<li><a href="https://wiki.osdev.org/index.php?title=Memory_Map_(x86)&amp;printable=yes" rel="alternate">Printable version</a></li>
+			<li id="t-permalink"><a href="https://wiki.osdev.org/index.php?title=Memory_Map_(x86)&amp;oldid=28292" title="Permanent link to this revision of the page">Permanent link</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /TOOLBOX -->
+
+<!-- LANGUAGES -->
+
+<!-- /LANGUAGES -->
+			</div>
+		<!-- /panel -->
+		<!-- footer -->
+		<div id="footer">
+							<ul id="footer-info">
+											<li id="footer-info-lastmod"> This page was last modified on 27 August 2023, at 22:54.</li>
+											<li id="footer-info-viewcount">This page has been accessed 398,141 times.</li>
+									</ul>
+							<ul id="footer-places">
+											<li id="footer-places-privacy"><a href="https://wiki.osdev.org/OSDev_Wiki:Privacy_policy" title="OSDev Wiki:Privacy policy">Privacy policy</a></li>
+											<li id="footer-places-about"><a href="https://wiki.osdev.org/OSDev_Wiki:About" title="OSDev Wiki:About">About OSDev Wiki</a></li>
+											<li id="footer-places-disclaimer"><a href="https://wiki.osdev.org/OSDev_Wiki:General_disclaimer" title="OSDev Wiki:General disclaimer">Disclaimers</a></li>
+									</ul>
+										<ul id="footer-icons" class="noprint">
+					<li id="footer-poweredbyico">
+						<a href="https://www.mediawiki.org/"><img src="Memory%20Map%20(x86)%20-%20OSDev%20Wiki_files/poweredby_mediawiki_88x31.png" alt="Powered by MediaWiki" width="88" height="31"></a>
+					</li>
+				</ul>
+						<div style="clear:both"></div>
+		</div>
+		<!-- /footer -->
+		<!-- fixalpha -->
+		<script type="text/javascript"> if ( window.isMSIE55 ) fixalpha(); </script>
+		<!-- /fixalpha -->
+		<script src="Memory%20Map%20(x86)%20-%20OSDev%20Wiki_files/load_003.es"></script>
+<script>if(window.mw){
+	mw.loader.load(["mediawiki.user", "mediawiki.util", "mediawiki.page.ready", "mediawiki.legacy.wikibits", "mediawiki.legacy.ajax"]);
+}
+</script><script type="text/javascript" src="Memory%20Map%20(x86)%20-%20OSDev%20Wiki_files/load_005.es"></script>
+<script src="Memory%20Map%20(x86)%20-%20OSDev%20Wiki_files/load_002.es"></script>
+<script>if(window.mw){
+	mw.user.options.set({"ccmeonemails":0,"cols":80,"date":"default","diffonly":0,"disablemail":0,"disablesuggest":0,"editfont":"default","editondblclick":0,"editsection":1,"editsectiononrightclick":0,"enotifminoredits":0,"enotifrevealaddr":0,"enotifusertalkpages":1,"enotifwatchlistpages":0,"extendwatchlist":0,"externaldiff":0,"externaleditor":0,"fancysig":0,"forceeditsummary":0,"gender":"unknown","hideminor":0,"hidepatrolled":0,"highlightbroken":1,"imagesize":2,"justify":0,"math":1,"minordefault":0,"newpageshidepatrolled":0,"nocache":0,"noconvertlink":0,"norollbackdiff":0,"numberheadings":0,"previewonfirst":0,"previewontop":1,"quickbar":5,"rcdays":7,"rclimit":50,"rememberpassword":0,"rows":25,"searchlimit":20,"showhiddencats":0,"showjumplinks":1,"shownumberswatching":1,"showtoc":1,"showtoolbar":1,"skin":"vector","stubthreshold":0,"thumbsize":2,"underline":2,"uselivepreview":0,"usenewrc":0,"watchcreations":0,"watchdefault":0,"watchdeletion":0,"watchlistdays":3,"watchlisthideanons":0,
+	"watchlisthidebots":0,"watchlisthideliu":0,"watchlisthideminor":0,"watchlisthideown":0,"watchlisthidepatrolled":0,"watchmoves":0,"wllimit":250,"variant":"en","language":"en","searchNs0":true,"searchNs1":false,"searchNs2":false,"searchNs3":false,"searchNs4":false,"searchNs5":false,"searchNs6":false,"searchNs7":false,"searchNs8":false,"searchNs9":false,"searchNs10":false,"searchNs11":false,"searchNs12":false,"searchNs13":false,"searchNs14":false,"searchNs15":false});;mw.user.tokens.set({"editToken":"+\\","watchToken":false});;mw.loader.state({"user.options":"ready","user.tokens":"ready"});
+	
+	/* cache key: wikidb:resourceloader:filter:minify-js:4:19a4b18a9ac79a6b8c60b24af4668814 */
+}
+</script><!-- Served in 0.050 secs. -->
+	<script>(function(){var js = "window['__CF$cv$params']={r:'862bf2001c8b9294',t:'MTcxMDE2NDMxMS4yOTMwMDA='};_cpo=document.createElement('script');_cpo.nonce='',_cpo.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js',document.getElementsByTagName('head')[0].appendChild(_cpo);";var _0xh = document.createElement('iframe');_0xh.height = 1;_0xh.width = 1;_0xh.style.position = 'absolute';_0xh.style.top = 0;_0xh.style.left = 0;_0xh.style.border = 'none';_0xh.style.visibility = 'hidden';document.body.appendChild(_0xh);function handler() {var _0xi = _0xh.contentDocument || _0xh.contentWindow.document;if (_0xi) {var _0xj = _0xi.createElement('script');_0xj.innerHTML = js;_0xi.getElementsByTagName('head')[0].appendChild(_0xj);}}if (document.readyState !== 'loading') {handler();} else if (window.addEventListener) {document.addEventListener('DOMContentLoaded', handler);} else {var prev = document.onreadystatechange || function () {};document.onreadystatechange = function (e) {prev(e);if (document.readyState !== 'loading') {document.onreadystatechange = prev;handler();}};}})();</script><iframe height="1" width="1" style="position: absolute; top: 0px; left: 0px; border: medium; visibility: hidden;"></iframe>
+
+</body></html>

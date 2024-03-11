@@ -9,19 +9,23 @@
 # * linux 5.19 VirtualBox 6.1 (no enabled nested paging)
 #
 # memory map
-# 00000-003FF  IVT (Interrupt Vector Table)
-# 00400-005FF  BDA (BIOS Data Area)
-# 00600-9FFFF  Ordinary application RAM
-# 00600-0077F    osca IDT (Interrupt Descriptor Table)
-# 00780-07AFF    free
-# 07800-07BFF    osca stack (1K)
-# 07C00-07FFF    osca kernel (1K)
-# 08000-9FFFF    application (608K)
-# A0000-BFFFF  Video memory
-# C0000-EFFFF  Optional ROMs (The VGA ROM is usually located at C0000)
-# F0000-FFFFF  BIOS ROM
+# ------------+--------+---------------------------------------
+# 00000-003FF |   1 KB | Real Mode IVT (Interrupt Vector Table)
+# 00400-004FF | 256 B  | BDA (BIOS data area)
+# 00500-0067F | 384 B  | osca IDT (Interrupt Descriptor Table)
+# 00680-077FF | ~28 KB | free
+# 07800-07BFF |   1 KB | osca stack
+# 07C00-07FFF |   1 KB | osca kernel
+# 08000-7FFFF | 480 KB | application
+# 80000-9FFFF | 128 KB | EBDA (Extended BIOS Data Area)
+# A0000-BFFFF |	128 KB | Video display memory
+# C0000-C7FFF |	 32 KB | Video BIOS
+# C8000-EFFFF |	160 KB | BIOS Expansions
+# F0000-FFFFF |  64 KB | Motherboard BIOS
+# ------------+--------+---------------------------------------
+# from https://wiki.osdev.org/Memory_Map_(x86)
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - constants
-.set IDT,0x600          # interrupt descriptor table address
+.set IDT,0x500          # interrupt descriptor table address
 .set IDT_ENTRY_COUNT,48 # number of interrupts registered
                         # 32 reserved exceptions + irq 0..15
 .set IDT_ENTRY_SIZE,8   # size of an idt entry
