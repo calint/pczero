@@ -13,9 +13,10 @@
 # 00400-005FF  BDA (BIOS Data Area)
 # 00600-9FFFF  Ordinary application RAM
 # 00600-0077F    osca IDT (Interrupt Descriptor Table)
-# 00780-07BFF    free
-# 07C00-07FFF    kernel osca
-# 08000-9FFFF    application
+# 00780-07AFF    free
+# 07800-07BFF    osca stack (1K)
+# 07C00-07FFF    osca kernel (1K)
+# 08000-9FFFF    application (608K)
 # A0000-BFFFF  Video memory
 # C0000-EFFFF  Optional ROMs (The VGA ROM is usually located at C0000)
 # F0000-FFFFF  BIOS ROM
@@ -491,6 +492,8 @@ isr_tmr_acknowledge_and_return:
 .align 4
 isr_kbd:
   cli # disable interrupts
+  mov %esp,tmp_ecx # save current task stack pointer
+  mov $_start,%esp # use osca stack
   pusha # save registers
   xor %eax,%eax # clear eax
   in $0x60,%al # read keyboard port
@@ -501,6 +504,7 @@ isr_kbd:
   mov $0x20,%al # ack interrupt
   out %al,$0x20 # ...
   popa # restore registers
+  mov tmp_ecx,%esp # restore task stack pointer
   sti # enables interrupts after next instruction
   iret
 
@@ -508,7 +512,7 @@ isr_kbd:
 .align 4
 isr_fpu:
   cli
-  push %eax
+  mov %eax,tmp_eax # save clobbered eax
   clts # reset the TS (Task Switched) flag in CR0
   # is the active task same as active FPU state?
   mov osca_task_active,%eax
@@ -516,15 +520,15 @@ isr_fpu:
   je isr_fpu_done
     # not same task, switch FPU state
     incl 0xa0000+320-24 # on screen
-    push %ebx
-    mov osca_active_fpu,%ebx
+    mov %ebx,tmp_ebx
+    mov osca_active_fpu,%ebx # save clobbered ebx
     fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx) # save state
     frstor TASK_STRUCT_OFFSET_FPU_STATE(%eax) # restore state
     mov %eax,osca_active_fpu # set the active FPU task
-    pop %ebx
+    mov tmp_ebx,%ebx # restore ebx
 
 isr_fpu_done:
-  pop %eax
+  mov tmp_eax,%eax # restore eax
   sti # enables interrupts after next instruction
   iret
 
