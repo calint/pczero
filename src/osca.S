@@ -300,8 +300,8 @@ sector2: # 0x7e00
 osca_yield: # switches to next task
   cli # disable interrupts
   pushf # push flags. stack is now ..., EIP, EFLAGS
-        # EFLAGS 'Interrupt enable flag' is off
-        #  so popf in cli/sti section is safe
+        # note: EFLAGS 'Interrupt enable flag' is off
+        #       so popf in cli/sti section is safe
   incl 0xa0000+320-16 # create output on screen
   # start task switching
   mov %eax,tmp_eax # save eax,ebx,ecx
@@ -373,7 +373,7 @@ osca_yield_exit_without_task_switch:
   mov tmp_ecx,%ecx
   # stack is ..., EIP, EFLAGS
   popf # restore flags
-  sti
+  sti # enables interrupts after next instruction
   ret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - interrupts
 # "*NOTE* Because IA-32 tasks are not re-entrant, an interrupt-handler
@@ -511,7 +511,7 @@ isr_kbd:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu state switch
 .align 4
 isr_fpu:
-  cli
+  cli # disable interrupts
   mov %eax,tmp_eax # save clobbered eax
   clts # reset the TS (Task Switched) flag in CR0
   # is the active task same as active FPU state?
