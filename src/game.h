@@ -638,10 +638,12 @@ auto Game::create_boss()->void{
 		}
 
 		// print stats
-		out.pos({9,2}).fg(2);
+		out.pos({10,2}).fg(2);
 		out.p("i=").p_hex_8b(uint8(osca_task_focused->id)).spc();
 		out.p("t=").p_hex_16b(uint16(osca_tick)).spc();
-		out.p("s=").p_hex_16b(uint16(Object::time)).spc();
+		out.p("s=").p_hex_8b(uint8(uint32(Object::time)%0xff)).spc();
+		// note: casting a double to uint8 or uint16 results to 0 if value
+		//       larger than max value of type thus casting shenanigans
 		out.p("k=").p_hex_8b(uint8(last_received_key)).spc();
 		out.p("m=").p_hex_8b(uint8(metrics::matrix_set_transforms)).spc();
 		out.p("c=").p_hex_8b(uint8(metrics::collisions_checks)).spc();
