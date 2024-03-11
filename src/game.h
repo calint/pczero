@@ -632,15 +632,15 @@ auto Game::create_boss()->void{
 		}
 
 		// print stats
-		out.pos({10,2}).fg(2);
+		out.pos({9,2}).fg(2);
 		out.p("i=").p_hex_8b(static_cast<Byte>(osca_task_focused->id)).spc();
 		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_tmr_lo)).spc();
+		out.p("s=").p_hex_16b(static_cast<unsigned short>(Object::time)).spc();
 		out.p("k=").p_hex_8b(static_cast<Byte>(last_received_key)).spc();
 		out.p("m=").p_hex_8b(static_cast<Byte>(metrics::matrix_set_transforms)).spc();
 		out.p("c=").p_hex_8b(static_cast<Byte>(metrics::collisions_checks)).spc();
 		out.p("b=").p_hex_8b(static_cast<Byte>(metrics::collisions_checks_bounding_shapes)).spc();
 		out.p("a=").p_hex_8b(static_cast<Byte>(Object::allocated_objects_count())).spc();
-		out.p("s=").p_hex_8b(static_cast<Byte>(Object::time)).spc();
 		out.p("f=").p_hex_16b(static_cast<unsigned short>(Object::fps)).spc();
 
 		Ship*shp=Game::player;
