@@ -8,7 +8,7 @@
 # * linux 5.19 qemu 7.0.0
 # * linux 5.19 VirtualBox 6.1 (no enabled nested paging)
 #
-# memory map
+# memory map from https://wiki.osdev.org/Memory_Map_(x86)
 # ------------+--------+---------------------------------------
 # 00000-003FF |   1 KB | Real Mode IVT (Interrupt Vector Table)
 # 00400-004FF | 256 B  | BDA (BIOS data area)
@@ -22,8 +22,7 @@
 # C0000-C7FFF |	 32 KB | Video BIOS
 # C8000-EFFFF |	160 KB | BIOS Expansions
 # F0000-FFFFF |  64 KB | Motherboard BIOS
-# ------------+--------+---------------------------------------
-# from https://wiki.osdev.org/Memory_Map_(x86)
+#        
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - constants
 .set IDT,0x500          # interrupt descriptor table address
 .set IDT_ENTRY_COUNT,48 # number of interrupts registered
