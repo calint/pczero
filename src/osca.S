@@ -59,8 +59,8 @@
 .set CR0_BIT_MP,2 # Monitor co-processor bit
 .set CR0_BIT_TS,8 # Task switched bit
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - exports
-.global osca_tmr_lo # 1024 Hz timer low bits
-.global osca_tmr_hi # 1024 Hz timer high bits
+.global osca_timer_lo # 1024 Hz timer low bits
+.global osca_timer_hi # 1024 Hz timer high bits
 .global osca_yield # export function
 .global osca_task_active # pointer to active task
 .global _start # export entry point
@@ -234,18 +234,18 @@ in $0x71,%al
 #   the right hand side). 
 #  on qemu and virtualbox not same behaviour
 
-# mov $osca_exception,%eax # store the upper bits of the handler
+# mov $osca_on_exception,%eax # store the upper bits of the handler
 mov $isr_other,%eax # store the upper 16 bits of the handler address
 shr $16,%eax        #  in ax
 mov $IDT,%ebx       # interrupt descriptor table address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
 lp1:
-#    movw $osca_exception,(%ebx)    # offset 0..15
-    movw $isr_other,      (%ebx)    # offset 0..15
-    movw $0x0008,        2(%ebx)    # selector in gdt
-    movb $0x00,          4(%ebx)    # unused
-    movb $0x8e,          5(%ebx)    # type_attrs p,pv0,!s,i32b
-    movw %ax,            6(%ebx)    # offfset 16..31
+#   movw $osca_on_exception,(%ebx)    # offset 0..15
+    movw $isr_other,        (%ebx)    # offset 0..15
+    movw $0x0008,          2(%ebx)    # selector in gdt
+    movb $0x00,            4(%ebx)    # unused
+    movb $0x8e,            5(%ebx)    # type_attrs p,pv0,!s,i32b
+    movw %ax,              6(%ebx)    # offfset 16..31
     add $IDT_ENTRY_SIZE,%ebx
 loop lp1
 # setup IRQ 1 (keyboard) and IRQ 8 (RTC timer)
@@ -290,8 +290,8 @@ sti # enables interrupts after next instruction
 jmp *tmp_eip # jmp to saved eip (first task)
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
 .align 4
-osca_tmr_lo:.long 0 # 1024 Hz tick lower, exported
-osca_tmr_hi:.long 0 # 1024 Hz tick higher, exported
+osca_timer_lo:.long 0 # 1024 Hz tick lower, exported
+osca_timer_hi:.long 0 # 1024 Hz tick higher, exported
 osca_task_active:.long osca_tasks # pointer to active task, exported
 osca_active_fpu:.long osca_tasks # pointer to task that has the FPU
 tmp_eax:.long 0 # used in osca_yield and isr_tmr
@@ -397,10 +397,10 @@ osca_yield_exit_without_task_switch:
 isr_tmr:
   cli # disable interrupts
   incl 0xa0000+320-8 # create output on screen
-  incl osca_tmr_lo    # increase lower 32 bits ticker
-  adcl $0,osca_tmr_hi # add carry to upper 32 bits
+  incl osca_timer_lo    # increase lower 32 bits ticker
+  adcl $0,osca_timer_hi # add carry to upper 32 bits
   mov %eax,tmp_eax # save eax
-  mov osca_tmr_lo,%eax # switch task every 8'th tick
+  mov osca_timer_lo,%eax # switch task every 8'th tick
   and $FREQ_DIV_AND,%eax # 1024/8 Hz
   jnz isr_tmr_acknowledge_and_return # if no task switch
   # start task switching

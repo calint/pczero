@@ -350,14 +350,14 @@ public:
 		ls_deleted_pos=ls_deleted;
 		ls_deleted_end=ls_deleted+nobjects_max;
 
-		fps_time_prv=time_prv=time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits can be problem
+		fps_time_prv=time_prv=time=TimeSec(osca_timer_lo)*sec_per_tick; // ? not using the high bits can be problem
 	}
 	static auto tick()->void{
 		metrics::reset();
 
 		// time
 		time_prv=time;
-		time=TimeSec(osca_tmr_lo)*sec_per_tick; // ? not using the high bits is a problem. fix
+		time=TimeSec(osca_timer_lo)*sec_per_tick; // ? not using the high bits is a problem. fix
 		dt=time-time_prv;
 		if(dt<0){ // ? once every 2 billionth tick?
 			dt=0;

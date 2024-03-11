@@ -53,10 +53,10 @@ inline auto osca_halt()->void{asm("hlt");}
 inline auto osca_nop()->void{asm("nop");}
 
 // disables interrupts
-inline auto osca_disable_interrupts()->void{asm("cli");}
+inline auto osca_interrupts_disable()->void{asm("cli");}
 
 // enables interrupts
-inline auto osca_enable_interrupts()->void{asm("sti");}
+inline auto osca_interrupts_enable()->void{asm("sti");}
 
 //
 // exported from osca.S
@@ -66,10 +66,10 @@ inline auto osca_enable_interrupts()->void{asm("sti");}
 extern "C" Task*osca_task_active;
 
 // time lower 32b
-extern "C" volatile const unsigned osca_tmr_lo;
+extern "C" volatile const unsigned osca_timer_lo;
 
 // time higher 32b
-extern "C" volatile const unsigned osca_tmr_hi;
+extern "C" volatile const unsigned osca_timer_hi;
 
 // switches to next task
 // note: single small task yielding in a tight loop might inhibit
@@ -88,6 +88,6 @@ extern "C" auto osca_init()->void;
 extern "C" auto osca_on_key(Byte scan_code)->void;
 
 // called when interrupt other than keyboard or timer
-extern "C" auto osca_exception()->void;
+extern "C" auto osca_on_exception()->void;
 
 } // end namespace osca

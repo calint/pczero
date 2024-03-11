@@ -9,7 +9,7 @@ using namespace osca;
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] auto tsk0()->void{
-	osca_disable_interrupts();
+	osca_interrupts_disable();
 	const Task*this_task=osca_task_active;
 	const Register eax=osca_task_active->eax;
 //	Register ebx=osca_active_task->ebx;
@@ -19,7 +19,7 @@ extern "C" [[noreturn]] auto tsk0()->void{
 //	Register edi=osca_active_task->edi;
 //	Register ebp=osca_active_task->ebp;
 //	Register esp0=osca_active_task->esp0;
-	osca_enable_interrupts();
+	osca_interrupts_enable();
 //	err.p_hex_32b(unsigned(eax)).spc();
 //	err.p_hex_32b(unsigned(ebx)).spc();
 //	err.p_hex_32b(unsigned(ecx)).spc();
@@ -133,13 +133,13 @@ extern "C" [[noreturn]] auto tsk2()->void{
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] auto tsk3()->void{
-	osca_disable_interrupts();
+	osca_interrupts_disable();
 	const Register eax=osca_task_active->eax;
 	const Register ecx=osca_task_active->ecx;
-	osca_enable_interrupts();
+	osca_interrupts_enable();
 
 	while(true){
-		const float f=float(osca_tmr_lo)/float(ecx);
+		const float f=float(osca_timer_lo)/float(ecx);
 		*static_cast<unsigned*>(vga13h.bmp().address_offset({CoordPx(eax),0}))=unsigned(f);
 		osca_yield();
 	}

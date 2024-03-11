@@ -18,7 +18,7 @@ extern "C" [[noreturn]] auto tsk4()->void;
 namespace osca{
 
 // called by the interrupt handler for events other than keyboard or timer
-extern "C" auto osca_exception()->void{
+extern "C" auto osca_on_exception()->void{
 	static unsigned stack_0;
 	static unsigned stack_1;
 	static unsigned stack_2;
