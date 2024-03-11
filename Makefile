@@ -14,7 +14,7 @@ INSTALL_TO=/dev/sda
 SRC_FILES=src/osca.S src/osca.h src/kernel.h src/lib.h src/libge.h src/game.h src/main.cc
 
 # as
-AF=-march=i386+387 --32
+AF=-march=i386+387 --32 -W -fatal-warnings
 
 # g++
 #CC=g++ -std=c++2b # c++ 23

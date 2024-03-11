@@ -285,13 +285,18 @@ popf # restore flags, no op that modifies flags after this
 mov (-TASK_STRUCT_OFFSET_EFLAGS_END+TASK_STRUCT_OFFSET_ESP)(%esp),%esp
 sti # enables interrupts after next instruction
 jmp *tmp_eip # jmp to saved eip (first task)
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - partitions
-.space _start+436-.,0
-.space 10,0 # partition table
-.space 16,0 # #1
-.space 16,0 # #2
-.space 16,0 # #3
-.space 16,0 # #4
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
+.align 4
+osca_tmr_lo:.long 0 # 1024 Hz tick lower, exported
+osca_tmr_hi:.long 0 # 1024 Hz tick higher, exported
+osca_task_active:.long osca_tasks # pointer to active task, exported
+osca_active_fpu:.long osca_tasks # pointer to task that has the FPU
+tmp_eax:.long 0 # used in osca_yield and isr_tmr
+tmp_ebx:.long 0 # ...
+tmp_ecx:.long 0 # ...
+tmp_eip:.long 0 # ...
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - signature
+.space _start+510-.,0xf
 .word 0xaa55 # pc boot sector signature
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - sector 2
 sector2: # 0x7e00
@@ -460,14 +465,14 @@ isr_tmr_next_task:
   # IRQ 8 will not be generated again. This means that you must read status
   # register C inside your ISR for interrupt 70h even when you normally don't care
   # about its contents. Otherwise you will only see a single interrupt."
-  push %ax # save to be clobbered ax
+  push %eax # save to be clobbered ax
   mov $0x0c,%al # read register C in ISR
   out %al,$0x70 #  to keep getting
   in $0x71,%al  #   irq 8
   mov $0x20,%al # acknowledge interrupt (EOI) to
   out %al,$0xa0 #  second controller PIC1
   out %al,$0x20 #   main controller PIC0
-  pop %ax # restore ax
+  pop %eax # restore ax
   sti # enables interrupts after next instruction
   jmp *tmp_eip # jmp to restored eip
 
@@ -535,18 +540,10 @@ isr_fpu_done:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - other
 .align 4
 isr_other:
+  cli
   incl 0xa0000+320-32 # on screen
+  sti
   iret
 
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
-.align 4
-osca_tmr_lo:.long 0 # 1024 Hz tick lower, exported
-osca_tmr_hi:.long 0 # 1024 Hz tick higher, exported
-osca_task_active:.long osca_tasks # pointer to active task, exported
-osca_active_fpu:.long osca_tasks # pointer to task that has the FPU
-tmp_eax:.long 0 # used in osca_yield and isr_tmr
-tmp_ebx:.long 0 # ...
-tmp_ecx:.long 0 # ...
-tmp_eip:.long 0 # ...
-.space sector2+512-.,0
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - done
+.space sector2+512-.,0xf
