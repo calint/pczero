@@ -19,12 +19,12 @@ namespace osca{
 
 // called by the interrupt handler for events other than keyboard or timer
 extern "C" auto osca_on_exception()->void{
-	static unsigned stack_0;
-	static unsigned stack_1;
-	static unsigned stack_2;
-	static unsigned stack_3;
-	static unsigned stack_4;
-	static unsigned stack_5;
+	static uint32 stack_0;
+	static uint32 stack_1;
+	static uint32 stack_2;
+	static uint32 stack_3;
+	static uint32 stack_4;
+	static uint32 stack_5;
 	asm("mov (%%esp),%0":"=r"(stack_0));
 	asm("mov 4(%%esp),%0":"=r"(stack_1));
 	asm("mov 8(%%esp),%0":"=r"(stack_2));

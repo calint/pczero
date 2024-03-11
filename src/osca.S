@@ -227,26 +227,19 @@ in $0x71,%al
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
 # setup interrupt service routines
 # https://wiki.osdev.org/Interrupt_Descriptor_Table
-#
-# !!! asus zenbook hangs because an unknown interrupt is triggered
-#  todo: find out which interrupt is triggered
-#  for now disabled with an empty interrupt handler that increases
-#   dots on screen (4th group of blinking pixels on top line from
-#   the right hand side). 
-#  on qemu and virtualbox not same behaviour
 
-# mov $osca_on_exception,%eax # store the upper bits of the handler
-mov $isr_other,%eax # store the upper 16 bits of the handler address
+mov $osca_on_exception,%eax # store the upper bits of the handler
+#mov $isr_other,%eax # store the upper 16 bits of the handler address
 shr $16,%eax        #  in ax
 mov $IDT,%ebx       # interrupt descriptor table address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
 lp1:
-#   movw $osca_on_exception,(%ebx)    # offset 0..15
-    movw $isr_other,        (%ebx)    # offset 0..15
+    movw $osca_on_exception,(%ebx)    # offset 0..15
+#   movw $isr_other,        (%ebx)    # offset 0..15
     movw $0x0008,          2(%ebx)    # selector in gdt
     movb $0x00,            4(%ebx)    # unused
     movb $0x8e,            5(%ebx)    # type_attrs p,pv0,!s,i32b
-    movw %ax,              6(%ebx)    # offfset 16..31
+    mov  %ax,              6(%ebx)    # offfset 16..31
     add $IDT_ENTRY_SIZE,%ebx
 loop lp1
 # setup IRQ 1 (keyboard) and IRQ 8 (RTC timer)
@@ -258,6 +251,14 @@ movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE   # exception 7: device not available,
 movw       $0,IDT+     7*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is within 64K)
                                           #   triggered when a FPU context switch
                                           #    might be needed
+# note: asus zenbook generates ISA interrupt 7:
+#       LPT1 / Unreliable "spurious" interrupt (usually)
+#       see https://wiki.osdev.org/8259_PIC#Spurious_IRQs 
+#       disabled with an empty interrupt handler: isr_7
+#       (qemu and virtualbox does not generate this interrupt)
+movw $isr_7,IDT+(32+7)*IDT_ENTRY_SIZE   # 
+movw     $0,IDT+(32+7)*IDT_ENTRY_SIZE+6 #
+
 lidt idtr # load the interrupt descriptor table register
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
 # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
@@ -289,6 +290,10 @@ popf # restore flags, no op that modifies flags after this
 mov (-TASK_STRUCT_OFFSET_EFLAGS_END+TASK_STRUCT_OFFSET_ESP)(%esp),%esp
 sti # enables interrupts after next instruction
 jmp *tmp_eip # jmp to saved eip (first task)
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - spurios
+.align 4
+isr_7: # see https://wiki.osdev.org/8259_PIC#Spurious_IRQs
+  iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
 .align 4
 osca_tick:           # timer tick (1024 Hz), 64 bit, exported
