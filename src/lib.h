@@ -13,7 +13,7 @@ using SizeBytes=Size;
 
 // forward declaration of memory copy and set functions
 auto pz_memcpy(Address dst,Address src,SizeBytes n)->void;
-auto pz_memset(Address dst,Byte byte,SizeBytes n)->void;
+auto pz_memset(Address dst,uint8 byte,SizeBytes n)->void;
 
 using OffsetBytes=int;
 
@@ -28,7 +28,7 @@ public:
 	inline constexpr auto address_offset(const OffsetBytes n)const->Address{return static_cast<char*>(address_)+n;}
 	inline auto to(const Data&d)const->void{pz_memcpy(d.address(),address_,size_);}
 	inline auto to(const Data&d,const SizeBytes n)const->void{pz_memcpy(d.address(),address_,n);}
-	inline auto clear(Byte byte=0)const->void{pz_memset(address_,byte,size_);}
+	inline auto clear(uint8 byte=0)const->void{pz_memset(address_,byte,size_);}
 	inline constexpr auto end()const->Address{return static_cast<char*>(address_)+size_;}
 };
 
@@ -146,7 +146,7 @@ public:
 
 using SizePx=short; // size in pixel space
 using DimensionPx=DimensionT<SizePx>; // dimension in pixel space
-using Color8b=Byte; // 8 bit index in color palette
+using Color8b=uint8; // 8 bit index in color palette
 
 // configuration of polygon rendering
 namespace enable{
@@ -529,7 +529,7 @@ class PrinterToBitmap{
 	Color8b fg_{2}; // foreground
 	Color8b bg_{}; // background
 	bool transparent_{}; // true if transparent
-	Byte padding[1]{}; // unused
+	uint8 padding[1]{}; // unused
 	static constexpr SizePx font_wi_{5};
 	static constexpr SizePx font_hi_{6};
 	static constexpr SizePx line_padding_{2}; // ? attribute
@@ -564,7 +564,7 @@ public:
 		draw(table_hex_to_font[hex_number_4b&0xf]);
 		return*this;
 	}
-	constexpr auto p_hex_8b(Byte v)->PrinterToBitmap&{
+	constexpr auto p_hex_8b(uint8 v)->PrinterToBitmap&{
 		const int ch1=v&0xf;
 		const int ch2=(v>>4)&0xf;
 		p_hex(ch2);
@@ -729,7 +729,7 @@ inline auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
     );
 }
 
-inline auto pz_memset(Address dst,Byte value,SizeBytes n)->void{
+inline auto pz_memset(Address dst,uint8 value,SizeBytes n)->void{
     asm(
         "cld;"
         "rep stosb;"
@@ -747,7 +747,7 @@ void*memcpy(void*dst,const void*src,unsigned n){
     return dst;
 }
 void*memset(void* dst,int value,unsigned n){
-	pz_memset(Address(dst),Byte(value),SizeBytes(n));
+	pz_memset(Address(dst),uint8(value),SizeBytes(n));
     return dst;
 }
 

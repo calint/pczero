@@ -397,7 +397,7 @@ osca_yield_exit_without_task_switch:
 isr_tmr:
   cli # disable interrupts
   incl 0xa0000+320-8 # create output on screen
-  incl osca_timer_lo    # increase lower 32 bits ticker
+  addl $1,osca_timer_lo # increase lower 32 bits ticker
   adcl $0,osca_timer_hi # add carry to upper 32 bits
   mov %eax,tmp_eax # save eax
   mov osca_timer_lo,%eax # switch task every 8'th tick

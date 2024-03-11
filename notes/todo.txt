@@ -1,3 +1,4 @@
+[ ] Object::time represented as float does not work well with osca_timer_hi > 3
 [x] osca: don't use current task stack to push/pop
     => isr_kbd uses osca stack
     => osca_yield does one 32 bit push/pop on current task stack

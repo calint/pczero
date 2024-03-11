@@ -216,7 +216,7 @@ class Ship final:public Object{
 	TimeSec fire_t{0};
 public:
 	bool auto_aim_at_boss{false};
-	Byte padding[3]{};
+	uint8 padding[3]{};
 
 	Ship():
 		Object{
@@ -605,14 +605,14 @@ auto Game::create_boss()->void{
 	out.pos({12,1}).fg(6).p("keys: w a s d j  f g x c [ctrl+tab] [ctrl+Fx]");
 
 	// keyboard state
-	constexpr Byte key_w=0;
-	constexpr Byte key_a=1;
-	constexpr Byte key_s=2;
-	constexpr Byte key_d=3;
-	constexpr Byte key_spc=4;
-	constexpr Byte key_j=5;
+	constexpr uint8 key_w=0;
+	constexpr uint8 key_a=1;
+	constexpr uint8 key_s=2;
+	constexpr uint8 key_d=3;
+	constexpr uint8 key_spc=4;
+	constexpr uint8 key_j=5;
 	bool keyb[6]{}; // 'wasd space j' pressed status
-	Byte last_received_key=0;
+	uint8 last_received_key=0;
 
 	// crate scene
 	create_player();
@@ -633,21 +633,21 @@ auto Game::create_boss()->void{
 
 		// print stats
 		out.pos({9,2}).fg(2);
-		out.p("i=").p_hex_8b(static_cast<Byte>(osca_task_focused->id)).spc();
-		out.p("t=").p_hex_16b(static_cast<unsigned short>(osca_timer_lo)).spc();
-		out.p("s=").p_hex_16b(static_cast<unsigned short>(Object::time)).spc();
-		out.p("k=").p_hex_8b(static_cast<Byte>(last_received_key)).spc();
-		out.p("m=").p_hex_8b(static_cast<Byte>(metrics::matrix_set_transforms)).spc();
-		out.p("c=").p_hex_8b(static_cast<Byte>(metrics::collisions_checks)).spc();
-		out.p("b=").p_hex_8b(static_cast<Byte>(metrics::collisions_checks_bounding_shapes)).spc();
-		out.p("a=").p_hex_8b(static_cast<Byte>(Object::allocated_objects_count())).spc();
-		out.p("f=").p_hex_16b(static_cast<unsigned short>(Object::fps)).spc();
+		out.p("i=").p_hex_8b(static_cast<uint8>(osca_task_focused->id)).spc();
+		out.p("t=").p_hex_16b(static_cast<uint16>(osca_timer_lo)).spc();
+		out.p("s=").p_hex_16b(static_cast<uint16>(Object::time)).spc();
+		out.p("k=").p_hex_8b(static_cast<uint8>(last_received_key)).spc();
+		out.p("m=").p_hex_8b(static_cast<uint8>(metrics::matrix_set_transforms)).spc();
+		out.p("c=").p_hex_8b(static_cast<uint8>(metrics::collisions_checks)).spc();
+		out.p("b=").p_hex_8b(static_cast<uint8>(metrics::collisions_checks_bounding_shapes)).spc();
+		out.p("a=").p_hex_8b(static_cast<uint8>(Object::allocated_objects_count())).spc();
+		out.p("f=").p_hex_16b(static_cast<uint16>(Object::fps)).spc();
 
 		Ship*shp=Game::player;
 
 		if(osca_task_focused==this_task){
 			// this task has keyboard focus, handle keyboard
-			while(const Byte key=keyboard.get_next_key()){
+			while(const uint8 key=keyboard.get_next_key()){
 				last_received_key=key;
 				switch(key){
 				case 0x11: // w pressed

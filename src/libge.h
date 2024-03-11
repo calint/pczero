@@ -127,7 +127,7 @@ namespace enable{
 }
 
 using TypeBits=unsigned; // used by 'Object' to declare 'type' as a bit and interests in collision with other types
-using Flags8b=Byte;
+using Flags8b=uint8;
 using Scalar=Real;
 
 constexpr Scale sqrt_of_2=Real(1.414213562);
@@ -150,7 +150,7 @@ class Object{
 	Color8b color_{}; // shape color
 	Flags8b flags_{}; // bit 1: is not alive
 	                  // bit 2: 'pts_wld_' don't need update
-	Byte padding[2]{};
+	uint8 padding[2]{};
 public:
 	Object(
 		const TypeBits tb,
@@ -323,8 +323,6 @@ private:
 	//----------------------------------------------------------------
 	//-- statics
 	//----------------------------------------------------------------
-	constexpr static Real sec_per_tick{Real(1)/Real(1024)}; //? the 1024 Hz clock used by osca.S
-
 	inline static Object**ls_all{}; // list of pointers to allocated objects
 	inline static Object**ls_all_pos{}; // next free slot
 	inline static Object**ls_all_end{}; // end of list (1 past last)
@@ -332,9 +330,10 @@ private:
 	inline static Object**ls_deleted_pos{}; // next free slot
 	inline static Object**ls_deleted_end{}; // end of list (1 past last)
 
-	inline static TimeSec time_prv{};
+	inline static uint64 timer_tick{};
+	inline static uint64 timer_tick_prv{};
+	inline static uint64 fps_timer_tick_prv{};
 	inline static Count fps_frame_counter{};
-	inline static TimeSec fps_time_prv{};
 
 public:
 	inline static TimeSec time{};
@@ -350,26 +349,25 @@ public:
 		ls_deleted_pos=ls_deleted;
 		ls_deleted_end=ls_deleted+nobjects_max;
 
-		fps_time_prv=time_prv=time=TimeSec(osca_timer_lo)*sec_per_tick; // ? not using the high bits can be problem
+		fps_timer_tick_prv=timer_tick=timer_tick_prv=osca_timer();
+		time=TimeSec(timer_tick)*osca_timer_sec_per_tick;
 	}
 	static auto tick()->void{
 		metrics::reset();
 
 		// time
-		time_prv=time;
-		time=TimeSec(osca_timer_lo)*sec_per_tick; // ? not using the high bits is a problem. fix
-		dt=time-time_prv;
-		if(dt<0){ // ? once every 2 billionth tick?
-			dt=0;
-		}
+		timer_tick_prv=timer_tick;
+		timer_tick=osca_timer();
+		time=TimeSec(timer_tick)*osca_timer_sec_per_tick;
+		dt=TimeSec(timer_tick-timer_tick_prv)*osca_timer_sec_per_tick;
 
 		// fps calculations
 		fps_frame_counter++;
-		const TimeSec fps_dt=time-fps_time_prv;
+		const TimeSec fps_dt=TimeSec(timer_tick-fps_timer_tick_prv)*osca_timer_sec_per_tick;
 		if(fps_dt>1){ // recalculate fps every second
 			fps=Count(TimeSec(fps_frame_counter)/fps_dt);
 			fps_frame_counter=0;
-			fps_time_prv=time;
+			fps_timer_tick_prv=timer_tick;
 		}
 
 		// draw and update

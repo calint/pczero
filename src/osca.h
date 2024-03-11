@@ -7,31 +7,35 @@
 
 namespace osca{
 
-using TaskBits=short;
-using TaskId=short;
-using Register=int;
-using Byte=unsigned char;
+using int8=char;
+using uint8=unsigned char;
+using int16=short;
+using uint16=unsigned short;
+using int32=int;
+using uint32=unsigned;
+using int64=long long;
+using uint64=unsigned long long;
 
 struct alignas(16) Task{
-	Register eip{};
-	Register esp{};
-	Register eflags{};
-	TaskBits bits{}; // 1: accepts keyboard focus, 2: is running
-	TaskId id{};
-	Register edi{};
-	Register esi{};
-	Register ebp{};
-	Register esp_unused{};
-	Register ebx{};
-	Register edx{};
-	Register ecx{};
-	Register eax{};
+	uint32 eip{};
+	uint32 esp{};
+	uint32 eflags{};
+	uint16 bits{}; // 1: accepts keyboard focus, 2: is running
+	uint16 id{};
+	int32 edi{};
+	int32 esi{};
+	int32 ebp{};
+	int32 esp_unused{};
+	int32 ebx{};
+	int32 edx{};
+	int32 ecx{};
+	int32 eax{};
 	// note: The FSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
 	//       first byte of the structure needed to be aligned on a 16-byte boundary.
-	alignas(16) Byte fpu_state[108]{};
-	Byte padding[4]{};
+	alignas(16) uint8 fpu_state[108]{};
+	uint8 padding[4]{};
 
-	constexpr inline auto get_id()const->TaskId{return id;}
+	constexpr inline auto get_id()const->uint16{return id;}
 	constexpr inline auto is_grab_keyboard_focus()const->bool{return bits&1;}
 	constexpr inline auto is_running()const->bool{return bits&2;}
 	constexpr inline auto set_running(const bool b)->void{if(b)bits|=2;else bits&=~2;}
@@ -65,11 +69,20 @@ inline auto osca_interrupts_enable()->void{asm("sti");}
 // current active task
 extern "C" Task*osca_task_active;
 
-// time lower 32b
-extern "C" volatile const unsigned osca_timer_lo;
+// timer ticks - lower 32b
+extern "C" volatile const uint32 osca_timer_lo;
 
-// time higher 32b
-extern "C" volatile const unsigned osca_timer_hi;
+// timer ticks - higher 32b
+extern "C" volatile const uint32 osca_timer_hi;
+
+// timer ticks - 64 bits
+inline auto osca_timer()->uint64{
+	return (uint64(osca_timer_hi)<<32)|osca_timer_lo;
+}
+
+// seconds per timer tick
+constexpr float osca_timer_sec_per_tick=1.0f/1024; // 1024 Hz
+
 
 // switches to next task
 // note: single small task yielding in a tight loop might inhibit
@@ -85,7 +98,7 @@ extern "C" auto osca_yield()->void;
 extern "C" auto osca_init()->void;
 
 // called from 'isr_kbd' when a key is pressed or released
-extern "C" auto osca_on_key(Byte scan_code)->void;
+extern "C" auto osca_on_key(uint8 scan_code)->void;
 
 // called when interrupt other than keyboard or timer
 extern "C" auto osca_on_exception()->void;
