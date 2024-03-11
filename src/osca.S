@@ -59,8 +59,9 @@
 .set CR0_BIT_MP,2 # Monitor co-processor bit
 .set CR0_BIT_TS,8 # Task switched bit
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - exports
-.global osca_timer_lo # 1024 Hz timer low bits
-.global osca_timer_hi # 1024 Hz timer high bits
+.global osca_tick   # uint64 tick of 1024 Hz timer
+.global osca_tick_lo # 1024 Hz timer low bits
+.global osca_tick_hi # 1024 Hz timer high bits
 .global osca_yield # export function
 .global osca_task_active # pointer to active task
 .global _start # export entry point
@@ -290,8 +291,9 @@ sti # enables interrupts after next instruction
 jmp *tmp_eip # jmp to saved eip (first task)
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
 .align 4
-osca_timer_lo:.long 0 # 1024 Hz tick lower, exported
-osca_timer_hi:.long 0 # 1024 Hz tick higher, exported
+osca_tick:           # timer tick (1024 Hz), 64 bit, exported
+osca_tick_lo:.long 0 #   low bits, exported
+osca_tick_hi:.long 0 #   high bits, exported
 osca_task_active:.long osca_tasks # pointer to active task, exported
 osca_active_fpu:.long osca_tasks # pointer to task that has the FPU
 tmp_eax:.long 0 # used in osca_yield and isr_tmr
@@ -397,10 +399,10 @@ osca_yield_exit_without_task_switch:
 isr_tmr:
   cli # disable interrupts
   incl 0xa0000+320-8 # create output on screen
-  addl $1,osca_timer_lo # increase lower 32 bits ticker
-  adcl $0,osca_timer_hi # add carry to upper 32 bits
+  addl $1,osca_tick_lo # increase lower 32 bits ticker
+  adcl $0,osca_tick_hi # add carry to upper 32 bits
   mov %eax,tmp_eax # save eax
-  mov osca_timer_lo,%eax # switch task every 8'th tick
+  mov osca_tick_lo,%eax # switch task every 8'th tick
   and $FREQ_DIV_AND,%eax # 1024/8 Hz
   jnz isr_tmr_acknowledge_and_return # if no task switch
   # start task switching

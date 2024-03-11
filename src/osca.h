@@ -69,16 +69,14 @@ inline auto osca_interrupts_enable()->void{asm("sti");}
 // current active task
 extern "C" Task*osca_task_active;
 
+// timer ticks - 64 bits
+extern "C" volatile const uint64 osca_tick;
+
 // timer ticks - lower 32b
-extern "C" volatile const uint32 osca_timer_lo;
+extern "C" volatile const uint32 osca_tick_lo;
 
 // timer ticks - higher 32b
-extern "C" volatile const uint32 osca_timer_hi;
-
-// timer ticks - 64 bits
-inline auto osca_timer()->uint64{
-	return (uint64(osca_timer_hi)<<32)|osca_timer_lo;
-}
+extern "C" volatile const uint32 osca_tick_hi;
 
 // seconds per timer tick
 constexpr float osca_timer_sec_per_tick=1.0f/1024; // 1024 Hz

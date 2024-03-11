@@ -57,6 +57,7 @@ using Acceleration=Vector;
 using AngularVelocityRad=AngleRad;
 using Time=Real;
 using TimeSec=Time;
+using TimeStep=Real;
 
 // physics states are kept in their own buffer for better cpu cache utilization at update
 class PhysicsState final{
@@ -349,7 +350,7 @@ public:
 		ls_deleted_pos=ls_deleted;
 		ls_deleted_end=ls_deleted+nobjects_max;
 
-		fps_timer_tick_prv=timer_tick=timer_tick_prv=osca_timer();
+		fps_timer_tick_prv=timer_tick=timer_tick_prv=osca_tick;
 		time=TimeSec(timer_tick)*osca_timer_sec_per_tick;
 	}
 	static auto tick()->void{
@@ -357,7 +358,7 @@ public:
 
 		// time
 		timer_tick_prv=timer_tick;
-		timer_tick=osca_timer();
+		timer_tick=osca_tick;
 		time=TimeSec(timer_tick)*osca_timer_sec_per_tick;
 		dt=TimeSec(timer_tick-timer_tick_prv)*osca_timer_sec_per_tick;
 

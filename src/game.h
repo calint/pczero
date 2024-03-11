@@ -634,7 +634,7 @@ auto Game::create_boss()->void{
 		// print stats
 		out.pos({9,2}).fg(2);
 		out.p("i=").p_hex_8b(static_cast<uint8>(osca_task_focused->id)).spc();
-		out.p("t=").p_hex_16b(static_cast<uint16>(osca_timer_lo)).spc();
+		out.p("t=").p_hex_16b(static_cast<uint16>(osca_tick)).spc();
 		out.p("s=").p_hex_16b(static_cast<uint16>(Object::time)).spc();
 		out.p("k=").p_hex_8b(static_cast<uint8>(last_received_key)).spc();
 		out.p("m=").p_hex_8b(static_cast<uint8>(metrics::matrix_set_transforms)).spc();
