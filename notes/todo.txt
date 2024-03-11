@@ -2,7 +2,7 @@
     => time represented as double and time step as float
     => when double > 65535.0 cast to uint16 results in 0
 [x] osca: don't use current task stack to push/pop
-    => isr_kbd uses osca stack
+    => isr_kbd uses osca stack (callback to c might generate a substantial stack footprint)
     => osca_yield does one 32 bit push/pop on current task stack
     => isr_tmr does one 16 bit push/pop on current task stack
 [ ] libge: Object: allow change of ObjectDef
