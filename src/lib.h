@@ -560,18 +560,18 @@ public:
 		}
 		return*this;
 	}
-	constexpr auto p_hex(const int hex_number_4b)->PrinterToBitmap&{
+	constexpr auto p_hex(const int32 hex_number_4b)->PrinterToBitmap&{
 		draw(table_hex_to_font[hex_number_4b&0xf]);
 		return*this;
 	}
-	constexpr auto p_hex_8b(uint8 v)->PrinterToBitmap&{
+	constexpr auto p_hex_8b(const uint8 v)->PrinterToBitmap&{
 		const int ch1=v&0xf;
 		const int ch2=(v>>4)&0xf;
 		p_hex(ch2);
 		p_hex(ch1);
 		return*this;
 	}
-	constexpr auto p_hex_16b(unsigned short v)->PrinterToBitmap&{
+	constexpr auto p_hex_16b(const uint16 v)->PrinterToBitmap&{
 		// ? ugly code. remake
 		const int ch1= v     &0xf;
 		const int ch2=(v>> 4)&0xf;
@@ -583,7 +583,7 @@ public:
 		p_hex(ch1);
 		return*this;
 	}
-	constexpr auto p_hex_32b(unsigned v)->PrinterToBitmap&{
+	constexpr auto p_hex_32b(const uint32 v)->PrinterToBitmap&{
 		// ? ugly code. remake
 		const int ch1= v     &0xf;
 		const int ch2=(v>> 4)&0xf;

@@ -79,7 +79,7 @@ extern "C" volatile const uint32 osca_tick_lo;
 extern "C" volatile const uint32 osca_tick_hi;
 
 // seconds per timer tick
-constexpr float osca_timer_sec_per_tick=1.0f/1024; // 1024 Hz
+constexpr float osca_tick_per_sec=1.0f/1024; // 1024 Hz
 
 
 // switches to next task

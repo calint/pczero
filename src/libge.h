@@ -55,9 +55,9 @@ constexpr Size nobjects_max{256};
 using Velocity=Vector;
 using Acceleration=Vector;
 using AngularVelocityRad=AngleRad;
-using Time=Real;
+using Time=double;
 using TimeSec=Time;
-using TimeStep=Real;
+using TimeStepSec=Real;
 
 // physics states are kept in their own buffer for better cpu cache utilization at update
 class PhysicsState final{
@@ -69,7 +69,7 @@ public:
 	AngularVelocityRad dagl{}; // angular velocity per second
 	Object*obj{}; // pointer to the object that owns this physics state
 	              // note: circular reference
-	inline auto update(const TimeSec dt)->void{
+	inline auto update(const TimeStepSec dt)->void{
 		vel.inc_by(acc,dt);
 		pos.inc_by(vel,dt);
 		agl+=dagl*dt;
@@ -338,7 +338,7 @@ private:
 
 public:
 	inline static TimeSec time{};
-	inline static TimeSec dt{};
+	inline static TimeStepSec dt{};
 	inline static Count fps{};
 
 	static auto init_statics()->void{
@@ -351,7 +351,7 @@ public:
 		ls_deleted_end=ls_deleted+nobjects_max;
 
 		fps_timer_tick_prv=timer_tick=timer_tick_prv=osca_tick;
-		time=TimeSec(timer_tick)*osca_timer_sec_per_tick;
+		time=TimeSec(timer_tick)*TimeSec(osca_tick_per_sec);
 	}
 	static auto tick()->void{
 		metrics::reset();
@@ -359,14 +359,14 @@ public:
 		// time
 		timer_tick_prv=timer_tick;
 		timer_tick=osca_tick;
-		time=TimeSec(timer_tick)*osca_timer_sec_per_tick;
-		dt=TimeSec(timer_tick-timer_tick_prv)*osca_timer_sec_per_tick;
+		dt=TimeStepSec(timer_tick-timer_tick_prv)*osca_tick_per_sec;
+		time=TimeSec(timer_tick)*TimeSec(osca_tick_per_sec);
 
 		// fps calculations
 		fps_frame_counter++;
-		const TimeSec fps_dt=TimeSec(timer_tick-fps_timer_tick_prv)*osca_timer_sec_per_tick;
+		const TimeStepSec fps_dt=TimeStepSec(timer_tick-fps_timer_tick_prv)*osca_tick_per_sec;
 		if(fps_dt>1){ // recalculate fps every second
-			fps=Count(TimeSec(fps_frame_counter)/fps_dt);
+			fps=Count(TimeStepSec(fps_frame_counter)/fps_dt);
 			fps_frame_counter=0;
 			fps_timer_tick_prv=timer_tick;
 		}

@@ -103,8 +103,14 @@ public:
 		*static_cast<Color8b*>(vga13h.bmp().address_offset({xi,yi}))=color;
 	}
 
-	static auto draw_trajectory(const Point&p0,const Vector&vel,const TimeSec t_s,const TimeSec t_inc_s,const Color8b color)->void{
-		TimeSec t=0;
+	static auto draw_trajectory(
+		const Point&p0,
+		const Vector&vel,
+		const TimeStepSec t_s,
+		const TimeStepSec t_inc_s,
+		const Color8b color
+	)->void{
+		TimeStepSec t=0;
 		Point p=p0;
 		while(t<t_s){
 			t+=t_inc_s;
@@ -633,15 +639,15 @@ auto Game::create_boss()->void{
 
 		// print stats
 		out.pos({9,2}).fg(2);
-		out.p("i=").p_hex_8b(static_cast<uint8>(osca_task_focused->id)).spc();
-		out.p("t=").p_hex_16b(static_cast<uint16>(osca_tick)).spc();
-		out.p("s=").p_hex_16b(static_cast<uint16>(Object::time)).spc();
-		out.p("k=").p_hex_8b(static_cast<uint8>(last_received_key)).spc();
-		out.p("m=").p_hex_8b(static_cast<uint8>(metrics::matrix_set_transforms)).spc();
-		out.p("c=").p_hex_8b(static_cast<uint8>(metrics::collisions_checks)).spc();
-		out.p("b=").p_hex_8b(static_cast<uint8>(metrics::collisions_checks_bounding_shapes)).spc();
-		out.p("a=").p_hex_8b(static_cast<uint8>(Object::allocated_objects_count())).spc();
-		out.p("f=").p_hex_16b(static_cast<uint16>(Object::fps)).spc();
+		out.p("i=").p_hex_8b(uint8(osca_task_focused->id)).spc();
+		out.p("t=").p_hex_16b(uint16(osca_tick)).spc();
+		out.p("s=").p_hex_16b(uint16(Object::time)).spc();
+		out.p("k=").p_hex_8b(uint8(last_received_key)).spc();
+		out.p("m=").p_hex_8b(uint8(metrics::matrix_set_transforms)).spc();
+		out.p("c=").p_hex_8b(uint8(metrics::collisions_checks)).spc();
+		out.p("b=").p_hex_8b(uint8(metrics::collisions_checks_bounding_shapes)).spc();
+		out.p("a=").p_hex_8b(uint8(Object::allocated_objects_count())).spc();
+		out.p("f=").p_hex_16b(uint16(Object::fps)).spc();
 
 		Ship*shp=Game::player;
 
