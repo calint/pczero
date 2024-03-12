@@ -128,8 +128,8 @@ template<typename T>inline constexpr auto operator-(const VectorT<T>&lhs,const V
 using Coord=Real; // coordinate in real space
 using Vector=VectorT<Coord>; // vector in 2d real space coordinates
 using Point=Vector; // point in 2d
-using PointIx=short; // index into a list of points
-using CoordPx=short; // coordinate in pixel space
+using PointIx=uint16; // index into a list of points
+using CoordPx=int16; // coordinate in pixel space
 using PointPx=VectorT<CoordPx>; // point in pixel space
 using Count=Size; // used in loops
 
@@ -144,7 +144,7 @@ public:
 	inline constexpr auto height()const->const T{return height_;}
 };
 
-using SizePx=short; // size in pixel space
+using SizePx=int16; // size in pixel space
 using DimensionPx=DimensionT<SizePx>; // dimension in pixel space
 using Color8b=uint8; // 8 bit index in color palette
 
@@ -518,7 +518,7 @@ static constexpr unsigned table_ascii_to_font[]{
 		0,0,0,0,0,
 };
 
-using CoordsChar=VectorT<short>;
+using CoordsChar=VectorT<int16>;
 
 class PrinterToBitmap{
 	Bitmap8b*bmp_{}; // destination bitmap
@@ -565,18 +565,18 @@ public:
 		return*this;
 	}
 	constexpr auto p_hex_8b(const uint8 v)->PrinterToBitmap&{
-		const int ch1=v&0xf;
-		const int ch2=(v>>4)&0xf;
+		const int32 ch1=v&0xf;
+		const int32 ch2=(v>>4)&0xf;
 		p_hex(ch2);
 		p_hex(ch1);
 		return*this;
 	}
 	constexpr auto p_hex_16b(const uint16 v)->PrinterToBitmap&{
 		// ? ugly code. remake
-		const int ch1= v     &0xf;
-		const int ch2=(v>> 4)&0xf;
-		const int ch3=(v>> 8)&0xf;
-		const int ch4=(v>>12)&0xf;
+		const int32 ch1= v     &0xf;
+		const int32 ch2=(v>> 4)&0xf;
+		const int32 ch3=(v>> 8)&0xf;
+		const int32 ch4=(v>>12)&0xf;
 		p_hex(ch4);
 		p_hex(ch3);
 		p_hex(ch2);
@@ -585,14 +585,14 @@ public:
 	}
 	constexpr auto p_hex_32b(const uint32 v)->PrinterToBitmap&{
 		// ? ugly code. remake
-		const int ch1= v     &0xf;
-		const int ch2=(v>> 4)&0xf;
-		const int ch3=(v>> 8)&0xf;
-		const int ch4=(v>>12)&0xf;
-		const int ch5=(v>>16)&0xf;
-		const int ch6=(v>>20)&0xf;
-		const int ch7=(v>>24)&0xf;
-		const int ch8=(v>>28)&0xf;
+		const int32 ch1= v     &0xf;
+		const int32 ch2=(v>> 4)&0xf;
+		const int32 ch3=(v>> 8)&0xf;
+		const int32 ch4=(v>>12)&0xf;
+		const int32 ch5=(v>>16)&0xf;
+		const int32 ch6=(v>>20)&0xf;
+		const int32 ch7=(v>>24)&0xf;
+		const int32 ch8=(v>>28)&0xf;
 		p_hex(ch8);
 		p_hex(ch7);
 		p_hex(ch6);
@@ -741,7 +741,7 @@ inline auto pz_memset(Address dst,uint8 value,SizeBytes n)->void{
 
 // built-in functions replacements (used by clang++ -O0 and -Os)
 extern "C" void*memcpy(void*dst,const void*src,unsigned n);
-extern "C" void*memset(void* dst, int value,unsigned n);
+extern "C" void*memset(void*dst,int value,unsigned n);
 void*memcpy(void*dst,const void*src,unsigned n){
 	pz_memcpy(Address(dst),Address(src),SizeBytes(n));
     return dst;

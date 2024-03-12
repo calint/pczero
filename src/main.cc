@@ -112,7 +112,7 @@ extern "C" [[noreturn]] auto tsk2()->void{
 		pz_memset(Address(0xa'0000+320*150),4,320);
 
 		// copy kernel and osca stack to screen
-		constexpr int kernel_size=512*2;
+		constexpr SizeBytes kernel_size=512*2;
 		Data src_kernel=Data(Address(0x7c00),kernel_size); // kernel binary
 		Data dst_kernel=Data(Address(0xa'0000+320*151),kernel_size); // on screen
 		src_kernel.to(dst_kernel);

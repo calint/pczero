@@ -55,15 +55,15 @@ extern "C" auto osca_on_exception()->void{
 // note: The FSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
 //       first byte of the field needed to be aligned on a 16-byte boundary.
 alignas(16) struct Task osca_tasks[]{
-	//                                       :-> 0b01 grabs keyboard focus, 0b10 running
+	//                                     :-> 0b01 grabs keyboard focus, 0b10 running
 	//    eip     esp              eflags bits   id   edi  esi  ebp  esp0 ebx  edx  ecx  eax
-	{uint32(tsk4),0xa'0000+320*176,0     ,0b11  ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
-	{uint32(tsk1),0xa'0000+320*180,0     ,0b10  ,1   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
-	{uint32(tsk0),0xa'0000+320*184,0     ,0b11  ,2   ,0xde,0xec,0xeb,0xe5,0xb ,0xd ,0xc ,int32("kernel osca")},
-	{uint32(tsk2),0xa'0000+320*188,0     ,0b10  ,3   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
-	{uint32(tsk3),0xa'0000+320*192,0     ,0b10  ,4   ,0   ,0   ,0   ,0   ,0   ,0   ,1   ,140 },
-	{uint32(tsk3),0xa'0000+320*196,0     ,0b10  ,5   ,0   ,0   ,0   ,0   ,0   ,0   ,2   ,160 },
-	{uint32(tsk3),0xa'0000+320*200,0     ,0b10  ,6   ,0   ,0   ,0   ,0   ,0   ,0   ,4   ,180 },
+	{uint32(tsk4),0xa'0000+320*176,0     ,0b11  ,1   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
+	{uint32(tsk1),0xa'0000+320*180,0     ,0b10  ,2   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
+	{uint32(tsk0),0xa'0000+320*184,0     ,0b11  ,3   ,0xde,0xec,0xeb,0xe5,0xb ,0xd ,0xc ,int32("kernel osca")},
+	{uint32(tsk2),0xa'0000+320*188,0     ,0b10  ,4   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
+	{uint32(tsk3),0xa'0000+320*192,0     ,0b10  ,5   ,0   ,0   ,0   ,0   ,0   ,0   ,1   ,140 },
+	{uint32(tsk3),0xa'0000+320*196,0     ,0b10  ,6   ,0   ,0   ,0   ,0   ,0   ,0   ,2   ,160 },
+	{uint32(tsk3),0xa'0000+320*200,0     ,0b10  ,7   ,0   ,0   ,0   ,0   ,0   ,0   ,4   ,180 },
 };
 const Task* const osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
 
@@ -193,27 +193,27 @@ public:
 };
 
 class Keyboard{
-	uint8 buf[2<<3]{}; // minimum size 2 and a power of 2, max size 256
-	uint8 s{}; // next event index
-	uint8 e{}; // last event index +1 & roll
+	uint8 buf_[2<<3]{}; // ring buffer, minimum size 2, size power of 2, max 256
+	uint8 out_{}; // next event index
+	uint8 in_{}; // last event index +1 & roll
 public:
 	// called by 'osca_on_key'
 	constexpr auto on_key(const uint8 scan_code)->void{
-		const uint8 ne=(e+1)&(sizeof(buf)-1); // next end index
-		if(ne==s){ // check overrun
+		const uint8 next_in=(in_+1)&(sizeof(buf_)-1); // next end index
+		if(next_in==out_){ // check overrun
 			return; // write would overwrite unhandled scan_code. display on status line?
 		}
-		buf[e]=scan_code;
-		e=ne;
+		buf_[in_]=scan_code;
+		in_=next_in;
 	}
 	// returns keyboard scan code or 0 if no more events
 	constexpr auto get_next_key()->uint8{
-		if(s==e){
+		if(out_==in_){
 			return 0; // no more events
 		}
-		const uint8 scan_code=buf[s];
-		s++;
-		s&=sizeof(buf)-1; // roll
+		const uint8 scan_code=buf_[out_];
+		out_++;
+		out_&=sizeof(buf_)-1; // roll
 		return scan_code;
 	}
 };
@@ -237,6 +237,7 @@ extern "C" auto osca_init()->void{
 	*reinterpret_cast<char*>(0xa'0000)=2;
 
 	// initiate globals
+
 	vga13h=Vga13h{};
 	
 	err=PrinterToVga{};
@@ -274,15 +275,18 @@ extern "C" auto osca_init()->void{
 
 	// initiate heap with a size of 320*100 B
 	Heap::init_statics({free_mem_start,320*100},nobjects_max);
+	// fill buffers with colors for debugging output
 	Heap::clear(0x2c);
 	Heap::clear_heap_entries(0x2e,0x2f);
 }
+
 // called by osca from the keyboard interrupt
 // there is no task switch during this function
 extern "C" auto osca_on_key(const uint8 scan_code)->void{
 	static bool keyboard_ctrl_pressed{};
 
 	using namespace osca;
+
 	// on screen
 	*reinterpret_cast<unsigned*>(0xa0000+4)=scan_code;
 
@@ -308,11 +312,11 @@ extern "C" auto osca_on_key(const uint8 scan_code)->void{
 			}
 		}
 
-		// if F1 through F12 pressed toggle running state of task
-		if(scan_code>=0x3b && scan_code<=0x3b+12){
-			const uint8 tsk=scan_code-0x3b;
-			if(sizeof(osca_tasks)/sizeof(Task)>tsk){
-				osca_tasks[tsk].set_running(!osca_tasks[tsk].is_running());
+		// if F1 through F12 pressed then toggle running state of task
+		if(scan_code>=0x3b && scan_code<0x3b+12){
+			const uint8 tsk_ix=scan_code-0x3b;
+			if(sizeof(osca_tasks)/sizeof(Task)>tsk_ix){
+				osca_tasks[tsk_ix].set_running(!osca_tasks[tsk_ix].is_running());
 			}
 			return;
 		}
