@@ -61,6 +61,7 @@ build:
 	as -c src/osca.S -o bin/src/osca.o $(AF)
 	@echo
 	$(CC) -c src/main.cc -o bin/src/main.o $(CF) $(CW)
+	@echo
 	cp bin/src/main.o bin/src/main_debug.o
 	strip -g bin/src/main.o
 	@echo
