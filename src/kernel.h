@@ -56,7 +56,7 @@ extern "C" auto osca_on_exception()->void{
 //       first byte of the field needed to be aligned on a 16-byte boundary.
 alignas(16) struct Task osca_tasks[]{
 	//                                       :-> 0b01 grabs keyboard focus, 0b10 active
-	//        eip   esp              eflags bits   id   edi  esi  ebp  esp0 ebx  edx  ecx  eax
+	//    eip     esp              eflags bits   id   edi  esi  ebp  esp0 ebx  edx  ecx  eax
 	{uint32(tsk4),0xa'0000+320*176,0     ,0b11  ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
 	{uint32(tsk1),0xa'0000+320*180,0     ,0b10  ,1   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
 	{uint32(tsk0),0xa'0000+320*184,0     ,0b11  ,2   ,0xde,0xec,0xeb,0xe5,0xb ,0xd ,0xc ,int32("kernel osca")},
