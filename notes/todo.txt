@@ -1,10 +1,3 @@
-[x] Object::time represented as float does not work well with osca_timer_hi > 3
-    => time represented as double and time step as float
-    => when double > 65535.0 cast to uint16 results in 0
-[x] osca: don't use current task stack to push/pop
-    => isr_kbd uses osca stack (callback to c might generate a substantial stack footprint)
-    => osca_yield does one 32 bit push/pop on current task stack
-    => isr_tmr does one 16 bit push/pop on current task stack
 [ ] libge: Object: allow change of ObjectDef
 [ ] lib: Data::address_offset: check if within bounds?
 [ ] lib: Data::to: check if within bounds?
@@ -23,8 +16,7 @@
               => 'o1store' from "https://github.com/calint/glos"
 [ ] lib: PrinterToBitmap pos in pixels
 [ ] lib: PrinterToConsole pos in characters
-[x] osca: get EBDA usable memory setting application top of memory
-    => using safe method of avoiding EBDA
+[ ] build with -g and then link a stripped version of that object file
 ------------------------------------------------------------------------------
 [x] osca: is it necessary to do fwait on i386+387?
 [x]   "co-processors from 287 on do not need it"
@@ -114,3 +106,14 @@
 [x] move draw_x into Bitmap?
 [-] move the stack memory of the vga buffer for better performance (vga is slow)
     => toy application done. displaying heap and stack on screen is nice
+[x] osca: get EBDA usable memory setting application top of memory
+    => using safe method of avoiding EBDA
+[x] resolve the unknown interrupt on asus zenbook hardware
+    => isa irq 7: lpt1  spurious and unreliable
+[x] Object::time represented as float does not work well with osca_timer_hi > 3
+    => time represented as double and time step as float
+    => when double > 65535.0 cast to uint16 results in 0
+[x] osca: don't use current task stack to push/pop
+    => isr_kbd uses osca stack (callback to c might generate a substantial stack footprint)
+    => osca_yield does one 32 bit push/pop on current task stack
+    => isr_tmr does one 16 bit push/pop on current task stack

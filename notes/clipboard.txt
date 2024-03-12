@@ -10,6 +10,17 @@ objdump -m i8086 -D bin/src/osca.o | less
 # print assembler with source (compile with option -g for source)
 objdump -dS bin/src/main.o | less
 
+# to find source location of exception:
+# * get instruction address from print out
+    4'th output, the first 3 are the exception function pushes
+# * find function in bin/pczero.map using instruction address
+
+objdump -DlSC bin/src/main_debug.o | less
+
+# * find the function and calculate relative position using instruction
+#    pointer and function base address from pczero.map
+# * note: main.o base address is 0x8000
+
 # print 16 bit assembler code
 objdump -b binary -m i8086 -D pczero.img | less
 

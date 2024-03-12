@@ -244,7 +244,12 @@ public:
 		}
 
 		if(enable::draw_polygons){
-			dsp.draw_polygon(pts_wld_,def_.nbnd,def_.bnd,color_);
+			if(def_.nbnd==1){
+				// special case when definition is a point
+				dsp.draw_dot(pts_wld_[0],color_);
+			}else{
+				dsp.draw_polygon(pts_wld_,def_.nbnd,def_.bnd,color_);
+			}
 		}
 
 		if(enable::draw_bounding_circle){
