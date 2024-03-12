@@ -45,19 +45,19 @@ CC=clang++ -std=c++20
 CF=-g -Os -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
 CF+=-Wfatal-errors # stop at first error
 CW=-Werror # warnings are errors
-CW+=-Weverything
+CW+=-Weverything # all wargning
 CW+=-Wno-c++98-compat # ignore c++98 compatability issues
 CW+=-Wno-c++98-compat-pedantic # alow 'long long'
 CW+=-Wno-c++98-c++11-compat-binary-literal # allow 0xb..... literals
-CW+=-Wno-c++11-narrowing
+CW+=-Wno-c++11-narrowing # allow
 CW+=-Wno-global-constructors # global constructors ok here
 CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
 CW+=-Wno-weak-vtables # allow for source in include files
+CW+=-Wno-unsafe-buffer-usage # allow pointer shenanigans
 CW+=-Wno-unused-function # allow for debugging
 CW+=-Wno-unused-parameter # allow for debugging
 CW+=-Wno-unused-variable # allow for debugging
 CW+=-Wno-unused-private-field # allow for padding
-CW+=-Wno-unsafe-buffer-usage # allow pointer shenanigans
 
 # ld
 LF=-Tlink.ld -melf_i386 -nostdlib
