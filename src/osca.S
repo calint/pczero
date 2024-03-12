@@ -256,8 +256,8 @@ movw       $0,IDT+     7*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is with
 #       see https://wiki.osdev.org/8259_PIC#Spurious_IRQs 
 #       disabled with an empty interrupt handler: isr_7
 #       (qemu and virtualbox does not generate this interrupt)
-#movw $isr_7,IDT+(32+7)*IDT_ENTRY_SIZE   # 
-#movw     $0,IDT+(32+7)*IDT_ENTRY_SIZE+6 #
+movw $isr_7,IDT+(32+7)*IDT_ENTRY_SIZE   # 
+movw     $0,IDT+(32+7)*IDT_ENTRY_SIZE+6 #
 
 lidt idtr # load the interrupt descriptor table register
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
