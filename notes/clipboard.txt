@@ -37,3 +37,9 @@ cp ~/w/pczero/pczero.img .
 truncate pczero.img --size=1M
 rm pczero.vdi
 VBoxManage convertfromraw --format VDI pczero.img pczero.vdi
+
+# generate exception
+uint32 ptr=0;
+*reinterpret_cast<uint32*>(ptr)=1;
+uint32 a=1/ptr;
+out.p_hex_8b(uint8(a));

@@ -25,20 +25,27 @@ extern "C" auto osca_on_exception()->void{
 	static uint32 stack_3;
 	static uint32 stack_4;
 	static uint32 stack_5;
-	asm("mov (%%esp),%0":"=r"(stack_0));
-	asm("mov 4(%%esp),%0":"=r"(stack_1));
-	asm("mov 8(%%esp),%0":"=r"(stack_2));
+	static uint32 stack_6;
+	static uint32 stack_7;
+	asm("mov   (%%esp),%0":"=r"(stack_0));
+	asm("mov  4(%%esp),%0":"=r"(stack_1));
+	asm("mov  8(%%esp),%0":"=r"(stack_2));
 	asm("mov 12(%%esp),%0":"=r"(stack_3));
 	asm("mov 16(%%esp),%0":"=r"(stack_4));
 	asm("mov 20(%%esp),%0":"=r"(stack_5));
+	asm("mov 24(%%esp),%0":"=r"(stack_6));
+	asm("mov 28(%%esp),%0":"=r"(stack_7));
 
 	err.p("osca exception").nl();
 	err.spc().p_hex_32b(stack_0);
 	err.spc().p_hex_32b(stack_1);
 	err.spc().p_hex_32b(stack_2);
 	err.spc().p_hex_32b(stack_3);
+	err.nl();
 	err.spc().p_hex_32b(stack_4);
 	err.spc().p_hex_32b(stack_5);
+	err.spc().p_hex_32b(stack_6);
+	err.spc().p_hex_32b(stack_7);
 	osca_hang();
 }
 
@@ -261,7 +268,7 @@ extern "C" auto osca_init()->void{
 
 	// clear free memory
 	pz_memset(free_mem_start,0,free_mem_size);
-	
+
 	// initiate heap with a size of 320*100 B
 	Heap::init_statics({free_mem_start,320*100},nobjects_max);
 	Heap::clear(0x2c);
