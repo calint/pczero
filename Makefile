@@ -3,6 +3,15 @@
 #   g++      (Ubuntu 13.2.0-4ubuntu3) 13.2.0
 #   clang++  Ubuntu clang version 16.0.6
 #   ld       GNU ld (GNU Binutils for Ubuntu) 2.41
+#   strip    GNU strip (GNU Binutils for Ubuntu) 2.4
+#
+# emulated with:
+#   qemu-system-i386  QEMU emulator version 8.0.4
+#   VirtualBox        7.0
+#
+# tested on hardware:
+#   asus zenbook
+#
 
 # resulting bootable image
 IMAGE=pczero.img
