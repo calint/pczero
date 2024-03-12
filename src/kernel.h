@@ -55,7 +55,7 @@ extern "C" auto osca_on_exception()->void{
 // note: The FSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
 //       first byte of the field needed to be aligned on a 16-byte boundary.
 alignas(16) struct Task osca_tasks[]{
-	//                                       :-> 0b01 grabs keyboard focus, 0b10 active
+	//                                       :-> 0b01 grabs keyboard focus, 0b10 running
 	//    eip     esp              eflags bits   id   edi  esi  ebp  esp0 ebx  edx  ecx  eax
 	{uint32(tsk4),0xa'0000+320*176,0     ,0b11  ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
 	{uint32(tsk1),0xa'0000+320*180,0     ,0b10  ,1   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
