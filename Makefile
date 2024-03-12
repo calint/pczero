@@ -45,7 +45,7 @@ CC=clang++ -std=c++20
 CF=-g -Os -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
 CF+=-Wfatal-errors # stop at first error
 CF+=-Werror # warnings are errors
-CW+=-Weverything # all warnings
+CW=-Weverything # all warnings
 CW+=-Wno-c++98-compat # ignore c++98 compatability issues
 CW+=-Wno-c++98-compat-pedantic # alow 'long long'
 CW+=-Wno-c++98-c++11-compat-binary-literal # allow 0xb..... literals
