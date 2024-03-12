@@ -1,10 +1,6 @@
 #pragma once
 // reviewed: 2024-03-09
 
-//
-// osca kernel header
-//
-
 namespace osca{
 
 using int8=char;
