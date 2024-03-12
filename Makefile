@@ -62,7 +62,7 @@ build:
 	@echo
 	$(CC) -c src/main.cc -o bin/src/main.o $(CF) $(CW)
 	@echo
-	ld -o $(IMAGE) $(LF) -Map pczero.map && chmod -x $(IMAGE)
+	ld -o $(IMAGE) $(LF) -Map bin/pczero.map && chmod -x $(IMAGE)
 	@echo
 	
 print:
