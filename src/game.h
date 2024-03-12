@@ -272,8 +272,8 @@ public:
 	}
 
 	auto fire()->void{
-		const TimeSec dt=time-fire_t;
-		if(dt<fire_rate){
+		const TimeSec fire_dt=time-fire_t;
+		if(fire_dt<fire_rate){
 			return;
 		}
 		fire_t=time;

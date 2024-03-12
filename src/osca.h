@@ -34,7 +34,7 @@ struct alignas(16) Task{
 	constexpr inline auto get_id()const->uint16{return id;}
 	constexpr inline auto is_grab_keyboard_focus()const->bool{return bits&1;}
 	constexpr inline auto is_running()const->bool{return bits&2;}
-	constexpr inline auto set_running(const bool b)->void{if(b)bits|=2;else bits&=~2;}
+	constexpr inline auto set_running(const bool b)->void{if(b)bits|=2;else bits&=uint16(~2);}
 };
 
 // tasks list implemented in kernel.h

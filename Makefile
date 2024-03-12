@@ -27,15 +27,15 @@ AF=-march=i386+387 --32 -W -fatal-warnings
 
 # g++
 #CC=g++ -std=c++2b # c++ 23
-#CF=-g -Os -m32 -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
+#CF=-g -Os -m32 -ffreestanding -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
 #CF+=-Wfatal-errors # stop at first error
 #CF+=-fanalyzer
-#CW+=-Werror # warnings are errors
+#CF+=-Werror # warnings are errors
 #CW=-pedantic -pedantic-errors -Wall -Wextra -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
 #CW+=-Wpadded # warn when complier pads a data structure
-#CW+=-Wfloat-conversion 
 #CW+=-Wno-array-bounds # allow pointer shenanigans
 #CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
+#CW+=-Wno-cast-qual # allow cast from const void* to void*
 #CW+=-Wno-unused-function # allow for debugging
 #CW+=-Wno-unused-variable # allow for debugging
 #CW+=-Wno-unused-parameter # allow for debugging

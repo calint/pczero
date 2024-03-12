@@ -539,7 +539,7 @@ public:
 		di_{static_cast<Color8b*>(bmp->data().address())},
 		dil_{di_},
 		bmp_wi_{bmp->dim().width()},
-		ln_{bmp_wi_-font_wi_}
+		ln_{SizePx(bmp_wi_-font_wi_)}
 	{}
 	constexpr auto pos(const CoordsChar p)->PrinterToBitmap&{
 		di_=static_cast<Color8b*>(bmp_->data().address());
@@ -560,23 +560,23 @@ public:
 		}
 		return*this;
 	}
-	constexpr auto p_hex(const int32 hex_number_4b)->PrinterToBitmap&{
+	constexpr auto p_hex(const uint32 hex_number_4b)->PrinterToBitmap&{
 		draw(table_hex_to_font[hex_number_4b&0xf]);
 		return*this;
 	}
 	constexpr auto p_hex_8b(const uint8 v)->PrinterToBitmap&{
-		const int32 ch1=v&0xf;
-		const int32 ch2=(v>>4)&0xf;
+		const uint32 ch1=v&0xf;
+		const uint32 ch2=(v>>4)&0xf;
 		p_hex(ch2);
 		p_hex(ch1);
 		return*this;
 	}
 	constexpr auto p_hex_16b(const uint16 v)->PrinterToBitmap&{
 		// ? ugly code. remake
-		const int32 ch1= v     &0xf;
-		const int32 ch2=(v>> 4)&0xf;
-		const int32 ch3=(v>> 8)&0xf;
-		const int32 ch4=(v>>12)&0xf;
+		const uint32 ch1= v     &0xf;
+		const uint32 ch2=(v>> 4)&0xf;
+		const uint32 ch3=(v>> 8)&0xf;
+		const uint32 ch4=(v>>12)&0xf;
 		p_hex(ch4);
 		p_hex(ch3);
 		p_hex(ch2);
@@ -585,14 +585,14 @@ public:
 	}
 	constexpr auto p_hex_32b(const uint32 v)->PrinterToBitmap&{
 		// ? ugly code. remake
-		const int32 ch1= v     &0xf;
-		const int32 ch2=(v>> 4)&0xf;
-		const int32 ch3=(v>> 8)&0xf;
-		const int32 ch4=(v>>12)&0xf;
-		const int32 ch5=(v>>16)&0xf;
-		const int32 ch6=(v>>20)&0xf;
-		const int32 ch7=(v>>24)&0xf;
-		const int32 ch8=(v>>28)&0xf;
+		const uint32 ch1= v     &0xf;
+		const uint32 ch2=(v>> 4)&0xf;
+		const uint32 ch3=(v>> 8)&0xf;
+		const uint32 ch4=(v>>12)&0xf;
+		const uint32 ch5=(v>>16)&0xf;
+		const uint32 ch6=(v>>20)&0xf;
+		const uint32 ch7=(v>>24)&0xf;
+		const uint32 ch8=(v>>28)&0xf;
 		p_hex(ch8);
 		p_hex(ch7);
 		p_hex(ch6);
@@ -720,7 +720,7 @@ public:
 using Matrix=MatrixT<Coord>;
 
 inline auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
-    asm(
+    asm volatile(
         "cld;"
         "rep movsb;"
         :"=D"(dst),"=S"(src),"=c"(n)
@@ -730,7 +730,7 @@ inline auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
 }
 
 inline auto pz_memset(Address dst,uint8 value,SizeBytes n)->void{
-    asm(
+    asm volatile(
         "cld;"
         "rep stosb;"
         :"=D"(dst),"=c"(n)
@@ -746,7 +746,7 @@ void*memcpy(void*dst,const void*src,unsigned n){
 	pz_memcpy(Address(dst),Address(src),SizeBytes(n));
     return dst;
 }
-void*memset(void* dst,int value,unsigned n){
+void*memset(void*dst,int value,unsigned n){
 	pz_memset(Address(dst),uint8(value),SizeBytes(n));
     return dst;
 }
