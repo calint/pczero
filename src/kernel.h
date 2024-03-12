@@ -27,6 +27,9 @@ extern "C" auto osca_on_exception()->void{
 	static uint32 stack_5;
 	static uint32 stack_6;
 	static uint32 stack_7;
+
+	osca_interrupts_disable();
+
 	asm("mov   (%%esp),%0":"=r"(stack_0));
 	asm("mov  4(%%esp),%0":"=r"(stack_1));
 	asm("mov  8(%%esp),%0":"=r"(stack_2));
@@ -40,12 +43,12 @@ extern "C" auto osca_on_exception()->void{
 	err.spc().p_hex_32b(stack_0);
 	err.spc().p_hex_32b(stack_1);
 	err.spc().p_hex_32b(stack_2);
-	err.spc().p_hex_32b(stack_3);
-	err.nl();
+	err.spc().p_hex_32b(stack_3).nl();
 	err.spc().p_hex_32b(stack_4);
 	err.spc().p_hex_32b(stack_5);
 	err.spc().p_hex_32b(stack_6);
 	err.spc().p_hex_32b(stack_7);
+
 	osca_hang();
 }
 

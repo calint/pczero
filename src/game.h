@@ -528,7 +528,7 @@ auto Game::create_boss()->void{
 	osca_interrupts_disable();
 	const Task*this_task=osca_task_active;
 	osca_interrupts_enable();
-	
+
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	// init statics
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
