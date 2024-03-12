@@ -228,14 +228,14 @@ in $0x71,%al
 # setup interrupt service routines
 # https://wiki.osdev.org/Interrupt_Descriptor_Table
 
-mov $osca_on_exception,%eax # store the upper bits of the handler
-#mov $isr_other,%eax # store the upper 16 bits of the handler address
+#mov $osca_on_exception,%eax # store the upper bits of the handler
+mov $isr_other,%eax # store the upper 16 bits of the handler address
 shr $16,%eax        #  in ax
 mov $IDT,%ebx       # interrupt descriptor table address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
 lp1:
-    movw $osca_on_exception,(%ebx)    # offset 0..15
-#   movw $isr_other,        (%ebx)    # offset 0..15
+#    movw $osca_on_exception,(%ebx)    # offset 0..15
+    movw $isr_other,        (%ebx)    # offset 0..15
     movw $0x0008,          2(%ebx)    # selector in gdt
     movb $0x00,            4(%ebx)    # unused
     movb $0x8e,            5(%ebx)    # type_attrs p,pv0,!s,i32b
@@ -256,8 +256,8 @@ movw       $0,IDT+     7*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is with
 #       see https://wiki.osdev.org/8259_PIC#Spurious_IRQs 
 #       disabled with an empty interrupt handler: isr_7
 #       (qemu and virtualbox does not generate this interrupt)
-movw $isr_7,IDT+(32+7)*IDT_ENTRY_SIZE   # 
-movw     $0,IDT+(32+7)*IDT_ENTRY_SIZE+6 #
+#movw $isr_7,IDT+(32+7)*IDT_ENTRY_SIZE   # 
+#movw     $0,IDT+(32+7)*IDT_ENTRY_SIZE+6 #
 
 lidt idtr # load the interrupt descriptor table register
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
