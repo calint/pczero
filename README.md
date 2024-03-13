@@ -20,5 +20,4 @@ contains:
   - simple targeting system of objects in motion (can easily be extended to 3d and non-linear trajectories)
 * sample tasks (main.cc)
 
-
-![screenshot](https://github.com/calint/pczero/assets/1920811/409c9152-a3aa-486d-ac26-0df128f20db9)
+![screenshot 2024-03-13--12-07-40](https://github.com/calint/pczero/assets/1920811/fdbb313f-c202-411b-9806-6f472d39d167)
