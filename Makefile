@@ -10,7 +10,7 @@
 #   VirtualBox        7.0
 #
 # tested on hardware:
-#   asus zenbook
+#   asus zenbook UX305CA
 #
 
 # resulting bootable image
