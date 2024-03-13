@@ -19,8 +19,8 @@ class Game{
 	static auto create_scene()->void;
 	static auto create_boss()->void;
 
-	static auto create_circle(const Count segments)->Point*{
-		Point*pts=new Point[unsigned(segments)];
+	static auto create_circle(const PointIx segments)->Point*{
+		Point*pts=new Point[segments];
 		AngleRad th=0;
 		const AngleRad dth=2*PI/AngleRad(segments);
 		for(Count i=0;i<segments;i++){
@@ -33,8 +33,8 @@ class Game{
 		return pts;
 	}
 
-	static auto create_circle_ix(const Count segments)->PointIx*{
-		PointIx*ix=new PointIx[unsigned(segments)];
+	static auto create_circle_ix(const PointIx segments)->PointIx*{
+		PointIx*ix=new PointIx[segments];
 		for(PointIx i=0;i<segments;i++){
 			ix[i]=i;
 		}
@@ -88,10 +88,10 @@ public:
 		const Real xmin=Real(Game::play_area_top_left.x);
 		const Real ymax=Real(Game::play_area_top_left.y+Game::play_area_dim.height());
 		const Real ymin=Real(Game::play_area_top_left.y);
-		return !(phy.pos.x>=xmax-bounding_radius ||
-		         phy.pos.x< xmin+bounding_radius ||
-	             phy.pos.y>=ymax-bounding_radius ||
-				 phy.pos.y< ymin+bounding_radius);
+		return !(phy.position.x>=xmax-bounding_radius ||
+		         phy.position.x< xmin+bounding_radius ||
+	             phy.position.y>=ymax-bounding_radius ||
+				 phy.position.y< ymin+bounding_radius);
 	}
 
 	static auto draw_dot(const Point&p,const Color8b color)->void{
@@ -107,14 +107,14 @@ public:
 		const Point&p0,
 		const Vector&vel,
 		const TimeStepSec t_s,
-		const TimeStepSec t_inc_s,
+		const TimeStepSec t_step_s,
 		const Color8b color
 	)->void{
 		TimeStepSec t=0;
 		Point p=p0;
 		while(t<t_s){
-			t+=t_inc_s;
-			p.inc_by(vel,t_inc_s);
+			t+=t_step_s;
+			p.inc_by(vel,t_step_s);
 			draw_dot(p,color);
 		}
 	}
@@ -126,6 +126,7 @@ public:
 // game objects
 //
 
+// type bits
 constexpr TypeBits tb_none = 0;
 constexpr TypeBits tb_ships = 1;
 constexpr TypeBits tb_bullets = 2;
@@ -136,15 +137,15 @@ constexpr TypeBits tb_bosses = 32;
 
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - - 
 class Enemy final:public Object{
-	static constexpr Scale scl=5;
-	static constexpr Scale bounding_radius=scl*sqrt_of_2;
+	static constexpr Scale def_scale=5;
+	static constexpr Scale bounding_radius=def_scale*sqrt_of_2;
 public:
 	Enemy():
 		Object{
 			tb_enemies,
 			tb_bullets|tb_missiles,
 			Game::enemy_def,
-			scl,
+			def_scale,
 			bounding_radius,
 			{0,0},
 			0,
@@ -161,7 +162,7 @@ public:
 	// returns false if object is dead
 	auto update()->bool override{
 		if(!Game::is_in_play_area(*this)){
-			phy().vel.y=-phy().vel.y;
+			phy().velocity.y=-phy().velocity.y;
 		}
 		return true;
 	}
@@ -175,8 +176,8 @@ public:
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - - 
 
 class Bullet final:public Object{
-	static constexpr Scale scl=0.5;
-	static constexpr Scale bounding_radius=scl*sqrt_of_2;
+	static constexpr Scale scale=0.5;
+	static constexpr Scale bounding_radius=scale*sqrt_of_2;
 	TimeSec created_time;
 public:
 	static constexpr Scalar speed=40;
@@ -187,7 +188,7 @@ public:
 			tb_bullets,
 			tb_bosses|tb_enemies|tb_ships|tb_walls,
 			Game::bullet_def,
-			scl,
+			scale,
 			bounding_radius,
 			{0,0},
 			0,
@@ -214,12 +215,12 @@ public:
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - - 
 
 class Ship final:public Object{
-	static constexpr Scale scl=4;
-	static constexpr Scale bounding_radius=scl*sqrt_of_2;
-	static constexpr AngleDeg dagl=90;
+	static constexpr Scale def_scale=4;
+	static constexpr Scale bounding_radius=def_scale*sqrt_of_2;
+	static constexpr AngleDeg turning_rate=90;
 	static constexpr Scalar speed=20;
 	static constexpr TimeSec fire_rate=TimeSec(.2);
-	TimeSec fire_t{0};
+	TimeSec last_fired_time{0};
 public:
 	bool auto_aim_at_boss{false};
 	uint8 padding[3]{};
@@ -229,7 +230,7 @@ public:
 			tb_ships,
 			tb_bosses|tb_bullets|tb_enemies|tb_missiles|tb_ships|tb_walls,
 			Game::ship_def,
-			scl,
+			def_scale,
 			bounding_radius,
 			{0,0},
 			0,
@@ -243,17 +244,17 @@ public:
 		Game::player=nullptr;
 	}
 
-	auto turn_left()->void{phy().dagl=-deg_to_rad(dagl);}
-	auto turn_right()->void{phy().dagl=deg_to_rad(dagl);}
-	auto turn_still()->void{phy().dagl=0;}
-	auto thrust_fwd()->void{phy().vel=forward_vector().scale(speed);}
-	auto thrust_rev()->void{phy().vel=forward_vector().negate().scale(speed);}
+	auto turn_left()->void{phy().angular_velocity=-deg_to_rad(turning_rate);}
+	auto turn_right()->void{phy().angular_velocity=deg_to_rad(turning_rate);}
+	auto turn_still()->void{phy().angular_velocity=0;}
+	auto thrust_fwd()->void{phy().velocity=forward_vector().scale(speed);}
+	auto thrust_rev()->void{phy().velocity=forward_vector().negate().scale(speed);}
 
 	// returns false if object is dead
 	auto update()->bool override{
 		Object::update();
 		if(!Game::is_in_play_area(*this)){
-			phy().vel={0,0};
+			phy().velocity={0,0};
 		}
 		if(!auto_aim_at_boss){
 			return true;
@@ -272,30 +273,34 @@ public:
 	}
 
 	auto fire()->void{
-		const TimeSec fire_dt=time-fire_t;
+		const TimeSec fire_dt=time-last_fired_time;
 		if(fire_dt<fire_rate){
 			return;
 		}
-		fire_t=time;
+		last_fired_time=time;
 		Bullet*b=new Bullet;
 		Vector v=forward_vector().scale(Scale(1.1));
-		v.scale(scale()); // place bullet in front of ship
-		b->phy().pos=phy().pos+v;
-		b->phy().vel=v.normalize().scale(Bullet::speed);
-		b->phy().agl=phy().agl;
+		// place bullet in front of ship
+		v.scale(scale());
+		b->phy().position=phy().position+v;
+		b->phy().velocity=v.normalize().scale(Bullet::speed);
+		b->phy().angle=phy().angle;
 	}
 private:
-	auto attack_target_current_location(const Object&target,const bool draw_trajectory=false)->void{
+	auto attack_target_current_location(
+		const Object&target,
+		const bool draw_trajectory=false
+	)->void{
 		// aim and shoot at targets' current location
 		constexpr Real margin_of_error=Real(0.01);
-		Vector v_tgt=target.phy_const().pos-phy_const().pos;
+		Vector v_tgt=target.phy_const().position-phy_const().position;
 		v_tgt.normalize();
 		Vector v_fwd=forward_vector();
 		// draw trajectory of bullet
 		Vector v_bullet=v_fwd;
 		v_bullet.scale(Bullet::speed);
 		if(draw_trajectory){
-			Game::draw_trajectory(phy().pos,v_bullet,5,.5,0xe);
+			Game::draw_trajectory(phy().position,v_bullet,5,.5,0xe);
 		}
 		Vector n_fwd=v_fwd.normal();
 		Real dot=v_tgt.dot(n_fwd);
@@ -310,13 +315,16 @@ private:
 	}
 
 	// aim and shoot at targets' expected location
-	auto attack_target_expected_location(const Object&target,const bool draw_trajectory=false)->void{
-		constexpr Real margin_of_error_t=Real(0.25);
+	auto attack_target_expected_location(
+		const Object&target,
+		const bool draw_trajectory=false
+	)->void{
+		constexpr Real intersection_time_margin_of_error=Real(0.25);
 		Vector v_aim=find_aim_vector_for_moving_target(
 			target,
 			Bullet::lifetime,
 			Real(.2),
-			margin_of_error_t,
+			intersection_time_margin_of_error,
 			draw_trajectory
 		);
 		if(v_aim.x==0 && v_aim.y==0){
@@ -341,16 +349,16 @@ private:
 
 	// ? move to TargetingSystem class
 	auto find_aim_vector_for_moving_target(
-		const Object&tgt,
+		const Object&target,
 		const Real eval_t,
 		const Real eval_dt,
 		const Real error_margin_t,
 		const bool draw_trajectory=false
 	)->Vector{
 		Real t=0;
-		Point p_tgt=tgt.phy_const().pos;
-		Vector v_tgt=tgt.phy_const().vel;
-		const Vector a_tgt=tgt.phy_const().acc;
+		Point p_tgt=target.phy_const().position;
+		Vector v_tgt=target.phy_const().velocity;
+		const Vector a_tgt=target.phy_const().acceleration;
 		while(t<eval_t){
 			t+=eval_dt;
 			// get expected position of target
@@ -362,7 +370,7 @@ private:
 			}
 
 			// aim vector to the expected location
-			const Vector v_aim=p_tgt-phy_const().pos;
+			const Vector v_aim=p_tgt-phy_const().position;
 			// get t for bullet to reach expected location
 			const Real t_bullet=v_aim.magnitude()/Bullet::speed;
 			// note: optimizing away sqrt() in magnitude() reduces precision when
@@ -377,7 +385,7 @@ private:
 					// draw aim vector
 					Vector v3=v_aim;
 					v3.normalize().scale(Bullet::speed);
-					Game::draw_trajectory(phy_const().pos,v3,t_bullet,Real(.2),2);
+					Game::draw_trajectory(phy_const().position,v3,t_bullet,Real(.2),2);
 				}
 				return v_aim;
 			}
@@ -391,15 +399,15 @@ private:
 
 class Wall final:public Object{
 public:
-	Wall(const Scale scl,const Point&pos,const AngleRad agl):
+	Wall(const Scale scale,const Point&position,const AngleRad angle):
 		Object{
 			tb_walls,
 			tb_none,
 			Game::wall_def,
-			scl,
-			scl*sqrt_of_2,
-			pos,
-			agl,
+			scale,
+			scale*sqrt_of_2,
+			position,
+			angle,
 			3
 		}
 	{}
@@ -408,15 +416,15 @@ public:
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - - 
 
 class Missile final:public Object{
-	static constexpr Scale scl=2;
-	static constexpr Scale bounding_radius=scl*sqrt_of_2;
+	static constexpr Scale def_scale=2;
+	static constexpr Scale bounding_radius=def_scale*sqrt_of_2;
 public:
 	Missile():
 		Object{
 			tb_missiles,
 			tb_bosses|tb_bullets|tb_enemies|tb_missiles|tb_ships|tb_walls,
 			Game::missile_def,
-			scl,
+			def_scale,
 			bounding_radius,
 			{0,0},
 			0,
@@ -439,9 +447,9 @@ public:
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - - 
 
 class Boss final:public Object{
-	static constexpr Scale scl=3;
-	static constexpr Scale bounding_radius=scl*sqrt_of_2;
-	static constexpr TimeSec boss_live_t{10};
+	static constexpr Scale def_scale=3;
+	static constexpr Scale bounding_radius=def_scale*sqrt_of_2;
+	static constexpr TimeSec boss_lifetime{10};
 
 	Count health{5};
 	TimeSec time_started{};
@@ -451,7 +459,7 @@ public:
 			tb_bosses,
 			tb_bullets|tb_missiles,
 			Game::boss_def,
-			scl,
+			def_scale,
 			bounding_radius,
 			{0,0},
 			0,
@@ -472,7 +480,7 @@ public:
 		if(!Game::is_in_play_area(*this)){
 			return false;
 		}
-		if(time-time_started>boss_live_t){
+		if(time-time_started>boss_lifetime){
 			return false;
 		}
 		return true;
@@ -490,16 +498,16 @@ public:
 auto Game::create_scene()->void{
 	for(Real i=30;i<300;i+=20){
 		Enemy*o=new Enemy;
-		o->phy().pos={i,60};
-		o->phy().agl=deg_to_rad(i);
-		o->phy().dagl=deg_to_rad(10);
-		o->phy().vel={0,2};
+		o->phy().position={i,60};
+		o->phy().angle=deg_to_rad(i);
+		o->phy().angular_velocity=deg_to_rad(10);
+		o->phy().velocity={0,2};
 	}
 }
 
 auto Game::create_player()->void{
 	Ship*o=new Ship;
-	o->phy().pos={160,130};
+	o->phy().position={160,130};
 	player=o;
 }
 
@@ -519,9 +527,9 @@ auto Game::create_boss()->void{
 	}else{
 		boss_vel.inc_by({-5,2});
 	}
-	o->phy().pos=boss_pos;
-	o->phy().vel=boss_vel;
-	o->phy().dagl=deg_to_rad(25);
+	o->phy().position=boss_pos;
+	o->phy().velocity=boss_vel;
+	o->phy().angular_velocity=deg_to_rad(25);
 }
 
 [[noreturn]] auto Game::run()->void{
@@ -552,7 +560,7 @@ auto Game::create_boss()->void{
 		},
 		new PointIx[]{1,2,3,4} // bounding convex polygon CCW
 	};
-	enemy_def.init_normals();
+	enemy_def.calculate_normals();
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	ship_def={4,3,
 		new Point[]{
@@ -563,7 +571,7 @@ auto Game::create_boss()->void{
 		},
 		new PointIx[]{1,2,3}
 	};
-	ship_def.init_normals();
+	ship_def.calculate_normals();
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	bullet_def={1,1, // at least one bounding point for collision detection
 		new Point[]{
@@ -571,7 +579,7 @@ auto Game::create_boss()->void{
 		},
 		new PointIx[]{0}
 	};
-	bullet_def.init_normals();
+	bullet_def.calculate_normals();
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	wall_def={4,4,
 		new Point[]{
@@ -582,7 +590,7 @@ auto Game::create_boss()->void{
 		},
 		new PointIx[]{0,1,2,3}
 	};
-	wall_def.init_normals();
+	wall_def.calculate_normals();
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	missile_def={4,3,
 		new Point[]{
@@ -592,14 +600,14 @@ auto Game::create_boss()->void{
 		},
 		new PointIx[]{0,1,2}
 	};
-	missile_def.init_normals();
+	missile_def.calculate_normals();
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	constexpr Count segments=6;
 	boss_def={segments,segments,
 		create_circle(segments),
 		create_circle_ix(segments),
 	};
-	boss_def.init_normals();
+	boss_def.calculate_normals();
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 
 	// constants used to clear screen by copying ram to vga
@@ -724,7 +732,7 @@ auto Game::create_boss()->void{
 				if(keyb[key_d])shp->turn_right();
 				if(!keyb[key_a] && !keyb[key_d])shp->turn_still();
 			}
-			if(!keyb[key_w] && !keyb[key_s])shp->phy().vel={0,0};
+			if(!keyb[key_w] && !keyb[key_s])shp->phy().velocity={0,0};
 			if(keyb[key_j])shp->fire();
 		}
 	}

@@ -274,7 +274,7 @@ extern "C" auto osca_init()->void{
 	pz_memset(free_mem_start,0,free_mem_size);
 
 	// initiate heap with a size of 320*100 B
-	Heap::init_statics({free_mem_start,320*100},nobjects_max);
+	Heap::init_statics({free_mem_start,320*100},objects_size_max);
 	// fill buffers with colors for debugging output
 	Heap::clear(0x2c);
 	Heap::clear_heap_entries(0x2e,0x2f);

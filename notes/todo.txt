@@ -1,3 +1,4 @@
+[x] libge: renaming
 [ ] libge: Object: allow change of ObjectDef
 [ ] lib: Data::address_offset: check if within bounds?
 [ ] lib: Data::to: check if within bounds?
