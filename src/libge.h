@@ -170,8 +170,8 @@ class Object{
 	// bounding radius that includes all points. usually: scale_*sqrt(2)
 	Scale bounding_radius_{};
 	Color8b color_{}; // shape color
-	Flags8b flags_{}; // bit 1: is not alive
-	                  // bit 2: 'pts_wld_' don't need update
+	Flags8b flags_{}; // bit 1: is dead
+	                  // bit 2: 'points_world_' need update
 	uint8 padding[2]{};
 public:
 	Object(
@@ -297,21 +297,13 @@ public:
 
 private:
 	// set to false at 'add_deleted'
-	inline constexpr auto set_is_alive(const bool b)->void{
-		if(b){ // alive bit is 0
-			flags_&=Flags8b(~1);
-		}else{ // not alive bit is 1
-			flags_|=1;
-		}
-	}
-	inline constexpr auto world_points_need_update()const->bool{
-		return!(flags_&2);
-	}
+	inline constexpr auto flag_as_dead()->void{flags_|=1;}
+	inline constexpr auto world_points_need_update()const->bool{return flags_&2;}
 	inline constexpr auto set_world_points_need_update(const bool b)->void{
 		if(b){
-			flags_&=Flags8b(~2);
-		}else{
 			flags_|=2;
+		}else{
+			flags_&=Flags8b(~2);
 		}
 	}
 	constexpr auto refresh_wld_points()->void{
@@ -417,7 +409,7 @@ private:
 			osca_hang();
 		}
 
-		obj->set_is_alive(false);
+		obj->flag_as_dead();
 		if(ls_deleted_pos==ls_deleted_end){
 			err.p("Object::add_deleted:2");
 			osca_hang();
