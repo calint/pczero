@@ -101,7 +101,7 @@ struct VectorT{
 	// increases and returns this vector by 'v'
 	inline constexpr auto inc_by(const VectorT&v)->VectorT{x+=v.x;y+=v.y;return*this;}
 	// increases by 'v' scaled by 's' and returns this vector
-	inline constexpr auto inc_by(const VectorT&v,const Scale s)->void{x+=v.x*s;y+=v.y*s;}
+	inline constexpr auto inc_by(const VectorT&v,const Scale s)->VectorT&{x+=v.x*s;y+=v.y*s;return*this;}
 	// negates and returns this vector
 	inline constexpr auto negate()->VectorT&{x=-x;y=-y;return*this;}
 	// sets and returns this vector to absolute value
@@ -110,8 +110,9 @@ struct VectorT{
 	inline constexpr auto dot(const VectorT&v)const->T{return x*v.x+y*v.y;}
 	// returns the normal of this vector
 	inline constexpr auto normal()const->VectorT{return{-y,x};}
+	// returns magnitude (length)
 	inline auto magnitude()const->T{return sqrt(x*x+y*y);}
-	// magnitude squared
+	// returns magnitude squared
 	inline constexpr auto magnitude2()const->T{return x*x+y*y;}
 	// inline constexpr auto operator<=>(const VectorT&)const=default; // ? does not compile in clang++ without includes from std
 };
@@ -565,7 +566,7 @@ public:
 		return*this;
 	}
 	constexpr auto p_hex_8b(const uint8 v)->PrinterToBitmap&{
-		const uint32 ch1=v&0xf;
+		const uint32 ch1= v    &0xf;
 		const uint32 ch2=(v>>4)&0xf;
 		p_hex(ch2);
 		p_hex(ch1);

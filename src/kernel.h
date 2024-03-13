@@ -53,7 +53,7 @@ extern "C" auto osca_on_exception()->void{
 }
 
 // note: The FSAVE instruction saves a 108-byte data structure to memory (fpu_state), with the
-//       first byte of the field needed to be aligned on a 16-byte boundary.
+//       first byte of the field needed to be aligned to a 16-byte boundary.
 alignas(16) struct Task osca_tasks[]{
 	//                                     :-> 0b01 grabs keyboard focus, 0b10 running
 	//    eip     esp              eflags bits   id   edi  esi  ebp  esp0 ebx  edx  ecx  eax
@@ -66,6 +66,8 @@ alignas(16) struct Task osca_tasks[]{
 	{uint32(tsk3),0xa'0000+320*200,0     ,0b10  ,7   ,0   ,0   ,0   ,0   ,0   ,0   ,4   ,180 },
 };
 const Task* const osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
+
+constexpr uint32 heap_entries_size=256;
 
 class Heap final{
 	struct Entry final{
@@ -82,32 +84,32 @@ class Heap final{
 	inline static Entry*ls_free_{}; // list of freed memory entries
 	inline static Entry*ls_free_pos_{}; // next available slot
 	inline static Entry*ls_free_end_{}; // end (1 past last) of free entries list
-	inline static Size nentries_max_{}; // maximum slots
+	inline static Size entries_size_{}; // maximum slots
 public:
-	static auto init_statics(const Data&d,const Size nentries_max)->void{
-		data_=d;
-		nentries_max_=nentries_max;
+	static auto init_statics(const Data&data,const Size entries_size)->void{
+		data_=data;
+		entries_size_=entries_size;
 
 		// place start of free memory
-		mem_pos_=reinterpret_cast<char*>(d.address());
+		mem_pos_=reinterpret_cast<char*>(data.address());
 
 		// place used entries area at top of the heap
-		ls_used_=static_cast<Entry*>(d.end())-nentries_max;
+		ls_used_=static_cast<Entry*>(data.end())-entries_size;
 		if(reinterpret_cast<char*>(ls_used_)<mem_pos_){
 			err.p("Heap:init_statics:1");
 			osca_hang();
 		}
 		ls_used_pos_=ls_used_;
-		ls_used_end_=ls_used_+nentries_max;
+		ls_used_end_=ls_used_+entries_size;
 
 		// place free entries area before used entries
-		ls_free_=ls_used_-nentries_max;
+		ls_free_=ls_used_-entries_size;
 		if(reinterpret_cast<char*>(ls_free_)<mem_pos_){
 			err.p("Heap:init_statics:2");
 			osca_hang();
 		}
 		ls_free_pos_=ls_free_;
-		ls_free_end_=ls_free_+nentries_max;
+		ls_free_end_=ls_free_+entries_size;
 
 		// place end of free heap memory to start of free entries area
 		mem_end_=reinterpret_cast<char*>(ls_free_);
@@ -116,7 +118,6 @@ public:
 	// called by operator 'new'
 	static auto alloc(const uint32 size_bytes)->void*{
 		// try to find a free slot of that size
-		
 		for(Entry*ent=ls_free_;ent<ls_free_pos_;ent++){
 			if(ent->size_bytes!=size_bytes){
 				continue;
@@ -187,8 +188,8 @@ public:
 	static auto clear(const uint8 b=0)->void{data_.clear(b);}
 	static auto clear_heap_entries(const uint8 free_area=0,const uint8 used_area=0)->void{
 		const SizeBytes es=SizeBytes(sizeof(Entry));
-		pz_memset(ls_free_,free_area,nentries_max_*es);
-		pz_memset(ls_used_,used_area,nentries_max_*es);
+		pz_memset(ls_free_,free_area,entries_size_*es);
+		pz_memset(ls_used_,used_area,entries_size_*es);
 	}
 };
 
@@ -199,7 +200,7 @@ class Keyboard{
 public:
 	// called by 'osca_on_key'
 	constexpr auto on_key(const uint8 scan_code)->void{
-		const uint8 next_in=(in_+1)&(sizeof(buf_)-1); // next end index
+		const uint8 next_in=(in_+1)&(sizeof(buf_)-1);
 		if(next_in==out_){ // check overrun
 			return; // write would overwrite unhandled scan_code. display on status line?
 		}
@@ -274,7 +275,7 @@ extern "C" auto osca_init()->void{
 	pz_memset(free_mem_start,0,free_mem_size);
 
 	// initiate heap with a size of 320*100 B
-	Heap::init_statics({free_mem_start,320*100},objects_size_max);
+	Heap::init_statics({free_mem_start,320*100},heap_entries_size);
 	// fill buffers with colors for debugging output
 	Heap::clear(0x2c);
 	Heap::clear_heap_entries(0x2e,0x2f);

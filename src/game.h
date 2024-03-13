@@ -654,8 +654,8 @@ auto Game::create_boss()->void{
 		//       larger than max value of type thus casting shenanigans
 		out.p("k=").p_hex_8b(uint8(last_received_key)).spc();
 		out.p("m=").p_hex_8b(uint8(metrics::matrix_set_transforms)).spc();
-		out.p("c=").p_hex_8b(uint8(metrics::collisions_checks)).spc();
-		out.p("b=").p_hex_8b(uint8(metrics::collisions_checks_bounding_shapes)).spc();
+		out.p("c=").p_hex_8b(uint8(metrics::collisions_checks_bounding_circle)).spc();
+		out.p("b=").p_hex_8b(uint8(metrics::collisions_checks_bounding_shape)).spc();
 		out.p("a=").p_hex_8b(uint8(Object::allocated_objects_count())).spc();
 		out.p("f=").p_hex_16b(uint16(Object::fps)).spc();
 

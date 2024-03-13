@@ -1,8 +1,5 @@
 // reviewed: 2024-03-09
 
-#include"osca.h"
-#include"lib.h"
-#include"libge.h"
 #include"kernel.h"
 
 using namespace osca;
@@ -146,6 +143,6 @@ extern "C" [[noreturn]] auto tsk3()->void{
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 #include"game.h"
-extern "C" auto tsk4()->void{
+extern "C" [[noreturn]] auto tsk4()->void{
 	osca::game::Game::run();
 }

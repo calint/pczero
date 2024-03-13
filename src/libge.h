@@ -44,20 +44,21 @@ public:
 namespace metrics{
 	constexpr static bool enabled{true};
 	static Count matrix_set_transforms{};
-	static Count collisions_checks{};
-	static Count collisions_checks_bounding_shapes{};
+	static Count collisions_checks_bounding_circle{};
+	static Count collisions_checks_bounding_shape{};
 	
 	static auto reset()->void{
 		matrix_set_transforms=0;
-		collisions_checks=0;
-		collisions_checks_bounding_shapes=0;
+		collisions_checks_bounding_circle=0;
+		collisions_checks_bounding_shape=0;
 	}
 }
 
 class Object;
 
-// maximum number of objects (note: also used in kernel.h when initiating heap)
-constexpr Size objects_size_max{256};
+// maximum number of objects
+// each object uses 3 allocation entries (the object, world points, world normals)
+constexpr Size objects_size=heap_entries_size/3;
 
 using Velocity=Vector;
 using Acceleration=Vector;
@@ -92,9 +93,9 @@ public:
 	inline static PhysicsState*ls_all_end{};
 	
 	static auto init_statics()->void{
-		ls_all=new PhysicsState[objects_size_max];
+		ls_all=new PhysicsState[objects_size];
 		ls_all_pos=ls_all;
-		ls_all_end=ls_all+objects_size_max;
+		ls_all_end=ls_all+objects_size;
 	}
 	static auto alloc()->PhysicsState*{
 		// check buffer overrun
@@ -106,7 +107,7 @@ public:
 		ls_all_pos++;
 		return next_free;
 	}
-	// returns reference to the object that has a new address for physics state
+	// returns the object that has a new address for physics state
 	// this function works with '~Object()' to relocate physics state
 	static auto free(PhysicsState*phy)->Object*{
 		ls_all_pos--;
@@ -128,11 +129,11 @@ public:
 };
 
 namespace enable{
-	constexpr static bool draw_dots{true};
-	constexpr static bool draw_polygons{true};
-	constexpr static bool draw_normals{true};
-	constexpr static bool draw_collision_check{};
-	constexpr static bool draw_bounding_circle{true};
+	constexpr static bool draw_dots=true;
+	constexpr static bool draw_polygons=true;
+	constexpr static bool draw_normals=true;
+	constexpr static bool draw_collision_check=false;
+	constexpr static bool draw_bounding_circle=true;
 }
 
 using TypeBits=uint32;
@@ -155,7 +156,7 @@ class Object{
 	PhysicsState*phy_{};
 	// scale that is used in model to world transform
 	Scale scale_{};
-	// contains the model definition
+	// contains the drawable and bounding shape definition
 	const ObjectDef&def_;
 	// transformed model to world points cache
 	Point*points_world_{};
@@ -239,7 +240,9 @@ public:
 	constexpr Object&operator=(Object&&)=delete;
 
 	inline constexpr auto type_bits()const->TypeBits{return type_bits_;}
+	inline constexpr auto type_bits(const uint32 bits)->void{type_bits_=bits;}
 	inline constexpr auto type_bits_collision_mask()const->TypeBits{return type_bits_collision_mask_;}
+	inline constexpr auto type_bits_collision_mask(const uint32 bits)->void{type_bits_collision_mask_=bits;}
 	inline constexpr auto phy()->PhysicsState&{return*phy_;}
 	inline constexpr auto phy_const()const->const PhysicsState&{return*phy_;}
 	inline constexpr auto scale()const->Scale{return scale_;}
@@ -367,13 +370,13 @@ public:
 	inline static Count fps{}; // this interval frames per second
 
 	static auto init_statics()->void{
-		ls_all=new Object*[objects_size_max];
+		ls_all=new Object*[objects_size];
 		ls_all_pos=ls_all;
-		ls_all_end=ls_all+objects_size_max;
+		ls_all_end=ls_all+objects_size;
 
-		ls_deleted=new Object*[objects_size_max];
+		ls_deleted=new Object*[objects_size];
 		ls_deleted_pos=ls_deleted;
-		ls_deleted_end=ls_deleted+objects_size_max;
+		ls_deleted_end=ls_deleted+objects_size;
 
 		fps_timer_tick_prv=timer_tick=timer_tick_prv=osca_tick;
 		time=TimeSec(timer_tick)*TimeSec(osca_tick_per_sec);
@@ -450,18 +453,18 @@ private:
 
 				// check if objects are interested in collision check
 				const bool o1_check_collision_with_o2=
-				           o1->type_bits_collision_mask_&o2->type_bits_ &&
-				           o1->is_alive();
+				           		o1->type_bits_collision_mask_&o2->type_bits_ &&
+				           		o1->is_alive();
 				const bool o2_check_collision_with_o1=
-				           o2->type_bits_collision_mask_&o1->type_bits_ &&
-						   o2->is_alive();
+				           		o2->type_bits_collision_mask_&o1->type_bits_ &&
+						   		o2->is_alive();
 				
 				if(!o1_check_collision_with_o2 && !o2_check_collision_with_o1){
 					continue;
 				}
 
 				if(metrics::enabled){
-					metrics::collisions_checks++;
+					metrics::collisions_checks_bounding_circle++;
 				}
 
 				if(!Object::are_bounding_circles_in_collision(*o1,*o2)){
@@ -469,7 +472,7 @@ private:
 				}
 
 				if(metrics::enabled){
-					metrics::collisions_checks_bounding_shapes++;
+					metrics::collisions_checks_bounding_shape++;
 				}
 
 				// refresh world coordinates
@@ -478,8 +481,8 @@ private:
 
 				// check if any o1 points in o2 bounding shape or 
 				// any o2 points in o1 bounding shape
-				if(!Object::objects_are_in_collision(*o1,*o2) && 
-				   !Object::objects_are_in_collision(*o2,*o1)
+				if(!Object::is_any_point_in_bounding_shape(*o1,*o2) && 
+				   !Object::is_any_point_in_bounding_shape(*o2,*o1)
 				){
 					continue;
 				}
@@ -500,24 +503,18 @@ private:
 		}
 	}
 	static auto are_bounding_circles_in_collision(Object&o1,Object&o2)->bool{
-		const Scalar r1=o1.bounding_radius();
-		const Scalar r2=o2.bounding_radius();
-		
-		const Point p1=o1.phy_const().position;
-		const Point p2=o2.phy_const().position;
-
 		// check if: sqrt(dx*dx+dy*dy)<=r1+r2
 		//                dx*dx+dy*dy <=(r1+r2)²
-		const Real dist_check=r1+r2;
+		const Real dist_check=o1.bounding_radius_+o2.bounding_radius_;
 		const Real dist2_check=dist_check*dist_check; // (r1+r2)²
-		const Vector v=p2-p1; // dx,dy
+		const Vector v=o2.phy_->position-o1.phy_->position; // dx,dy
 		const Real dist2=v.dot(v);
 		return dist2<=dist2_check;
 	}
 	// checks if any o1 bounding points are in o2 bounding shape
-	static auto objects_are_in_collision(const Object&o1,const Object&o2)->bool{
+	static auto is_any_point_in_bounding_shape(const Object&o1,const Object&o2)->bool{
 		// for each point in 'o1' check if behind every normal of 'o2'
-		// if behind every normal then within the convex bounding shape thus collision
+		// if behind every normal then point is within the convex bounding shape
 
 		// if o2 has no bounding shape (at least 3 points) return false
 		if(!o2.def_.normals){
@@ -525,7 +522,7 @@ private:
 		}
 
 		// for each point in 'o1' bounding shape
-		const PointIx*ix=o1.def_.indexes; // bounding points indexes of 'o1'
+		const PointIx*ix=o1.def_.indexes;
 		PointIx n=o1.def_.indexes_size;
 		while(n--){
 			const Point&p1=o1.points_world_[*ix];

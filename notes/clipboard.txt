@@ -7,8 +7,8 @@ TAG=$(date "+%Y-%m-%d--%H-%M") && git tag $TAG && git push origin $TAG
 # print 16 bit assembler code
 objdump -m i8086 -D bin/src/osca.o | less
 
-# print assembler with source (compile with option -g for source)
-objdump -dS bin/src/main.o | less
+# print assembler with source
+objdump -DlSC bin/src/main_debug.o | less
 
 # to find source location of exception:
 # * get instruction address from print out
