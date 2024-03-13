@@ -241,7 +241,7 @@ public:
 	inline constexpr auto phy()->PhysicsState&{return*phy_;}
 	inline constexpr auto phy_const()const->const PhysicsState&{return*phy_;}
 	inline constexpr auto scale()const->Scale{return scale_;}
-	inline constexpr auto set_scale(const Scale s)->void{scale_=s;}
+	inline constexpr auto scale(const Scale s)->void{scale_=s;}
 	inline constexpr auto def()const->const ObjectDef&{return def_;}
 	inline constexpr auto is_alive()const->bool{return!(flags_&1);}
 	inline constexpr auto bounding_radius()const->Scale{return bounding_radius_;}
