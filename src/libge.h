@@ -245,9 +245,11 @@ public:
 	inline constexpr auto def()const->const ObjectDef&{return def_;}
 	inline constexpr auto is_alive()const->bool{return!(flags_&1);}
 	inline constexpr auto bounding_radius()const->Scale{return bounding_radius_;}
+
 	inline auto forward_vector()->Vector{
 		refresh_Mmw_if_invalid();
-		return Mmw_.axis_y().negate().normalize(); // not negated if positive y is up
+		// negated because of object defintion uses 'forward' y negative
+		return Mmw_.axis_y().negate().normalize();
 	}
 	
 	// returns false if object died
