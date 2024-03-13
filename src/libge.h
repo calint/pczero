@@ -33,11 +33,11 @@ public:
 		normals=new Vector[indexes_size];
 		const PointIx n=indexes_size-1;
 		for(PointIx i=0;i<n;i++){
-			const Vector d{points[indexes[i+1]]-points[indexes[i]]};
-			normals[i]=d.normal().normalize();
+			const Vector v{points[indexes[i+1]]-points[indexes[i]]};
+			normals[i]=v.normal().normalize();
 		}
-		const Vector d{points[indexes[0]]-points[indexes[indexes_size-1]]};
-		normals[indexes_size-1]=d.normal().normalize();
+		const Vector v{points[indexes[0]]-points[indexes[indexes_size-1]]};
+		normals[indexes_size-1]=v.normal().normalize();
 	}
 };
 
