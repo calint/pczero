@@ -1,4 +1,3 @@
-[x] libge: renaming
 [ ] libge: Object: allow change of ObjectDef
 [ ] lib: Data::address_offset: check if within bounds?
 [ ] lib: Data::to: check if within bounds?
@@ -18,7 +17,6 @@
               => 'o1store' from "https://github.com/calint/glos"
 [ ] lib: PrinterToBitmap pos in pixels
 [ ] lib: PrinterToConsole pos in characters
-[ ] libge: better naming of public members
 ------------------------------------------------------------------------------
 [x] osca: is it necessary to do fwait on i386+387?
 [x]   "co-processors from 287 on do not need it"
@@ -120,3 +118,5 @@
     => osca_yield does one 32 bit push/pop on current task stack
     => isr_tmr does one 16 bit push/pop on current task stack
 [x] build with -g and then link a stripped version of that object file
+[x] libge: renaming
+[x] game: renaming
