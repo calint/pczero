@@ -2,11 +2,9 @@
 # kernel osca
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - info
 # reviewed: 2024-03-10
-# tested on
+# tested on:
 # * linux 6.5.0 qemu-system-i386 8.0.4
-# * asus zenbook
-# * linux 5.19 qemu 7.0.0
-# * linux 5.19 VirtualBox 6.1 (no enabled nested paging)
+# * asus zenbook UX305CA
 #
 # memory map from https://wiki.osdev.org/Memory_Map_(x86)
 # ------------+--------+---------------------------------------
