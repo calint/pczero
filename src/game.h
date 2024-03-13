@@ -94,28 +94,28 @@ public:
 				 phy.position.y< ymin+bounding_radius);
 	}
 
-	static auto draw_dot(const Point&p,const Color8b color)->void{
+	static auto draw_dot(const Point&p,const Color8b c)->void{
 		if(!is_in_play_area(p)){
 			return;
 		}
 		const CoordPx xi=CoordPx(p.x);
 		const CoordPx yi=CoordPx(p.y);
-		*static_cast<Color8b*>(vga13h.bmp().address_offset({xi,yi}))=color;
+		*static_cast<Color8b*>(vga13h.bmp().address_offset({xi,yi}))=c;
 	}
 
 	static auto draw_trajectory(
-		const Point&p0,
+		const Point&pt,
 		const Vector&vel,
-		const TimeStepSec t_s,
+		const TimeStepSec t_eval_s,
 		const TimeStepSec t_step_s,
-		const Color8b color
+		const Color8b c
 	)->void{
 		TimeStepSec t=0;
-		Point p=p0;
-		while(t<t_s){
+		Point p=pt;
+		while(t<t_eval_s){
 			t+=t_step_s;
 			p.inc_by(vel,t_step_s);
-			draw_dot(p,color);
+			draw_dot(p,c);
 		}
 	}
 
@@ -138,7 +138,7 @@ constexpr TypeBits tb_bosses = 32;
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - - 
 class Enemy final:public Object{
 	static constexpr Scale def_scale=5;
-	static constexpr Scale bounding_radius=def_scale*sqrt_of_2;
+	static constexpr Scale def_bounding_radius=def_scale*sqrt_of_2;
 public:
 	Enemy():
 		Object{
@@ -146,7 +146,7 @@ public:
 			tb_bullets|tb_missiles,
 			Game::enemy_def,
 			def_scale,
-			bounding_radius,
+			def_bounding_radius,
 			{0,0},
 			0,
 			3
@@ -176,8 +176,8 @@ public:
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - - 
 
 class Bullet final:public Object{
-	static constexpr Scale scale=0.5;
-	static constexpr Scale bounding_radius=scale*sqrt_of_2;
+	static constexpr Scale def_scale=0.5;
+	static constexpr Scale def_bounding_radius=def_scale*sqrt_of_2;
 	TimeSec created_time;
 public:
 	static constexpr Scalar speed=40;
@@ -188,8 +188,8 @@ public:
 			tb_bullets,
 			tb_bosses|tb_enemies|tb_ships|tb_walls,
 			Game::bullet_def,
-			scale,
-			bounding_radius,
+			def_scale,
+			def_bounding_radius,
 			{0,0},
 			0,
 			4
@@ -216,7 +216,7 @@ public:
 
 class Ship final:public Object{
 	static constexpr Scale def_scale=4;
-	static constexpr Scale bounding_radius=def_scale*sqrt_of_2;
+	static constexpr Scale def_bounding_radius=def_scale*sqrt_of_2;
 	static constexpr AngleDeg turning_rate=90;
 	static constexpr Scalar speed=20;
 	static constexpr TimeSec fire_rate=TimeSec(.2);
@@ -231,7 +231,7 @@ public:
 			tb_bosses|tb_bullets|tb_enemies|tb_missiles|tb_ships|tb_walls,
 			Game::ship_def,
 			def_scale,
-			bounding_radius,
+			def_bounding_radius,
 			{0,0},
 			0,
 			2
@@ -279,12 +279,11 @@ public:
 		}
 		last_fired_time=time;
 		Bullet*b=new Bullet;
-		Vector v=forward_vector().scale(Scale(1.1));
-		// place bullet in front of ship
-		v.scale(scale());
-		b->phy().position=phy().position+v;
-		b->phy().velocity=v.normalize().scale(Bullet::speed);
-		b->phy().angle=phy().angle;
+		Vector v=forward_vector().scale(bounding_radius()+b->bounding_radius());
+		PhysicsState&bp=b->phy();
+		bp.position=phy_const().position+v;
+		bp.velocity=v.normalize().scale(Bullet::speed);
+		bp.angle=phy_const().angle;
 	}
 private:
 	auto attack_target_current_location(
@@ -320,10 +319,11 @@ private:
 		const bool draw_trajectory=false
 	)->void{
 		constexpr Real intersection_time_margin_of_error=Real(0.25);
+		constexpr TimeStepSec evaluation_time_step=TimeStepSec(0.2);
 		Vector v_aim=find_aim_vector_for_moving_target(
 			target,
 			Bullet::lifetime,
-			Real(.2),
+			evaluation_time_step,
 			intersection_time_margin_of_error,
 			draw_trajectory
 		);
@@ -332,6 +332,7 @@ private:
 			turn_still();
 			return;
 		}
+		// turn towards aim vector and fire if within error margin
 		v_aim.normalize();
 		const Vector v_fwd=forward_vector();
 		const Vector n_fwd=v_fwd.normal();
@@ -350,12 +351,12 @@ private:
 	// ? move to TargetingSystem class
 	auto find_aim_vector_for_moving_target(
 		const Object&target,
-		const Real eval_t,
-		const Real eval_dt,
+		const TimeStepSec eval_t,
+		const TimeStepSec eval_dt,
 		const Real error_margin_t,
 		const bool draw_trajectory=false
 	)->Vector{
-		Real t=0;
+		TimeStepSec t=0;
 		Point p_tgt=target.phy_const().position;
 		Vector v_tgt=target.phy_const().velocity;
 		const Vector a_tgt=target.phy_const().acceleration;
@@ -372,20 +373,20 @@ private:
 			// aim vector to the expected location
 			const Vector v_aim=p_tgt-phy_const().position;
 			// get t for bullet to reach expected location
-			const Real t_bullet=v_aim.magnitude()/Bullet::speed;
+			const TimeStepSec t_bullet=v_aim.magnitude()/Bullet::speed;
 			// note: optimizing away sqrt() in magnitude() reduces precision when
 			//       aiming at far targets since t_aim grows in a non-linear way
 
 			// difference between target and bullet intersection t
-			const Real t_aim=abs(t_bullet-t);
+			const TimeStepSec t_aim=abs(t_bullet-t);
 
 			// if t within error margin return aim vector
 			if(t_aim<error_margin_t){
 				if(draw_trajectory){
 					// draw aim vector
-					Vector v3=v_aim;
-					v3.normalize().scale(Bullet::speed);
-					Game::draw_trajectory(phy_const().position,v3,t_bullet,Real(.2),2);
+					Vector v=v_aim;
+					v.normalize().scale(Bullet::speed);
+					Game::draw_trajectory(phy_const().position,v,t_bullet,eval_dt,2);
 				}
 				return v_aim;
 			}
@@ -417,7 +418,7 @@ public:
 
 class Missile final:public Object{
 	static constexpr Scale def_scale=2;
-	static constexpr Scale bounding_radius=def_scale*sqrt_of_2;
+	static constexpr Scale def_bounding_radius=def_scale*sqrt_of_2;
 public:
 	Missile():
 		Object{
@@ -425,7 +426,7 @@ public:
 			tb_bosses|tb_bullets|tb_enemies|tb_missiles|tb_ships|tb_walls,
 			Game::missile_def,
 			def_scale,
-			bounding_radius,
+			def_bounding_radius,
 			{0,0},
 			0,
 			4
@@ -434,7 +435,6 @@ public:
 
 	// returns false if object is dead
 	auto update()->bool override{
-		Object::update();
 		return Game::is_in_play_area(*this);
 	}
 
@@ -448,11 +448,11 @@ public:
 
 class Boss final:public Object{
 	static constexpr Scale def_scale=3;
-	static constexpr Scale bounding_radius=def_scale*sqrt_of_2;
+	static constexpr Scale def_bounding_radius=def_scale*sqrt_of_2;
 	static constexpr TimeSec boss_lifetime{10};
 
-	Count health{5};
-	TimeSec time_started{};
+	Count health_=5;
+	TimeSec time_started_{};
 public:
 	Boss():
 		Object{
@@ -460,13 +460,13 @@ public:
 			tb_bullets|tb_missiles,
 			Game::boss_def,
 			def_scale,
-			bounding_radius,
+			def_bounding_radius,
 			{0,0},
 			0,
 			4
-		}
+		},
+		time_started_{time}
 	{
-		time_started=time;
 		Game::boss=this;
 	}
 
@@ -476,11 +476,10 @@ public:
 
 	// returns false if object is dead
 	auto update()->bool override{
-		Object::update();
 		if(!Game::is_in_play_area(*this)){
 			return false;
 		}
-		if(time-time_started>boss_lifetime){
+		if(time-time_started_>boss_lifetime){
 			return false;
 		}
 		return true;
@@ -488,8 +487,8 @@ public:
 
 	// returns false if object is dead
 	auto on_collision(Object&other)->bool override{
-		health--;
-		return health>0;
+		health_--;
+		return health_>0;
 	}
 };
 

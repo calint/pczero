@@ -1,4 +1,5 @@
 // reviewed: 2024-03-09
+// reviewed: 2024-03-13
 
 #include"kernel.h"
 
@@ -146,3 +147,4 @@ extern "C" [[noreturn]] auto tsk3()->void{
 extern "C" [[noreturn]] auto tsk4()->void{
 	osca::game::Game::run();
 }
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
