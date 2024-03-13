@@ -1,7 +1,7 @@
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 
 # kernel osca
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - info
-# reviewed: 2024-03-10
+# reviewed: 2024-03-10git reset --hard HEAD
 # tested on:
 # * linux 6.5.0 qemu-system-i386 8.0.4
 # * asus zenbook UX305CA
@@ -38,17 +38,18 @@
 .set TASK_STRUCT_OFFSET_GPRS_END,48   # ..
 .set TASK_STRUCT_OFFSET_FPU_STATE,48  # ..
 #.set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+94+2
-# from 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987, 7.1.2.1 COPROCESSOR CONTEXT SWITCHING
+# from 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
+#   7.1.2.1 COPROCESSOR CONTEXT SWITCHING
 #   The save area should be 94 bytes, the size of the area used
 #   by the FSAVE and FRSTOR instructions.
 #
 # from you.com:
-#   The FSAVE instruction writes a total of 108 bytes to the memory
-#   address specified.
+#   The FSAVE instruction writes a total of 108 bytes to the
+#   memory address specified.
 #
 # from Intel® 64 and IA-32 Architectures Software Developer’s Manual
 #   page 3-424 Vol. 2A: FSAVE/FNSAVE—Store x87 FPU State
-#   FSAVE m94/108byte Store FPU state to m94byte or m108byte after ...
+#   FSAVE m94/108byte Store FPU state to m94byte or m108byte
 .set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+108+4
 .set TASK_BIT_FOCUS_KEYBOARD,1
 .set TASK_BIT_RUNNING,2
@@ -68,10 +69,10 @@
 _start:
 # https://stackoverflow.com/questions/47277702/custom-bootloader-booted-via-usb-drive-produces-incorrect-output-on-some-compute
 # jump over BIOS Parameter Block (BPB) because
-# that memory may be written to by BIOS when booting from USB
+#  that memory may be written to by BIOS when booting from USB
 jmp _main
-.space 3-(.-_start),0x90 # support 2 or 3 bytes encoded jmp, space with 'nop'
-.space 59,0x90 # BPB area that may be written to by BIOS, space with 'nop'
+.space 3-(.-_start),0x90 # support 2 or 3 bytes encoded jmp
+.space 59,0x90 # BPB area that may be written to by BIOS
 _main:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - setup
 #mov %dl,osca_boot_drive # save boot drive
@@ -95,15 +96,18 @@ mov $_start,%sp #  at 0x7c00
 # ES:BX -> buffer
 # Set DL = "drive number" -- typically 0x80, for the "C" drive
 # INT 0x13.
-# The carry flag will be set if there is any error during the read.
+# The carry flag will be set if there is any error during the
+# read.
 # AH should be set to 0 on success.
 #
 cld # clear direction (forward)
 # read 127 sectors * 512B = 65024 bytes
-#   assumes load from USB. floppy does not support that many sectors.
+#  assumes load from USB. floppy does not support that many
+#   sectors.
 # command 2 (%ah), number of sectors to read (%al)
 mov $0x027f,%ax
-# from cylinder 0 (%ch), sector 2 (%cl) (sector starts from 1, not 0)
+# from cylinder 0 (%ch), sector 2 (%cl)
+#  sector starts from 1, not 0
 mov $0x0002,%cx
 xor %dh,%dh # head 0
 # %dl, drive number, is unchanged
@@ -136,9 +140,9 @@ lgdt gdtr # load global descriptor tables
 mov %cr0,%eax      # enter 32b protected mode
 or $CR0_BIT_PE,%al #  set 'Protection Enable' bit
 mov %eax,%cr0      #   in CR0 (Control Register 0)
-# far jump to selector 08h (offset into GDT, pointing at
-# a 32bit PM code segment descriptor) to load CS with
-# proper PM32 descriptor
+# far jump to selector 08h (offset into GDT, pointing at a
+#  32bit PM code segment descriptor) to load CS with proper
+#    PM32 descriptor
 jmp $8,$protected_mode # jmp and flush
 # global descriptor table
 # https://wiki.osdev.org/Global_Descriptor_Table
@@ -173,8 +177,8 @@ in $0x92,%al
 or $2,%al
 out %al,$0x92
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - map irqs
-# reprogram the PIC (8259's) to map IRQ 0-15 to IDT mapping 32 to 47
-# avoiding the first 32 reserved for exceptions
+# reprogram the PIC (8259's) to map IRQ 0-15 to IDT mapping 32
+# to 47 avoiding the first 32 reserved for exceptions
 # https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interrupt_Controller
 mov $0x11,%al
 out %al,$0x20 # restart PIC1
@@ -199,8 +203,8 @@ out %al,$0xa1 # done
 in $0x21,%al
 or $1,%al
 out %al,$0x21
-# disable the Non-Maskable Interrupt (NMI) before programming RTC
-#   NMI happens when there is a critical hardware failure
+# disable the Non-Maskable Interrupt (NMI) before programming
+#   RTC. NMI happens when there is a critical hardware failure
 # https://wiki.osdev.org/Non_Maskable_Interrupt
 in $0x70,%al
 or $0x80,%al
@@ -217,7 +221,7 @@ out %al,$0x70
 mov %dl,%al
 or $0x40,%al
 out %al,$0x71
-# enable NMI
+# programming RTC done. enable NMI
 in $0x70,%al
 and $0x7f,%al
 out %al,$0x70
@@ -225,14 +229,11 @@ in $0x71,%al
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - isr
 # setup interrupt service routines
 # https://wiki.osdev.org/Interrupt_Descriptor_Table
-
-#mov $osca_on_exception,%eax # store the upper bits of the handler
-mov $isr_other,%eax # store the upper 16 bits of the handler address
-shr $16,%eax        #  in ax
+mov $isr_other,%eax # store the upper 16 bits of the handler
+shr $16,%eax        #  address in ax
 mov $IDT,%ebx       # interrupt descriptor table address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
 lp1:
-#    movw $osca_on_exception,(%ebx)    # offset 0..15
     movw $isr_other,        (%ebx)    # offset 0..15
     movw $0x0008,          2(%ebx)    # selector in gdt
     movb $0x00,            4(%ebx)    # unused
@@ -241,14 +242,15 @@ lp1:
     add $IDT_ENTRY_SIZE,%ebx
 loop lp1
 # setup IRQ 1 (keyboard) and IRQ 8 (RTC timer)
+#  high 16 bits (IDT_ENTRY_SIZE+6) 0 because handler is within 64K
 movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE   # IRQ 1: keyboard
-movw       $0,IDT+(32+1)*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is within 64K)
-movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE   # IRQ 8: timer 1024 Hz
-movw       $0,IDT+(32+8)*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is within 64K)
-movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE   # exception 7: device not available,
-movw       $0,IDT+     7*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is within 64K)
-                                          #   triggered when a FPU context switch
-                                          #    might be needed
+movw       $0,IDT+(32+1)*IDT_ENTRY_SIZE+6 #  offset 16..31
+movw $isr_tmr,IDT+(32+8)*IDT_ENTRY_SIZE   # IRQ 8: 1024 Hz timer
+movw       $0,IDT+(32+8)*IDT_ENTRY_SIZE+6 #  offset 16..31
+# exception 7: device not available, triggered when a FPU
+#  context switch might be needed
+movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE
+movw       $0,IDT+     7*IDT_ENTRY_SIZE+6 #  offset 16..31
 # note: asus zenbook UX305CA generates ISA interrupt 7:
 #       LPT1 / Unreliable "spurious" interrupt (usually)
 #       see https://wiki.osdev.org/8259_PIC#Spurious_IRQs 
@@ -261,8 +263,8 @@ lidt idtr # load the interrupt descriptor table register
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - fpu
 # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
 # 7.1.2.1 COPROCESSOR CONTEXT SWITCHING page 122
-mov %cr0,%eax      # enable MP (Monitor co-processor) bit in CR0
-or $CR0_BIT_MP,%al #  if TS (Task switched) bit is set and a FPU
+mov %cr0,%eax      # enable MP (monitor co-processor) bit in CR0
+or $CR0_BIT_MP,%al #  if TS (task switched) bit is set and a FPU
 mov %eax,%cr0      #   instruction is used then exception 7 is triggered
 # initiate the tasks' FPU state with initial values
 fninit # initiate FPU
@@ -366,7 +368,8 @@ osca_yield_next_task:
   mov osca_task_active,%ecx
   mov TASK_STRUCT_OFFSET_EIP(%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
-  # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
+  # restore gprs. position stack pointer for popa by skipping
+  #  eip,esp,eflags,bits
   lea TASK_STRUCT_OFFSET_GPRS(%ecx),%esp
   popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
   # position stack pointer at task.eflags
@@ -389,11 +392,12 @@ osca_yield_exit_without_task_switch:
   sti # enables interrupts after next instruction
   ret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - interrupts
-# "*NOTE* Because IA-32 tasks are not re-entrant, an interrupt-handler
-# task must disable interrupts between the time it completes handling
-# the interrupt and the time it executes the IRET instruction. This
-# action prevents another interrupt from occurring while the interrupt
-# task's TSS is still marked busy, which would cause a general-protection
+# "*NOTE* Because IA-32 tasks are not re-entrant, an
+# interrupt-handler task must disable interrupts between the
+# time it completes handling the interrupt and the time it
+# executes the IRET instruction. This action prevents another
+# interrupt from occurring while the interrupt task's TSS is
+# still marked busy, which would cause a general-protection
 # (#GP) exception."
 #
 # —Intel Software Developer Manual
@@ -411,7 +415,7 @@ isr_tmr:
   # start task switching
   mov %ebx,tmp_ebx # save ebx
   mov %ecx,tmp_ecx # save ecx
-  mov osca_task_active,%ebx # ebx points to current active task
+  mov osca_task_active,%ebx
   mov %ebx,%ecx # ecx will point to the next task
   # find next task and store it in ecx
 isr_tmr_next_task:
@@ -421,7 +425,7 @@ isr_tmr_next_task:
     mov $osca_tasks,%ecx # roll
   lbl2:
   cmp %ebx,%ecx # if no active task found
-  je isr_tmr_exit_without_task_switch # exit without task switch
+  je isr_tmr_exit_without_task_switch
   # get bits to check if task is running
   mov TASK_STRUCT_OFFSET_BITS(%ecx),%ax
   and $TASK_BIT_RUNNING,%ax # check 'running' bit
@@ -439,7 +443,8 @@ isr_tmr_next_task:
   pop TASK_STRUCT_OFFSET_EIP(%ebx) # pop eip to task.eip
   add $4,%esp # skip cs
   pop TASK_STRUCT_OFFSET_EFLAGS(%ebx) # pop eflags to task.eflags
-  # clear the 'enable interrupts' flag so that popf is safe in a cli/sti section
+  # clear the 'enable interrupts' flag so that popf is safe in
+  #  a cli/sti section
   andl $~EFLAGS_BIT_IF,TASK_STRUCT_OFFSET_EFLAGS(%ebx)
   # save stack pointer as it was before irq to task.esp
   mov %esp,TASK_STRUCT_OFFSET_ESP(%ebx)
@@ -454,7 +459,8 @@ isr_tmr_next_task:
   mov osca_task_active,%ecx
   mov TASK_STRUCT_OFFSET_EIP(%ecx),%esp # get task.eip
   mov %esp,tmp_eip # save for jump
-  # restore gprs. position stack pointer for popa by skipping eip,esp,eflags,bits
+  # restore gprs. position stack pointer for popa by skipping
+  #  eip,esp,eflags,bits
   lea TASK_STRUCT_OFFSET_GPRS(%ecx),%esp
   popa # pop edi,esi,ebp,esp0,ebx,edx,ecx,eax
   # position stack pointer at task.eflags
@@ -467,12 +473,14 @@ isr_tmr_next_task:
   # acknowledge interrupt and jmp
   # https://forum.osdev.org/viewtopic.php?f=1&t=15526&start=0
   # https://www.compuphase.com/int70.txt
-  # "When an IRQ 8 fires and interrupt 70h is called, status register C holds a bit
-  # mask that tells what kind of interrupt occurred: periodic interrupt, alarm
-  # interrupt or update ended interrupt. And unless you read status register C,
-  # IRQ 8 will not be generated again. This means that you must read status
-  # register C inside your ISR for interrupt 70h even when you normally don't care
-  # about its contents. Otherwise you will only see a single interrupt."
+  # "When an IRQ 8 fires and interrupt 70h is called, status
+  # register C holds a bit mask that tells what kind of
+  # interrupt occurred: periodic interrupt, alarm interrupt or
+  # update ended interrupt. And unless you read status
+  # register C, IRQ 8 will not be generated again. This means
+  # that you must read status register C inside your ISR for
+  # interrupt 70h even when you normally don't care about its
+  # contents. Otherwise you will only see a single interrupt."
   push %eax # save to be clobbered ax
   mov $0x0c,%al # read register C in ISR
   out %al,$0x70 #  to keep getting
@@ -533,8 +541,8 @@ isr_fpu:
   je isr_fpu_done
     # not same task, switch FPU state
     incl 0xa0000+320-24 # on screen
-    mov %ebx,tmp_ebx
-    mov osca_active_fpu,%ebx # save clobbered ebx
+    mov %ebx,tmp_ebx # save clobbered ebx
+    mov osca_active_fpu,%ebx
     fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx) # save state
     frstor TASK_STRUCT_OFFSET_FPU_STATE(%eax) # restore state
     mov %eax,osca_active_fpu # set the active FPU task
