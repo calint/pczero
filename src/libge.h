@@ -511,7 +511,7 @@ private:
 		const Real dist2=v.dot(v);
 		return dist2<=dist2_check;
 	}
-	// checks if any o1 bounding points are in o2 bounding shape
+	// checks if any o1 bounding points is in o2 bounding shape
 	static auto is_any_point_in_bounding_shape(const Object&o1,const Object&o2)->bool{
 		// for each point in 'o1' check if behind every normal of 'o2'
 		// if behind every normal then point is within the convex bounding shape
