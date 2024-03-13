@@ -167,7 +167,7 @@ class Object{
 	AngleRad Mmw_angle_{};
 	// scale used in 'Mmw_'
 	Scale Mmw_scale_{};
-	// bounding radius scl_*sqrt(2)
+	// bounding radius that includes all points. usually: scale_*sqrt(2)
 	Scale bounding_radius_{};
 	Color8b color_{}; // shape color
 	Flags8b flags_{}; // bit 1: is not alive
