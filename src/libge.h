@@ -61,7 +61,7 @@ constexpr Size objects_size_max{256};
 
 using Velocity=Vector;
 using Acceleration=Vector;
-using AngularVelocityRad=AngleRad;
+using AngularVelocity=AngleRad;
 using Time=double;
 using TimeSec=Time;
 using TimeStepSec=Real;
@@ -73,7 +73,7 @@ public:
 	Velocity velocity{};
 	Acceleration acceleration{};
 	AngleRad angle{};
-	AngularVelocityRad angular_velocity{};
+	AngularVelocity angular_velocity{};
 	// the object that this physics state belongs to
 	Object*owner{};
 
