@@ -16,7 +16,7 @@ public:
 	Point*points{}; // list of points used for rendering and bounding shape
 	// list of indexes in 'points' that defines the bounding shape as a convex polygon CCW
 	PointIx*indexes{};
-	// list of normals to the lines defined by 'indexes'. calculated by 'init_normals'
+	// list of normals to the lines defined by 'indexes'. calculated by 'calculate_normals'
 	Vector*normals{};
 	
 	// destructor cannot happen because object life time is program lifetime
