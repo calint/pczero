@@ -3,6 +3,8 @@
 [ ] lib: Data::to: check if within bounds?
 [ ] lib: Bitmap::address_offset: check if within bounds?
 [ ] lib: Bitmap::address_offset: (...)*sizeof(T) can overflow?
+[ ] libge, lib: consider replacing verbose type names with verbose variable names
+    => example: c++ does not warn assigning a type 'AngleRad' to 'AngleDeg' when defined with 'using' 
 [ ] kernel: improved Heap that does not fragment (o1store?)
 [ ] osca: read more sectors
 [ ] libge: Object: cached transformed points without translation
