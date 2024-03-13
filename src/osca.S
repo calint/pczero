@@ -251,7 +251,7 @@ movw $isr_fpu,IDT+     7*IDT_ENTRY_SIZE   # exception 7: device not available,
 movw       $0,IDT+     7*IDT_ENTRY_SIZE+6 #  offset 16..31 (0 because it is within 64K)
                                           #   triggered when a FPU context switch
                                           #    might be needed
-# note: asus zenbook generates ISA interrupt 7:
+# note: asus zenbook UX305CA generates ISA interrupt 7:
 #       LPT1 / Unreliable "spurious" interrupt (usually)
 #       see https://wiki.osdev.org/8259_PIC#Spurious_IRQs 
 #       disabled with an empty interrupt handler: isr_7
