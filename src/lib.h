@@ -8,6 +8,7 @@
 
 namespace osca{
 
+using ZString=const char*;
 using Address=void*;
 using Size=int32;
 using SizeBytes=Size;
@@ -610,10 +611,10 @@ public:
 		draw(table_ascii_to_font[uint32(ch)]);
 		return*this;
 	}
-	constexpr auto p(const char*czstr)->PrinterToBitmap&{
-		while(*czstr){
-			p(*czstr);
-			czstr++;
+	constexpr auto p(ZString str)->PrinterToBitmap&{
+		while(*str){
+			p(*str);
+			str++;
 		}
 		return*this;
 	}
@@ -681,6 +682,14 @@ PrinterToVga out; // initialized by 'osca_init'
 // print error to vga13h
 extern PrinterToVga err;
 PrinterToVga err; // initialized by 'osca_init'
+
+// crashes by printing 'msg' and stack to 'err' then hangs
+[[noreturn]] auto osca_crash(ZString msg)->void;
+[[noreturn]] auto osca_crash(ZString msg)->void{
+	err.p(msg).nl();
+	osca_on_exception();
+	while(true);
+}
 
 template<typename T>
 class MatrixT{

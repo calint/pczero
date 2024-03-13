@@ -27,7 +27,7 @@ extern "C" [[noreturn]] auto tsk0()->void{
 //	err.p_hex_32b(unsigned(ebp)).spc();
 //	err.p_hex_32b(unsigned(esp0)).spc();
 
-	const char*hello=reinterpret_cast<const char*>(eax);
+	ZString hello=reinterpret_cast<ZString>(eax);
 	PrinterToBitmap pb{&vga13h.bmp()};
 
 	pb.fg(5).pos({13,3});

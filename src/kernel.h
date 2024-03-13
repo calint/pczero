@@ -40,12 +40,11 @@ extern "C" auto osca_on_exception()->void{
 	asm("mov 24(%%esp),%0":"=r"(stack_6));
 	asm("mov 28(%%esp),%0":"=r"(stack_7));
 
-	err.p("osca exception").nl();
-	err.spc().p_hex_32b(stack_0);
+	err.p_hex_32b(stack_0);
 	err.spc().p_hex_32b(stack_1);
 	err.spc().p_hex_32b(stack_2);
 	err.spc().p_hex_32b(stack_3).nl();
-	err.spc().p_hex_32b(stack_4);
+	err.p_hex_32b(stack_4);
 	err.spc().p_hex_32b(stack_5);
 	err.spc().p_hex_32b(stack_6);
 	err.spc().p_hex_32b(stack_7);
@@ -78,13 +77,13 @@ class Heap final{
 
 	inline static Data data_{}; // location and size of heap
 	inline static char*mem_pos_{}; // position in heap to contiguous memory
-	inline static char*mem_end_{}; // end of heap memory (1 past last)
+	inline static const char*mem_end_{}; // end of heap memory (1 past last)
 	inline static Entry*ls_used_{}; // list of used memory entries
 	inline static Entry*ls_used_pos_{}; // next available slot
-	inline static Entry*ls_used_end_{}; // end (1 past last) of used entries list
+	inline static const Entry*ls_used_end_{}; // end (1 past last) of used entries list
 	inline static Entry*ls_free_{}; // list of freed memory entries
 	inline static Entry*ls_free_pos_{}; // next available slot
-	inline static Entry*ls_free_end_{}; // end (1 past last) of free entries list
+	inline static const Entry*ls_free_end_{}; // end (1 past last) of free entries list
 	inline static Size entries_size_{}; // maximum slots
 public:
 	static auto init_statics(const Data&data,const Size entries_size)->void{
@@ -97,8 +96,7 @@ public:
 		// place used entries area at top of the heap
 		ls_used_=static_cast<Entry*>(data.end())-entries_size;
 		if(reinterpret_cast<char*>(ls_used_)<mem_pos_){
-			err.p("Heap:init_statics:1");
-			osca_hang();
+			osca_crash("Heap:1");
 		}
 		ls_used_pos_=ls_used_;
 		ls_used_end_=ls_used_+entries_size;
@@ -106,8 +104,7 @@ public:
 		// place free entries area before used entries
 		ls_free_=ls_used_-entries_size;
 		if(reinterpret_cast<char*>(ls_free_)<mem_pos_){
-			err.p("Heap:init_statics:2");
-			osca_hang();
+			osca_crash("Heap:2");
 		}
 		ls_free_pos_=ls_free_;
 		ls_free_end_=ls_free_+entries_size;
@@ -115,7 +112,7 @@ public:
 		// place end of free heap memory to start of free entries area
 		mem_end_=reinterpret_cast<char*>(ls_free_);
 	}
-	static inline auto data()->const Data&{return data_;	}
+	static inline auto data()->const Data&{return data_;}
 	// called by operator 'new'
 	static auto alloc(const uint32 size_bytes)->void*{
 		// try to find a free slot of that size
@@ -128,8 +125,7 @@ public:
 			void*ptr=ent->ptr;
 			// move to used entries
 			if(ls_used_pos_>=ls_used_end_){
-				err.p("Heap:alloc:1");
-				osca_hang();
+				osca_crash("Heap:3");
 			}
 			*ls_used_pos_=*ent;
 			ls_used_pos_++;
@@ -142,12 +138,10 @@ public:
 		char*ptr=mem_pos_;
 		mem_pos_+=size_bytes;
 		if(mem_pos_>mem_end_){
-			err.p("Heap:alloc:2");
-			osca_hang();
+			osca_crash("Heap:4");
 		}
 		if(ls_used_pos_>=ls_used_end_){
-			err.p("Heap:alloc:3");
-			osca_hang();
+			osca_crash("Heap:5");
 		}
 		// write to used list
 		*ls_used_pos_={ptr,size_bytes};
@@ -157,7 +151,6 @@ public:
 	// called by operator 'delete'
 	static auto free(void*ptr)->void{
 		// find the allocated memory in the used list
-		
 		for(Entry*ent=ls_used_;ent<ls_used_pos_;ent++){
 			if(ent->ptr!=ptr){
 				continue;
@@ -166,8 +159,7 @@ public:
 			// found the allocation entry
 			// copy entry from used to free
 			if(ls_free_pos_>=ls_free_end_){
-				err.p("Heap:free:1");
-				osca_hang();
+				osca_crash("Heap:6");
 			}
 			*ls_free_pos_=*ent;
 			ls_free_pos_++;
@@ -183,8 +175,7 @@ public:
 			return;
 		}
 		// did not find the allocated memory. probably a double delete
-		err.p("Heap:free:2");
-		osca_hang();
+		osca_crash("Heap:7");
 	}
 	static auto clear(const uint8 b=0)->void{data_.clear(b);}
 	static auto clear_heap_entries(const uint8 free_area=0,const uint8 used_area=0)->void{

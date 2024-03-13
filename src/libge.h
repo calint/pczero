@@ -101,8 +101,7 @@ public:
 	static auto alloc()->PhysicsState*{
 		// check buffer overrun
 		if(ls_all_pos==ls_all_end){
-			err.p("PhysicsState:e1");
-			osca_hang();
+			osca_crash("PhysicsState:1");
 		}
 		PhysicsState*next_free=ls_all_pos;
 		ls_all_pos++;
@@ -207,8 +206,7 @@ public:
 
 		// allocate index in 'all[]' from free slots
 		if(ls_all_pos==ls_all_end){
-			err.p("Object:e1");
-			osca_hang();
+			osca_crash("Object:1");
 		}
 		
 		*ls_all_pos=this;
@@ -413,14 +411,12 @@ public:
 private:
 	static auto add_deleted(Object*obj)->void{
 		if(!obj->is_alive()){ // debugging (can be removed)
-			err.p("Object::add_deleted:1");
-			osca_hang();
+			osca_crash("Object:2");
 		}
 
 		obj->flag_as_dead();
 		if(ls_deleted_pos==ls_deleted_end){
-			err.p("Object::add_deleted:2");
-			osca_hang();
+			osca_crash("Object:3");
 		}
 		*ls_deleted_pos=obj;
 		ls_deleted_pos++;
