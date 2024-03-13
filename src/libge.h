@@ -25,6 +25,7 @@ public:
 
 	constexpr auto calculate_normals()->void{
 		delete[]normals; // in case definition has changed
+		normals=nullptr;
 		if(indexes_size<3){ // not enough points for a shape
 			// don't define normals
 			return;
