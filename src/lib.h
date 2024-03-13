@@ -720,6 +720,7 @@ public:
 using Matrix=MatrixT<Coord>;
 
 inline auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
+	// note: volatile so g++ does not optimizes it away
     asm volatile(
         "cld;"
         "rep movsb;"
@@ -730,6 +731,7 @@ inline auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
 }
 
 inline auto pz_memset(Address dst,uint8 value,SizeBytes n)->void{
+	// note: volatile so g++ does not optimizes it away
     asm volatile(
         "cld;"
         "rep stosb;"

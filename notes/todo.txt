@@ -3,11 +3,12 @@
 [ ] lib: Data::to: check if within bounds?
 [ ] lib: Bitmap::address_offset: check if within bounds?
 [ ] lib: Bitmap::address_offset: (...)*sizeof(T) can overflow?
-[ ] improved Heap that does not fragment (o1store?)
+[ ] kernel: improved Heap that does not fragment (o1store?)
 [ ] osca: read more sectors
-[ ] libge: cached transformed points without translation
+[ ] libge: Object: cached transformed points without translation
+[ ] libge: ObjectDef: bounding points and bounding planes. see http://github.com/calint/glos
 [ ] implement a unique_ptr<T>
-[o] heap
+[o] kernel: heap
 [x]   step 1. a vector of [*ptr,size] elements pointing to freed memory. O(n) free, O(n) alloc
 [ ]   step 2. hash table on size with vectors [*ptr,size]. O(n/x)
       => if 'size' is not arbitrary then there is a set of sizes depending on the program
@@ -16,7 +17,7 @@
               => 'o1store' from "https://github.com/calint/glos"
 [ ] lib: PrinterToBitmap pos in pixels
 [ ] lib: PrinterToConsole pos in characters
-[ ] build with -g and then link a stripped version of that object file
+[ ] libge: better naming of public members
 ------------------------------------------------------------------------------
 [x] osca: is it necessary to do fwait on i386+387?
 [x]   "co-processors from 287 on do not need it"
@@ -117,3 +118,4 @@
     => isr_kbd uses osca stack (callback to c might generate a substantial stack footprint)
     => osca_yield does one 32 bit push/pop on current task stack
     => isr_tmr does one 16 bit push/pop on current task stack
+[x] build with -g and then link a stripped version of that object file
