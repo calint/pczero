@@ -70,7 +70,7 @@ const Task* const osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
 class Heap final{
 	struct Entry final{
 		void*ptr{};
-		unsigned size_bytes{};
+		uint32 size_bytes{};
 	};
 
 	inline static Data data_{}; // location and size of heap
@@ -114,7 +114,7 @@ public:
 	}
 	static inline auto data()->const Data&{return data_;	}
 	// called by operator 'new'
-	static auto alloc(const unsigned size_bytes)->void*{
+	static auto alloc(const uint32 size_bytes)->void*{
 		// try to find a free slot of that size
 		
 		for(Entry*ent=ls_free_;ent<ls_free_pos_;ent++){
@@ -172,7 +172,7 @@ public:
 
 			// copy last entry from used list to this entry
 			ls_used_pos_--;
-			const unsigned size=ent->size_bytes;
+			const uint32 size=ent->size_bytes;
 			*ent=*ls_used_pos_;
 
 			// debugging (can be removed)
@@ -288,7 +288,7 @@ extern "C" auto osca_on_key(const uint8 scan_code)->void{
 	using namespace osca;
 
 	// on screen
-	*reinterpret_cast<unsigned*>(0xa0000+4)=scan_code;
+	*reinterpret_cast<uint32*>(0xa0000+4)=scan_code;
 
 	if(scan_code==0x1d)keyboard_ctrl_pressed=true;
 	else if(scan_code==0x9d)keyboard_ctrl_pressed=false;

@@ -8,7 +8,7 @@
 namespace osca{
 
 using Address=void*;
-using Size=int;
+using Size=int32;
 using SizeBytes=Size;
 
 // forward declaration of memory copy and set functions
@@ -346,7 +346,7 @@ public:
 
 using Bitmap8b=Bitmap<Color8b>;
 
-static constexpr unsigned table_hex_to_font[]{
+static constexpr uint32 table_hex_to_font[]{
 		0b01100'10010'10010'10010'01100'00000'00, // 0
 		0b00100'01100'00100'00100'01110'00000'00, // 1
 		0b01100'10010'00100'01000'11110'00000'00, // 2
@@ -402,7 +402,7 @@ static constexpr char table_scancode_to_ascii[256]{
 // 0e - backspace
 // 1c - return
 
-static constexpr unsigned table_ascii_to_font[]{
+static constexpr uint32 table_ascii_to_font[]{
 		0,0,0,0,0,0,0,0,0,0,
 		0,0,0,0,0,0,0,0,0,0,
 		0,0,0,0,0,0,0,0,0,0,
@@ -552,7 +552,7 @@ public:
 	inline constexpr auto fg(const Color8b c)->PrinterToBitmap&{fg_=c;return*this;}
 	inline constexpr auto bg(const Color8b c)->PrinterToBitmap&{bg_=c;return*this;}
 	inline constexpr auto transparent(const bool b)->PrinterToBitmap&{transparent_=b;return*this;}
-	constexpr auto draw(unsigned bmp_5x6)->PrinterToBitmap&{
+	constexpr auto draw(uint32 bmp_5x6)->PrinterToBitmap&{
 		if(transparent_){
 			draw_transparent(bmp_5x6);
 		}else{
@@ -605,7 +605,7 @@ public:
 		return*this;
 	}
 	constexpr auto p(const char ch)->PrinterToBitmap&{
-		draw(table_ascii_to_font[unsigned(ch)]);
+		draw(table_ascii_to_font[uint32(ch)]);
 		return*this;
 	}
 	constexpr auto p(const char*czstr)->PrinterToBitmap&{
@@ -623,8 +623,8 @@ public:
 	}
 	constexpr auto spc()->PrinterToBitmap&{p(' ');return*this;}
 private:
-	constexpr auto draw_with_bg(unsigned bmp_5x6)->PrinterToBitmap&{
-		constexpr unsigned mask=1u<<31;
+	constexpr auto draw_with_bg(uint32 bmp_5x6)->PrinterToBitmap&{
+		constexpr uint32 mask=1u<<31;
 		for(SizePx y=0;y<font_hi_;y++){
 			for(SizePx x=0;x<font_wi_;x++){
 				const bool px=bmp_5x6&mask;
@@ -637,8 +637,8 @@ private:
 		di_=di_-bmp_wi_*font_hi_+font_wi_;
 		return*this;
 	}
-	constexpr auto draw_transparent(unsigned bmp_5x6)->PrinterToBitmap&{
-		constexpr unsigned mask=1u<<31;
+	constexpr auto draw_transparent(uint32 bmp_5x6)->PrinterToBitmap&{
+		constexpr uint32 mask=1u<<31;
 		for(SizePx y=0;y<font_hi_;y++){
 			for(SizePx x=0;x<font_wi_;x++){
 				const bool px=bmp_5x6&mask;
@@ -742,13 +742,13 @@ inline auto pz_memset(Address dst,uint8 value,SizeBytes n)->void{
 }
 
 // built-in functions replacements (used by clang++ -O0 and -Os)
-extern "C" void*memcpy(void*dst,const void*src,unsigned n);
-extern "C" void*memset(void*dst,int value,unsigned n);
-void*memcpy(void*dst,const void*src,unsigned n){
+extern "C" void*memcpy(void*dst,const void*src,uint32 n);
+extern "C" void*memset(void*dst,int value,uint32 n);
+void*memcpy(void*dst,const void*src,uint32 n){
 	pz_memcpy(Address(dst),Address(src),SizeBytes(n));
     return dst;
 }
-void*memset(void*dst,int value,unsigned n){
+void*memset(void*dst,int value,uint32 n){
 	pz_memset(Address(dst),uint8(value),SizeBytes(n));
     return dst;
 }

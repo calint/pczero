@@ -118,7 +118,7 @@ public:
 			it->update(dt_s);
 		}
 	}
-	static auto clear(unsigned char b=0)->void{
+	static auto clear(uint8 b=0)->void{
 		const Address from=Address(ls_all);
 		const SizeBytes n=SizeBytes(ls_all_end)-SizeBytes(ls_all);
 		pz_memset(from,b,n);
@@ -335,7 +335,10 @@ private:
 		set_world_points_need_update(false);
 	}
 	constexpr auto refresh_Mmw_if_invalid()->void{
-		if(phy().angle==Mmw_angle_ && phy().position==Mmw_position_ && scale_==Mmw_scale_){
+		if(phy_->angle==Mmw_angle_ && 
+		   phy_->position==Mmw_position_ && 
+		   scale_==Mmw_scale_
+		){
 			return;
 		}
 
@@ -357,15 +360,15 @@ private:
 	inline static Object**ls_deleted_pos{}; // next free slot
 	inline static Object**ls_deleted_end{}; // end of list (1 past last)
 
-	inline static uint64 timer_tick{};
-	inline static uint64 timer_tick_prv{};
-	inline static uint64 fps_timer_tick_prv{};
-	inline static Count fps_frame_counter{};
+	inline static uint64 timer_tick{}; // current time in osca ticks
+	inline static uint64 timer_tick_prv{}; // previous frame time
+	inline static uint64 fps_timer_tick_prv{}; // previous calculation tick
+	inline static Count fps_frame_counter{}; // frames rendered during this interval
 
 public:
-	inline static TimeSec time{};
-	inline static TimeStepSec dt{};
-	inline static Count fps{};
+	inline static TimeSec time{}; // time in seconds with decimals
+	inline static TimeStepSec dt{}; // time step for this frame
+	inline static Count fps{}; // this interval frames per second
 
 	static auto init_statics()->void{
 		ls_all=new Object*[objects_size_max];
@@ -404,8 +407,8 @@ public:
 		check_collisions();
 		commit_deleted();
 	}
-	static auto allocated_objects_count()->unsigned{
-		return unsigned(ls_all_pos-ls_all);
+	static auto allocated_objects_count()->uint32{
+		return uint32(ls_all_pos-ls_all);
 	}
 private:
 	static auto add_deleted(Object*obj)->void{
