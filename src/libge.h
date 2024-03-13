@@ -13,7 +13,8 @@ public:
 	PointIx points_size{};
 	// number of elements in 'indexes'
 	PointIx indexes_size{};
-	Point*points{}; // list of points used for rendering and bounding shape
+	// list of points used for rendering and bounding shape
+	Point*points{};
 	// list of indexes in 'points' that defines the bounding shape as a convex polygon CCW
 	PointIx*indexes{};
 	// list of normals to the lines defined by 'indexes'. calculated by 'calculate_normals'
