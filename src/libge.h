@@ -17,13 +17,13 @@ public:
 	Point*points{};
 	// list of indexes in 'points' that defines the bounding shape as a convex polygon CCW
 	PointIx*indexes{};
-	// list of normals to the lines defined by 'indexes'. calculated by 'calculate_normals'
+	// list of normals to the lines defined by 'indexes'. calculated by 'init_normals'
 	Vector*normals{};
-	
+
 	// destructor cannot happen because object life time is program lifetime
 	// void operator delete(void*)=delete;
 
-	constexpr auto calculate_normals()->void{
+	constexpr auto init_normals()->void{
 		delete[]normals; // in case definition has changed
 		normals=nullptr;
 		if(indexes_size<3){ // not enough points for a shape

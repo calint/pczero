@@ -560,7 +560,7 @@ auto Game::create_boss()->void{
 		},
 		new PointIx[]{1,2,3,4} // bounding convex polygon CCW
 	};
-	enemy_def.calculate_normals();
+	enemy_def.init_normals();
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	ship_def={4,3,
 		new Point[]{
@@ -571,7 +571,7 @@ auto Game::create_boss()->void{
 		},
 		new PointIx[]{1,2,3}
 	};
-	ship_def.calculate_normals();
+	ship_def.init_normals();
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	bullet_def={1,1, // at least one bounding point for collision detection
 		new Point[]{
@@ -579,7 +579,7 @@ auto Game::create_boss()->void{
 		},
 		new PointIx[]{0}
 	};
-	bullet_def.calculate_normals();
+	bullet_def.init_normals();
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	wall_def={4,4,
 		new Point[]{
@@ -590,7 +590,7 @@ auto Game::create_boss()->void{
 		},
 		new PointIx[]{0,1,2,3}
 	};
-	wall_def.calculate_normals();
+	wall_def.init_normals();
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	missile_def={4,3,
 		new Point[]{
@@ -600,14 +600,14 @@ auto Game::create_boss()->void{
 		},
 		new PointIx[]{0,1,2}
 	};
-	missile_def.calculate_normals();
+	missile_def.init_normals();
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	constexpr Count segments=6;
 	boss_def={segments,segments,
 		create_circle(segments),
 		create_circle_ix(segments),
 	};
-	boss_def.calculate_normals();
+	boss_def.init_normals();
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 
 	// constants used to clear screen by copying ram to vga
