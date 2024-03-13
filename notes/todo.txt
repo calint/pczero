@@ -124,3 +124,4 @@
 [-] libge: ObjectDef: bounding points and bounding planes. see http://github.com/calint/glos
     => it is good enough for toy application
 [x] on error print error message and call osca_on_exception() to print stack
+    => osca_crash(ZString msg)
