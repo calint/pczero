@@ -290,7 +290,7 @@ public:
 					Vector v=*nml;
 					v.normalize().scale(3);
 					Point p=points_world_[def_.indexes[i]];
-					Vector v1{p+v};
+					Vector v1=p+v;
 					dsp.draw_dot(v1,0xf); // white dot
 					nml++;
 				}
