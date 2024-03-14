@@ -499,7 +499,7 @@ private:
 			}
 		}
 	}
-	static auto are_bounding_circles_in_collision(Object&o1,Object&o2)->bool{
+	static auto are_bounding_circles_in_collision(const Object&o1,const Object&o2)->bool{
 		// check if: sqrt(dx*dx+dy*dy)<=r1+r2
 		//                dx*dx+dy*dy <=(r1+r2)²
 		const Real dist_check=o1.bounding_radius_+o2.bounding_radius_;
