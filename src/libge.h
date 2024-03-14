@@ -121,7 +121,7 @@ public:
 			it->update(dt_s);
 		}
 	}
-	static auto clear(uint8 b=0)->void{
+	static auto clear(const uint8 b=0)->void{
 		const Address from=Address(ls_all);
 		const SizeBytes n=SizeBytes(ls_all_end)-SizeBytes(ls_all);
 		pz_memset(from,b,n);
@@ -535,7 +535,7 @@ private:
 		const Vector*nml=o.normals_world_; // normals
 		PointIx n=o.def_.indexes_size;
 		while(n--){
-			const Vector&p{o.points_world_[*ix]};
+			const Vector&p=o.points_world_[*ix];
 			ix++;
 
 			if(enable::draw_collision_check){
