@@ -1,7 +1,7 @@
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 
 # kernel osca
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - info
-# reviewed: 2024-03-10git reset --hard HEAD
+# reviewed: 2024-03-10
 # tested on:
 # * linux 6.5.0 qemu-system-i386 8.0.4
 # * asus zenbook UX305CA
