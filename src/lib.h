@@ -17,7 +17,7 @@ using SizeBytes=Size;
 auto pz_memcpy(Address dst,Address src,SizeBytes n)->void;
 auto pz_memset(Address dst,uint8 byte,SizeBytes n)->void;
 
-using OffsetBytes=int;
+using OffsetBytes=Size;
 
 class Data{
 	Address address_{};
@@ -34,7 +34,7 @@ public:
 	inline constexpr auto end()const->Address{return static_cast<char*>(address_)+size_;}
 };
 
-using Real=float;
+using Real=flt32;
 using Angle=Real;
 using AngleRad=Angle;
 

@@ -64,7 +64,7 @@ constexpr Size objects_size=heap_entries_size/3;
 using Velocity=Vector;
 using Acceleration=Vector;
 using AngularVelocity=AngleRad;
-using Time=double;
+using Time=flt64;
 using TimeSec=Time;
 using TimeStepSec=Real;
 
@@ -116,9 +116,9 @@ public:
 		pz_memset(ls_all_pos,0x0f,sizeof(PhysicsState)); // debugging (can be removed)
 		return obj;
 	}
-	static auto update_all(const float dt_s)->void{
+	static auto update_all(const TimeStepSec dt)->void{
 		for(PhysicsState*it=ls_all;it<ls_all_pos;++it){
-			it->update(dt_s);
+			it->update(dt);
 		}
 	}
 	static auto clear(const uint8 b=0)->void{

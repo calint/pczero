@@ -137,7 +137,7 @@ extern "C" [[noreturn]] auto tsk3()->void{
 	osca_interrupts_enable();
 
 	while(true){
-		const float f=float(osca_tick_lo)/float(ecx);
+		const flt32 f=flt32(osca_tick_lo)/flt32(ecx);
 		*static_cast<uint32*>(vga13h.bmp().address_offset({CoordPx(eax),0}))=uint32(f);
 		osca_yield();
 	}

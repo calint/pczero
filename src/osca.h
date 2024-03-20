@@ -12,6 +12,8 @@ using int32=int;
 using uint32=unsigned;
 using int64=long long;
 using uint64=unsigned long long;
+using flt32=float;
+using flt64=double;
 
 struct alignas(16) Task{
 	uint32 eip{};
@@ -76,7 +78,7 @@ extern "C" volatile const uint32 osca_tick_lo;
 extern "C" volatile const uint32 osca_tick_hi;
 
 // seconds per timer tick
-constexpr float osca_tick_per_sec=1.0f/1024; // 1024 Hz
+constexpr flt32 osca_tick_per_sec=1.0f/1024; // 1024 Hz
 
 // switches to next running task
 // note: single small task yielding in a tight loop might inhibit
