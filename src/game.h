@@ -20,7 +20,7 @@ class Game{
 	static auto create_scene()->void;
 	static auto create_boss()->void;
 
-	static auto create_circle(const PointIx segments)->unique_ptr<Point>{
+	static auto create_circle(const PointIx segments)->unique_ptr<Point[]>{
 		Point*pts=new Point[segments];
 		AngleRad th=0;
 		const AngleRad dth=2*PI/AngleRad(segments);
@@ -31,15 +31,15 @@ class Game{
 			pts[i]={fcos,-fsin};
 			th+=dth;
 		}
-		return unique_ptr<Point>(pts);
+		return unique_ptr<Point[]>(pts);
 	}
 
-	static auto create_circle_ix(const PointIx segments)->unique_ptr<PointIx>{
+	static auto create_circle_ix(const PointIx segments)->unique_ptr<PointIx[]>{
 		PointIx*ix=new PointIx[segments];
 		for(PointIx i=0;i<segments;i++){
 			ix[i]=i;
 		}
-		return unique_ptr<PointIx>(ix);
+		return unique_ptr<PointIx[]>(ix);
 	}
 
 	static auto draw_axis(Bitmap8b&dsp)->void{
@@ -319,8 +319,8 @@ private:
 		const Object&target,
 		const bool draw_trajectory=false
 	)->void{
-		constexpr Real intersection_time_margin_of_error=Real(0.25);
-		constexpr TimeStepSec evaluation_time_step=TimeStepSec(0.2);
+		constexpr Real intersection_time_margin_of_error=Real(0.1);
+		constexpr TimeStepSec evaluation_time_step=TimeStepSec(0.1);
 		Vector v_aim=find_aim_vector_for_moving_target(
 			target,
 			Bullet::lifetime,
@@ -604,8 +604,8 @@ auto Game::create_boss()->void{
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 	constexpr Count segments=6;
 	boss_def={segments,segments,
-		create_circle(segments),
-		create_circle_ix(segments),
+		create_circle(segments).release(),
+		create_circle_ix(segments).release(),
 	};
 	boss_def.init_normals();
 	//-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -

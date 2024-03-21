@@ -755,8 +755,7 @@ public:
 		}
 		return*this;
 	}
-	inline auto operator->()const->T*{return ptr_;}
-	inline auto operator*()const->T&{return*ptr_;}
+	inline auto release()->T*{T*p=ptr_;ptr_=nullptr;return p;}
 	inline explicit operator bool()const{return ptr_!=nullptr;}
 	inline operator T*()const{return ptr_;}
 };
@@ -780,10 +779,13 @@ public:
 		}
 		return*this;
 	}
-	inline auto operator[](int32 index)const->T&{return ptr_[index];}
+	inline auto release()->T*{T*p=ptr_;ptr_=nullptr;return p;}
 	inline explicit operator bool()const{return ptr_!=nullptr;}
 	inline operator T*()const{return ptr_;}
 };
+
+template<typename T>
+auto move(T&arg)->T&&{return static_cast<T&&>(arg);}
 
 inline auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
 	// note: volatile so g++ does not optimizes it away
