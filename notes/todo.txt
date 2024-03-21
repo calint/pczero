@@ -8,7 +8,6 @@
 [ ] kernel: improved Heap that does not fragment (o1store?)
 [ ] osca: read more sectors
 [ ] libge: Object: cached transformed points without translation
-[x] implement a unique_ptr<T>
 [o] kernel: heap
 [x]   step 1. a vector of [*ptr,size] elements pointing to freed memory. O(n) free, O(n) alloc
 [ ]   step 2. hash table on size with vectors [*ptr,size]. O(n/x)
@@ -125,3 +124,5 @@
     => it is good enough for toy application
 [x] on error print error message and call osca_on_exception() to print stack
     => osca_crash(ZString msg)
+[x] implement a unique_ptr<T>
+    => what about 'delete[]' vs 'delete'
