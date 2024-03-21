@@ -19,6 +19,7 @@ auto pz_memset(Address dst,uint8 byte,SizeBytes n)->void;
 
 using OffsetBytes=Size;
 
+// implements a span of raw data starting at an address with a size
 class Data{
 	Address address_{};
 	SizeBytes size_{};
@@ -93,6 +94,7 @@ constexpr inline auto deg_to_rad(const AngleDeg deg)->AngleRad{
 
 using Scale=Real;
 
+// implements a 2d vector
 template<typename T>
 struct VectorT{
 	T x{},y{};
@@ -136,6 +138,7 @@ using CoordPx=int16; // coordinate in pixel space
 using PointPx=VectorT<CoordPx>; // point in pixel space
 using Count=Size; // used in loops
 
+// implements a 2d dimension
 template<typename T>
 class DimensionT{
 	T width_{};
@@ -157,6 +160,7 @@ namespace enable{
 	constexpr static bool draw_polygons_edges{true};
 }
 
+// implementation of a bitmap with given address and dimensions
 template<typename T>
 class Bitmap{
 	DimensionPx dim_{};
@@ -523,6 +527,7 @@ static constexpr uint32 table_ascii_to_font[]{
 
 using CoordsChar=VectorT<int16>;
 
+// prints to a bitmap
 class PrinterToBitmap{
 	Bitmap8b*bmp_{}; // destination bitmap
 	Color8b*di_{}; // current pixel in bitmap
@@ -691,6 +696,7 @@ PrinterToVga err; // initialized by 'osca_init'
 	while(true);
 }
 
+// implementation of a matrix handling 2d transforms
 template<typename T>
 class MatrixT{
 	T xx{},xy{},xt{};
@@ -730,8 +736,9 @@ public:
 
 using Matrix=MatrixT<Coord>;
 
-// a simple implementation of owning pointer
-template<typename T>class unique_ptr{
+// implementation of an owning pointer
+template<typename T>
+class unique_ptr{
 	T*ptr{};
 public:
 	inline unique_ptr()=default;
