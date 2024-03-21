@@ -20,7 +20,7 @@ class Game{
 	static auto create_scene()->void;
 	static auto create_boss()->void;
 
-	static auto create_circle(const PointIx segments)->Point*{
+	static auto create_circle(const PointIx segments)->unique_ptr<Point>{
 		Point*pts=new Point[segments];
 		AngleRad th=0;
 		const AngleRad dth=2*PI/AngleRad(segments);
@@ -34,7 +34,7 @@ class Game{
 		return pts;
 	}
 
-	static auto create_circle_ix(const PointIx segments)->PointIx*{
+	static auto create_circle_ix(const PointIx segments)->unique_ptr<PointIx>{
 		PointIx*ix=new PointIx[segments];
 		for(PointIx i=0;i<segments;i++){
 			ix[i]=i;
@@ -279,7 +279,7 @@ public:
 			return;
 		}
 		last_fired_time=time;
-		Bullet*b=new Bullet;
+		Bullet*b=new Bullet{};
 		Vector v=forward_vector().scale(bounding_radius()+b->bounding_radius());
 		PhysicsState&bp=b->phy();
 		bp.position=phy_const().position+v;
@@ -497,7 +497,7 @@ public:
 
 auto Game::create_scene()->void{
 	for(Real i=30;i<300;i+=20){
-		Enemy*o=new Enemy;
+		Enemy*o=new Enemy{};
 		o->phy().position={i,60};
 		o->phy().angle=deg_to_rad(i);
 		o->phy().angular_velocity=deg_to_rad(10);
@@ -506,13 +506,13 @@ auto Game::create_scene()->void{
 }
 
 auto Game::create_player()->void{
-	Ship*o=new Ship;
+	Ship*o=new Ship{};
 	o->phy().position={160,130};
 	player=o;
 }
 
 auto Game::create_boss()->void{
-	Object*o=new Boss;
+	Object*o=new Boss{};
 	if(boss_vel.y>20){
 		if(boss_vel.x>0){
 			boss_pos={300,60};
