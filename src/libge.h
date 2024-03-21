@@ -259,7 +259,7 @@ public:
 		refresh_wld_points();
 
 		if(enable::draw_dots){
-			const Point*pt=points_world_;
+			const Point*pt=points_world_.get();
 			for(PointIx i=0;i<def_.points_size;i++){
 				dsp.draw_dot(*pt,0xe); // yellow dot
 				pt++;
@@ -271,7 +271,7 @@ public:
 				// special case when definition is a point
 				dsp.draw_dot(points_world_[0],color_);
 			}else{
-				dsp.draw_polygon(points_world_,def_.indexes_size,def_.indexes,color_);
+				dsp.draw_polygon(points_world_.get(),def_.indexes_size,def_.indexes,color_);
 			}
 		}
 
@@ -281,7 +281,7 @@ public:
 
 		if(enable::draw_normals){
 			if(normals_world_){ // check if there are any normals defined
-				const Point*nml=normals_world_;
+				const Point*nml=normals_world_.get();
 				for(PointIx i=0;i<def_.indexes_size;i++){
 					Vector v=*nml;
 					v.normalize().scale(3);
@@ -320,10 +320,10 @@ private:
 		}
 
 		// matrix has been updated, update cached points
-		Mmw_.transform(def_.points,points_world_,def_.points_size);
+		Mmw_.transform(def_.points,points_world_.get(),def_.points_size);
 
 		if(def_.normals){ // check if there are any meaningful normals
-			Mmw_.rotate(def_.normals,normals_world_,def_.indexes_size);
+			Mmw_.rotate(def_.normals,normals_world_.get(),def_.indexes_size);
 		}
 	
 		set_world_points_need_update(false);
@@ -528,7 +528,7 @@ private:
 	}
 	inline static auto is_point_in_bounding_shape(const Point&p0,const Object&o)->bool{
 		const PointIx*ix=o.def_.indexes; // bounding points indexes
-		const Vector*nml=o.normals_world_; // normals
+		const Vector*nml=o.normals_world_.get(); // normals
 		PointIx n=o.def_.indexes_size;
 		while(n--){
 			const Vector&p=o.points_world_[*ix];
