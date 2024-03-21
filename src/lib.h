@@ -160,7 +160,7 @@ namespace enable{
 	constexpr static bool draw_polygons_edges{true};
 }
 
-// implementation of a bitmap with given address and dimensions
+// implementation of a bitmap with given address and dimension
 template<typename T>
 class Bitmap{
 	DimensionPx dim_{};
