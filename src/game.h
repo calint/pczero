@@ -31,7 +31,7 @@ class Game{
 			pts[i]={fcos,-fsin};
 			th+=dth;
 		}
-		return pts;
+		return unique_ptr<Point>(pts);
 	}
 
 	static auto create_circle_ix(const PointIx segments)->unique_ptr<PointIx>{
@@ -39,7 +39,7 @@ class Game{
 		for(PointIx i=0;i<segments;i++){
 			ix[i]=i;
 		}
-		return ix;
+		return unique_ptr<PointIx>(ix);
 	}
 
 	static auto draw_axis(Bitmap8b&dsp)->void{

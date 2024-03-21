@@ -735,7 +735,7 @@ template<typename T>class unique_ptr{
 	T*ptr{};
 public:
 	inline unique_ptr()=default;
-	inline unique_ptr(T*p):ptr{p}{}
+	inline explicit unique_ptr(T*p):ptr{p}{}
 	inline ~unique_ptr(){delete ptr;}
 	inline unique_ptr(unique_ptr&&other):ptr{other.ptr}{other.ptr=nullptr;}
 	inline auto operator=(unique_ptr&&other)->unique_ptr&{
@@ -746,11 +746,10 @@ public:
 		}
 		return*this;
 	}
-	inline auto reset()->void{delete ptr;ptr=nullptr;}
 	inline auto operator->()const->T*{return ptr;}
 	inline auto operator*()const->T&{return*ptr;}
 	inline auto operator[](int32 index)const->T&{return ptr[index];}
-	inline operator bool()const{return ptr!=nullptr;}
+	inline explicit operator bool()const{return ptr!=nullptr;}
 	inline operator T*()const{return ptr;}
 };
 
