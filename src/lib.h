@@ -730,26 +730,50 @@ public:
 
 using Matrix=MatrixT<Coord>;
 
+// a simple implementation of owning pointer
+template <class T>class unique_ptr{
+	T*ptr{};
+public:
+	inline unique_ptr()=default;
+	inline unique_ptr(T*p):ptr{p}{}
+	inline ~unique_ptr(){delete ptr;}
+	inline unique_ptr(unique_ptr&&other):ptr{other.ptr}{other.ptr=nullptr;}
+	inline unique_ptr&operator=(unique_ptr&&other){
+		if(this!=&other){
+			delete ptr;
+			ptr=other.ptr;
+			other.ptr=nullptr;
+		}
+		return*this;
+	}
+	inline auto reset()->void{delete ptr;ptr=nullptr;}
+	inline auto operator->()const->T*{return ptr;}
+	inline auto operator*()const->T&{return*ptr;}
+	inline auto operator[](int32 index)const->T&{return ptr[index];}
+	inline explicit operator bool()const{return ptr!=nullptr;}
+	inline operator T*()const{return ptr;}
+};
+
 inline auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
 	// note: volatile so g++ does not optimizes it away
-    asm volatile(
-        "cld;"
-        "rep movsb;"
-        :"=D"(dst),"=S"(src),"=c"(n)
-        :"0"(dst),"1"(src),"2"(n)
-        :"memory"
-    );
+	asm volatile(
+		"cld;"
+		"rep movsb;"
+		:"=D"(dst),"=S"(src),"=c"(n)
+		:"0"(dst),"1"(src),"2"(n)
+		:"memory"
+	);
 }
 
 inline auto pz_memset(Address dst,uint8 value,SizeBytes n)->void{
 	// note: volatile so g++ does not optimizes it away
-    asm volatile(
-        "cld;"
-        "rep stosb;"
-        :"=D"(dst),"=c"(n)
-        :"0"(dst),"1"(n),"a"(value)
-        :"memory"
-    );
+	asm volatile(
+		"cld;"
+		"rep stosb;"
+		:"=D"(dst),"=c"(n)
+		:"0"(dst),"1"(n),"a"(value)
+		:"memory"
+	);
 }
 
 // built-in functions replacements (used by clang++ -O0 and -Os)
@@ -757,11 +781,11 @@ extern "C" void*memcpy(void*dst,const void*src,uint32 n);
 extern "C" void*memset(void*dst,int value,uint32 n);
 void*memcpy(void*dst,const void*src,uint32 n){
 	pz_memcpy(Address(dst),Address(src),SizeBytes(n));
-    return dst;
+	return dst;
 }
 void*memset(void*dst,int value,uint32 n){
 	pz_memset(Address(dst),uint8(value),SizeBytes(n));
-    return dst;
+	return dst;
 }
 
 } // end namespace osca

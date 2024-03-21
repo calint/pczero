@@ -8,7 +8,7 @@
 [ ] kernel: improved Heap that does not fragment (o1store?)
 [ ] osca: read more sectors
 [ ] libge: Object: cached transformed points without translation
-[ ] implement a unique_ptr<T>
+[x] implement a unique_ptr<T>
 [o] kernel: heap
 [x]   step 1. a vector of [*ptr,size] elements pointing to freed memory. O(n) free, O(n) alloc
 [ ]   step 2. hash table on size with vectors [*ptr,size]. O(n/x)

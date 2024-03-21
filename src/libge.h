@@ -159,9 +159,9 @@ class Object{
 	// contains the drawable and bounding shape definition
 	const ObjectDef&def_;
 	// transformed model to world points cache
-	Point*points_world_{};
+	unique_ptr<Point>points_world_{};
 	// normals of bounding shape rotated to the world coordinates (not normalized if scale!=1)
-	Vector*normals_world_{};
+	unique_ptr<Vector>normals_world_{};
 	// model to world transform
 	Matrix Mmw_{};
 	// position used in 'Mmw_'
@@ -226,10 +226,6 @@ public:
 		*ls_all_pos=nullptr; // debugging (can be removed)
 		// adjust pointer to the freed slot in 'all' list
 		(*ls_all_pos_)->ls_all_pos_=ls_all_pos_;
-
-		// delete cache
-		delete[]points_world_;
-		delete[]normals_world_;
 	}
 
 	constexpr Object()=delete;
