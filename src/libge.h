@@ -24,6 +24,7 @@ public:
 	// destructor cannot happen because object life time is program lifetime
 	// void operator delete(void*)=delete;
 
+	// calculates the normals using the points and indexes
 	constexpr auto init_normals()->void{
 		delete[]normals; // in case definition has changed
 		normals=nullptr;

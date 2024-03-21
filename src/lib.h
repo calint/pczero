@@ -750,7 +750,7 @@ public:
 	inline auto operator->()const->T*{return ptr;}
 	inline auto operator*()const->T&{return*ptr;}
 	inline auto operator[](int32 index)const->T&{return ptr[index];}
-	inline explicit operator bool()const{return ptr!=nullptr;}
+	inline operator bool()const{return ptr!=nullptr;}
 	inline operator T*()const{return ptr;}
 };
 
