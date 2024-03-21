@@ -731,7 +731,7 @@ public:
 using Matrix=MatrixT<Coord>;
 
 // a simple implementation of owning pointer
-template <class T>class unique_ptr{
+template<typename T>class unique_ptr{
 	T*ptr{};
 public:
 	inline unique_ptr()=default;

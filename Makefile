@@ -33,6 +33,7 @@ AF=-march=i386+387 --32 -W -fatal-warnings
 #CF+=-Werror # warnings are errors
 #CW=-pedantic -pedantic-errors -Wall -Wextra -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
 #CW+=-Wpadded # warn when complier pads a data structure
+#CW+=-Wno-effc++ # allow pointer data members
 #CW+=-Wno-array-bounds # allow pointer shenanigans
 #CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
 #CW+=-Wno-cast-qual # allow cast from const void* to void*
