@@ -738,7 +738,7 @@ public:
 	inline unique_ptr(T*p):ptr{p}{}
 	inline ~unique_ptr(){delete ptr;}
 	inline unique_ptr(unique_ptr&&other):ptr{other.ptr}{other.ptr=nullptr;}
-	inline unique_ptr&operator=(unique_ptr&&other){
+	inline auto operator=(unique_ptr&&other)->unique_ptr&{
 		if(this!=&other){
 			delete ptr;
 			ptr=other.ptr;
