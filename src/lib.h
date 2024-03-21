@@ -762,6 +762,32 @@ public:
 	inline operator T*()const{return ptr_;}
 };
 
+// implementation of an owning pointer to an array
+template<typename T>
+class unique_ptr<T[]>{
+	T*ptr_{};
+public:
+	inline unique_ptr()=default;
+	inline explicit unique_ptr(T*p):ptr_{p}{}
+	inline ~unique_ptr(){delete[]ptr_;}
+	inline unique_ptr(const unique_ptr&)=delete;
+	inline unique_ptr&operator=(const unique_ptr&)=delete;
+	inline unique_ptr(unique_ptr&&other):ptr_{other.ptr_}{other.ptr_=nullptr;}
+	inline auto operator=(unique_ptr&&other)->unique_ptr&{
+		if(this!=&other){
+			delete[]ptr_;
+			ptr_=other.ptr_;
+			other.ptr_=nullptr;
+		}
+		return*this;
+	}
+	inline auto operator->()const->T*{return ptr_;}
+	inline auto operator*()const->T&{return*ptr_;}
+	inline auto operator[](int32 index)const->T&{return ptr_[index];}
+	inline explicit operator bool()const{return ptr_!=nullptr;}
+	inline operator T*()const{return ptr_;}
+};
+
 inline auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
 	// note: volatile so g++ does not optimizes it away
 	asm volatile(

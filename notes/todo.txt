@@ -126,3 +126,4 @@
     => osca_crash(ZString msg)
 [x] implement a unique_ptr<T>
     => what about 'delete[]' vs 'delete'
+    => fixed with 2 definitions, one for the base case T* and one for T[]

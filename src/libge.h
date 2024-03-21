@@ -25,9 +25,8 @@ public:
 	// void operator delete(void*)=delete;
 
 	// calculates the normals using the points and indexes
+	// called once at program init
 	constexpr auto init_normals()->void{
-		delete[]normals; // in case definition has changed
-		normals=nullptr;
 		if(indexes_size<3){ // not enough points for a shape
 			// don't define normals
 			return;
@@ -160,9 +159,9 @@ class Object{
 	// contains the drawable and bounding shape definition
 	const ObjectDef&def_;
 	// transformed model to world points cache
-	unique_ptr<Point>points_world_{};
+	unique_ptr<Point[]>points_world_{};
 	// normals of bounding shape rotated to the world coordinates (not normalized if scale!=1)
-	unique_ptr<Vector>normals_world_{};
+	unique_ptr<Vector[]>normals_world_{};
 	// model to world transform
 	Matrix Mmw_{};
 	// position used in 'Mmw_'
