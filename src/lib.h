@@ -744,6 +744,8 @@ public:
 	inline unique_ptr()=default;
 	inline explicit unique_ptr(T*p):ptr{p}{}
 	inline ~unique_ptr(){delete ptr;}
+	inline unique_ptr(const unique_ptr&)=delete;
+	inline unique_ptr& operator=(const unique_ptr&)=delete;
 	inline unique_ptr(unique_ptr&&other):ptr{other.ptr}{other.ptr=nullptr;}
 	inline auto operator=(unique_ptr&&other)->unique_ptr&{
 		if(this!=&other){
