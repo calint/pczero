@@ -786,7 +786,7 @@ public:
 	}
 	inline constexpr auto release()->T*{T*p=ptr_;ptr_=nullptr;return p;}
 	inline constexpr auto get()const->T*{return ptr_;}
-	inline constexpr auto operator[](int32 index)const->T&{return ptr_[index];}
+	inline constexpr auto operator[](const int32 index)const->T&{return ptr_[index];}
 	inline constexpr explicit operator bool()const{return ptr_!=nullptr;}
 };
 
