@@ -628,7 +628,7 @@ auto Game::create_boss()->void{
 	bool keyb[6]{}; // 'wasd space j' pressed status
 	uint8 last_received_key=0;
 
-	// crate scene
+	// create scene
 	create_player();
 	create_scene();
 	create_boss();
