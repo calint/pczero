@@ -120,13 +120,16 @@ struct VectorT{
 	inline constexpr auto magnitude2()const->T{return x*x+y*y;}
 	// inline constexpr auto operator<=>(const VectorT&)const=default; // ? does not compile in clang++ without includes from std
 };
-template<typename T>inline constexpr auto operator==(const VectorT<T>&lhs,const VectorT<T>&rhs)->bool{
+template<typename T>
+inline constexpr auto operator==(const VectorT<T>&lhs,const VectorT<T>&rhs)->bool{
     return lhs.x==rhs.x && lhs.y==rhs.y;
 }
-template<typename T>inline constexpr auto operator+(const VectorT<T>&lhs,const VectorT<T>&rhs)->VectorT<T>{
+template<typename T>
+inline constexpr auto operator+(const VectorT<T>&lhs,const VectorT<T>&rhs)->VectorT<T>{
 	return{lhs.x+rhs.x,lhs.y+rhs.y};
 }
-template<typename T>inline constexpr auto operator-(const VectorT<T>&lhs,const VectorT<T>&rhs)->VectorT<T>{
+template<typename T>
+inline constexpr auto operator-(const VectorT<T>&lhs,const VectorT<T>&rhs)->VectorT<T>{
 	return{lhs.x-rhs.x,lhs.y-rhs.y};
 }
 
@@ -741,13 +744,13 @@ template<typename T>
 class unique_ptr{
 	T*ptr_{};
 public:
-	inline unique_ptr()=default;
-	inline explicit unique_ptr(T*p):ptr_{p}{}
-	inline ~unique_ptr(){delete ptr_;}
-	inline unique_ptr(const unique_ptr&)=delete;
-	inline unique_ptr&operator=(const unique_ptr&)=delete;
-	inline unique_ptr(unique_ptr&&other):ptr_{other.ptr_}{other.ptr_=nullptr;}
-	inline auto operator=(unique_ptr&&other)->unique_ptr&{
+	inline constexpr unique_ptr()=default;
+	inline constexpr explicit unique_ptr(T*p):ptr_{p}{}
+	inline constexpr ~unique_ptr(){delete ptr_;}
+	inline constexpr unique_ptr(const unique_ptr&)=delete;
+	inline constexpr unique_ptr&operator=(const unique_ptr&)=delete;
+	inline constexpr unique_ptr(unique_ptr&&other):ptr_{other.ptr_}{other.ptr_=nullptr;}
+	inline constexpr auto operator=(unique_ptr&&other)->unique_ptr&{
 		if(this!=&other){
 			delete ptr_;
 			ptr_=other.ptr_;
@@ -755,11 +758,11 @@ public:
 		}
 		return*this;
 	}
-	inline auto release()->T*{T*p=ptr_;ptr_=nullptr;return p;}
-	inline auto get()const->T*{return ptr_;}
-	inline auto operator*()const->T&{return*ptr_;}
-	inline auto operator->()const->T*{return ptr_;}
-	inline explicit operator bool()const{return ptr_!=nullptr;}
+	inline constexpr auto release()->T*{T*p=ptr_;ptr_=nullptr;return p;}
+	inline constexpr auto get()const->T*{return ptr_;}
+	inline constexpr auto operator*()const->T&{return*ptr_;}
+	inline constexpr auto operator->()const->T*{return ptr_;}
+	inline constexpr explicit operator bool()const{return ptr_!=nullptr;}
 };
 
 // implementation of an owning pointer to an array
@@ -767,13 +770,13 @@ template<typename T>
 class unique_ptr<T[]>{
 	T*ptr_{};
 public:
-	inline unique_ptr()=default;
-	inline explicit unique_ptr(T*p):ptr_{p}{}
-	inline ~unique_ptr(){delete[]ptr_;}
-	inline unique_ptr(const unique_ptr&)=delete;
-	inline unique_ptr&operator=(const unique_ptr&)=delete;
-	inline unique_ptr(unique_ptr&&other):ptr_{other.ptr_}{other.ptr_=nullptr;}
-	inline auto operator=(unique_ptr&&other)->unique_ptr&{
+	inline constexpr unique_ptr()=default;
+	inline constexpr explicit unique_ptr(T*p):ptr_{p}{}
+	inline constexpr ~unique_ptr(){delete[]ptr_;}
+	inline constexpr unique_ptr(const unique_ptr&)=delete;
+	inline constexpr unique_ptr&operator=(const unique_ptr&)=delete;
+	inline constexpr unique_ptr(unique_ptr&&other):ptr_{other.ptr_}{other.ptr_=nullptr;}
+	inline constexpr auto operator=(unique_ptr&&other)->unique_ptr&{
 		if(this!=&other){
 			delete[]ptr_;
 			ptr_=other.ptr_;
@@ -781,14 +784,27 @@ public:
 		}
 		return*this;
 	}
-	inline auto release()->T*{T*p=ptr_;ptr_=nullptr;return p;}
-	inline auto get()const->T*{return ptr_;}
-	inline auto operator[](int32 index)const->T&{return ptr_[index];}
-	inline explicit operator bool()const{return ptr_!=nullptr;}
+	inline constexpr auto release()->T*{T*p=ptr_;ptr_=nullptr;return p;}
+	inline constexpr auto get()const->T*{return ptr_;}
+	inline constexpr auto operator[](int32 index)const->T&{return ptr_[index];}
+	inline constexpr explicit operator bool()const{return ptr_!=nullptr;}
 };
 
 template<typename T>
-inline auto move(T&arg)->T&&{return static_cast<T&&>(arg);}
+inline constexpr auto move(T&arg)->T&&{return static_cast<T&&>(arg);}
+
+template<typename T>
+inline constexpr auto forward(T&&t)->T&&{return static_cast<T&&>(t);}
+
+template<typename T,typename...Args>
+inline constexpr auto make_unique(Args&&...args)->unique_ptr<T>{
+	return unique_ptr<T>(new T(forward<Args>(args)...));
+}
+
+template<typename T>
+inline constexpr auto make_unique_array(uint32 size)->unique_ptr<T[]>{
+	return unique_ptr<T[]>(new T[size]{});
+}
 
 inline auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
 	// note: volatile so g++ does not optimizes it away
