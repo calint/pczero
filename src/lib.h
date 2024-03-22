@@ -802,7 +802,7 @@ inline constexpr auto make_unique(Args&&...args)->unique_ptr<T>{
 }
 
 template<typename T>
-inline constexpr auto make_unique_array(uint32 size)->unique_ptr<T[]>{
+inline constexpr auto make_unique_array(const uint32 size)->unique_ptr<T[]>{
 	return unique_ptr<T[]>(new T[size]{});
 }
 
