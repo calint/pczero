@@ -791,7 +791,7 @@ public:
 };
 
 template<typename T>
-inline constexpr auto move(T&arg)->T&&{return static_cast<T&&>(arg);}
+inline constexpr auto move(T&t)->T&&{return static_cast<T&&>(t);}
 
 template<typename T>
 inline constexpr auto forward(T&&t)->T&&{return static_cast<T&&>(t);}
