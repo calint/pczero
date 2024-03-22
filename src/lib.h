@@ -788,7 +788,7 @@ public:
 };
 
 template<typename T>
-auto move(T&arg)->T&&{return static_cast<T&&>(arg);}
+inline auto move(T&arg)->T&&{return static_cast<T&&>(arg);}
 
 inline auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
 	// note: volatile so g++ does not optimizes it away
