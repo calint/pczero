@@ -22,7 +22,6 @@
 * declares callback functions to be implemented in c++ by kernel.h
   * osca_init
   * osca_on_key
-  * osca_on_exception
 
 ## lib.h
 * library of classes and functions used by kernel.h and applications
