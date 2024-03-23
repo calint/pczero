@@ -43,6 +43,7 @@ struct alignas(16) Task{
 // tasks list implemented in kernel.h
 // used from osca.S in '_main', 'osca_yield', 'isr_tmr' and 'isr_fpu'
 extern "C" Task osca_tasks[];
+
 // pointer to end of tasks (1 past last entry)
 extern "C" const Task* const osca_tasks_end;
 
