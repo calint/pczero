@@ -13,12 +13,18 @@
 
 ## osca.h
 * makes variables declared in osca.S available in c++
+  * osca_tick
+  * osca_tick_lo
+  * osca_tick_hi
+  * osca_task_active
 * declares necessary variables to be provided by c++
-  * task list
+  * osca_tasks
+  * osca_tasks_end
 * implements low level functions to interact with osca.S
   * osca_interrupts_disable
   * osca_interrupts_enable
   * osca_yield
+  * osca_hang
 * declares callback functions to be implemented in c++ by kernel.h
   * osca_init
   * osca_on_key
