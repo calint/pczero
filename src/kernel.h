@@ -75,21 +75,19 @@ class Heap final{
 		uint32 size_bytes{};
 	};
 
-	inline static Data data_{}; // location and size of heap
-	inline static char*mem_pos_{}; // position in heap to contiguous memory
-	inline static const char*mem_end_{}; // end of heap memory (1 past last)
-	inline static Entry*ls_used_{}; // list of used memory entries
-	inline static Entry*ls_used_pos_{}; // next available slot
-	inline static const Entry*ls_used_end_{}; // end (1 past last) of used entries list
-	inline static Entry*ls_free_{}; // list of freed memory entries
-	inline static Entry*ls_free_pos_{}; // next available slot
-	inline static const Entry*ls_free_end_{}; // end (1 past last) of free entries list
-	inline static Size entries_size_{}; // maximum slots
+	Data data_{}; // location and size of heap
+	char*mem_pos_{}; // position in heap to contiguous memory
+	const char*mem_end_{}; // end of heap memory (1 past last)
+	Entry*ls_used_{}; // list of used memory entries
+	Entry*ls_used_pos_{}; // next available slot
+	const Entry*ls_used_end_{}; // end (1 past last) of used entries list
+	Entry*ls_free_{}; // list of freed memory entries
+	Entry*ls_free_pos_{}; // next available slot
+	const Entry*ls_free_end_{}; // end (1 past last) of free entries list
+	Size entries_size_{}; // maximum slots
 public:
-	static auto init_statics(const Data&data,const Size entries_size)->void{
-		data_=data;
-		entries_size_=entries_size;
-
+	Heap()=default;
+	Heap(const Data&data,const Size entries_size):data_{data},entries_size_{entries_size}{
 		// place start of free memory
 		mem_pos_=reinterpret_cast<char*>(data.address());
 
@@ -112,9 +110,9 @@ public:
 		// place end of free heap memory to start of free entries area
 		mem_end_=reinterpret_cast<char*>(ls_free_);
 	}
-	static inline auto data()->const Data&{return data_;}
+	inline auto data()->const Data&{return data_;}
 	// called by operator 'new'
-	static auto alloc(const uint32 size_bytes)->void*{
+	auto alloc(const uint32 size_bytes)->void*{
 		// try to find a free slot of that size
 		for(Entry*ent=ls_free_;ent<ls_free_pos_;ent++){
 			if(ent->size_bytes!=size_bytes){
@@ -149,7 +147,7 @@ public:
 		return ptr;
 	}
 	// called by operator 'delete'
-	static auto free(void*ptr)->void{
+	auto free(void*ptr)->void{
 		// find the allocated memory in the used list
 		for(Entry*ent=ls_used_;ent<ls_used_pos_;ent++){
 			if(ent->ptr!=ptr){
@@ -177,15 +175,19 @@ public:
 		// did not find the allocated memory. probably a double delete
 		osca_crash("Heap:7");
 	}
-	static auto clear(const uint8 b=0)->void{data_.clear(b);}
-	static auto clear_heap_entries(const uint8 free_area=0,const uint8 used_area=0)->void{
+	auto clear(const uint8 b=0)->void{data_.clear(b);}
+	auto clear_heap_entries(const uint8 free_area=0,const uint8 used_area=0)->void{
 		const SizeBytes es=SizeBytes(sizeof(Entry));
 		pz_memset(ls_free_,free_area,entries_size_*es);
 		pz_memset(ls_used_,used_area,entries_size_*es);
 	}
 };
 
-class Keyboard{
+// initiated at 'osca_init'
+extern Heap heap;
+Heap heap;
+
+class Keyboard final{
 	uint8 buf_[2<<3]{}; // ring buffer, minimum size 2, size power of 2, max 256
 	uint8 out_{}; // next event index
 	uint8 in_{}; // last event index +1 & roll
@@ -211,8 +213,9 @@ public:
 	}
 };
 
+// initiated at 'osca_init'
 extern Keyboard keyboard;
-Keyboard keyboard; // global initialized by 'osca_init'
+Keyboard keyboard;
 
 // focused task that should read keyboard
 inline Task*osca_task_focused{};
@@ -267,10 +270,10 @@ extern "C" auto osca_init()->void{
 	pz_memset(free_mem_start,0,free_mem_size);
 
 	// initiate heap with a size of 320*100 B
-	Heap::init_statics({free_mem_start,320*100},heap_entries_size);
+	heap=Heap{{free_mem_start,320*100},heap_entries_size};
 	// fill buffers with colors for debugging output
-	Heap::clear(0x2c);
-	Heap::clear_heap_entries(0x2e,0x2f);
+	heap.clear(0x2c);
+	heap.clear_heap_entries(0x2e,0x2f);
 }
 
 // called by osca from the keyboard interrupt
@@ -321,11 +324,11 @@ extern "C" auto osca_on_key(const uint8 scan_code)->void{
 } // end namespace osca
 
 // called by C++ to allocate and free memory
-void*operator new[](unsigned size){return osca::Heap::alloc(size);}
-void*operator new(unsigned size){return osca::Heap::alloc(size);}
-void operator delete(void*ptr)noexcept{osca::Heap::free(ptr);}
+void*operator new[](unsigned size){return osca::heap.alloc(size);}
+void*operator new(unsigned size){return osca::heap.alloc(size);}
+void operator delete(void*ptr)noexcept{osca::heap.free(ptr);}
 void operator delete(void*ptr,unsigned size)noexcept;
-void operator delete(void*ptr,unsigned size)noexcept{osca::Heap::free(ptr);}
-void operator delete[](void*ptr)noexcept{osca::Heap::free(ptr);}
+void operator delete(void*ptr,unsigned size)noexcept{osca::heap.free(ptr);}
+void operator delete[](void*ptr)noexcept{osca::heap.free(ptr);}
 void operator delete[](void*ptr,unsigned size)noexcept;
-void operator delete[](void*ptr,unsigned size)noexcept{osca::Heap::free(ptr);}
+void operator delete[](void*ptr,unsigned size)noexcept{osca::heap.free(ptr);}

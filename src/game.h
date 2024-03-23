@@ -612,7 +612,7 @@ auto Game::create_boss()->void{
 
 	// constants used to clear screen by copying ram to vga
 	const Address clear_start_at_address=vga13h.bmp().address_offset({0,50});
-	const Address clear_copy_from_address=Heap::data().address();
+	const Address clear_copy_from_address=heap.data().address();
 	const SizeBytes clear_copy_num_bytes=vga13h.bmp().dim().width()*100;
 
 	// print keys
