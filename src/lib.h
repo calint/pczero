@@ -10,12 +10,12 @@ namespace osca{
 
 using ZString=const char*;
 using Address=void*;
-using Size=int32;
+using Size=i32;
 using SizeBytes=Size;
 
 // forward declaration of memory copy and set functions
 auto pz_memcpy(Address dst,Address src,SizeBytes n)->void;
-auto pz_memset(Address dst,uint8 byte,SizeBytes n)->void;
+auto pz_memset(Address dst,u8 byte,SizeBytes n)->void;
 
 using OffsetBytes=Size;
 
@@ -31,11 +31,11 @@ public:
 	inline constexpr auto address_offset(const OffsetBytes n)const->Address{return static_cast<char*>(address_)+n;}
 	inline auto to(const Data&d)const->void{pz_memcpy(d.address(),address_,size_);}
 	inline auto to(const Data&d,const SizeBytes n)const->void{pz_memcpy(d.address(),address_,n);}
-	inline auto clear(uint8 byte=0)const->void{pz_memset(address_,byte,size_);}
+	inline auto clear(u8 byte=0)const->void{pz_memset(address_,byte,size_);}
 	inline constexpr auto end()const->Address{return static_cast<char*>(address_)+size_;}
 };
 
-using Real=flt32;
+using Real=f32;
 using Angle=Real;
 using AngleRad=Angle;
 
@@ -136,8 +136,8 @@ inline constexpr auto operator-(const VectorT<T>&lhs,const VectorT<T>&rhs)->Vect
 using Coord=Real; // coordinate in real space
 using Vector=VectorT<Coord>; // vector in 2d real space coordinates
 using Point=Vector; // point in 2d
-using PointIx=uint16; // index into a list of points
-using CoordPx=int16; // coordinate in pixel space
+using PointIx=u16; // index into a list of points
+using CoordPx=i16; // coordinate in pixel space
 using PointPx=VectorT<CoordPx>; // point in pixel space
 using Count=Size; // used in loops
 
@@ -153,9 +153,9 @@ public:
 	inline constexpr auto height()const->const T{return height_;}
 };
 
-using SizePx=int16; // size in pixel space
+using SizePx=i16; // size in pixel space
 using DimensionPx=DimensionT<SizePx>; // dimension in pixel space
-using Color8b=uint8; // 8 bit index in color palette
+using Color8b=u8; // 8 bit index in color palette
 
 // configuration of polygon rendering
 namespace enable{
@@ -356,7 +356,7 @@ public:
 
 using Bitmap8b=Bitmap<Color8b>;
 
-static constexpr uint32 table_hex_to_font[]{
+static constexpr u32 table_hex_to_font[]{
 		0b01100'10010'10010'10010'01100'00000'00, // 0
 		0b00100'01100'00100'00100'01110'00000'00, // 1
 		0b01100'10010'00100'01000'11110'00000'00, // 2
@@ -412,7 +412,7 @@ static constexpr char table_scancode_to_ascii[256]{
 // 0e - backspace
 // 1c - return
 
-static constexpr uint32 table_ascii_to_font[]{
+static constexpr u32 table_ascii_to_font[]{
 		0,0,0,0,0,0,0,0,0,0,
 		0,0,0,0,0,0,0,0,0,0,
 		0,0,0,0,0,0,0,0,0,0,
@@ -528,7 +528,7 @@ static constexpr uint32 table_ascii_to_font[]{
 		0,0,0,0,0,
 };
 
-using CoordsChar=VectorT<int16>;
+using CoordsChar=VectorT<i16>;
 
 // prints to a bitmap
 class PrinterToBitmap{
@@ -540,7 +540,7 @@ class PrinterToBitmap{
 	Color8b fg_{2}; // foreground
 	Color8b bg_{}; // background
 	bool transparent_{}; // true if transparent
-	uint8 padding[1]{}; // unused
+	u8 padding[1]{}; // unused
 	static constexpr SizePx font_wi_{5};
 	static constexpr SizePx font_hi_{6};
 	static constexpr SizePx line_padding_{2}; // ? attribute
@@ -563,7 +563,7 @@ public:
 	inline constexpr auto fg(const Color8b c)->PrinterToBitmap&{fg_=c;return*this;}
 	inline constexpr auto bg(const Color8b c)->PrinterToBitmap&{bg_=c;return*this;}
 	inline constexpr auto transparent(const bool b)->PrinterToBitmap&{transparent_=b;return*this;}
-	constexpr auto draw(uint32 bmp_5x6)->PrinterToBitmap&{
+	constexpr auto draw(u32 bmp_5x6)->PrinterToBitmap&{
 		if(transparent_){
 			draw_transparent(bmp_5x6);
 		}else{
@@ -571,39 +571,39 @@ public:
 		}
 		return*this;
 	}
-	constexpr auto p_hex(const uint32 hex_number_4b)->PrinterToBitmap&{
+	constexpr auto p_hex(const u32 hex_number_4b)->PrinterToBitmap&{
 		draw(table_hex_to_font[hex_number_4b&0xf]);
 		return*this;
 	}
-	constexpr auto p_hex_8b(const uint8 v)->PrinterToBitmap&{
-		const uint32 ch1= v    &0xf;
-		const uint32 ch2=(v>>4)&0xf;
+	constexpr auto p_hex_8b(const u8 v)->PrinterToBitmap&{
+		const u32 ch1= v    &0xf;
+		const u32 ch2=(v>>4)&0xf;
 		p_hex(ch2);
 		p_hex(ch1);
 		return*this;
 	}
-	constexpr auto p_hex_16b(const uint16 v)->PrinterToBitmap&{
+	constexpr auto p_hex_16b(const u16 v)->PrinterToBitmap&{
 		// ? ugly code. remake
-		const uint32 ch1= v     &0xf;
-		const uint32 ch2=(v>> 4)&0xf;
-		const uint32 ch3=(v>> 8)&0xf;
-		const uint32 ch4=(v>>12)&0xf;
+		const u32 ch1= v     &0xf;
+		const u32 ch2=(v>> 4)&0xf;
+		const u32 ch3=(v>> 8)&0xf;
+		const u32 ch4=(v>>12)&0xf;
 		p_hex(ch4);
 		p_hex(ch3);
 		p_hex(ch2);
 		p_hex(ch1);
 		return*this;
 	}
-	constexpr auto p_hex_32b(const uint32 v)->PrinterToBitmap&{
+	constexpr auto p_hex_32b(const u32 v)->PrinterToBitmap&{
 		// ? ugly code. remake
-		const uint32 ch1= v     &0xf;
-		const uint32 ch2=(v>> 4)&0xf;
-		const uint32 ch3=(v>> 8)&0xf;
-		const uint32 ch4=(v>>12)&0xf;
-		const uint32 ch5=(v>>16)&0xf;
-		const uint32 ch6=(v>>20)&0xf;
-		const uint32 ch7=(v>>24)&0xf;
-		const uint32 ch8=(v>>28)&0xf;
+		const u32 ch1= v     &0xf;
+		const u32 ch2=(v>> 4)&0xf;
+		const u32 ch3=(v>> 8)&0xf;
+		const u32 ch4=(v>>12)&0xf;
+		const u32 ch5=(v>>16)&0xf;
+		const u32 ch6=(v>>20)&0xf;
+		const u32 ch7=(v>>24)&0xf;
+		const u32 ch8=(v>>28)&0xf;
 		p_hex(ch8);
 		p_hex(ch7);
 		p_hex(ch6);
@@ -616,7 +616,7 @@ public:
 		return*this;
 	}
 	constexpr auto p(const char ch)->PrinterToBitmap&{
-		draw(table_ascii_to_font[uint32(ch)]);
+		draw(table_ascii_to_font[u32(ch)]);
 		return*this;
 	}
 	constexpr auto p(ZString str)->PrinterToBitmap&{
@@ -634,8 +634,8 @@ public:
 	}
 	constexpr auto spc()->PrinterToBitmap&{p(' ');return*this;}
 private:
-	constexpr auto draw_with_bg(uint32 bmp_5x6)->PrinterToBitmap&{
-		constexpr uint32 mask=1u<<31;
+	constexpr auto draw_with_bg(u32 bmp_5x6)->PrinterToBitmap&{
+		constexpr u32 mask=1u<<31;
 		for(SizePx y=0;y<font_hi_;y++){
 			for(SizePx x=0;x<font_wi_;x++){
 				const bool px=bmp_5x6&mask;
@@ -648,8 +648,8 @@ private:
 		di_=di_-bmp_wi_*font_hi_+font_wi_;
 		return*this;
 	}
-	constexpr auto draw_transparent(uint32 bmp_5x6)->PrinterToBitmap&{
-		constexpr uint32 mask=1u<<31;
+	constexpr auto draw_transparent(u32 bmp_5x6)->PrinterToBitmap&{
+		constexpr u32 mask=1u<<31;
 		for(SizePx y=0;y<font_hi_;y++){
 			for(SizePx x=0;x<font_wi_;x++){
 				const bool px=bmp_5x6&mask;
@@ -786,7 +786,7 @@ public:
 	}
 	inline constexpr auto release()->T*{T*p=ptr_;ptr_=nullptr;return p;}
 	inline constexpr auto get()const->T*{return ptr_;}
-	inline constexpr auto operator[](const int32 index)const->T&{return ptr_[index];}
+	inline constexpr auto operator[](const i32 index)const->T&{return ptr_[index];}
 	inline constexpr explicit operator bool()const{return ptr_!=nullptr;}
 };
 
@@ -802,7 +802,7 @@ inline constexpr auto make_unique(Args&&...args)->UniquePtr<T>{
 }
 
 template<typename T>
-inline constexpr auto make_unique_array(const uint32 size)->UniquePtr<T[]>{
+inline constexpr auto make_unique_array(const u32 size)->UniquePtr<T[]>{
 	return UniquePtr<T[]>(new T[size]{});
 }
 
@@ -817,7 +817,7 @@ inline auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{
 	);
 }
 
-inline auto pz_memset(Address dst,uint8 value,SizeBytes n)->void{
+inline auto pz_memset(Address dst,u8 value,SizeBytes n)->void{
 	// note: volatile so g++ does not optimizes it away
 	asm volatile(
 		"cld;"
@@ -829,14 +829,14 @@ inline auto pz_memset(Address dst,uint8 value,SizeBytes n)->void{
 }
 
 // built-in functions replacements (used by clang++ -O0 and -Os)
-extern "C" void*memcpy(void*dst,const void*src,uint32 n);
-extern "C" void*memset(void*dst,int value,uint32 n);
-void*memcpy(void*dst,const void*src,uint32 n){
+extern "C" void*memcpy(void*dst,const void*src,int n);
+extern "C" void*memset(void*dst,int value,int n);
+void*memcpy(void*dst,const void*src,int n){
 	pz_memcpy(Address(dst),Address(src),SizeBytes(n));
 	return dst;
 }
-void*memset(void*dst,int value,uint32 n){
-	pz_memset(Address(dst),uint8(value),SizeBytes(n));
+void*memset(void*dst,int value,int n){
+	pz_memset(Address(dst),u8(value),SizeBytes(n));
 	return dst;
 }
 

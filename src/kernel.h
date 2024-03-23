@@ -20,14 +20,14 @@ namespace osca{
 
 // called by the interrupt handler for events other than keyboard or timer
 extern "C" auto osca_on_exception()->void{
-	static uint32 stack_0;
-	static uint32 stack_1;
-	static uint32 stack_2;
-	static uint32 stack_3;
-	static uint32 stack_4;
-	static uint32 stack_5;
-	static uint32 stack_6;
-	static uint32 stack_7;
+	static u32 stack_0;
+	static u32 stack_1;
+	static u32 stack_2;
+	static u32 stack_3;
+	static u32 stack_4;
+	static u32 stack_5;
+	static u32 stack_6;
+	static u32 stack_7;
 
 	osca_interrupts_disable();
 
@@ -57,22 +57,22 @@ extern "C" auto osca_on_exception()->void{
 alignas(16) struct Task osca_tasks[]{
 	//                                     :-> 0b01 grabs keyboard focus, 0b10 running
 	//    eip     esp              eflags bits   id   edi  esi  ebp  esp0 ebx  edx  ecx  eax
-	{uint32(tsk4),0xa'0000+320*176,0     ,0b11  ,1   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
-	{uint32(tsk1),0xa'0000+320*180,0     ,0b10  ,2   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
-	{uint32(tsk0),0xa'0000+320*184,0     ,0b11  ,3   ,0xde,0xec,0xeb,0xe5,0xb ,0xd ,0xc ,int32("kernel osca")},
-	{uint32(tsk2),0xa'0000+320*188,0     ,0b10  ,4   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
-	{uint32(tsk3),0xa'0000+320*192,0     ,0b10  ,5   ,0   ,0   ,0   ,0   ,0   ,0   ,1   ,140 },
-	{uint32(tsk3),0xa'0000+320*196,0     ,0b10  ,6   ,0   ,0   ,0   ,0   ,0   ,0   ,2   ,160 },
-	{uint32(tsk3),0xa'0000+320*200,0     ,0b10  ,7   ,0   ,0   ,0   ,0   ,0   ,0   ,4   ,180 },
+	{u32(tsk4),0xa'0000+320*176,0     ,0b11  ,1   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
+	{u32(tsk1),0xa'0000+320*180,0     ,0b10  ,2   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
+	{u32(tsk0),0xa'0000+320*184,0     ,0b11  ,3   ,0xde,0xec,0xeb,0xe5,0xb ,0xd ,0xc ,i32("kernel osca")},
+	{u32(tsk2),0xa'0000+320*188,0     ,0b10  ,4   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   },
+	{u32(tsk3),0xa'0000+320*192,0     ,0b10  ,5   ,0   ,0   ,0   ,0   ,0   ,0   ,1   ,140 },
+	{u32(tsk3),0xa'0000+320*196,0     ,0b10  ,6   ,0   ,0   ,0   ,0   ,0   ,0   ,2   ,160 },
+	{u32(tsk3),0xa'0000+320*200,0     ,0b10  ,7   ,0   ,0   ,0   ,0   ,0   ,0   ,4   ,180 },
 };
 const Task* const osca_tasks_end=osca_tasks+sizeof(osca_tasks)/sizeof(Task);
 
-constexpr uint32 heap_entries_size=256;
+constexpr u32 heap_entries_size=256;
 
 class Heap final{
 	struct Entry final{
 		void*ptr{};
-		uint32 size_bytes{};
+		u32 size_bytes{};
 	};
 
 	Data data_{}; // location and size of heap
@@ -112,7 +112,7 @@ public:
 	}
 	inline auto data()->const Data&{return data_;}
 	// called by operator 'new'
-	auto alloc(const uint32 size_bytes)->void*{
+	auto alloc(const u32 size_bytes)->void*{
 		// try to find a free slot of that size
 		for(Entry*ent=ls_free_;ent<ls_free_pos_;ent++){
 			if(ent->size_bytes!=size_bytes){
@@ -164,7 +164,7 @@ public:
 
 			// copy last entry from used list to this entry
 			ls_used_pos_--;
-			const uint32 size=ent->size_bytes;
+			const u32 size=ent->size_bytes;
 			*ent=*ls_used_pos_;
 
 			// debugging (can be removed)
@@ -175,8 +175,8 @@ public:
 		// did not find the allocated memory. probably a double delete
 		osca_crash("Heap:7");
 	}
-	auto clear(const uint8 b=0)->void{data_.clear(b);}
-	auto clear_heap_entries(const uint8 free_area=0,const uint8 used_area=0)->void{
+	auto clear(const u8 b=0)->void{data_.clear(b);}
+	auto clear_heap_entries(const u8 free_area=0,const u8 used_area=0)->void{
 		const SizeBytes es=SizeBytes(sizeof(Entry));
 		pz_memset(ls_free_,free_area,entries_size_*es);
 		pz_memset(ls_used_,used_area,entries_size_*es);
@@ -188,13 +188,13 @@ extern Heap heap;
 Heap heap;
 
 class Keyboard final{
-	uint8 buf_[2<<3]{}; // ring buffer, minimum size 2, size power of 2, max 256
-	uint8 out_{}; // next event index
-	uint8 in_{}; // last event index +1 & roll
+	u8 buf_[2<<3]{}; // ring buffer, minimum size 2, size power of 2, max 256
+	u8 out_{}; // next event index
+	u8 in_{}; // last event index +1 & roll
 public:
 	// called by 'osca_on_key'
-	constexpr auto on_key(const uint8 scan_code)->void{
-		const uint8 next_in=(in_+1)&(sizeof(buf_)-1);
+	constexpr auto on_key(const u8 scan_code)->void{
+		const u8 next_in=(in_+1)&(sizeof(buf_)-1);
 		if(next_in==out_){ // check overrun
 			return; // write would overwrite unhandled scan_code. display on status line?
 		}
@@ -202,11 +202,11 @@ public:
 		in_=next_in;
 	}
 	// returns keyboard scan code or 0 if no more events
-	constexpr auto get_next_key()->uint8{
+	constexpr auto get_next_key()->u8{
 		if(out_==in_){
 			return 0; // no more events
 		}
-		const uint8 scan_code=buf_[out_];
+		const u8 scan_code=buf_[out_];
 		out_++;
 		out_&=sizeof(buf_)-1; // roll
 		return scan_code;
@@ -278,13 +278,13 @@ extern "C" auto osca_init()->void{
 
 // called by osca from the keyboard interrupt
 // there is no task switch during this function
-extern "C" auto osca_on_key(const uint8 scan_code)->void{
+extern "C" auto osca_on_key(const u8 scan_code)->void{
 	static bool keyboard_ctrl_pressed{};
 
 	using namespace osca;
 
 	// on screen
-	*reinterpret_cast<uint32*>(0xa0000+4)=scan_code;
+	*reinterpret_cast<u32*>(0xa0000+4)=scan_code;
 
 	if(scan_code==0x1d)keyboard_ctrl_pressed=true;
 	else if(scan_code==0x9d)keyboard_ctrl_pressed=false;
@@ -310,7 +310,7 @@ extern "C" auto osca_on_key(const uint8 scan_code)->void{
 
 		// if F1 through F12 pressed then toggle running state of task
 		if(scan_code>=0x3b && scan_code<0x3b+12){
-			const uint8 tsk_ix=scan_code-0x3b;
+			const u8 tsk_ix=scan_code-0x3b;
 			if(sizeof(osca_tasks)/sizeof(Task)>tsk_ix){
 				osca_tasks[tsk_ix].set_running(!osca_tasks[tsk_ix].is_running());
 			}

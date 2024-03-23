@@ -224,7 +224,7 @@ class Ship final:public Object{
 	TimeSec last_fired_time{0};
 public:
 	bool auto_aim_at_boss{false};
-	uint8 padding[3]{};
+	u8 padding[3]{};
 
 	Ship():
 		Object{
@@ -619,14 +619,14 @@ auto Game::create_boss()->void{
 	out.pos({12,1}).fg(6).p("keys: w a s d j  f g x c [ctrl+tab] [ctrl+Fx]");
 
 	// keyboard state
-	constexpr uint8 key_w=0;
-	constexpr uint8 key_a=1;
-	constexpr uint8 key_s=2;
-	constexpr uint8 key_d=3;
-	constexpr uint8 key_spc=4;
-	constexpr uint8 key_j=5;
+	constexpr u8 key_w=0;
+	constexpr u8 key_a=1;
+	constexpr u8 key_s=2;
+	constexpr u8 key_d=3;
+	constexpr u8 key_spc=4;
+	constexpr u8 key_j=5;
 	bool keyb[6]{}; // 'wasd space j' pressed status
-	uint8 last_received_key=0;
+	u8 last_received_key=0;
 
 	// create scene
 	create_player();
@@ -647,23 +647,23 @@ auto Game::create_boss()->void{
 
 		// print stats
 		out.pos({10,2}).fg(2);
-		out.p("i=").p_hex_8b(uint8(osca_task_focused->id)).spc();
-		out.p("t=").p_hex_16b(uint16(osca_tick)).spc();
-		out.p("s=").p_hex_8b(uint8(uint32(Object::time)%0xff)).spc();
+		out.p("i=").p_hex_8b(u8(osca_task_focused->id)).spc();
+		out.p("t=").p_hex_16b(u16(osca_tick)).spc();
+		out.p("s=").p_hex_8b(u8(u32(Object::time)%0xff)).spc();
 		// note: casting a double to uint8 or uint16 results to 0 if value
 		//       larger than max value of type thus casting shenanigans
-		out.p("k=").p_hex_8b(uint8(last_received_key)).spc();
-		out.p("m=").p_hex_8b(uint8(metrics::matrix_set_transforms)).spc();
-		out.p("c=").p_hex_8b(uint8(metrics::collisions_checks_bounding_circle)).spc();
-		out.p("b=").p_hex_8b(uint8(metrics::collisions_checks_bounding_shape)).spc();
-		out.p("a=").p_hex_8b(uint8(Object::allocated_objects_count())).spc();
-		out.p("f=").p_hex_16b(uint16(Object::fps)).spc();
+		out.p("k=").p_hex_8b(u8(last_received_key)).spc();
+		out.p("m=").p_hex_8b(u8(metrics::matrix_set_transforms)).spc();
+		out.p("c=").p_hex_8b(u8(metrics::collisions_checks_bounding_circle)).spc();
+		out.p("b=").p_hex_8b(u8(metrics::collisions_checks_bounding_shape)).spc();
+		out.p("a=").p_hex_8b(u8(Object::allocated_objects_count())).spc();
+		out.p("f=").p_hex_16b(u16(Object::fps)).spc();
 
 		Ship*shp=Game::player;
 
 		if(osca_task_focused==this_task){
 			// this task has keyboard focus, handle keyboard
-			while(const uint8 key=keyboard.get_next_key()){
+			while(const u8 key=keyboard.get_next_key()){
 				last_received_key=key;
 				switch(key){
 				case 0x11: // w pressed

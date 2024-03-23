@@ -9,7 +9,7 @@ using namespace osca;
 extern "C" [[noreturn]] auto tsk0()->void{
 	osca_interrupts_disable();
 	const Task*this_task=osca_task_active;
-	const int32 eax=osca_task_active->eax;
+	const i32 eax=osca_task_active->eax;
 //	Register ebx=osca_active_task->ebx;
 //	Register ecx=osca_active_task->ecx;
 //	Register edx=osca_active_task->edx;
@@ -68,7 +68,7 @@ extern "C" [[noreturn]] auto tsk0()->void{
 			if(osca_task_focused!=this_task){
 				break;
 			}
-			const uint8 sc=keyboard.get_next_key();
+			const u8 sc=keyboard.get_next_key();
 			if(!sc){
 				break;
 			}
@@ -132,13 +132,13 @@ extern "C" [[noreturn]] auto tsk2()->void{
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] auto tsk3()->void{
 	osca_interrupts_disable();
-	const int32 eax=osca_task_active->eax;
-	const int32 ecx=osca_task_active->ecx;
+	const i32 eax=osca_task_active->eax;
+	const i32 ecx=osca_task_active->ecx;
 	osca_interrupts_enable();
 
 	while(true){
-		const flt32 f=flt32(osca_tick_lo)/flt32(ecx);
-		*static_cast<uint32*>(vga13h.bmp().address_offset({CoordPx(eax),0}))=uint32(f);
+		const f32 f=f32(osca_tick_lo)/f32(ecx);
+		*static_cast<u32*>(vga13h.bmp().address_offset({CoordPx(eax),0}))=u32(f);
 		osca_yield();
 	}
 }

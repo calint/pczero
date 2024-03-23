@@ -64,7 +64,7 @@ constexpr Size objects_size=heap_entries_size/3;
 using Velocity=Vector;
 using Acceleration=Vector;
 using AngularVelocity=AngleRad;
-using Time=flt64;
+using Time=f64;
 using TimeSec=Time;
 using TimeStepSec=Real;
 
@@ -121,7 +121,7 @@ public:
 			it->update(dt);
 		}
 	}
-	static auto clear(const uint8 b=0)->void{
+	static auto clear(const u8 b=0)->void{
 		const Address from=Address(ls_all);
 		const SizeBytes n=SizeBytes(ls_all_end)-SizeBytes(ls_all);
 		pz_memset(from,b,n);
@@ -136,8 +136,8 @@ namespace enable{
 	constexpr static bool draw_bounding_circle=true;
 }
 
-using TypeBits=uint32;
-using Flags8b=uint8;
+using TypeBits=u32;
+using Flags8b=u8;
 using Scalar=Real;
 
 constexpr Scale sqrt_of_2=Real(1.414213562);
@@ -175,7 +175,7 @@ class Object{
 	Color8b color_{}; // shape color
 	Flags8b flags_{}; // bit 1: is dead
 	                  // bit 2: 'points_world_' need update
-	uint8 padding[2]{};
+	u8 padding[2]{};
 public:
 	Object(
 		const TypeBits type_bits,
@@ -235,9 +235,9 @@ public:
 	constexpr Object&operator=(Object&&)=delete;
 
 	inline constexpr auto type_bits()const->TypeBits{return type_bits_;}
-	inline constexpr auto type_bits(const uint32 bits)->void{type_bits_=bits;}
+	inline constexpr auto type_bits(const u32 bits)->void{type_bits_=bits;}
 	inline constexpr auto type_bits_collision_mask()const->TypeBits{return type_bits_collision_mask_;}
-	inline constexpr auto type_bits_collision_mask(const uint32 bits)->void{type_bits_collision_mask_=bits;}
+	inline constexpr auto type_bits_collision_mask(const u32 bits)->void{type_bits_collision_mask_=bits;}
 	inline constexpr auto phy()->PhysicsState&{return*phy_;}
 	inline constexpr auto phy_const()const->const PhysicsState&{return*phy_;}
 	inline constexpr auto scale()const->Scale{return scale_;}
@@ -354,9 +354,9 @@ private:
 	inline static Object**ls_deleted_pos{}; // next free slot
 	inline static Object**ls_deleted_end{}; // end of list (1 past last)
 
-	inline static uint64 timer_tick{}; // current time in osca ticks
-	inline static uint64 timer_tick_prv{}; // previous frame time
-	inline static uint64 fps_timer_tick_prv{}; // previous calculation tick
+	inline static u64 timer_tick{}; // current time in osca ticks
+	inline static u64 timer_tick_prv{}; // previous frame time
+	inline static u64 fps_timer_tick_prv{}; // previous calculation tick
 	inline static Count fps_frame_counter{}; // frames rendered during this interval
 
 public:
@@ -401,8 +401,8 @@ public:
 		check_collisions();
 		commit_deleted();
 	}
-	static auto allocated_objects_count()->uint32{
-		return uint32(ls_all_pos-ls_all);
+	static auto allocated_objects_count()->u32{
+		return u32(ls_all_pos-ls_all);
 	}
 private:
 	static auto add_deleted(Object*obj)->void{
