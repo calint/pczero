@@ -159,9 +159,9 @@ class Object{
 	// contains the drawable and bounding shape definition
 	const ObjectDef&def_;
 	// transformed model to world points cache
-	unique_ptr<Point[]>points_world_{};
+	UniquePtr<Point[]>points_world_{};
 	// normals of bounding shape rotated to the world coordinates (not normalized if scale!=1)
-	unique_ptr<Vector[]>normals_world_{};
+	UniquePtr<Vector[]>normals_world_{};
 	// model to world transform
 	Matrix Mmw_{};
 	// position used in 'Mmw_'

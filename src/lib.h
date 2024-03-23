@@ -741,16 +741,16 @@ using Matrix=MatrixT<Coord>;
 
 // implementation of an owning pointer
 template<typename T>
-class unique_ptr{
+class UniquePtr{
 	T*ptr_{};
 public:
-	inline constexpr unique_ptr()=default;
-	inline constexpr explicit unique_ptr(T*p):ptr_{p}{}
-	inline constexpr ~unique_ptr(){delete ptr_;}
-	inline constexpr unique_ptr(const unique_ptr&)=delete;
-	inline constexpr unique_ptr&operator=(const unique_ptr&)=delete;
-	inline constexpr unique_ptr(unique_ptr&&other):ptr_{other.ptr_}{other.ptr_=nullptr;}
-	inline constexpr auto operator=(unique_ptr&&other)->unique_ptr&{
+	inline constexpr UniquePtr()=default;
+	inline constexpr explicit UniquePtr(T*p):ptr_{p}{}
+	inline constexpr ~UniquePtr(){delete ptr_;}
+	inline constexpr UniquePtr(const UniquePtr&)=delete;
+	inline constexpr UniquePtr&operator=(const UniquePtr&)=delete;
+	inline constexpr UniquePtr(UniquePtr&&other):ptr_{other.ptr_}{other.ptr_=nullptr;}
+	inline constexpr auto operator=(UniquePtr&&other)->UniquePtr&{
 		if(this!=&other){
 			delete ptr_;
 			ptr_=other.ptr_;
@@ -767,16 +767,16 @@ public:
 
 // implementation of an owning pointer to an array
 template<typename T>
-class unique_ptr<T[]>{
+class UniquePtr<T[]>{
 	T*ptr_{};
 public:
-	inline constexpr unique_ptr()=default;
-	inline constexpr explicit unique_ptr(T*p):ptr_{p}{}
-	inline constexpr ~unique_ptr(){delete[]ptr_;}
-	inline constexpr unique_ptr(const unique_ptr&)=delete;
-	inline constexpr unique_ptr&operator=(const unique_ptr&)=delete;
-	inline constexpr unique_ptr(unique_ptr&&other):ptr_{other.ptr_}{other.ptr_=nullptr;}
-	inline constexpr auto operator=(unique_ptr&&other)->unique_ptr&{
+	inline constexpr UniquePtr()=default;
+	inline constexpr explicit UniquePtr(T*p):ptr_{p}{}
+	inline constexpr ~UniquePtr(){delete[]ptr_;}
+	inline constexpr UniquePtr(const UniquePtr&)=delete;
+	inline constexpr UniquePtr&operator=(const UniquePtr&)=delete;
+	inline constexpr UniquePtr(UniquePtr&&other):ptr_{other.ptr_}{other.ptr_=nullptr;}
+	inline constexpr auto operator=(UniquePtr&&other)->UniquePtr&{
 		if(this!=&other){
 			delete[]ptr_;
 			ptr_=other.ptr_;
@@ -797,13 +797,13 @@ template<typename T>
 inline constexpr auto forward(T&&t)->T&&{return static_cast<T&&>(t);}
 
 template<typename T,typename...Args>
-inline constexpr auto make_unique(Args&&...args)->unique_ptr<T>{
-	return unique_ptr<T>(new T(forward<Args>(args)...));
+inline constexpr auto make_unique(Args&&...args)->UniquePtr<T>{
+	return UniquePtr<T>(new T(forward<Args>(args)...));
 }
 
 template<typename T>
-inline constexpr auto make_unique_array(const uint32 size)->unique_ptr<T[]>{
-	return unique_ptr<T[]>(new T[size]{});
+inline constexpr auto make_unique_array(const uint32 size)->UniquePtr<T[]>{
+	return UniquePtr<T[]>(new T[size]{});
 }
 
 inline auto pz_memcpy(Address dst,Address src,SizeBytes n)->void{

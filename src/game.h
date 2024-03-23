@@ -20,7 +20,7 @@ class Game{
 	static auto create_scene()->void;
 	static auto create_boss()->void;
 
-	static auto create_circle(const PointIx segments)->unique_ptr<Point[]>{
+	static auto create_circle(const PointIx segments)->UniquePtr<Point[]>{
 		Point*pts=new Point[segments];
 		AngleRad th=0;
 		const AngleRad dth=2*PI/AngleRad(segments);
@@ -31,15 +31,15 @@ class Game{
 			pts[i]={fcos,-fsin};
 			th+=dth;
 		}
-		return unique_ptr<Point[]>(pts);
+		return UniquePtr<Point[]>(pts);
 	}
 
-	static auto create_circle_ix(const PointIx segments)->unique_ptr<PointIx[]>{
+	static auto create_circle_ix(const PointIx segments)->UniquePtr<PointIx[]>{
 		PointIx*ix=new PointIx[segments];
 		for(PointIx i=0;i<segments;i++){
 			ix[i]=i;
 		}
-		return unique_ptr<PointIx[]>(ix);
+		return UniquePtr<PointIx[]>(ix);
 	}
 
 	static auto draw_axis(Bitmap8b&dsp)->void{
