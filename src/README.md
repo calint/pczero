@@ -16,6 +16,13 @@
 * declares necessary variables to be provided by c++
   * task list
 * implements low level functions to interact with osca.S
+  * osca_interrupts_disable
+  * osca_interrupts_enable
+  * osca_yield
+* declares callback functions to be implemented in c++ by kernel.h
+  * osca_init
+  * osca_on_key
+  * osca_on_exception
 
 ## lib.h
 * library of classes and functions used by kernel.h and applications
