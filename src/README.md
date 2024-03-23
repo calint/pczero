@@ -27,6 +27,9 @@
 ## lib.h
 * library of classes and functions used by kernel.h and applications
 * declares globals for printing text to display
+  * vga13h
+  * out
+  * err
 
 ## kernel.h
 * implements memory allocation
