@@ -324,6 +324,7 @@ extern "C" auto osca_on_key(const u8 scan_code)->void{
 } // end namespace osca
 
 // called by C++ to allocate and free memory
+// note: inline not allowed by the c++ standard
 void*operator new[](unsigned size){return osca::heap.alloc(size);}
 void*operator new(unsigned size){return osca::heap.alloc(size);}
 void operator delete(void*ptr)noexcept{osca::heap.free(ptr);}
