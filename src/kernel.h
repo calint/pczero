@@ -232,7 +232,7 @@ extern "C" auto osca_init()->void{
 	// green dot on screen (top left)
 	*reinterpret_cast<char*>(0xa'0000)=2;
 
-	// initiate globals
+	// initiate non heap dependent globals
 
 	vga13h=Vga13h{};
 	
@@ -247,7 +247,7 @@ extern "C" auto osca_init()->void{
 	osca_task_focused=&osca_tasks[0];
 
 	//
-	// setup heap
+	// initiate heap
 	//
 
 	// start of contiguous free memory
