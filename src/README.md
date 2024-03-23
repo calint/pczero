@@ -1,4 +1,12 @@
 # table of contents
+* osca.S
+* osca.h
+* lib.h
+* kernel.h
+* libge.h
+* game.h
+* main.cc
+
 ## osca.S
 * assembler
 * bootable binary
