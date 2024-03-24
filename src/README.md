@@ -11,8 +11,8 @@
 * assembler
 * bootable binary
 * loads 63½ KB for a total program size of 64 KB
-* sets video mode to vga 320x200x8 starting at a0000h
-* sets the cpu in 32 bit protected mode
+* sets vga to video mode 320x200x8 starting at a0000h
+* sets cpu in 32 bit protected mode
 * maps interrupts to handlers
     * timer 1024 Hz
     * keyboard
