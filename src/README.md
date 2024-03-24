@@ -14,10 +14,10 @@
 * sets vga to video mode 320x200x8 starting at a0000h
 * sets cpu in 32 bit protected mode
 * maps interrupts to handlers
-    * timer 1024 Hz
+    * 1024 Hz timer
     * keyboard
 * runs tasks
-    * preemptive task switch 128 Hz
+    * preemptive task switch at 128 Hz
 
 ## osca.h
 * makes variables declared in osca.S available in c++
