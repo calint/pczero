@@ -45,6 +45,7 @@
   * err
 
 ## kernel.h
+* defines tasks to run
 * implements memory allocation
 * keyboard handling
 * task focus switch
