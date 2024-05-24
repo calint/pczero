@@ -829,9 +829,9 @@ inline auto pz_memset(Address dst,u8 value,SizeBytes n)->void{
 }
 
 // built-in functions replacements (used by clang++ -O0 and -Os)
-extern "C" void*memcpy(void*dst,const void*src,int n);
+extern "C" void*memcpy(void*dst,void*src,int n);
 extern "C" void*memset(void*dst,int value,int n);
-void*memcpy(void*dst,const void*src,int n){
+void*memcpy(void*dst,void*src,int n){
 	pz_memcpy(Address(dst),Address(src),SizeBytes(n));
 	return dst;
 }
