@@ -1,12 +1,12 @@
 # tools used:
-#   as       GNU assembler (GNU Binutils for Ubuntu) 2.41
-#   g++      (Ubuntu 13.2.0-4ubuntu3) 13.2.0
-#   clang++  Ubuntu clang version 16.0.6
-#   ld       GNU ld (GNU Binutils for Ubuntu) 2.41
-#   strip    GNU strip (GNU Binutils for Ubuntu) 2.4
+#   as       2.43.0
+#   g++      14.2.1
+#   clang++  18.1.18
+#   ld       2.43.0
+#   strip    2.43.0
 #
 # emulated with:
-#   qemu-system-i386  QEMU emulator version 8.0.4
+#   qemu-system-i386  9.1.2
 #   VirtualBox        7.0
 #
 # tested on hardware:
@@ -26,39 +26,39 @@ SRC_FILES=src/osca.S src/osca.h src/kernel.h src/lib.h src/libge.h src/game.h sr
 AF=-march=i386+387 --32 -W -fatal-warnings
 
 # g++
-#CC=g++ -std=c++2b # c++ 23
-#CF=-g -Os -m32 -ffreestanding -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
-#CF+=-Wfatal-errors # stop at first error
-#CF+=-fanalyzer
-#CF+=-Werror # warnings are errors
-#CW=-pedantic -pedantic-errors -Wall -Wextra -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
-#CW+=-Wpadded # warn when complier pads a data structure
-#CW+=-Wno-effc++ # allow pointer data members
-#CW+=-Wno-array-bounds # allow pointer shenanigans
-#CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
-#CW+=-Wno-cast-qual # allow cast from const void* to void*
-#CW+=-Wno-unused-function # allow for debugging
-#CW+=-Wno-unused-variable # allow for debugging
-#CW+=-Wno-unused-parameter # allow for debugging
+CC=g++ -std=c++23
+CF=-g -Os -m32 -march=i386 -ffreestanding -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics -fno-stack-protector
+CF+=-Wfatal-errors # stop at first error
+CF+=-fanalyzer
+CF+=-Werror # warnings are errors
+CW=-pedantic -pedantic-errors -Wall -Wextra -Wconversion -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wswitch-default -Wundef -Weffc++ -Wfloat-equal
+CW+=-Wpadded # warn when complier pads a data structure
+CW+=-Wno-effc++ # allow pointer data members
+CW+=-Wno-array-bounds # allow pointer shenanigans
+CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
+CW+=-Wno-cast-qual # allow cast from const void* to void*
+CW+=-Wno-unused-function # allow for debugging
+CW+=-Wno-unused-variable # allow for debugging
+CW+=-Wno-unused-parameter # allow for debugging
 
 # clang++
-CC=clang++ -std=c++20
-CF=-g -Os -m32 -ffreestanding -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics
-CF+=-Wfatal-errors # stop at first error
-CF+=-Werror # warnings are errors
-CW=-Weverything # all warnings
-CW+=-Wno-c++98-compat # ignore c++98 compatability issues
-CW+=-Wno-c++98-compat-pedantic # alow 'long long'
-CW+=-Wno-c++98-c++11-compat-binary-literal # allow 0xb..... literals
-CW+=-Wno-c++11-narrowing # allow
-CW+=-Wno-global-constructors # global variables allowed (initiated at init)
-CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
-CW+=-Wno-weak-vtables # allow for source in include files
-CW+=-Wno-unsafe-buffer-usage # allow pointer shenanigans
-CW+=-Wno-unused-function # allow for debugging
-CW+=-Wno-unused-parameter # allow for debugging
-CW+=-Wno-unused-variable # allow for debugging
-CW+=-Wno-unused-private-field # allow for padding
+#CC=clang++ -std=c++23
+#CF=-g -Os -m32 -march=i386 -ffreestanding -nostdlib -fno-builtin -fno-pie -fno-rtti -fno-exceptions -fno-threadsafe-statics -fno-stack-protector
+#CF+=-Wfatal-errors # stop at first error
+#CF+=-Werror # warnings are errors
+#CW=-Weverything # all warnings
+#CW+=-Wno-c++98-compat # ignore c++98 compatability issues
+#CW+=-Wno-c++98-compat-pedantic # alow 'long long'
+#CW+=-Wno-c++98-c++11-compat-binary-literal # allow 0xb..... literals
+#CW+=-Wno-c++11-narrowing # allow
+#CW+=-Wno-global-constructors # global variables allowed (initiated at init)
+#CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
+#CW+=-Wno-weak-vtables # allow for source in include files
+#CW+=-Wno-unsafe-buffer-usage # allow pointer shenanigans
+#CW+=-Wno-unused-function # allow for debugging
+#CW+=-Wno-unused-parameter # allow for debugging
+#CW+=-Wno-unused-variable # allow for debugging
+#CW+=-Wno-unused-private-field # allow for padding
 
 # ld
 LF=-Tlink.ld -melf_i386 -nostdlib
