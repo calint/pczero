@@ -42,10 +42,11 @@ struct alignas(16) Task {
     }
     constexpr inline auto is_running() const -> bool { return bits & 2; }
     constexpr inline auto set_running(const bool b) -> void {
-        if (b)
+        if (b) {
             bits |= 2;
-        else
+        } else {
             bits &= u16(~2);
+        }
     }
 };
 
