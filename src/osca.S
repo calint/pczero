@@ -21,7 +21,7 @@
 # C0000-C7FFF |	 32 KB | Video BIOS
 # C8000-EFFFF |	160 KB | BIOS Expansions
 # F0000-FFFFF |  64 KB | Motherboard BIOS
-#        
+#
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - constants
 .set IDT,0x500          # interrupt descriptor table address
 .set IDT_ENTRY_COUNT,48 # number of interrupts registered

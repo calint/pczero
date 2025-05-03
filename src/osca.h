@@ -16,37 +16,37 @@ using f32 = float;
 using f64 = double;
 
 struct alignas(16) Task {
-  u32 eip{};
-  u32 esp{};
-  u32 eflags{};
-  u16 bits{}; // 1: accepts keyboard focus, 2: is running
-  u16 id{};
-  i32 edi{};
-  i32 esi{};
-  i32 ebp{};
-  i32 esp_unused{};
-  i32 ebx{};
-  i32 edx{};
-  i32 ecx{};
-  i32 eax{};
-  // note: The FSAVE instruction saves a 108-byte data structure to memory
-  // (fpu_state), with the
-  //       first byte of the structure needed to be aligned on a 16-byte
-  //       boundary.
-  alignas(16) u8 fpu_state[108]{};
-  u8 padding[4]{};
+    u32 eip{};
+    u32 esp{};
+    u32 eflags{};
+    u16 bits{}; // 1: accepts keyboard focus, 2: is running
+    u16 id{};
+    i32 edi{};
+    i32 esi{};
+    i32 ebp{};
+    i32 esp_unused{};
+    i32 ebx{};
+    i32 edx{};
+    i32 ecx{};
+    i32 eax{};
+    // note: The FSAVE instruction saves a 108-byte data structure to memory
+    // (fpu_state), with the
+    //       first byte of the structure needed to be aligned on a 16-byte
+    //       boundary.
+    alignas(16) u8 fpu_state[108]{};
+    u8 padding[4]{};
 
-  constexpr inline auto get_id() const -> u16 { return id; }
-  constexpr inline auto is_grab_keyboard_focus() const -> bool {
-    return bits & 1;
-  }
-  constexpr inline auto is_running() const -> bool { return bits & 2; }
-  constexpr inline auto set_running(const bool b) -> void {
-    if (b)
-      bits |= 2;
-    else
-      bits &= u16(~2);
-  }
+    constexpr inline auto get_id() const -> u16 { return id; }
+    constexpr inline auto is_grab_keyboard_focus() const -> bool {
+        return bits & 1;
+    }
+    constexpr inline auto is_running() const -> bool { return bits & 2; }
+    constexpr inline auto set_running(const bool b) -> void {
+        if (b)
+            bits |= 2;
+        else
+            bits &= u16(~2);
+    }
 };
 
 // tasks list implemented in kernel.h
