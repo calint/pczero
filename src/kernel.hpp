@@ -56,10 +56,8 @@ extern "C" auto osca_on_exception() -> void {
 // (fpu_state), with the
 //       first byte of the field needed to be aligned to a 16-byte boundary.
 alignas(16) struct Task osca_tasks[]{
-    //                                     :-> 0b01 grabs keyboard focus, 0b10
-    //                                     running
-    //    eip     esp              eflags bits   id   edi  esi  ebp  esp0 ebx
-    //    edx  ecx  eax
+    //                 :-> 0b01 grabs keyboard focus, 0b10 running
+    // eip esp eflags bits id edi esi ebp esp0 ebx edx ecx eax
     {u32(tsk4), 0xa'0000 + 320 * 176, 0, 0b11, 1, 0, 0, 0, 0, 0, 0, 0, 0},
     {u32(tsk1), 0xa'0000 + 320 * 180, 0, 0b10, 2, 0, 0, 0, 0, 0, 0, 0, 0},
     {u32(tsk0), 0xa'0000 + 320 * 184, 0, 0b11, 3, 0xde, 0xec, 0xeb, 0xe5, 0xb,
