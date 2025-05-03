@@ -21,7 +21,7 @@ class Game {
     static auto create_boss() -> void;
 
     static auto create_circle(const PointIx segments) -> UniquePtr<Point[]> {
-        Point *pts = new Point[segments];
+        Point* pts = new Point[segments];
         AngleRad th = 0;
         const AngleRad dth = 2 * PI / AngleRad(segments);
         for (Count i = 0; i < segments; i++) {
@@ -36,14 +36,14 @@ class Game {
 
     static auto create_circle_ix(const PointIx segments)
         -> UniquePtr<PointIx[]> {
-        PointIx *ix = new PointIx[segments];
+        PointIx* ix = new PointIx[segments];
         for (PointIx i = 0; i < segments; i++) {
             ix[i] = i;
         }
         return UniquePtr<PointIx[]>(ix);
     }
 
-    static auto draw_axis(Bitmap8b &dsp) -> void {
+    static auto draw_axis(Bitmap8b& dsp) -> void {
         static AngleDeg deg = 0;
         static Matrix R{};
         if (deg > 360) { // ? what if deg=730
@@ -70,22 +70,22 @@ class Game {
     inline static ObjectDef boss_def;
 
     // game state
-    inline static Ship *player{};
-    inline static Object *boss{};
+    inline static Ship* player{};
+    inline static Object* boss{};
     inline static Count enemies_alive{};
     inline static Point boss_pos{20, 60};
     inline static Vector boss_vel{10, 0};
 
-    static auto is_in_play_area(const Point &p) -> bool {
+    static auto is_in_play_area(const Point& p) -> bool {
         return !(p.x >= Coord(play_area_top_left.x + play_area_dim.width()) ||
                  p.x < Coord(play_area_top_left.x) ||
                  p.y >= Coord(play_area_top_left.y + play_area_dim.height()) ||
                  p.y < Coord(play_area_top_left.y));
     }
 
-    static auto is_in_play_area(const Object &o) -> bool {
+    static auto is_in_play_area(const Object& o) -> bool {
         const Scale bounding_radius = o.bounding_radius();
-        const PhysicsState &phy = o.phy_const();
+        const PhysicsState& phy = o.phy_const();
         const Real xmax =
             Real(Game::play_area_top_left.x + Game::play_area_dim.width());
         const Real xmin = Real(Game::play_area_top_left.x);
@@ -98,16 +98,16 @@ class Game {
                  phy.position.y < ymin + bounding_radius);
     }
 
-    static auto draw_dot(const Point &p, const Color8b c) -> void {
+    static auto draw_dot(const Point& p, const Color8b c) -> void {
         if (!is_in_play_area(p)) {
             return;
         }
         const CoordPx xi = CoordPx(p.x);
         const CoordPx yi = CoordPx(p.y);
-        *static_cast<Color8b *>(vga13h.bmp().address_offset({xi, yi})) = c;
+        *static_cast<Color8b*>(vga13h.bmp().address_offset({xi, yi})) = c;
     }
 
-    static auto draw_trajectory(const Point &pt, const Vector &vel,
+    static auto draw_trajectory(const Point& pt, const Vector& vel,
                                 const TimeStepSec t_eval_s,
                                 const TimeStepSec t_step_s, const Color8b c)
         -> void {
@@ -165,7 +165,7 @@ class Enemy final : public Object {
     }
 
     // returns false if object is dead
-    auto on_collision(Object &other) -> bool override {
+    auto on_collision(Object& other) -> bool override {
         return false; // collision with 'Bullet' or 'Missile'
     }
 };
@@ -202,7 +202,7 @@ class Bullet final : public Object {
     }
 
     // returns false if object is dead
-    auto on_collision(Object &other) -> bool override { return false; }
+    auto on_collision(Object& other) -> bool override { return false; }
 };
 
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - -
@@ -266,7 +266,7 @@ class Ship final : public Object {
     }
 
     // returns false if object is dead
-    auto on_collision(Object &other) -> bool override { return false; }
+    auto on_collision(Object& other) -> bool override { return false; }
 
     auto fire() -> void {
         const TimeSec fire_dt = time - last_fired_time;
@@ -274,17 +274,17 @@ class Ship final : public Object {
             return;
         }
         last_fired_time = time;
-        Bullet *b = new Bullet{};
+        Bullet* b = new Bullet{};
         Vector v =
             forward_vector().scale(bounding_radius() + b->bounding_radius());
-        PhysicsState &bp = b->phy();
+        PhysicsState& bp = b->phy();
         bp.position = phy_const().position + v;
         bp.velocity = v.normalize().scale(Bullet::speed);
         bp.angle = phy_const().angle;
     }
 
   private:
-    auto attack_target_current_location(const Object &target,
+    auto attack_target_current_location(const Object& target,
                                         const bool draw_trajectory = false)
         -> void {
         // aim and shoot at targets' current location
@@ -311,7 +311,7 @@ class Ship final : public Object {
     }
 
     // aim and shoot at targets' expected location
-    auto attack_target_expected_location(const Object &target,
+    auto attack_target_expected_location(const Object& target,
                                          const bool draw_trajectory = false)
         -> void {
         constexpr Real intersection_time_margin_of_error = Real(0.1);
@@ -341,7 +341,7 @@ class Ship final : public Object {
     }
 
     // ? move to TargetingSystem class
-    auto find_aim_vector_for_moving_target(const Object &target,
+    auto find_aim_vector_for_moving_target(const Object& target,
                                            const TimeStepSec eval_t,
                                            const TimeStepSec eval_dt,
                                            const Real error_margin_t,
@@ -393,7 +393,7 @@ class Ship final : public Object {
 
 class Wall final : public Object {
   public:
-    Wall(const Scale scale, const Point &position, const AngleRad angle)
+    Wall(const Scale scale, const Point& position, const AngleRad angle)
         : Object{tb_walls,          tb_none,  Game::wall_def, scale,
                  scale * sqrt_of_2, position, angle,          3} {}
 };
@@ -420,7 +420,7 @@ class Missile final : public Object {
     auto update() -> bool override { return Game::is_in_play_area(*this); }
 
     // returns false if object is dead
-    auto on_collision(Object &other) -> bool override { return false; }
+    auto on_collision(Object& other) -> bool override { return false; }
 };
 
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - -
@@ -461,7 +461,7 @@ class Boss final : public Object {
     }
 
     // returns false if object is dead
-    auto on_collision(Object &other) -> bool override {
+    auto on_collision(Object& other) -> bool override {
         health_--;
         return health_ > 0;
     }
@@ -471,7 +471,7 @@ class Boss final : public Object {
 
 auto Game::create_scene() -> void {
     for (Real i = 30; i < 300; i += 20) {
-        Enemy *o = new Enemy{};
+        Enemy* o = new Enemy{};
         o->phy().position = {i, 60};
         o->phy().angle = deg_to_rad(i);
         o->phy().angular_velocity = deg_to_rad(10);
@@ -480,13 +480,13 @@ auto Game::create_scene() -> void {
 }
 
 auto Game::create_player() -> void {
-    Ship *o = new Ship{};
+    Ship* o = new Ship{};
     o->phy().position = {160, 130};
     player = o;
 }
 
 auto Game::create_boss() -> void {
-    Object *o = new Boss{};
+    Object* o = new Boss{};
     if (boss_vel.y > 20) {
         if (boss_vel.x > 0) {
             boss_pos = {300, 60};
@@ -508,7 +508,7 @@ auto Game::create_boss() -> void {
 
 [[noreturn]] auto Game::run() -> void {
     osca_interrupts_disable();
-    const Task *this_task = osca_task_active;
+    const Task* this_task = osca_task_active;
     osca_interrupts_enable();
 
     //-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
@@ -638,7 +638,7 @@ auto Game::create_boss() -> void {
         out.p("a=").p_hex_8b(u8(Object::allocated_objects_count())).spc();
         out.p("f=").p_hex_16b(u16(Object::fps)).spc();
 
-        Ship *shp = Game::player;
+        Ship* shp = Game::player;
 
         if (osca_task_focused == this_task) {
             // this task has keyboard focus, handle keyboard

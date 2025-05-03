@@ -55,7 +55,7 @@ struct alignas(16) Task {
 extern "C" Task osca_tasks[];
 
 // pointer to end of tasks (1 past last entry)
-extern "C" const Task *const osca_tasks_end;
+extern "C" const Task* const osca_tasks_end;
 
 // hangs the system
 inline auto osca_hang() -> void { asm("cli;hlt"); }
@@ -77,7 +77,7 @@ inline auto osca_interrupts_enable() -> void { asm("sti"); }
 //
 
 // current active task
-extern "C" Task *osca_task_active;
+extern "C" Task* osca_task_active;
 
 // timer ticks - 64 bits
 extern "C" volatile const u64 osca_tick;

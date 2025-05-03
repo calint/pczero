@@ -8,7 +8,7 @@ using namespace osca;
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] auto tsk0() -> void {
     osca_interrupts_disable();
-    const Task *this_task = osca_task_active;
+    const Task* this_task = osca_task_active;
     const i32 eax = osca_task_active->eax;
     //	Register ebx=osca_active_task->ebx;
     //	Register ecx=osca_active_task->ecx;
@@ -140,7 +140,7 @@ extern "C" [[noreturn]] auto tsk3() -> void {
 
     while (true) {
         const f32 f = f32(osca_tick_lo) / f32(ecx);
-        *static_cast<u32 *>(vga13h.bmp().address_offset({CoordPx(eax), 0})) =
+        *static_cast<u32*>(vga13h.bmp().address_offset({CoordPx(eax), 0})) =
             u32(f);
         osca_yield();
     }

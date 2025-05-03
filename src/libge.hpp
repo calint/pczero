@@ -16,13 +16,13 @@ class ObjectDef final {
     // number of elements in 'indexes'
     PointIx indexes_size{};
     // list of points used for rendering and bounding shape
-    Point *points{};
+    Point* points{};
     // list of indexes in 'points' that defines the bounding shape as a convex
     // polygon CCW
-    PointIx *indexes{};
+    PointIx* indexes{};
     // list of normals to the lines defined by 'indexes'. calculated by
     // 'init_normals'
-    Vector *normals{};
+    Vector* normals{};
 
     // destructor cannot happen because object life time is program lifetime
     // void operator delete(void*)=delete;
@@ -82,7 +82,7 @@ class PhysicsState final {
     AngleRad angle{};
     AngularVelocity angular_velocity{};
     // the object that this physics state belongs to
-    Object *owner{};
+    Object* owner{};
 
     inline auto update(const TimeStepSec dt) -> void {
         velocity.inc_by(acceleration, dt);
@@ -94,36 +94,36 @@ class PhysicsState final {
     //--- statics
     //-----------------------------------------------------------
 
-    inline static PhysicsState *ls_all{};
-    inline static PhysicsState *ls_all_pos{};
-    inline static PhysicsState *ls_all_end{};
+    inline static PhysicsState* ls_all{};
+    inline static PhysicsState* ls_all_pos{};
+    inline static PhysicsState* ls_all_end{};
 
     static auto init_statics() -> void {
         ls_all = new PhysicsState[objects_size];
         ls_all_pos = ls_all;
         ls_all_end = ls_all + objects_size;
     }
-    static auto alloc() -> PhysicsState * {
+    static auto alloc() -> PhysicsState* {
         // check buffer overrun
         if (ls_all_pos == ls_all_end) {
             osca_crash("PhysicsState:1");
         }
-        PhysicsState *next_free = ls_all_pos;
+        PhysicsState* next_free = ls_all_pos;
         ls_all_pos++;
         return next_free;
     }
     // returns the object that has a new address for physics state
     // this function works with '~Object()' to relocate physics state
-    static auto free(PhysicsState *phy) -> Object * {
+    static auto free(PhysicsState* phy) -> Object* {
         ls_all_pos--;
-        Object *obj = ls_all_pos->owner;
+        Object* obj = ls_all_pos->owner;
         *phy = *ls_all_pos;
         pz_memset(ls_all_pos, 0x0f,
                   sizeof(PhysicsState)); // debugging (can be removed)
         return obj;
     }
     static auto update_all(const TimeStepSec dt) -> void {
-        for (PhysicsState *it = ls_all; it < ls_all_pos; ++it) {
+        for (PhysicsState* it = ls_all; it < ls_all_pos; ++it) {
             it->update(dt);
         }
     }
@@ -151,7 +151,7 @@ constexpr Scale sqrt_of_2 = Real(1.414213562);
 class Object {
     // pointer to element in 'all' list containing pointer to this object
     // used in ~Object()
-    Object **ls_all_pos_{};
+    Object** ls_all_pos_{};
     // object type that is usually a bit (32 object types supported)
     TypeBits type_bits_{};
     // bits used to bitwise 'and' with other object's 'type_bits_'
@@ -160,11 +160,11 @@ class Object {
     // physics state kept in own buffer of states for better cpu cache
     // utilization at update may change between frames (when objects are deleted
     // and 'phy_' relocated)
-    PhysicsState *phy_{};
+    PhysicsState* phy_{};
     // scale that is used in model to world transform
     Scale scale_{};
     // contains the drawable and bounding shape definition
-    const ObjectDef &def_;
+    const ObjectDef& def_;
     // transformed model to world points cache
     UniquePtr<Point[]> points_world_{};
     // normals of bounding shape rotated to the world coordinates (not
@@ -187,8 +187,8 @@ class Object {
 
   public:
     Object(const TypeBits type_bits, const TypeBits type_bits_collision_mask,
-           const ObjectDef &def, const Scale scale,
-           const Scalar bounding_radius, const Point &position,
+           const ObjectDef& def, const Scale scale,
+           const Scalar bounding_radius, const Point& position,
            const AngleRad angle, const Color8b color)
         : type_bits_{type_bits},
           type_bits_collision_mask_{type_bits_collision_mask},
@@ -229,10 +229,10 @@ class Object {
     }
 
     constexpr Object() = delete;
-    constexpr Object(const Object &) = delete;
-    constexpr Object &operator=(const Object &) = delete;
-    constexpr Object(Object &&) = delete;
-    constexpr Object &operator=(Object &&) = delete;
+    constexpr Object(const Object&) = delete;
+    constexpr Object& operator=(const Object&) = delete;
+    constexpr Object(Object&&) = delete;
+    constexpr Object& operator=(Object&&) = delete;
 
     inline constexpr auto type_bits() const -> TypeBits { return type_bits_; }
     inline constexpr auto type_bits(const u32 bits) -> void {
@@ -244,13 +244,13 @@ class Object {
     inline constexpr auto type_bits_collision_mask(const u32 bits) -> void {
         type_bits_collision_mask_ = bits;
     }
-    inline constexpr auto phy() -> PhysicsState & { return *phy_; }
-    inline constexpr auto phy_const() const -> const PhysicsState & {
+    inline constexpr auto phy() -> PhysicsState& { return *phy_; }
+    inline constexpr auto phy_const() const -> const PhysicsState& {
         return *phy_;
     }
     inline constexpr auto scale() const -> Scale { return scale_; }
     inline constexpr auto scale(const Scale s) -> void { scale_ = s; }
-    inline constexpr auto def() const -> const ObjectDef & { return def_; }
+    inline constexpr auto def() const -> const ObjectDef& { return def_; }
     inline constexpr auto is_alive() const -> bool { return !(flags_ & 1); }
     inline constexpr auto bounding_radius() const -> Scale {
         return bounding_radius_;
@@ -265,11 +265,11 @@ class Object {
     // returns false if object died
     virtual auto update() -> bool { return true; }
 
-    virtual auto draw(Bitmap8b &dsp) -> void {
+    virtual auto draw(Bitmap8b& dsp) -> void {
         refresh_wld_points();
 
         if (enable::draw_dots) {
-            const Point *pt = points_world_.get();
+            const Point* pt = points_world_.get();
             for (PointIx i = 0; i < def_.points_size; i++) {
                 dsp.draw_dot(*pt, 0xe); // yellow dot
                 pt++;
@@ -292,7 +292,7 @@ class Object {
 
         if (enable::draw_normals) {
             if (normals_world_) { // check if there are any normals defined
-                const Point *nml = normals_world_.get();
+                const Point* nml = normals_world_.get();
                 for (PointIx i = 0; i < def_.indexes_size; i++) {
                     Vector v = *nml;
                     v.normalize().scale(3);
@@ -306,7 +306,7 @@ class Object {
     }
 
     // returns false if object has died
-    virtual auto on_collision(Object &other) -> bool { return true; }
+    virtual auto on_collision(Object& other) -> bool { return true; }
 
   private:
     // set to false at 'add_deleted'
@@ -358,12 +358,12 @@ class Object {
     //----------------------------------------------------------------
     //-- statics
     //----------------------------------------------------------------
-    inline static Object **ls_all{}; // list of pointers to allocated objects
-    inline static Object **ls_all_pos{}; // next free slot
-    inline static Object **ls_all_end{}; // end of list (1 past last)
-    inline static Object **ls_deleted{}; // list of pointers to deleted objects
-    inline static Object **ls_deleted_pos{}; // next free slot
-    inline static Object **ls_deleted_end{}; // end of list (1 past last)
+    inline static Object** ls_all{}; // list of pointers to allocated objects
+    inline static Object** ls_all_pos{}; // next free slot
+    inline static Object** ls_all_end{}; // end of list (1 past last)
+    inline static Object** ls_deleted{}; // list of pointers to deleted objects
+    inline static Object** ls_deleted_pos{}; // next free slot
+    inline static Object** ls_deleted_end{}; // end of list (1 past last)
 
     inline static u64 timer_tick{};         // current time in osca ticks
     inline static u64 timer_tick_prv{};     // previous frame time
@@ -377,11 +377,11 @@ class Object {
     inline static Count fps{};      // this interval frames per second
 
     static auto init_statics() -> void {
-        ls_all = new Object *[objects_size];
+        ls_all = new Object*[objects_size];
         ls_all_pos = ls_all;
         ls_all_end = ls_all + objects_size;
 
-        ls_deleted = new Object *[objects_size];
+        ls_deleted = new Object*[objects_size];
         ls_deleted_pos = ls_deleted;
         ls_deleted_end = ls_deleted + objects_size;
 
@@ -419,7 +419,7 @@ class Object {
     }
 
   private:
-    static auto add_deleted(Object *obj) -> void {
+    static auto add_deleted(Object* obj) -> void {
         if (!obj->is_alive()) { // debugging (can be removed)
             osca_crash("Object:2");
         }
@@ -432,31 +432,31 @@ class Object {
         ls_deleted_pos++;
     }
     static auto commit_deleted() -> void {
-        for (Object **it = ls_deleted; it < ls_deleted_pos; ++it) {
+        for (Object** it = ls_deleted; it < ls_deleted_pos; ++it) {
             delete *it;
             *it = nullptr; // debugging (can be removed)
         }
         ls_deleted_pos = ls_deleted;
     }
     static auto update_all() -> void {
-        for (Object **it = ls_all; it < ls_all_pos; ++it) {
-            Object *o = *it;
+        for (Object** it = ls_all; it < ls_all_pos; ++it) {
+            Object* o = *it;
             if (!o->update()) {
                 add_deleted(o);
             }
         }
     }
-    static auto draw_all(Bitmap8b &dsp) -> void {
-        for (Object **it = ls_all; it < ls_all_pos; ++it) {
-            Object *o = *it;
+    static auto draw_all(Bitmap8b& dsp) -> void {
+        for (Object** it = ls_all; it < ls_all_pos; ++it) {
+            Object* o = *it;
             o->draw(dsp);
         }
     }
     static auto check_collisions() -> void {
-        for (Object **it1 = ls_all; it1 < ls_all_pos - 1; ++it1) {
-            for (Object **it2 = it1 + 1; it2 < ls_all_pos; ++it2) {
-                Object *o1 = *it1;
-                Object *o2 = *it2;
+        for (Object** it1 = ls_all; it1 < ls_all_pos - 1; ++it1) {
+            for (Object** it2 = it1 + 1; it2 < ls_all_pos; ++it2) {
+                Object* o1 = *it1;
+                Object* o2 = *it2;
 
                 // check if objects are interested in collision check
                 const bool o1_check_collision_with_o2 =
@@ -509,8 +509,8 @@ class Object {
             }
         }
     }
-    static auto are_bounding_circles_in_collision(const Object &o1,
-                                                  const Object &o2) -> bool {
+    static auto are_bounding_circles_in_collision(const Object& o1,
+                                                  const Object& o2) -> bool {
         // check if: sqrt(dx*dx+dy*dy)<=r1+r2
         //                dx*dx+dy*dy <=(r1+r2)²
         const Real dist_check = o1.bounding_radius_ + o2.bounding_radius_;
@@ -520,8 +520,8 @@ class Object {
         return dist2 <= dist2_check;
     }
     // checks if any o1 bounding points is in o2 bounding shape
-    static auto is_any_point_in_bounding_shape(const Object &o1,
-                                               const Object &o2) -> bool {
+    static auto is_any_point_in_bounding_shape(const Object& o1,
+                                               const Object& o2) -> bool {
         // for each point in 'o1' check if behind every normal of 'o2'
         // if behind every normal then point is within the convex bounding shape
 
@@ -531,10 +531,10 @@ class Object {
         }
 
         // for each point in 'o1' bounding shape
-        const PointIx *ix = o1.def_.indexes;
+        const PointIx* ix = o1.def_.indexes;
         PointIx n = o1.def_.indexes_size;
         while (n--) {
-            const Point &p1 = o1.points_world_[*ix];
+            const Point& p1 = o1.points_world_[*ix];
             if (is_point_in_bounding_shape(p1, o2)) {
                 return true;
             }
@@ -542,13 +542,13 @@ class Object {
         }
         return false;
     }
-    inline static auto is_point_in_bounding_shape(const Point &p0,
-                                                  const Object &o) -> bool {
-        const PointIx *ix = o.def_.indexes;         // bounding points indexes
-        const Vector *nml = o.normals_world_.get(); // normals
+    inline static auto is_point_in_bounding_shape(const Point& p0,
+                                                  const Object& o) -> bool {
+        const PointIx* ix = o.def_.indexes;         // bounding points indexes
+        const Vector* nml = o.normals_world_.get(); // normals
         PointIx n = o.def_.indexes_size;
         while (n--) {
-            const Vector &p = o.points_world_[*ix];
+            const Vector& p = o.points_world_[*ix];
             ix++;
 
             if (enable::draw_collision_check) {

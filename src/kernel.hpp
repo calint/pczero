@@ -69,37 +69,37 @@ alignas(16) struct Task osca_tasks[]{
     {u32(tsk3), 0xa'0000 + 320 * 196, 0, 0b10, 6, 0, 0, 0, 0, 0, 0, 2, 160},
     {u32(tsk3), 0xa'0000 + 320 * 200, 0, 0b10, 7, 0, 0, 0, 0, 0, 0, 4, 180},
 };
-const Task *const osca_tasks_end =
+const Task* const osca_tasks_end =
     osca_tasks + sizeof(osca_tasks) / sizeof(Task);
 
 constexpr u32 heap_entries_size = 256;
 
 class Heap final {
     struct Entry final {
-        void *ptr{};
+        void* ptr{};
         u32 size_bytes{};
     };
 
     Data data_{};                // location and size of heap
-    char *mem_pos_{};            // position in heap to contiguous memory
-    const char *mem_end_{};      // end of heap memory (1 past last)
-    Entry *ls_used_{};           // list of used memory entries
-    Entry *ls_used_pos_{};       // next available slot
-    const Entry *ls_used_end_{}; // end (1 past last) of used entries list
-    Entry *ls_free_{};           // list of freed memory entries
-    Entry *ls_free_pos_{};       // next available slot
-    const Entry *ls_free_end_{}; // end (1 past last) of free entries list
+    char* mem_pos_{};            // position in heap to contiguous memory
+    const char* mem_end_{};      // end of heap memory (1 past last)
+    Entry* ls_used_{};           // list of used memory entries
+    Entry* ls_used_pos_{};       // next available slot
+    const Entry* ls_used_end_{}; // end (1 past last) of used entries list
+    Entry* ls_free_{};           // list of freed memory entries
+    Entry* ls_free_pos_{};       // next available slot
+    const Entry* ls_free_end_{}; // end (1 past last) of free entries list
     Size entries_size_{};        // maximum slots
   public:
     Heap() = default;
-    Heap(const Data &data, const Size entries_size)
+    Heap(const Data& data, const Size entries_size)
         : data_{data}, entries_size_{entries_size} {
         // place start of free memory
-        mem_pos_ = reinterpret_cast<char *>(data.address());
+        mem_pos_ = reinterpret_cast<char*>(data.address());
 
         // place used entries area at top of the heap
-        ls_used_ = static_cast<Entry *>(data.end()) - entries_size;
-        if (reinterpret_cast<char *>(ls_used_) < mem_pos_) {
+        ls_used_ = static_cast<Entry*>(data.end()) - entries_size;
+        if (reinterpret_cast<char*>(ls_used_) < mem_pos_) {
             osca_crash("Heap:1");
         }
         ls_used_pos_ = ls_used_;
@@ -107,26 +107,26 @@ class Heap final {
 
         // place free entries area before used entries
         ls_free_ = ls_used_ - entries_size;
-        if (reinterpret_cast<char *>(ls_free_) < mem_pos_) {
+        if (reinterpret_cast<char*>(ls_free_) < mem_pos_) {
             osca_crash("Heap:2");
         }
         ls_free_pos_ = ls_free_;
         ls_free_end_ = ls_free_ + entries_size;
 
         // place end of free heap memory to start of free entries area
-        mem_end_ = reinterpret_cast<char *>(ls_free_);
+        mem_end_ = reinterpret_cast<char*>(ls_free_);
     }
-    inline auto data() -> const Data & { return data_; }
+    inline auto data() -> const Data& { return data_; }
     // called by operator 'new'
-    auto alloc(const u32 size_bytes) -> void * {
+    auto alloc(const u32 size_bytes) -> void* {
         // try to find a free slot of that size
-        for (Entry *ent = ls_free_; ent < ls_free_pos_; ent++) {
+        for (Entry* ent = ls_free_; ent < ls_free_pos_; ent++) {
             if (ent->size_bytes != size_bytes) {
                 continue;
             }
 
             // found a matching size entry
-            void *ptr = ent->ptr;
+            void* ptr = ent->ptr;
             // move to used entries
             if (ls_used_pos_ >= ls_used_end_) {
                 osca_crash("Heap:3");
@@ -140,7 +140,7 @@ class Heap final {
             return ptr;
         }
         // did not find in free list, create new
-        char *ptr = mem_pos_;
+        char* ptr = mem_pos_;
         mem_pos_ += size_bytes;
         if (mem_pos_ > mem_end_) {
             osca_crash("Heap:4");
@@ -154,9 +154,9 @@ class Heap final {
         return ptr;
     }
     // called by operator 'delete'
-    auto free(void *ptr) -> void {
+    auto free(void* ptr) -> void {
         // find the allocated memory in the used list
-        for (Entry *ent = ls_used_; ent < ls_used_pos_; ent++) {
+        for (Entry* ent = ls_used_; ent < ls_used_pos_; ent++) {
             if (ent->ptr != ptr) {
                 continue;
             }
@@ -227,7 +227,7 @@ extern Keyboard keyboard;
 Keyboard keyboard;
 
 // focused task that should read keyboard
-inline Task *osca_task_focused{};
+inline Task* osca_task_focused{};
 
 // declared in linker script 'link.ld' after code and data at first 64KB
 // boundary address of symbol marks start of contiguous memory
@@ -239,7 +239,7 @@ extern "C" auto osca_init() -> void {
     using namespace osca;
 
     // green dot on screen (top left)
-    *reinterpret_cast<char *>(0xa'0000) = 2;
+    *reinterpret_cast<char*>(0xa'0000) = 2;
 
     // initiate non heap dependent globals
 
@@ -294,7 +294,7 @@ extern "C" auto osca_on_key(const u8 scan_code) -> void {
     using namespace osca;
 
     // on screen
-    *reinterpret_cast<u32 *>(0xa0000 + 4) = scan_code;
+    *reinterpret_cast<u32*>(0xa0000 + 4) = scan_code;
 
     if (scan_code == 0x1d)
         keyboard_ctrl_pressed = true;
@@ -304,7 +304,7 @@ extern "C" auto osca_on_key(const u8 scan_code) -> void {
     // ? implement better task focus switch (same behaviour as alt+tab)
     if (keyboard_ctrl_pressed) { // ctrl+tab
         if (scan_code == 0xf) {  // tab pressed
-            const Task *prev_task_focused = osca_task_focused;
+            const Task* prev_task_focused = osca_task_focused;
             while (true) {
                 osca_task_focused++;
                 if (osca_task_focused == osca_tasks_end) {
@@ -339,15 +339,15 @@ extern "C" auto osca_on_key(const u8 scan_code) -> void {
 
 // called by c++ to allocate and free memory
 // note: inline not allowed by the standard
-void *operator new[](unsigned size) { return osca::heap.alloc(size); }
-void *operator new(unsigned size) { return osca::heap.alloc(size); }
-void operator delete(void *ptr) noexcept { osca::heap.free(ptr); }
-void operator delete(void *ptr, unsigned size) noexcept;
-void operator delete(void *ptr, unsigned size) noexcept {
+void* operator new[](unsigned size) { return osca::heap.alloc(size); }
+void* operator new(unsigned size) { return osca::heap.alloc(size); }
+void operator delete(void* ptr) noexcept { osca::heap.free(ptr); }
+void operator delete(void* ptr, unsigned size) noexcept;
+void operator delete(void* ptr, unsigned size) noexcept {
     osca::heap.free(ptr);
 }
-void operator delete[](void *ptr) noexcept { osca::heap.free(ptr); }
-void operator delete[](void *ptr, unsigned size) noexcept;
-void operator delete[](void *ptr, unsigned size) noexcept {
+void operator delete[](void* ptr) noexcept { osca::heap.free(ptr); }
+void operator delete[](void* ptr, unsigned size) noexcept;
+void operator delete[](void* ptr, unsigned size) noexcept {
     osca::heap.free(ptr);
 }
