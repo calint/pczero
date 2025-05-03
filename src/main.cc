@@ -93,7 +93,7 @@ extern "C" [[noreturn]] auto tsk0() -> void {
                       // because no interrupts get through due to
                       // almost all time spent in non-interruptable
                       // osca_yield code
-                      //		osca_halt(); // pauses task until next
+                      // osca_halt(); // pauses task until next
                       // interrupt
     }
 }
