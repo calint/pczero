@@ -1,11 +1,11 @@
 # table of contents
 * osca.S
-* osca.h
-* lib.h
-* kernel.h
-* libge.h
-* game.h
-* main.cc
+* osca.hpp
+* lib.hpp
+* kernel.hpp
+* libge.hpp
+* game.hpp
+* main.cpp
 
 ## osca.S
 * assembler
@@ -19,7 +19,7 @@
 * runs tasks
     * preemptive task switch at 128 Hz
 
-## osca.h
+## osca.hpp
 * makes variables declared in osca.S available in c++
   * osca_tick
   * osca_tick_lo
@@ -33,29 +33,29 @@
   * osca_interrupts_enable
   * osca_yield
   * osca_hang
-* declares callback functions to be implemented in c++ by kernel.h
+* declares callback functions to be implemented in c++ by kernel.hpp
   * osca_init
   * osca_on_key
 
-## lib.h
-* library of classes and functions used by kernel.h and applications
+## lib.hpp
+* library of classes and functions used by kernel.hpp and applications
 * declares globals for printing text to display
   * vga13h
   * out
   * err
 
-## kernel.h
+## kernel.hpp
 * defines tasks to run
 * implements memory allocation
 * keyboard handling
 * task focus switch
 * task activation/deactivation
 
-## libge.h
+## libge.hpp
 * game engine library
 
-## game.h
+## game.hpp
 * sample game featuring a targeting system
 
-## main.cc
+## main.cpp
 * sample tasks

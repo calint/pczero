@@ -6,7 +6,7 @@
 // osca game
 //
 
-#include "libge.h"
+#include "libge.hpp"
 
 namespace osca::game {
 

@@ -1,7 +1,7 @@
 // reviewed: 2024-03-09
 // reviewed: 2024-03-13
 
-#include "kernel.h"
+#include "kernel.hpp"
 
 using namespace osca;
 
@@ -146,6 +146,6 @@ extern "C" [[noreturn]] auto tsk3() -> void {
     }
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-#include "game.h"
+#include "game.hpp"
 extern "C" [[noreturn]] auto tsk4() -> void { osca::game::Game::run(); }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

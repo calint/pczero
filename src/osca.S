@@ -30,7 +30,7 @@
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
                       # note: high task switching frequency
                       #       might hang slower hardware
-.set TASK_STRUCT_OFFSET_EIP,0         # see osca.h: struct Task
+.set TASK_STRUCT_OFFSET_EIP,0         # see osca.hpp: struct Task
 .set TASK_STRUCT_OFFSET_ESP,4         # ..
 .set TASK_STRUCT_OFFSET_EFLAGS,8      # ..
 .set TASK_STRUCT_OFFSET_EFLAGS_END,12 # ..
@@ -276,7 +276,7 @@ lp2:
   cmp osca_tasks_end,%ebx
   jl lp2
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
-call osca_init # calls C function declared in osca.h
+call osca_init # calls C function declared in osca.hpp
 # restore cpu state for first task
 mov osca_task_active,%ebx # ebx points to first task
 mov TASK_STRUCT_OFFSET_EIP(%ebx),%esp  # save task.eip for jump

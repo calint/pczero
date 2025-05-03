@@ -20,7 +20,7 @@ IMAGE=pczero.img
 INSTALL_TO=/dev/sda
 
 # source files, used in 'print'
-SRC_FILES=src/osca.S src/osca.h src/kernel.h src/lib.h src/libge.h src/game.h src/main.cc
+SRC_FILES=src/osca.S src/osca.hpp src/kernel.hpp src/lib.hpp src/libge.hpp src/game.hpp src/main.cpp
 
 # as
 AF=-march=i386+387 --32 -W -fatal-warnings
@@ -70,7 +70,7 @@ build:
 	@mkdir -p bin/src
 	as -c src/osca.S -o bin/src/osca.o $(AF)
 	@echo
-	$(CC) -c src/main.cc -o bin/src/main.o $(CF) $(CW)
+	$(CC) -c src/main.cpp -o bin/src/main.o $(CF) $(CW)
 	@echo
 	cp bin/src/main.o bin/src/main_debug.o
 	strip -g bin/src/main.o

@@ -6,10 +6,10 @@
 // osca kernel
 //
 
-#include "lib.h"
-#include "osca.h"
+#include "lib.hpp"
+#include "osca.hpp"
 
-// sample tasks implemented in 'main.cc'
+// sample tasks implemented in 'main.cpp'
 extern "C" [[noreturn]] auto tsk0() -> void;
 extern "C" [[noreturn]] auto tsk1() -> void;
 extern "C" [[noreturn]] auto tsk2() -> void;
