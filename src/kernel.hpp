@@ -296,10 +296,11 @@ extern "C" auto osca_on_key(const u8 scan_code) -> void {
     // on screen
     *reinterpret_cast<u32*>(0xa0000 + 4) = scan_code;
 
-    if (scan_code == 0x1d)
+    if (scan_code == 0x1d) {
         keyboard_ctrl_pressed = true;
-    else if (scan_code == 0x9d)
+    } else if (scan_code == 0x9d) {
         keyboard_ctrl_pressed = false;
+    }
 
     // ? implement better task focus switch (same behaviour as alt+tab)
     if (keyboard_ctrl_pressed) { // ctrl+tab
