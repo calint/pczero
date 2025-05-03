@@ -5,6 +5,7 @@
 //
 // osca library
 //
+
 #include "osca.hpp"
 
 namespace osca {

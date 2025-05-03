@@ -5,6 +5,7 @@
 //
 // osca game engine library
 //
+
 #include "kernel.hpp"
 
 namespace osca {
