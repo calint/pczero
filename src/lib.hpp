@@ -39,7 +39,7 @@ class Data {
         pz_memcpy(d.address(), address_, size_);
     }
     inline auto to(const Data& d, const SizeBytes n) const -> void {
-        pz_memcpy(d.address(), address_, n);
+        pz_memcpy(d.address(), address_, n); // ? check bounds
     }
     inline auto clear(u8 byte = 0) const -> void {
         pz_memset(address_, byte, size_);
@@ -73,7 +73,7 @@ inline auto cos(const AngleRad radians) -> Real {
 inline auto sin_and_cos(const AngleRad radians, Real& fsin, Real& fcos)
     -> void {
     asm("fsincos"
-        : "=t"(fcos), "=u"(fsin) // 'u' : Second floating point register
+        : "=t"(fcos), "=u"(fsin) // 'u' : second floating point register
         : "0"(radians));
 }
 
@@ -109,7 +109,7 @@ template <typename T> struct VectorT {
     T x{}, y{};
     // normalizes and returns this vector
     inline auto normalize() -> VectorT& {
-        const Real len = sqrt(x * x + y * y);
+        const Real len = magnitude();
         x /= len;
         y /= len;
         return *this;
@@ -200,8 +200,8 @@ using Color8b = u8;                     // 8 bit index in color palette
 
 // configuration of polygon rendering
 namespace enable {
-constexpr static bool draw_polygons_fill{};
-constexpr static bool draw_polygons_edges{true};
+constexpr static bool draw_polygons_fill = false;
+constexpr static bool draw_polygons_edges = true;
 } // namespace enable
 
 // implementation of a bitmap with given address and dimension
@@ -217,7 +217,7 @@ template <typename T> class Bitmap {
     inline constexpr auto data() const -> const Data& { return data_; }
     inline constexpr auto address_offset(const PointPx p) const -> Address {
         return data_.address_offset(p.y * dim_.width() * Size(sizeof(T)) +
-                                    p.x * Size(sizeof(T)));
+                                    p.x * Size(sizeof(T))); // ? check bounds
     }
     constexpr auto to(const Bitmap& dst, const PointPx& pos) const -> void {
         T* si = static_cast<T*>(data_.address());

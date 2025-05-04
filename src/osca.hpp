@@ -1,6 +1,7 @@
 #pragma once
 // reviewed: 2024-03-09
-// reviewed: 2024-03-13
+//           2024-03-13
+//           2025-05-04
 
 namespace osca {
 
@@ -24,15 +25,14 @@ struct alignas(16) Task {
     i32 edi{};
     i32 esi{};
     i32 ebp{};
-    i32 esp_unused{};
+    i32 reserved{}; // unused esp from `pusha`
     i32 ebx{};
     i32 edx{};
     i32 ecx{};
     i32 eax{};
     // note: The FSAVE instruction saves a 108-byte data structure to memory
-    // (fpu_state), with the
-    //       first byte of the structure needed to be aligned on a 16-byte
-    //       boundary.
+    // (fpu_state), with the first byte of the structure needed to be aligned on
+    // a 16-byte boundary.
     alignas(16) u8 fpu_state[108]{};
     u8 padding[4]{};
 
@@ -51,7 +51,7 @@ struct alignas(16) Task {
 };
 
 // tasks list implemented in kernel.hpp
-// used from osca.S in '_main', 'osca_yield', 'isr_tmr' and 'isr_fpu'
+// used from osca.S in `_main`, `osca_yield`, `isr_tmr` and `isr_fpu`
 extern "C" Task osca_tasks[];
 
 // pointer to end of tasks (1 past last entry)
@@ -92,9 +92,8 @@ extern "C" volatile const u32 osca_tick_hi;
 constexpr f32 osca_tick_per_sec = 1.0f / 1024; // 1024 Hz
 
 // switches to next running task
-// note: single small task yielding in a tight loop might inhibit
-//       interrupts due to most time being spent in non-interruptable
-//       task switching code
+// note: single small task yielding in a tight loop might inhibit interrupts due
+//       to most time being spent in non-interruptible task switching code
 extern "C" auto osca_yield() -> void;
 
 //
@@ -104,7 +103,7 @@ extern "C" auto osca_yield() -> void;
 // called before starting tasks
 extern "C" auto osca_init() -> void;
 
-// called from 'isr_kbd' when a key is pressed or released
+// called from `isr_kbd` when a key is pressed or released
 extern "C" auto osca_on_key(u8 scan_code) -> void;
 
 // called when interrupt other than keyboard or timer
