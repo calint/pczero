@@ -1,6 +1,7 @@
 #pragma once
 // reviewed: 2024-03-09
-// reviewed: 2024-03-13
+//           2024-03-13
+//           2025-05-04
 
 //
 // osca library
@@ -735,12 +736,14 @@ class PrinterToBitmap {
           dil_{di_}, bmp_wi_{bmp->dim().width()},
           ln_{SizePx(bmp_wi_ - font_wi_)} {}
     constexpr auto pos(const CoordsChar p) -> PrinterToBitmap& {
+        // ? bounds check
         di_ = static_cast<Color8b*>(bmp_->data().address());
         di_ += bmp_wi_ * p.y * (font_hi_ + line_padding_) + p.x * font_wi_;
         dil_ = di_;
         return *this;
     }
     inline constexpr auto nl() -> PrinterToBitmap& {
+        // ? bounds check
         di_ = dil_ + bmp_wi_ * (font_hi_ + line_padding_);
         dil_ = di_;
         return *this;
@@ -825,6 +828,7 @@ class PrinterToBitmap {
         return *this;
     }
     constexpr auto backspace() -> PrinterToBitmap& {
+        // ? bounds check
         di_ -= font_wi_;
         p(' ');
         di_ -= font_wi_;
@@ -878,7 +882,7 @@ class Vga13h {
 };
 
 extern Vga13h vga13h;
-Vga13h vga13h; // initialized by 'osca_init'
+Vga13h vga13h; // initialized by `osca_init`
 
 class PrinterToVga : public PrinterToBitmap {
   public:
@@ -887,13 +891,13 @@ class PrinterToVga : public PrinterToBitmap {
 
 // print debug to vga13h
 extern PrinterToVga out;
-PrinterToVga out; // initialized by 'osca_init'
+PrinterToVga out; // initialized by `osca_init`
 
 // print error to vga13h
 extern PrinterToVga err;
-PrinterToVga err; // initialized by 'osca_init'
+PrinterToVga err; // initialized by `osca_init`
 
-// crashes by printing 'msg' and stack to 'err' then hangs
+// crashes by printing `msg` and stack to `err` then hangs
 [[noreturn]] auto osca_crash(ZString msg) -> void;
 [[noreturn]] auto osca_crash(ZString msg) -> void {
     err.p(msg).nl();
