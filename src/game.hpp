@@ -1,6 +1,7 @@
 #pragma once
 // reviewed: 2024-03-09
-// reviewed: 2024-03-13
+//           2024-03-13
+//           2025-05-04
 
 //
 // osca game
@@ -61,7 +62,7 @@ class Game {
     }
 
   public:
-    // object definitions initialized in 'run'
+    // object definitions initialized in `run`
     inline static ObjectDef enemy_def;
     inline static ObjectDef ship_def;
     inline static ObjectDef bullet_def;
@@ -159,6 +160,7 @@ class Enemy final : public Object {
     // returns false if object is dead
     auto update() -> bool override {
         if (!Game::is_in_play_area(*this)) {
+            // ?! reversing velocity is not always enough
             phy().velocity.y = -phy().velocity.y;
         }
         return true;
@@ -287,7 +289,7 @@ class Ship final : public Object {
     auto attack_target_current_location(const Object& target,
                                         const bool draw_trajectory = false)
         -> void {
-        // aim and shoot at targets' current location
+        // aim and shoot at target current location
         constexpr Real margin_of_error = Real(0.01);
         Vector v_tgt = target.phy_const().position - phy_const().position;
         v_tgt.normalize();
@@ -366,8 +368,8 @@ class Ship final : public Object {
             // get t for bullet to reach expected location
             const TimeStepSec t_bullet = v_aim.magnitude() / Bullet::speed;
             // note: optimizing away sqrt() in magnitude() reduces precision
-            // when
-            //       aiming at far targets since t_aim grows in a non-linear way
+            //       when aiming at far targets since t_aim grows in a
+            //       non-linear way
 
             // difference between target and bullet intersection t
             const TimeStepSec t_aim = abs(t_bullet - t);
@@ -430,7 +432,7 @@ class Boss final : public Object {
     static constexpr Scale def_bounding_radius = def_scale * sqrt_of_2;
     static constexpr TimeSec boss_lifetime{10};
 
-    Count health_ = 5;
+    Count health_{5};
     TimeSec time_started_{};
 
   public:
@@ -520,6 +522,7 @@ auto Game::create_boss() -> void {
     PhysicsState::init_statics();
     PhysicsState::clear(11);
 
+    //-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
     //
     // object definitions
     //
@@ -574,12 +577,12 @@ auto Game::create_boss() -> void {
                    new PointIx[]{0, 1, 2}};
     missile_def.init_normals();
     //-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
-    constexpr Count segments = 6;
+    constexpr Count boss_segments = 6;
     boss_def = {
-        segments,
-        segments,
-        create_circle(segments).release(),
-        create_circle_ix(segments).release(),
+        boss_segments,
+        boss_segments,
+        create_circle(boss_segments).release(),
+        create_circle_ix(boss_segments).release(),
     };
     boss_def.init_normals();
     //-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
@@ -625,8 +628,8 @@ auto Game::create_boss() -> void {
         out.p("i=").p_hex_8b(u8(osca_task_focused->id)).spc();
         out.p("t=").p_hex_16b(u16(osca_tick)).spc();
         out.p("s=").p_hex_8b(u8(u32(Object::time) % 0xff)).spc();
-        // note: casting a double to uint8 or uint16 results to 0 if value
-        //       larger than max value of type thus casting shenanigans
+        // note: casting a double to u8 or u16 results to 0 if value larger than
+        //       max value of type thus casting shenanigans
         out.p("k=").p_hex_8b(u8(last_received_key)).spc();
         out.p("m=").p_hex_8b(u8(metrics::matrix_set_transforms)).spc();
         out.p("c=")
@@ -687,20 +690,24 @@ auto Game::create_boss() -> void {
 
                 switch (table_scancode_to_ascii[key]) {
                 case 'x':
-                    if (Game::enemies_alive == 0)
+                    if (Game::enemies_alive == 0) {
                         create_scene();
+                    }
                     break;
                 case 'c':
-                    if (!shp)
+                    if (!shp) {
                         create_player();
+                    }
                     break;
                 case 'f':
-                    if (shp)
+                    if (shp) {
                         shp->auto_aim_at_boss = true;
+                    }
                     break;
                 case 'g':
-                    if (shp)
+                    if (shp) {
                         shp->auto_aim_at_boss = false;
+                    }
                     break;
                 default:
                     break;
@@ -708,22 +715,29 @@ auto Game::create_boss() -> void {
             }
         }
         if (shp) {
-            if (keyb[key_w])
+            if (keyb[key_w]) {
                 shp->thrust_fwd();
-            if (keyb[key_s])
-                shp->thrust_rev();
-            if (!shp->auto_aim_at_boss) {
-                if (keyb[key_a])
-                    shp->turn_left();
-                if (keyb[key_d])
-                    shp->turn_right();
-                if (!keyb[key_a] && !keyb[key_d])
-                    shp->turn_still();
             }
-            if (!keyb[key_w] && !keyb[key_s])
+            if (keyb[key_s]) {
+                shp->thrust_rev();
+            }
+            if (!shp->auto_aim_at_boss) {
+                if (keyb[key_a]) {
+                    shp->turn_left();
+                }
+                if (keyb[key_d]) {
+                    shp->turn_right();
+                }
+                if (!keyb[key_a] && !keyb[key_d]) {
+                    shp->turn_still();
+                }
+            }
+            if (!keyb[key_w] && !keyb[key_s]) {
                 shp->phy().velocity = {0, 0};
-            if (keyb[key_j])
+            }
+            if (keyb[key_j]) {
                 shp->fire();
+            }
         }
     }
 }
