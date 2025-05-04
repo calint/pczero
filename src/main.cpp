@@ -1,5 +1,6 @@
 // reviewed: 2024-03-09
-// reviewed: 2024-03-13
+//           2024-03-13
+//           2025-05-04
 
 #include "kernel.hpp"
 
@@ -93,8 +94,8 @@ extern "C" [[noreturn]] auto tsk0() -> void {
                       // because no interrupts get through due to
                       // almost all time spent in non-interruptable
                       // osca_yield code
-                      // osca_halt(); // pauses task until next
-                      // interrupt
+
+        // osca_halt(); // pauses task until next interrupt
     }
 }
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
