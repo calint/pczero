@@ -1,6 +1,7 @@
 #pragma once
 // reviewed: 2024-03-09
-// reviewed: 2024-03-13
+//           2024-03-13
+//           2025-05-04
 
 //
 // osca kernel
@@ -9,7 +10,7 @@
 #include "lib.hpp"
 #include "osca.hpp"
 
-// sample tasks implemented in 'main.cpp'
+// sample tasks implemented in `main.cpp`
 extern "C" [[noreturn]] auto tsk0() -> void;
 extern "C" [[noreturn]] auto tsk1() -> void;
 extern "C" [[noreturn]] auto tsk2() -> void;
@@ -53,8 +54,8 @@ extern "C" auto osca_on_exception() -> void {
 }
 
 // note: The FSAVE instruction saves a 108-byte data structure to memory
-// (fpu_state), with the
-//       first byte of the field needed to be aligned to a 16-byte boundary.
+// (fpu_state), with the first byte of the field needed to be aligned to a
+// 16-byte boundary.
 alignas(16) struct Task osca_tasks[]{
     //                 :-> 0b01 grabs keyboard focus, 0b10 running
     // eip esp eflags bits id edi esi ebp esp0 ebx edx ecx eax
@@ -97,6 +98,7 @@ class Heap final {
 
         // place used entries area at top of the heap
         ls_used_ = static_cast<Entry*>(data.end()) - entries_size;
+        // check that list start is within bounds
         if (reinterpret_cast<char*>(ls_used_) < mem_pos_) {
             osca_crash("Heap:1");
         }
@@ -105,6 +107,7 @@ class Heap final {
 
         // place free entries area before used entries
         ls_free_ = ls_used_ - entries_size;
+        // check that list start is within bounds
         if (reinterpret_cast<char*>(ls_free_) < mem_pos_) {
             osca_crash("Heap:2");
         }
@@ -125,21 +128,23 @@ class Heap final {
 
             // found a matching size entry
             void* ptr = ent->ptr;
-            // move to used entries
+            // check that next entry is within the list
             if (ls_used_pos_ >= ls_used_end_) {
                 osca_crash("Heap:3");
             }
+            // move to used entries
             *ls_used_pos_ = *ent;
             ls_used_pos_++;
             ls_free_pos_--;
             *ent = *ls_free_pos_;
-            pz_memset(ls_free_pos_, 0x0f,
-                      sizeof(Entry)); // debugging (can be removed)
+            // debugging (can be removed)
+            pz_memset(ls_free_pos_, 0x0f, sizeof(Entry));
             return ptr;
         }
         // did not find in free list, create new
         char* ptr = mem_pos_;
         mem_pos_ += size_bytes;
+        // check bounds
         if (mem_pos_ > mem_end_) {
             osca_crash("Heap:4");
         }
@@ -151,7 +156,7 @@ class Heap final {
         ls_used_pos_++;
         return ptr;
     }
-    // called by operator 'delete'
+    // called by operator `delete`
     auto free(void* ptr) -> void {
         // find the allocated memory in the used list
         for (Entry* ent = ls_used_; ent < ls_used_pos_; ent++) {
@@ -161,13 +166,15 @@ class Heap final {
 
             // found the allocation entry
             // copy entry from used to free
+
+            // check bounds
             if (ls_free_pos_ >= ls_free_end_) {
                 osca_crash("Heap:6");
             }
             *ls_free_pos_ = *ent;
             ls_free_pos_++;
 
-            // copy last entry from used list to this entry
+            // copy last entry of used list to this entry location avoiding gaps
             ls_used_pos_--;
             const u32 size = ent->size_bytes;
             *ent = *ls_used_pos_;
@@ -189,7 +196,7 @@ class Heap final {
     }
 };
 
-// initiated at 'osca_init'
+// initiated at `osca_init`
 extern Heap heap;
 Heap heap;
 
@@ -198,12 +205,13 @@ class Keyboard final {
     u8 out_{};         // next event index
     u8 in_{};          // last event index +1 & roll
   public:
-    // called by 'osca_on_key'
+    // called by `osca_on_key`
     constexpr auto on_key(const u8 scan_code) -> void {
         const u8 next_in = (in_ + 1) & (sizeof(buf_) - 1);
         if (next_in == out_) { // check overrun
-            return; // write would overwrite unhandled scan_code. display on
-                    // status line?
+            // write would overwrite unhandled scan_code. display on
+            // status line?
+            return;
         }
         buf_[in_] = scan_code;
         in_ = next_in;
@@ -220,14 +228,14 @@ class Keyboard final {
     }
 };
 
-// initiated at 'osca_init'
+// initiated at `osca_init`
 extern Keyboard keyboard;
 Keyboard keyboard;
 
 // focused task that should read keyboard
 inline Task* osca_task_focused{};
 
-// declared in linker script 'link.ld' after code and data at first 64KB
+// declared in linker script `link.ld` after code and data at first 64KB
 // boundary address of symbol marks start of contiguous memory
 extern "C" int free_mem_start_symbol;
 
