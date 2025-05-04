@@ -2,9 +2,10 @@
 # kernel osca
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - info
 # reviewed: 2024-03-10
-#
+#           2025-05-04
 # tested on:
 # * linux 6.5.0 qemu-system-i386 8.0.4
+#         6.14.4                 9.2.3
 # * asus zenbook UX305CA
 #
 # memory map from https://wiki.osdev.org/Memory_Map_(x86)
@@ -17,9 +18,9 @@
 # 07C00-07FFF |   1 KB | osca kernel
 # 08000-7FFFF | 480 KB | application
 # 80000-9FFFF | 128 KB | EBDA (Extended BIOS Data Area)
-# A0000-BFFFF |	128 KB | Video display memory
-# C0000-C7FFF |	 32 KB | Video BIOS
-# C8000-EFFFF |	160 KB | BIOS Expansions
+# A0000-BFFFF | 128 KB | Video display memory
+# C0000-C7FFF |  32 KB | Video BIOS
+# C8000-EFFFF | 160 KB | BIOS Expansions
 # F0000-FFFFF |  64 KB | Motherboard BIOS
 #
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - constants
@@ -30,7 +31,7 @@
 .set FREQ_DIV_AND,8-1 # task switches per second 1024/8=128
                       # note: high task switching frequency
                       #       might hang slower hardware
-.set TASK_STRUCT_OFFSET_EIP,0         # see osca.hpp: struct Task
+.set TASK_STRUCT_OFFSET_EIP,0         # see `osca.hpp`: `struct Task`
 .set TASK_STRUCT_OFFSET_ESP,4         # ..
 .set TASK_STRUCT_OFFSET_EFLAGS,8      # ..
 .set TASK_STRUCT_OFFSET_EFLAGS_END,12 # ..
@@ -59,10 +60,10 @@
 .set CR0_BIT_MP,2 # Monitor co-processor bit
 .set CR0_BIT_TS,8 # Task switched bit
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - exports
-.global osca_tick   # uint64 tick of 1024 Hz timer
-.global osca_tick_lo # 1024 Hz timer low bits
-.global osca_tick_hi # 1024 Hz timer high bits
-.global osca_yield # export function
+.global osca_tick        # uint64 tick of 1024 Hz timer
+.global osca_tick_lo     # 1024 Hz timer low bits
+.global osca_tick_hi     # 1024 Hz timer high bits
+.global osca_yield       # export function
 .global osca_task_active # pointer to active task
 .global _start # export entry point
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - bpb
@@ -77,8 +78,8 @@ jmp _main
 _main:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - setup
 #mov %dl,osca_boot_drive # save boot drive
-xor %bx,%bx # clear bx
-mov %bx,%ds # data segment
+xor %bx,%bx     # clear bx
+mov %bx,%ds     # data segment
 mov %bx,%ss     # setup stack
 mov $_start,%sp #  at 0x7c00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
@@ -115,7 +116,7 @@ xor %dh,%dh # head 0
 mov $0x07e0,%bx # to es:bx=7e00:0000
 mov %bx,%es     #
 xor %bx,%bx     #
-int $0x13 # read disk
+int $0x13       # read disk
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - mode 13h
 # switch to vga mode 13h (320x200x8 bmp @ 0xa0000)
 mov $0x13,%ax
@@ -136,8 +137,8 @@ int $0x10
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - to protected mode
 # enable 32bit protected mode
 # https://wiki.osdev.org/Protected_Mode
-cli # done with bios, disable interrupts
-lgdt gdtr # load global descriptor tables
+cli                # done with bios, disable interrupts
+lgdt gdtr          # load global descriptor tables
 mov %cr0,%eax      # enter 32b protected mode
 or $CR0_BIT_PE,%al #  set 'Protection Enable' bit
 mov %eax,%cr0      #   in CR0 (Control Register 0)
@@ -302,7 +303,7 @@ osca_tick_lo:.long 0 #   low bits, exported
 osca_tick_hi:.long 0 #   high bits, exported
 osca_task_active:.long osca_tasks # pointer to active task, exported
 osca_active_fpu:.long osca_tasks # pointer to task that has the FPU
-tmp_eax:.long 0 # used in osca_yield and isr_tmr
+tmp_eax:.long 0 # used in `osca_yield` and `isr_tmr`
 tmp_ebx:.long 0 # ...
 tmp_ecx:.long 0 # ...
 tmp_eip:.long 0 # ...
@@ -342,7 +343,7 @@ osca_yield_next_task:
   # enable TS (Task switched) bit in cr0
   # when this bit is enabled and a numeric (floating point)
   # operation executes the cpu triggers exception 7 which
-  # calls 'isr_fpu' that restores, if necessary, fpu state 
+  # calls `isr_fpu` that restores, if necessary, fpu state 
   # of current running task.
   # 80386 SYSTEM SOFTWARE WRITER'S GUIDE 1987
   # 7.1.2.1 COPROCESSOR CONTEXT SWITCHING page 122
@@ -433,7 +434,7 @@ isr_tmr_next_task:
   jz isr_tmr_next_task # if not 'running' get next task
 
   # enable TS (Task switched) bit in cr0
-  # (see comment in osca_yield_next_task)
+  # (see comment in `osca_yield_next_task`)
   mov %cr0,%eax
   or $CR0_BIT_TS,%al
   mov %eax,%cr0
