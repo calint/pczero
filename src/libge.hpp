@@ -1,6 +1,7 @@
 #pragma once
 // reviewed: 2024-03-09
-// reviewed: 2024-03-13
+//           2024-03-13
+//           2025-05-04
 
 //
 // osca game engine library
@@ -21,12 +22,12 @@ class ObjectDef final {
     // list of indexes in 'points' that defines the bounding shape as a convex
     // polygon CCW
     PointIx* indexes{};
-    // list of normals to the lines defined by 'indexes'. calculated by
-    // 'init_normals'
+    // list of normals to the lines defined by 'indexes'
+    // note: calculated by `init_normals`
     Vector* normals{};
 
     // destructor cannot happen because object life time is program lifetime
-    // void operator delete(void*)=delete;
+    // void operator delete(void*) = delete;
 
     // calculates the normals using the points and indexes
     // called once at program init
@@ -119,8 +120,8 @@ class PhysicsState final {
         ls_all_pos--;
         Object* obj = ls_all_pos->owner;
         *phy = *ls_all_pos;
-        pz_memset(ls_all_pos, 0x0f,
-                  sizeof(PhysicsState)); // debugging (can be removed)
+        // debugging (can be removed)
+        pz_memset(ls_all_pos, 0x0f, sizeof(PhysicsState));
         return obj;
     }
     static auto update_all(const TimeStepSec dt) -> void {
@@ -136,11 +137,11 @@ class PhysicsState final {
 };
 
 namespace enable {
-constexpr static bool draw_dots = true;
-constexpr static bool draw_polygons = true;
-constexpr static bool draw_normals = true;
-constexpr static bool draw_collision_check = false;
-constexpr static bool draw_bounding_circle = true;
+constexpr static bool draw_dots{true};
+constexpr static bool draw_polygons{true};
+constexpr static bool draw_normals{true};
+constexpr static bool draw_collision_check{};
+constexpr static bool draw_bounding_circle{true};
 } // namespace enable
 
 using TypeBits = u32;
@@ -151,20 +152,21 @@ constexpr Scale sqrt_of_2 = Real(1.414213562);
 
 class Object {
     // pointer to element in 'all' list containing pointer to this object
-    // used in ~Object()
+    // used in `~Object()`
     Object** ls_all_pos_{};
     // object type that is usually a bit (32 object types supported)
     TypeBits type_bits_{};
-    // bits used to bitwise 'and' with other object's 'type_bits_'
+    // bits used to bitwise `and` with other object's `type_bits_`
     // if true then collision detection is done
     TypeBits type_bits_collision_mask_{};
     // physics state kept in own buffer of states for better cpu cache
     // utilization at update may change between frames (when objects are deleted
     // and 'phy_' relocated)
     PhysicsState* phy_{};
-    // scale that is used in model to world transform
+    // scale is used in model to world transform
     Scale scale_{};
     // contains the drawable and bounding shape definition
+    // ? modifiable using pointer instead
     const ObjectDef& def_;
     // transformed model to world points cache
     UniquePtr<Point[]> points_world_{};
@@ -205,8 +207,8 @@ class Object {
         phy_->angle = angle;
         phy_->owner = this;
 
-        // allocate index in 'all[]' from free slots
-        if (ls_all_pos == ls_all_end) {
+        // allocate index in `all[]` from free slots
+        if (ls_all_pos >= ls_all_end) {
             osca_crash("Object:1");
         }
 
@@ -218,14 +220,14 @@ class Object {
     virtual ~Object() {
         // free returns a pointer to the object that has had it's
         // physics state moved to the newly freed physics location.
-        // set the pointer of that object's 'phy_' to the new location
+        // set the pointer of that object's `phy_` to the new location
         PhysicsState::free(this->phy_)->phy_ = phy_;
 
         // move the last object pointer in list to the slot this object had
         ls_all_pos--;
         *ls_all_pos_ = *ls_all_pos;
         *ls_all_pos = nullptr; // debugging (can be removed)
-        // adjust pointer to the freed slot in 'all' list
+        // adjust pointer to the freed slot in `all` list
         (*ls_all_pos_)->ls_all_pos_ = ls_all_pos_;
     }
 
@@ -259,7 +261,7 @@ class Object {
 
     inline auto forward_vector() -> Vector {
         refresh_Mmw_if_invalid();
-        // negated because of object defintion uses 'forward' y negative
+        // negated because of object definition uses 'forward' y negative
         return Mmw_.axis_y().negate().normalize();
     }
 
@@ -267,7 +269,7 @@ class Object {
     virtual auto update() -> bool { return true; }
 
     virtual auto draw(Bitmap8b& dsp) -> void {
-        refresh_wld_points();
+        refresh_wld_points_if_invalid();
 
         if (enable::draw_dots) {
             const Point* pt = points_world_.get();
@@ -310,7 +312,7 @@ class Object {
     virtual auto on_collision(Object& other) -> bool { return true; }
 
   private:
-    // set to false at 'add_deleted'
+    // set to false at `add_deleted`
     inline constexpr auto flag_as_dead() -> void { flags_ |= 1; }
     inline constexpr auto world_points_need_update() const -> bool {
         return flags_ & 2;
@@ -322,7 +324,7 @@ class Object {
             flags_ &= Flags8b(~2);
         }
     }
-    constexpr auto refresh_wld_points() -> void {
+    constexpr auto refresh_wld_points_if_invalid() -> void {
         refresh_Mmw_if_invalid();
 
         if (!world_points_need_update()) {
@@ -336,7 +338,7 @@ class Object {
         // matrix has been updated, update cached points
         Mmw_.transform(def_.points, points_world_.get(), def_.points_size);
 
-        if (def_.normals) { // check if there are any meaningful normals
+        if (def_.normals) { // check if there are any normals
             Mmw_.rotate(def_.normals, normals_world_.get(), def_.indexes_size);
         }
 
@@ -367,7 +369,7 @@ class Object {
     inline static Object** ls_deleted_end{}; // end of list (1 past last)
 
     inline static u64 timer_tick{};         // current time in osca ticks
-    inline static u64 timer_tick_prv{};     // previous frame time
+    inline static u64 timer_tick_prv{};     // time at previous frame
     inline static u64 fps_timer_tick_prv{}; // previous calculation tick
     inline static Count
         fps_frame_counter{}; // frames rendered during this interval
@@ -426,7 +428,7 @@ class Object {
         }
 
         obj->flag_as_dead();
-        if (ls_deleted_pos == ls_deleted_end) {
+        if (ls_deleted_pos >= ls_deleted_end) { // debugging
             osca_crash("Object:3");
         }
         *ls_deleted_pos = obj;
@@ -485,8 +487,8 @@ class Object {
                 }
 
                 // refresh world coordinates
-                o1->refresh_wld_points();
-                o2->refresh_wld_points();
+                o1->refresh_wld_points_if_invalid();
+                o2->refresh_wld_points_if_invalid();
 
                 // check if any o1 points in o2 bounding shape or
                 // any o2 points in o1 bounding shape
@@ -531,7 +533,7 @@ class Object {
             return false;
         }
 
-        // for each point in 'o1' bounding shape
+        // for each point in o1 bounding shape
         const PointIx* ix = o1.def_.indexes;
         PointIx n = o1.def_.indexes_size;
         while (n--) {
