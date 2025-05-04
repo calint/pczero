@@ -1,12 +1,12 @@
 # tools used:
-#   as       2.43.0
-#   g++      14.2.1
-#   clang++  18.1.18
-#   ld       2.43.0
-#   strip    2.43.0
+#   as       2.44.0
+#   g++      15.1.1
+#   clang++  19.1.7
+#   ld       2.44.0
+#   strip    2.44.0
 #
 # emulated with:
-#   qemu-system-i386  9.1.2
+#   qemu-system-i386  9.2.3
 #   VirtualBox        7.0
 #
 # tested on hardware:
