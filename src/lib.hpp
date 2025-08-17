@@ -99,7 +99,7 @@ constexpr Real PI = Real(3.141592653589793);
 using AngleDeg = Angle;
 
 constexpr inline auto deg_to_rad(const AngleDeg deg) -> AngleRad {
-    constexpr Real deg_to_rad{PI / 180};
+    constexpr Real deg_to_rad = PI / 180;
     return deg * deg_to_rad;
 }
 

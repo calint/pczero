@@ -20,7 +20,7 @@ IMAGE=pczero.img
 INSTALL_TO=/dev/sda
 
 # source files, used in 'print'
-SRC_FILES=src/osca.S src/osca.hpp src/kernel.hpp src/lib.hpp src/libge.hpp src/game.hpp src/main.cpp
+SRC_FILES=src/osca.S src/osca.hpp src/lib.hpp src/kernel.hpp src/libge.hpp src/game.hpp src/main.cpp
 
 # as
 AF=-march=i386+387 --32 -W -fatal-warnings
