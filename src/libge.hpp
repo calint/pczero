@@ -137,11 +137,11 @@ class PhysicsState final {
 };
 
 namespace enable {
-constexpr static bool draw_dots{true};
-constexpr static bool draw_polygons{true};
-constexpr static bool draw_normals{true};
-constexpr static bool draw_collision_check{};
-constexpr static bool draw_bounding_circle{true};
+constexpr static bool draw_dots = true;
+constexpr static bool draw_polygons = true;
+constexpr static bool draw_normals = true;
+constexpr static bool draw_collision_check = false;
+constexpr static bool draw_bounding_circle = true;
 } // namespace enable
 
 using TypeBits = u32;
