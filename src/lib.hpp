@@ -201,8 +201,8 @@ using Color8b = u8;                     // 8 bit index in color palette
 
 // configuration of polygon rendering
 namespace enable {
-constexpr static bool draw_polygons_fill{};
-constexpr static bool draw_polygons_edges{true};
+constexpr static bool draw_polygons_fill = false;
+constexpr static bool draw_polygons_edges = true;
 } // namespace enable
 
 // implementation of a bitmap with given address and dimension
