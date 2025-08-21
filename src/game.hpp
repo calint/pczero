@@ -218,7 +218,7 @@ class Ship final : public Object {
     TimeSec last_fired_time{0};
 
   public:
-    bool auto_aim_at_boss{false};
+    bool auto_aim_at_boss = false;
     u8 padding[3]{};
 
     Ship()

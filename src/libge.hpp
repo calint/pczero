@@ -48,7 +48,7 @@ class ObjectDef final {
 };
 
 namespace metrics {
-constexpr static bool enabled{true};
+constexpr static bool enabled = true;
 static Count matrix_set_transforms{};
 static Count collisions_checks_bounding_circle{};
 static Count collisions_checks_bounding_shape{};
