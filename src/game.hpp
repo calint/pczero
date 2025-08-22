@@ -214,8 +214,8 @@ class Ship final : public Object {
     static constexpr Scale def_bounding_radius = def_scale * sqrt_of_2;
     static constexpr AngleDeg turning_rate = 90;
     static constexpr Scalar speed = 20;
-    static constexpr TimeSec fire_rate = TimeSec(.2);
-    TimeSec last_fired_time{0};
+    static constexpr TimeSec fire_rate = .2;
+    TimeSec last_fired_time = 0;
 
   public:
     bool auto_aim_at_boss = false;
@@ -430,10 +430,10 @@ class Missile final : public Object {
 class Boss final : public Object {
     static constexpr Scale def_scale = 3;
     static constexpr Scale def_bounding_radius = def_scale * sqrt_of_2;
-    static constexpr TimeSec boss_lifetime{10};
+    static constexpr TimeSec boss_lifetime = 10;
 
-    Count health_{5};
-    TimeSec time_started_{};
+    Count health_ = 5;
+    TimeSec time_started_;
 
   public:
     Boss()
