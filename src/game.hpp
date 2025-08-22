@@ -177,7 +177,8 @@ class Enemy final : public Object {
 class Bullet final : public Object {
     static constexpr Scale def_scale = 0.5;
     static constexpr Scale def_bounding_radius = def_scale * sqrt_of_2;
-    TimeSec created_time;
+
+    TimeSec created_time_ = time;
 
   public:
     static constexpr Scalar speed = 40;
@@ -191,13 +192,12 @@ class Bullet final : public Object {
                  def_bounding_radius,
                  {0, 0},
                  0,
-                 4},
-          created_time{time} {}
+                 4} {}
 
     // returns false if object is dead
     auto update() -> bool override {
         Object::update();
-        if (lifetime < time - created_time) {
+        if (lifetime < time - created_time_) {
             return false;
         }
         return Game::is_in_play_area(*this);
@@ -215,7 +215,8 @@ class Ship final : public Object {
     static constexpr AngleDeg turning_rate = 90;
     static constexpr Scalar speed = 20;
     static constexpr TimeSec fire_rate = .2;
-    TimeSec last_fired_time = 0;
+
+    TimeSec last_fired_time_ = 0;
 
   public:
     bool auto_aim_at_boss = false;
@@ -271,11 +272,11 @@ class Ship final : public Object {
     auto on_collision(Object& other) -> bool override { return false; }
 
     auto fire() -> void {
-        const TimeSec fire_dt = time - last_fired_time;
+        const TimeSec fire_dt = time - last_fired_time_;
         if (fire_dt < fire_rate) {
             return;
         }
-        last_fired_time = time;
+        last_fired_time_ = time;
         Bullet* b = new Bullet{};
         Vector v =
             forward_vector().scale(bounding_radius() + b->bounding_radius());
@@ -433,7 +434,7 @@ class Boss final : public Object {
     static constexpr TimeSec boss_lifetime = 10;
 
     Count health_ = 5;
-    TimeSec time_started_;
+    TimeSec time_created_ = time;
 
   public:
     Boss()
@@ -444,8 +445,7 @@ class Boss final : public Object {
                  def_bounding_radius,
                  {0, 0},
                  0,
-                 4},
-          time_started_{time} {
+                 4} {
         Game::boss = this;
     }
 
@@ -456,7 +456,7 @@ class Boss final : public Object {
         if (!Game::is_in_play_area(*this)) {
             return false;
         }
-        if (time - time_started_ > boss_lifetime) {
+        if (time - time_created_ > boss_lifetime) {
             return false;
         }
         return true;
