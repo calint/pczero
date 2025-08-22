@@ -317,7 +317,7 @@ class Ship final : public Object {
                                          const bool draw_trajectory = false)
         -> void {
         constexpr Real intersection_time_margin_of_error = Real(0.1);
-        constexpr TimeStepSec evaluation_time_step = TimeStepSec(0.1);
+        constexpr TimeStepSec evaluation_time_step = TimeStepSec(0.05);
         Vector v_aim = find_aim_vector_for_moving_target(
             target, Bullet::lifetime, evaluation_time_step,
             intersection_time_margin_of_error, draw_trajectory);
