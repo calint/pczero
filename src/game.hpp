@@ -159,6 +159,9 @@ class Enemy final : public Object {
 
     // returns false if object is dead
     auto update() -> bool override {
+        if (!Object::update()) {
+            return false;
+        }
         if (!Game::is_in_play_area(*this)) {
             // ?! reversing velocity is not always enough
             phy().velocity.y = -phy().velocity.y;
@@ -196,7 +199,9 @@ class Bullet final : public Object {
 
     // returns false if object is dead
     auto update() -> bool override {
-        Object::update();
+        if (!Object::update()) {
+            return false;
+        }
         if (lifetime < time - created_time_) {
             return false;
         }
@@ -253,7 +258,9 @@ class Ship final : public Object {
 
     // returns false if object is dead
     auto update() -> bool override {
-        Object::update();
+        if (!Object::update()) {
+            return false;
+        }
         if (!Game::is_in_play_area(*this)) {
             phy().velocity = {0, 0};
         }
@@ -420,7 +427,12 @@ class Missile final : public Object {
                  4} {}
 
     // returns false if object is dead
-    auto update() -> bool override { return Game::is_in_play_area(*this); }
+    auto update() -> bool override {
+        if (!Object::update()) {
+            return false;
+        }
+        return Game::is_in_play_area(*this);
+    }
 
     // returns false if object is dead
     auto on_collision(Object& other) -> bool override { return false; }
@@ -453,6 +465,9 @@ class Boss final : public Object {
 
     // returns false if object is dead
     auto update() -> bool override {
+        if (!Object::update()) {
+            return false;
+        }
         if (!Game::is_in_play_area(*this)) {
             return false;
         }
