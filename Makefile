@@ -73,7 +73,8 @@ build:
 	$(CC) -c src/main.cpp -o bin/src/main.o $(CF) $(CW)
 	@echo
 	cp bin/src/main.o bin/src/main_debug.o
-	strip -g bin/src/main.o
+	strip --strip-debug bin/src/main.o
+	objcopy --remove-section=.comment bin/src/main.o bin/src/main.o
 	@echo
 	ld -o $(IMAGE) $(LF) -Map bin/pczero.map && chmod -x $(IMAGE)
 	@echo
