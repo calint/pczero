@@ -178,8 +178,10 @@ template <typename T> class DimensionT {
 
 // configuration of polygon rendering
 namespace enable {
+
 constexpr static bool draw_polygons_fill = false;
 constexpr static bool draw_polygons_edges = true;
+
 } // namespace enable
 
 using Coord = Real;                     // coordinate in real space
@@ -382,8 +384,6 @@ template <typename T> class Bitmap {
         }
     }
 };
-
-using Bitmap8b = Bitmap<Color8b>;
 
 static constexpr u32 table_hex_to_font[]{
     0b01100'10010'10010'10010'01100'00000'00, // 0
@@ -696,6 +696,7 @@ static constexpr u32 table_ascii_to_font[]{
 };
 
 using CoordsChar = VectorT<i16>;
+using Bitmap8b = Bitmap<Color8b>;
 
 // prints to a bitmap
 class PrinterToBitmap {
