@@ -89,6 +89,7 @@ class Heap final {
     Entry* ls_free_pos_{};       // next available slot
     const Entry* ls_free_end_{}; // end (1 past last) of free entries list
     Size entries_size_{};        // maximum slots
+
   public:
     Heap() = default;
 
@@ -210,6 +211,7 @@ class Keyboard final {
     u8 buf_[2 << 3]{}; // ring buffer, minimum size 2, size power of 2, max 256
     u8 out_{};         // next event index
     u8 in_{};          // last event index +1 & roll
+
   public:
     // called by `osca_on_key`
     constexpr auto on_key(const u8 scan_code) -> void {
