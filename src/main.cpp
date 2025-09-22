@@ -98,6 +98,7 @@ extern "C" [[noreturn]] auto tsk0() -> void {
         // osca_halt(); // pauses task until next interrupt
     }
 }
+
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 asm(".global tsk1");
 asm(".align 16");
@@ -105,6 +106,7 @@ asm("tsk1:");
 asm("  incl 0xa0000+80");
 // asm("  call osca_yield");
 asm("  jmp tsk1");
+
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] auto tsk2() -> void {
     while (true) {
@@ -132,6 +134,7 @@ extern "C" [[noreturn]] auto tsk2() -> void {
         osca_yield();
     }
 }
+
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 extern "C" [[noreturn]] auto tsk3() -> void {
     osca_interrupts_disable();
@@ -146,6 +149,7 @@ extern "C" [[noreturn]] auto tsk3() -> void {
         osca_yield();
     }
 }
+
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 #include "game.hpp"
 extern "C" [[noreturn]] auto tsk4() -> void { osca::game::Game::run(); }

@@ -30,53 +30,36 @@ class Data {
   public:
     inline constexpr Data(const Address a, const SizeBytes n)
         : address_{a}, size_{n} {}
+
     inline constexpr Data() = default;
+
     inline constexpr auto address() const -> Address { return address_; }
+
     inline constexpr auto size() const -> SizeBytes { return size_; }
+
     inline constexpr auto address_offset(const OffsetBytes n) const -> Address {
         return static_cast<char*>(address_) + n;
     }
+
     inline auto to(const Data& d) const -> void {
         pz_memcpy(d.address(), address_, size_);
     }
+
     inline auto to(const Data& d, const SizeBytes n) const -> void {
         pz_memcpy(d.address(), address_, n); // ? check bounds
     }
+
     inline auto clear(u8 byte = 0) const -> void {
         pz_memset(address_, byte, size_);
     }
+
     inline constexpr auto end() const -> Address {
         return static_cast<char*>(address_) + size_;
     }
 };
 
 using Real = f32;
-using Angle = Real;
-using AngleRad = Angle;
-
-inline auto sin(const AngleRad radians) -> Real {
-    Real v;
-    asm("fsin"
-        : "=t"(v) // 't': first (top of stack) floating point register
-        : "0"(radians));
-    return v;
-}
-
-inline auto cos(const AngleRad radians) -> Real {
-    Real v;
-    asm("fcos"
-        : "=t"(v) // 't': first (top of stack) floating point register
-        : "0"(radians));
-    return v;
-}
-
-// sets sin and cos value of 'radians' in 'fsin' and 'fcos'
-inline auto sin_and_cos(const AngleRad radians, Real& fsin, Real& fcos)
-    -> void {
-    asm("fsincos"
-        : "=t"(fcos), "=u"(fsin) // 'u' : second floating point register
-        : "0"(radians));
-}
+using Scale = Real;
 
 inline auto sqrt(const Real in) -> Real {
     Real v;
@@ -94,20 +77,10 @@ inline auto abs(const Real in) -> Real {
     return v;
 }
 
-constexpr Real PI = Real(3.141592653589793);
-
-using AngleDeg = Angle;
-
-constexpr inline auto deg_to_rad(const AngleDeg deg) -> AngleRad {
-    constexpr Real deg_to_rad = PI / 180;
-    return deg * deg_to_rad;
-}
-
-using Scale = Real;
-
 // implements a 2d vector
 template <typename T> struct VectorT {
     T x{}, y{};
+
     // normalizes and returns this vector
     inline auto normalize() -> VectorT& {
         const Real len = magnitude();
@@ -115,59 +88,71 @@ template <typename T> struct VectorT {
         y /= len;
         return *this;
     }
+
     // scales and returns this vector
     inline constexpr auto scale(const Scale s) -> VectorT& {
         x *= s;
         y *= s;
         return *this;
     }
+
     // increases and returns this vector by 'v'
     inline constexpr auto inc_by(const VectorT& v) -> VectorT {
         x += v.x;
         y += v.y;
         return *this;
     }
+
     // increases by 'v' scaled by 's' and returns this vector
     inline constexpr auto inc_by(const VectorT& v, const Scale s) -> VectorT& {
         x += v.x * s;
         y += v.y * s;
         return *this;
     }
+
     // negates and returns this vector
     inline constexpr auto negate() -> VectorT& {
         x = -x;
         y = -y;
         return *this;
     }
+
     // sets and returns this vector to absolute value
     inline auto absolute() -> VectorT& {
         x = abs(x);
         y = abs(y);
         return *this;
     }
+
     // returns dot product of this vector and 'v'
     inline constexpr auto dot(const VectorT& v) const -> T {
         return x * v.x + y * v.y;
     }
+
     // returns the normal of this vector
     inline constexpr auto normal() const -> VectorT { return {-y, x}; }
+
     // returns magnitude (length)
     inline auto magnitude() const -> T { return sqrt(x * x + y * y); }
+
     // returns magnitude squared
     inline constexpr auto magnitude2() const -> T { return x * x + y * y; }
     // inline constexpr auto operator<=>(const VectorT&)const=default; // ? does
     // not compile in clang++ without includes from std
 };
+
 template <typename T>
 inline constexpr auto operator==(const VectorT<T>& lhs, const VectorT<T>& rhs)
     -> bool {
     return lhs.x == rhs.x && lhs.y == rhs.y;
 }
+
 template <typename T>
 inline constexpr auto operator+(const VectorT<T>& lhs, const VectorT<T>& rhs)
     -> VectorT<T> {
     return {lhs.x + rhs.x, lhs.y + rhs.y};
 }
+
 template <typename T>
 inline constexpr auto operator-(const VectorT<T>& lhs, const VectorT<T>& rhs)
     -> VectorT<T> {
@@ -190,8 +175,11 @@ template <typename T> class DimensionT {
   public:
     inline constexpr DimensionT(const T width, const T height)
         : width_{width}, height_{height} {}
+
     inline constexpr DimensionT() = default;
+
     inline constexpr auto width() const -> const T { return width_; }
+
     inline constexpr auto height() const -> const T { return height_; }
 };
 
@@ -213,13 +201,18 @@ template <typename T> class Bitmap {
   public:
     inline constexpr Bitmap(const Address a, const DimensionPx& d)
         : dim_{d}, data_{a, d.width() * d.height() * Size(sizeof(T))} {}
+
     inline constexpr Bitmap() = default;
+
     inline constexpr auto dim() const -> const DimensionPx& { return dim_; }
+
     inline constexpr auto data() const -> const Data& { return data_; }
+
     inline constexpr auto address_offset(const PointPx p) const -> Address {
         return data_.address_offset(p.y * dim_.width() * Size(sizeof(T)) +
                                     p.x * Size(sizeof(T))); // ? check bounds
     }
+
     constexpr auto to(const Bitmap& dst, const PointPx& pos) const -> void {
         T* si = static_cast<T*>(data_.address());
         T* di = static_cast<T*>(dst.data_.address());
@@ -236,6 +229,7 @@ template <typename T> class Bitmap {
             di += ln;
         }
     }
+
     constexpr auto to_transparent(const Bitmap& dst, const PointPx& pos) const
         -> void {
         T* si = static_cast<T*>(data_.address());
@@ -256,6 +250,7 @@ template <typename T> class Bitmap {
             di += ln;
         }
     }
+
     constexpr auto draw_dot(const Point& pos, const T value) -> void {
         const CoordPx x = CoordPx(pos.x);
         const CoordPx y = CoordPx(pos.y);
@@ -264,21 +259,7 @@ template <typename T> class Bitmap {
         }
         *static_cast<T*>(address_offset({x, y})) = value;
     }
-    constexpr auto draw_bounding_circle(const Point& pos, const Scale radius)
-        -> void {
-        Count segments = Count(5 * radius); // ? magic number
-        AngleRad th = 0;
-        AngleRad dth = 2 * PI / AngleRad(segments);
-        while (segments--) {
-            Real fsin = 0;
-            Real fcos = 0;
-            sin_and_cos(th, fsin, fcos);
-            const Coord x = pos.x + radius * fcos;
-            const Coord y = pos.y + radius * fsin;
-            draw_dot({x, y}, 1); // blue dot
-            th += dth;
-        }
-    }
+
     constexpr auto draw_polygon(const Point pts[], const PointIx ix_size,
                                 const PointIx ix[], const T color) -> void {
         // ? what if ix_size<4
@@ -730,11 +711,13 @@ class PrinterToBitmap {
     static constexpr SizePx font_wi_{5};
     static constexpr SizePx font_hi_{6};
     static constexpr SizePx line_padding_{2}; // ? attribute
+
   public:
     constexpr explicit PrinterToBitmap(Bitmap8b* bmp)
         : bmp_{bmp}, di_{static_cast<Color8b*>(bmp->data().address())},
           dil_{di_}, bmp_wi_{bmp->dim().width()},
           ln_{SizePx(bmp_wi_ - font_wi_)} {}
+
     constexpr auto pos(const CoordsChar p) -> PrinterToBitmap& {
         // ? bounds check
         di_ = static_cast<Color8b*>(bmp_->data().address());
@@ -742,28 +725,34 @@ class PrinterToBitmap {
         dil_ = di_;
         return *this;
     }
+
     inline constexpr auto nl() -> PrinterToBitmap& {
         // ? bounds check
         di_ = dil_ + bmp_wi_ * (font_hi_ + line_padding_);
         dil_ = di_;
         return *this;
     }
+
     inline constexpr auto cr() -> PrinterToBitmap& {
         di_ = dil_;
         return *this;
     }
+
     inline constexpr auto fg(const Color8b c) -> PrinterToBitmap& {
         fg_ = c;
         return *this;
     }
+
     inline constexpr auto bg(const Color8b c) -> PrinterToBitmap& {
         bg_ = c;
         return *this;
     }
+
     inline constexpr auto transparent(const bool b) -> PrinterToBitmap& {
         transparent_ = b;
         return *this;
     }
+
     constexpr auto draw(u32 bmp_5x6) -> PrinterToBitmap& {
         if (transparent_) {
             draw_transparent(bmp_5x6);
@@ -772,10 +761,12 @@ class PrinterToBitmap {
         }
         return *this;
     }
+
     constexpr auto p_hex(const u32 hex_number_4b) -> PrinterToBitmap& {
         draw(table_hex_to_font[hex_number_4b & 0xf]);
         return *this;
     }
+
     constexpr auto p_hex_8b(const u8 v) -> PrinterToBitmap& {
         const u32 ch1 = v & 0xf;
         const u32 ch2 = (v >> 4) & 0xf;
@@ -783,6 +774,7 @@ class PrinterToBitmap {
         p_hex(ch1);
         return *this;
     }
+
     constexpr auto p_hex_16b(const u16 v) -> PrinterToBitmap& {
         // ? ugly code. remake
         const u32 ch1 = v & 0xf;
@@ -795,6 +787,7 @@ class PrinterToBitmap {
         p_hex(ch1);
         return *this;
     }
+
     constexpr auto p_hex_32b(const u32 v) -> PrinterToBitmap& {
         // ? ugly code. remake
         const u32 ch1 = v & 0xf;
@@ -816,10 +809,12 @@ class PrinterToBitmap {
         p_hex(ch1);
         return *this;
     }
+
     constexpr auto p(const char ch) -> PrinterToBitmap& {
         draw(table_ascii_to_font[u32(ch)]);
         return *this;
     }
+
     constexpr auto p(ZString str) -> PrinterToBitmap& {
         while (*str) {
             p(*str);
@@ -827,6 +822,7 @@ class PrinterToBitmap {
         }
         return *this;
     }
+
     constexpr auto backspace() -> PrinterToBitmap& {
         // ? bounds check
         di_ -= font_wi_;
@@ -834,6 +830,7 @@ class PrinterToBitmap {
         di_ -= font_wi_;
         return *this;
     }
+
     constexpr auto spc() -> PrinterToBitmap& {
         p(' ');
         return *this;
@@ -854,6 +851,7 @@ class PrinterToBitmap {
         di_ = di_ - bmp_wi_ * font_hi_ + font_wi_;
         return *this;
     }
+
     constexpr auto draw_transparent(u32 bmp_5x6) -> PrinterToBitmap& {
         constexpr u32 mask = 1u << 31;
         for (SizePx y = 0; y < font_hi_; y++) {
@@ -878,6 +876,7 @@ class Vga13h {
 
   public:
     inline Vga13h() : bmp_{Address(0xa'0000), DimensionPx{320, 200}} {}
+
     inline constexpr auto bmp() -> Bitmap8b& { return bmp_; }
 };
 
@@ -912,13 +911,19 @@ template <typename T> class UniquePtr {
 
   public:
     inline constexpr UniquePtr() = default;
+
     inline constexpr explicit UniquePtr(T* p) : ptr_{p} {}
+
     inline constexpr ~UniquePtr() { delete ptr_; }
+
     inline constexpr UniquePtr(const UniquePtr&) = delete;
+
     inline constexpr UniquePtr& operator=(const UniquePtr&) = delete;
+
     inline constexpr UniquePtr(UniquePtr&& other) : ptr_{other.ptr_} {
         other.ptr_ = nullptr;
     }
+
     inline constexpr auto operator=(UniquePtr&& other) -> UniquePtr& {
         if (this != &other) {
             delete ptr_;
@@ -927,14 +932,19 @@ template <typename T> class UniquePtr {
         }
         return *this;
     }
+
     inline constexpr auto release() -> T* {
         T* p = ptr_;
         ptr_ = nullptr;
         return p;
     }
+
     inline constexpr auto get() const -> T* { return ptr_; }
+
     inline constexpr auto operator*() const -> T& { return *ptr_; }
+
     inline constexpr auto operator->() const -> T* { return ptr_; }
+
     inline constexpr explicit operator bool() const { return ptr_ != nullptr; }
 };
 
@@ -944,13 +954,19 @@ template <typename T> class UniquePtr<T[]> {
 
   public:
     inline constexpr UniquePtr() = default;
+
     inline constexpr explicit UniquePtr(T* p) : ptr_{p} {}
+
     inline constexpr ~UniquePtr() { delete[] ptr_; }
+
     inline constexpr UniquePtr(const UniquePtr&) = delete;
+
     inline constexpr UniquePtr& operator=(const UniquePtr&) = delete;
+
     inline constexpr UniquePtr(UniquePtr&& other) : ptr_{other.ptr_} {
         other.ptr_ = nullptr;
     }
+
     inline constexpr auto operator=(UniquePtr&& other) -> UniquePtr& {
         if (this != &other) {
             delete[] ptr_;
@@ -959,15 +975,19 @@ template <typename T> class UniquePtr<T[]> {
         }
         return *this;
     }
+
     inline constexpr auto release() -> T* {
         T* p = ptr_;
         ptr_ = nullptr;
         return p;
     }
+
     inline constexpr auto get() const -> T* { return ptr_; }
+
     inline constexpr auto operator[](const i32 index) const -> T& {
         return ptr_[index];
     }
+
     inline constexpr explicit operator bool() const { return ptr_ != nullptr; }
 };
 
@@ -1010,10 +1030,12 @@ inline auto pz_memset(Address dst, u8 value, SizeBytes n) -> void {
 // built-in functions replacements (used by clang++ -O0 and -Os)
 extern "C" void* memcpy(void* dst, void* src, int n);
 extern "C" void* memset(void* dst, int value, int n);
+
 void* memcpy(void* dst, void* src, int n) {
     pz_memcpy(Address(dst), Address(src), SizeBytes(n));
     return dst;
 }
+
 void* memset(void* dst, int value, int n) {
     pz_memset(Address(dst), u8(value), SizeBytes(n));
     return dst;

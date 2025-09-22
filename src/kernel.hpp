@@ -91,6 +91,7 @@ class Heap final {
     Size entries_size_{};        // maximum slots
   public:
     Heap() = default;
+
     Heap(const Data& data, const Size entries_size)
         : data_{data}, entries_size_{entries_size} {
         // place start of free memory
@@ -117,7 +118,9 @@ class Heap final {
         // place end of free heap memory to start of free entries area
         mem_end_ = reinterpret_cast<char*>(ls_free_);
     }
+
     inline auto data() -> const Data& { return data_; }
+
     // called by operator 'new'
     auto alloc(const u32 size_bytes) -> void* {
         // try to find a free slot of that size
@@ -156,6 +159,7 @@ class Heap final {
         ls_used_pos_++;
         return ptr;
     }
+
     // called by operator `delete`
     auto free(void* ptr) -> void {
         // find the allocated memory in the used list
@@ -187,7 +191,9 @@ class Heap final {
         // did not find the allocated memory. probably a double delete
         osca_crash("Heap:7");
     }
+
     auto clear(const u8 b = 0) -> void { data_.clear(b); }
+
     auto clear_heap_entries(const u8 free_area = 0, const u8 used_area = 0)
         -> void {
         const SizeBytes es = SizeBytes(sizeof(Entry));
@@ -216,6 +222,7 @@ class Keyboard final {
         buf_[in_] = scan_code;
         in_ = next_in;
     }
+
     // returns keyboard scan code or 0 if no more events
     constexpr auto get_next_key() -> u8 {
         if (out_ == in_) {
@@ -342,6 +349,7 @@ extern "C" auto osca_on_key(const u8 scan_code) -> void {
     // to keyboard buffer
     keyboard.on_key(scan_code);
 }
+
 } // end namespace osca
 
 // called by c++ to allocate and free memory

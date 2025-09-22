@@ -11,6 +11,59 @@
 
 namespace osca {
 
+using Angle = Real;
+using AngleRad = Angle;
+
+inline auto sin(const AngleRad radians) -> Real {
+    Real v;
+    asm("fsin"
+        : "=t"(v) // 't': first (top of stack) floating point register
+        : "0"(radians));
+    return v;
+}
+
+inline auto cos(const AngleRad radians) -> Real {
+    Real v;
+    asm("fcos"
+        : "=t"(v) // 't': first (top of stack) floating point register
+        : "0"(radians));
+    return v;
+}
+
+// sets sin and cos value of 'radians' in 'fsin' and 'fcos'
+inline auto sin_and_cos(const AngleRad radians, Real& fsin, Real& fcos)
+    -> void {
+    asm("fsincos"
+        : "=t"(fcos), "=u"(fsin) // 'u' : second floating point register
+        : "0"(radians));
+}
+
+constexpr Real PI = Real(3.141592653589793);
+
+using AngleDeg = Angle;
+
+constexpr inline auto deg_to_rad(const AngleDeg deg) -> AngleRad {
+    constexpr Real deg_to_rad = PI / 180;
+    return deg * deg_to_rad;
+}
+
+template <typename T>
+constexpr auto draw_bounding_circle(Bitmap<T>& bmp, const Point& pos,
+                                    const Scale radius) -> void {
+    Count segments = Count(5 * radius); // ? magic number
+    AngleRad th = 0;
+    AngleRad dth = 2 * PI / AngleRad(segments);
+    while (segments--) {
+        Real fsin = 0;
+        Real fcos = 0;
+        sin_and_cos(th, fsin, fcos);
+        const Coord x = pos.x + radius * fcos;
+        const Coord y = pos.y + radius * fsin;
+        bmp.draw_dot({x, y}, 1); // blue dot
+        th += dth;
+    }
+}
+
 // implementation of a matrix handling 2d transforms
 template <typename T> class MatrixT {
     T xx{}, yx{}, tx{};
@@ -35,6 +88,7 @@ template <typename T> class MatrixT {
         ty = translation.y;
         tu = 1;
     }
+
     constexpr auto transform(const VectorT<T> src[], VectorT<T> dst[],
                              Count n) const -> void {
         while (n--) {
@@ -44,6 +98,7 @@ template <typename T> class MatrixT {
             dst++;
         }
     }
+
     // does the rotation part of the transform
     constexpr auto rotate(const VectorT<T> src[], VectorT<T> dst[],
                           Count n) const -> void {
@@ -54,7 +109,9 @@ template <typename T> class MatrixT {
             dst++;
         }
     }
+
     inline constexpr auto axis_x() const -> VectorT<T> { return {xx, xy}; }
+
     inline constexpr auto axis_y() const -> VectorT<T> { return {yx, yy}; }
 };
 
@@ -97,6 +154,7 @@ class ObjectDef final {
 };
 
 namespace metrics {
+
 constexpr static bool enabled = true;
 static Count matrix_set_transforms{};
 static Count collisions_checks_bounding_circle{};
@@ -107,6 +165,7 @@ static auto reset() -> void {
     collisions_checks_bounding_circle = 0;
     collisions_checks_bounding_shape = 0;
 }
+
 } // namespace metrics
 
 class Object;
@@ -132,6 +191,7 @@ class PhysicsState final {
     Acceleration acceleration{};
     AngleRad angle{};
     AngularVelocity angular_velocity{};
+
     // the object that this physics state belongs to
     Object* owner{};
 
@@ -154,6 +214,7 @@ class PhysicsState final {
         ls_all_pos = ls_all;
         ls_all_end = ls_all + objects_size;
     }
+
     static auto alloc() -> PhysicsState* {
         // check buffer overrun
         if (ls_all_pos == ls_all_end) {
@@ -163,6 +224,7 @@ class PhysicsState final {
         ls_all_pos++;
         return next_free;
     }
+
     // returns the object that has a new address for physics state
     // this function works with '~Object()' to relocate physics state
     static auto free(PhysicsState* phy) -> Object* {
@@ -173,11 +235,13 @@ class PhysicsState final {
         pz_memset(ls_all_pos, 0x0f, sizeof(PhysicsState));
         return obj;
     }
+
     static auto update_all(const TimeStepSec dt) -> void {
         for (PhysicsState* it = ls_all; it < ls_all_pos; ++it) {
             it->update(dt);
         }
     }
+
     static auto clear(const u8 b = 0) -> void {
         const Address from = Address(ls_all);
         const SizeBytes n = SizeBytes(ls_all_end) - SizeBytes(ls_all);
@@ -186,11 +250,13 @@ class PhysicsState final {
 };
 
 namespace enable {
+
 constexpr static bool draw_dots = true;
 constexpr static bool draw_polygons = true;
 constexpr static bool draw_normals = true;
 constexpr static bool draw_collision_check = false;
 constexpr static bool draw_bounding_circle = true;
+
 } // namespace enable
 
 using TypeBits = u32;
@@ -265,6 +331,7 @@ class Object {
         ls_all_pos_ = ls_all_pos;
         ls_all_pos++;
     }
+
     // called only in 'commit_deleted()'
     virtual ~Object() {
         // free returns a pointer to the object that has had it's
@@ -287,23 +354,33 @@ class Object {
     constexpr Object& operator=(Object&&) = delete;
 
     inline constexpr auto type_bits() const -> TypeBits { return type_bits_; }
+
     inline constexpr auto type_bits(const u32 bits) -> void {
         type_bits_ = bits;
     }
+
     inline constexpr auto type_bits_collision_mask() const -> TypeBits {
         return type_bits_collision_mask_;
     }
+
     inline constexpr auto type_bits_collision_mask(const u32 bits) -> void {
         type_bits_collision_mask_ = bits;
     }
+
     inline constexpr auto phy() -> PhysicsState& { return *phy_; }
+
     inline constexpr auto phy_const() const -> const PhysicsState& {
         return *phy_;
     }
+
     inline constexpr auto scale() const -> Scale { return scale_; }
+
     inline constexpr auto scale(const Scale s) -> void { scale_ = s; }
+
     inline constexpr auto def() const -> const ObjectDef& { return def_; }
+
     inline constexpr auto is_alive() const -> bool { return !(flags_ & 1); }
+
     inline constexpr auto bounding_radius() const -> Scale {
         return bounding_radius_;
     }
@@ -339,7 +416,7 @@ class Object {
         }
 
         if (enable::draw_bounding_circle) {
-            dsp.draw_bounding_circle(phy_const().position, bounding_radius());
+            draw_bounding_circle(dsp, phy_const().position, bounding_radius());
         }
 
         if (enable::draw_normals) {
@@ -363,9 +440,11 @@ class Object {
   private:
     // set to false at `add_deleted`
     inline constexpr auto flag_as_dead() -> void { flags_ |= 1; }
+
     inline constexpr auto world_points_need_update() const -> bool {
         return flags_ & 2;
     }
+
     inline constexpr auto set_world_points_need_update(const bool b) -> void {
         if (b) {
             flags_ |= 2;
@@ -373,6 +452,7 @@ class Object {
             flags_ &= Flags8b(~2);
         }
     }
+
     constexpr auto refresh_wld_points_if_invalid() -> void {
         refresh_Mmw_if_invalid();
 
@@ -393,6 +473,7 @@ class Object {
 
         set_world_points_need_update(false);
     }
+
     constexpr auto refresh_Mmw_if_invalid() -> void {
         if (phy_->angle == Mmw_angle_ && phy_->position == Mmw_position_ &&
             scale_ == Mmw_scale_) {
@@ -440,6 +521,7 @@ class Object {
         fps_timer_tick_prv = timer_tick = timer_tick_prv = osca_tick;
         time = TimeSec(timer_tick) * TimeSec(osca_tick_per_sec);
     }
+
     static auto tick() -> void {
         metrics::reset();
 
@@ -466,6 +548,7 @@ class Object {
         check_collisions();
         commit_deleted();
     }
+
     static auto allocated_objects_count() -> u32 {
         return u32(ls_all_pos - ls_all);
     }
@@ -483,6 +566,7 @@ class Object {
         *ls_deleted_pos = obj;
         ls_deleted_pos++;
     }
+
     static auto commit_deleted() -> void {
         for (Object** it = ls_deleted; it < ls_deleted_pos; ++it) {
             delete *it;
@@ -490,6 +574,7 @@ class Object {
         }
         ls_deleted_pos = ls_deleted;
     }
+
     static auto update_all() -> void {
         for (Object** it = ls_all; it < ls_all_pos; ++it) {
             Object* o = *it;
@@ -498,12 +583,14 @@ class Object {
             }
         }
     }
+
     static auto draw_all(Bitmap8b& dsp) -> void {
         for (Object** it = ls_all; it < ls_all_pos; ++it) {
             Object* o = *it;
             o->draw(dsp);
         }
     }
+
     static auto check_collisions() -> void {
         for (Object** it1 = ls_all; it1 < ls_all_pos - 1; ++it1) {
             for (Object** it2 = it1 + 1; it2 < ls_all_pos; ++it2) {
@@ -561,6 +648,7 @@ class Object {
             }
         }
     }
+
     static auto are_bounding_circles_in_collision(const Object& o1,
                                                   const Object& o2) -> bool {
         // check if: sqrt(dx*dx+dy*dy)<=r1+r2
@@ -571,6 +659,7 @@ class Object {
         const Real dist2 = v.dot(v);
         return dist2 <= dist2_check;
     }
+
     // checks if any o1 bounding points is in o2 bounding shape
     static auto is_any_point_in_bounding_shape(const Object& o1,
                                                const Object& o2) -> bool {
@@ -594,6 +683,7 @@ class Object {
         }
         return false;
     }
+
     inline static auto is_point_in_bounding_shape(const Point& p0,
                                                   const Object& o) -> bool {
         const PointIx* ix = o.def_.indexes;         // bounding points indexes

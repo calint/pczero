@@ -245,13 +245,17 @@ class Ship final : public Object {
     auto turn_left() -> void {
         phy().angular_velocity = -deg_to_rad(turning_rate);
     }
+
     auto turn_right() -> void {
         phy().angular_velocity = deg_to_rad(turning_rate);
     }
+
     auto turn_still() -> void { phy().angular_velocity = 0; }
+
     auto thrust_fwd() -> void {
         phy().velocity = forward_vector().scale(speed);
     }
+
     auto thrust_rev() -> void {
         phy().velocity = forward_vector().negate().scale(speed);
     }
