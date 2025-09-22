@@ -138,6 +138,7 @@ constexpr TypeBits tb_missiles = 16;
 constexpr TypeBits tb_bosses = 32;
 
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - -
+
 class Enemy final : public Object {
     static constexpr Scale def_scale = 5;
     static constexpr Scale def_bounding_radius = def_scale * sqrt_of_2;
