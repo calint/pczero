@@ -906,59 +906,6 @@ PrinterToVga err; // initialized by `osca_init`
         ;
 }
 
-// implementation of a matrix handling 2d transforms
-template <typename T> class MatrixT {
-    T xx{}, xy{}, xt{};
-    T yx{}, yy{}, yt{};
-    T ux{}, uy{}, id{};
-
-  public:
-    auto set_transform(const Scale scale, const AngleRad rotation,
-                       const VectorT<T>& translation) -> void {
-        T fcos = 0;
-        T fsin = 0;
-        sin_and_cos(rotation, fsin, fcos);
-        const T cs = scale * fcos;
-        const T sn = scale * fsin;
-        xx = cs;
-        xy = -sn;
-        xt = translation.x;
-        yx = sn;
-        yy = cs;
-        yt = translation.y;
-        ux = 0;
-        uy = 0;
-        id = 1;
-    }
-    constexpr auto transform(const VectorT<T> src[], VectorT<T> dst[],
-                             Count n) const -> void {
-        while (n--) {
-            dst->x = xx * src->x + xy * src->y + xt;
-            dst->y = yx * src->x + yy * src->y + yt;
-            src++;
-            dst++;
-        }
-    }
-    // does the rotation part of the transform
-    constexpr auto rotate(const VectorT<T> src[], VectorT<T> dst[],
-                          Count n) const -> void {
-        while (n--) {
-            dst->x = xx * src->x + xy * src->y;
-            dst->y = yx * src->x + yy * src->y;
-            src++;
-            dst++;
-        }
-    }
-    inline constexpr auto axis_x() const -> VectorT<T> {
-        return {xx, yx};
-    } // math correct?
-    inline constexpr auto axis_y() const -> VectorT<T> {
-        return {xy, yy};
-    } // math correct?
-};
-
-using Matrix = MatrixT<Coord>;
-
 // implementation of an owning pointer
 template <typename T> class UniquePtr {
     T* ptr_{};

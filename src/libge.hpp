@@ -9,6 +9,55 @@
 
 #include "kernel.hpp"
 
+// implementation of a matrix handling 2d transforms
+template <typename T> class MatrixT {
+    T xx{}, yx{}, tx{};
+    T xy{}, yy{}, ty{};
+    T xu{}, yu{}, id{};
+
+  public:
+    auto set_transform(const Scale scale, const AngleRad rotation,
+                       const VectorT<T>& translation) -> void {
+        T fcos = 0;
+        T fsin = 0;
+        sin_and_cos(rotation, fsin, fcos);
+        const T cs = scale * fcos;
+        const T sn = scale * fsin;
+        xx = cs;
+        xy = sn;
+        xu = 0;
+        yx = -sn;
+        yy = cs;
+        yu = 0;
+        tx = translation.x;
+        ty = translation.y;
+        id = 1;
+    }
+    constexpr auto transform(const VectorT<T> src[], VectorT<T> dst[],
+                             Count n) const -> void {
+        while (n--) {
+            dst->x = xx * src->x + yx * src->y + tx;
+            dst->y = xy * src->x + yy * src->y + ty;
+            src++;
+            dst++;
+        }
+    }
+    // does the rotation part of the transform
+    constexpr auto rotate(const VectorT<T> src[], VectorT<T> dst[],
+                          Count n) const -> void {
+        while (n--) {
+            dst->x = xx * src->x + yx * src->y;
+            dst->y = xy * src->x + yy * src->y;
+            src++;
+            dst++;
+        }
+    }
+    inline constexpr auto axis_x() const -> VectorT<T> { return {xx, xy}; }
+    inline constexpr auto axis_y() const -> VectorT<T> { return {yx, yy}; }
+};
+
+using Matrix = MatrixT<Coord>;
+
 namespace osca {
 
 class ObjectDef final {
