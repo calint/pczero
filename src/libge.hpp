@@ -9,11 +9,13 @@
 
 #include "kernel.hpp"
 
+namespace osca {
+
 // implementation of a matrix handling 2d transforms
 template <typename T> class MatrixT {
     T xx{}, yx{}, tx{};
     T xy{}, yy{}, ty{};
-    T xu{}, yu{}, id{};
+    T xu{}, yu{}, tu{};
 
   public:
     auto set_transform(const Scale scale, const AngleRad rotation,
@@ -31,7 +33,7 @@ template <typename T> class MatrixT {
         yu = 0;
         tx = translation.x;
         ty = translation.y;
-        id = 1;
+        tu = 1;
     }
     constexpr auto transform(const VectorT<T> src[], VectorT<T> dst[],
                              Count n) const -> void {
@@ -57,8 +59,6 @@ template <typename T> class MatrixT {
 };
 
 using Matrix = MatrixT<Coord>;
-
-namespace osca {
 
 class ObjectDef final {
   public:
