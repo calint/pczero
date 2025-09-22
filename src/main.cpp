@@ -7,6 +7,7 @@
 using namespace osca;
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
 extern "C" [[noreturn]] auto tsk0() -> void {
     osca_interrupts_disable();
     const Task* this_task = osca_task_active;
@@ -100,6 +101,7 @@ extern "C" [[noreturn]] auto tsk0() -> void {
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
 asm(".global tsk1");
 asm(".align 16");
 asm("tsk1:");
@@ -108,6 +110,7 @@ asm("  incl 0xa0000+80");
 asm("  jmp tsk1");
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
 extern "C" [[noreturn]] auto tsk2() -> void {
     while (true) {
         // draw red line
@@ -136,6 +139,7 @@ extern "C" [[noreturn]] auto tsk2() -> void {
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
 extern "C" [[noreturn]] auto tsk3() -> void {
     osca_interrupts_disable();
     const i32 eax = osca_task_active->eax;
@@ -151,6 +155,8 @@ extern "C" [[noreturn]] auto tsk3() -> void {
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
 #include "game.hpp"
 extern "C" [[noreturn]] auto tsk4() -> void { osca::game::Game::run(); }
+
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
