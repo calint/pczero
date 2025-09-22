@@ -59,7 +59,6 @@ class Data {
 };
 
 using Real = f32;
-using Scale = Real;
 
 inline auto sqrt(const Real in) -> Real {
     Real v;
@@ -76,6 +75,8 @@ inline auto abs(const Real in) -> Real {
         : "0"(in));
     return v;
 }
+
+using Scale = Real;
 
 // implements a 2d vector
 template <typename T> struct VectorT {
@@ -159,14 +160,6 @@ inline constexpr auto operator-(const VectorT<T>& lhs, const VectorT<T>& rhs)
     return {lhs.x - rhs.x, lhs.y - rhs.y};
 }
 
-using Coord = Real;               // coordinate in real space
-using Vector = VectorT<Coord>;    // vector in 2d real space coordinates
-using Point = Vector;             // point in 2d
-using PointIx = u16;              // index into a list of points
-using CoordPx = i16;              // coordinate in pixel space
-using PointPx = VectorT<CoordPx>; // point in pixel space
-using Count = Size;               // used in loops
-
 // implements a 2d dimension
 template <typename T> class DimensionT {
     T width_{};
@@ -183,15 +176,22 @@ template <typename T> class DimensionT {
     inline constexpr auto height() const -> const T { return height_; }
 };
 
-using SizePx = i16;                     // size in pixel space
-using DimensionPx = DimensionT<SizePx>; // dimension in pixel space
-using Color8b = u8;                     // 8 bit index in color palette
-
 // configuration of polygon rendering
 namespace enable {
 constexpr static bool draw_polygons_fill = false;
 constexpr static bool draw_polygons_edges = true;
 } // namespace enable
+
+using Coord = Real;                     // coordinate in real space
+using Vector = VectorT<Coord>;          // vector in 2d real space coordinates
+using Point = Vector;                   // point in 2d
+using CoordPx = i16;                    // coordinate in pixel space
+using PointPx = VectorT<CoordPx>;       // point in pixel space
+using SizePx = i16;                     // size in pixel space
+using DimensionPx = DimensionT<SizePx>; // dimension in pixel space
+using Color8b = u8;                     // 8 bit index in color palette
+using PointIx = u16;                    // index into a list of points
+using Count = Size;                     // used in loops
 
 // implementation of a bitmap with given address and dimension
 template <typename T> class Bitmap {
