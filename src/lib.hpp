@@ -2,6 +2,7 @@
 // reviewed: 2024-03-09
 //           2024-03-13
 //           2025-05-04
+//           2025-09-23
 
 //
 // osca library
@@ -707,8 +708,8 @@ class PrinterToBitmap {
     Color8b* di_{};      // current pixel in bitmap
     Color8b* dil_{};     // beginning of current line in bitmap
     SizePx bmp_wi_{};    // bitmap width
-    SizePx ln_{};        // offset from font line to next line
-    Color8b fg_{2};      // foreground
+    SizePx ln_{};        // offset from end of font line to next line
+    Color8b fg_{2};      // foreground (green)
     Color8b bg_{};       // background
     bool transparent_{}; // true if transparent
     u8 padding[1]{};     // unused
@@ -789,7 +790,8 @@ class PrinterToBitmap {
         return *this;
     }
 
-    constexpr auto p_hex_32b(const u32 v) -> PrinterToBitmap& {
+    constexpr auto p_hex_32b(const u32 v, const bool separate_words = true)
+        -> PrinterToBitmap& {
         // ? ugly code. remake
         const u32 ch1 = v & 0xf;
         const u32 ch2 = (v >> 4) & 0xf;
@@ -803,7 +805,9 @@ class PrinterToBitmap {
         p_hex(ch7);
         p_hex(ch6);
         p_hex(ch5);
-        p(':');
+        if (separate_words) {
+            p(':');
+        }
         p_hex(ch4);
         p_hex(ch3);
         p_hex(ch2);
