@@ -435,7 +435,9 @@ class Object {
     }
 
     // returns false if object has died
-    virtual auto on_collision(Object& other) -> bool { return true; }
+    virtual auto on_collision([[maybe_unused]] Object& other) -> bool {
+        return true;
+    }
 
   private:
     // set to false at `add_deleted`

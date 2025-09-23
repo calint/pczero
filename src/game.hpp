@@ -171,7 +171,7 @@ class Enemy final : public Object {
     }
 
     // returns false if object is dead
-    auto on_collision(Object& other) -> bool override {
+    auto on_collision([[maybe_unused]] Object& other) -> bool override {
         return false; // collision with 'Bullet' or 'Missile'
     }
 };
@@ -210,7 +210,9 @@ class Bullet final : public Object {
     }
 
     // returns false if object is dead
-    auto on_collision(Object& other) -> bool override { return false; }
+    auto on_collision([[maybe_unused]] Object& other) -> bool override {
+        return false;
+    }
 };
 
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - -
@@ -281,7 +283,9 @@ class Ship final : public Object {
     }
 
     // returns false if object is dead
-    auto on_collision(Object& other) -> bool override { return false; }
+    auto on_collision([[maybe_unused]] Object& other) -> bool override {
+        return false;
+    }
 
     auto fire() -> void {
         const TimeSec fire_dt = time - last_fired_time_;
@@ -440,7 +444,9 @@ class Missile final : public Object {
     }
 
     // returns false if object is dead
-    auto on_collision(Object& other) -> bool override { return false; }
+    auto on_collision([[maybe_unused]] Object& other) -> bool override {
+        return false;
+    }
 };
 
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - -
@@ -483,7 +489,7 @@ class Boss final : public Object {
     }
 
     // returns false if object is dead
-    auto on_collision(Object& other) -> bool override {
+    auto on_collision([[maybe_unused]] Object& other) -> bool override {
         health_--;
         return health_ > 0;
     }

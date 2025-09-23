@@ -1,11 +1,8 @@
 [
     {
         "arguments": [
-            "/usr/bin/clang++",
+            "clang++",
             "-std=c++23",
-            "-c",
-            "-g",
-            "-Os",
             "-m32",
             "-march=i386",
             "-ffreestanding",
@@ -26,13 +23,7 @@
             "-Wno-float-equal",
             "-Wno-weak-vtables",
             "-Wno-unsafe-buffer-usage",
-            "-Wno-unused-function",
-            "-Wno-unused-parameter",
-            "-Wno-unused-variable",
-            "-Wno-unused-private-field",
-            "-o",
-            "bin/src/main.o",
-            "src/main.cpp"
+            "-Wno-unused",
         ],
         "directory": "/home/c/w/pczero",
         "file": "/home/c/w/pczero/src/main.cpp",

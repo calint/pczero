@@ -360,11 +360,11 @@ void* operator new[](unsigned size) { return osca::heap.alloc(size); }
 void* operator new(unsigned size) { return osca::heap.alloc(size); }
 void operator delete(void* ptr) noexcept { osca::heap.free(ptr); }
 void operator delete(void* ptr, unsigned size) noexcept;
-void operator delete(void* ptr, unsigned size) noexcept {
+void operator delete(void* ptr, [[maybe_unused]] unsigned size) noexcept {
     osca::heap.free(ptr);
 }
 void operator delete[](void* ptr) noexcept { osca::heap.free(ptr); }
 void operator delete[](void* ptr, unsigned size) noexcept;
-void operator delete[](void* ptr, unsigned size) noexcept {
+void operator delete[](void* ptr, [[maybe_unused]] unsigned size) noexcept {
     osca::heap.free(ptr);
 }

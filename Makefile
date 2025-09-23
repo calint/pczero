@@ -55,10 +55,7 @@ CW+=-Wno-global-constructors # global variables allowed (initiated at init)
 CW+=-Wno-float-equal # allow float comparison since it is bitwise relevant
 CW+=-Wno-weak-vtables # allow for source in include files
 CW+=-Wno-unsafe-buffer-usage # allow pointer shenanigans
-CW+=-Wno-unused-function # allow for debugging
-CW+=-Wno-unused-parameter # allow for debugging
-CW+=-Wno-unused-variable # allow for debugging
-CW+=-Wno-unused-private-field # allow for padding
+CW+=-Wno-unused # allow for debugging
 
 # ld
 LF=-Tlink.ld -melf_i386 -nostdlib
