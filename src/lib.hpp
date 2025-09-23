@@ -699,6 +699,10 @@ using Bitmap8b = Bitmap<Color8b>;
 
 // prints to a bitmap
 class PrinterToBitmap {
+    static constexpr SizePx font_wi_{5};
+    static constexpr SizePx font_hi_{6};
+    static constexpr SizePx line_padding_{2}; // ? attribute
+
     Bitmap8b* bmp_{};    // destination bitmap
     Color8b* di_{};      // current pixel in bitmap
     Color8b* dil_{};     // beginning of current line in bitmap
@@ -708,9 +712,6 @@ class PrinterToBitmap {
     Color8b bg_{};       // background
     bool transparent_{}; // true if transparent
     u8 padding[1]{};     // unused
-    static constexpr SizePx font_wi_{5};
-    static constexpr SizePx font_hi_{6};
-    static constexpr SizePx line_padding_{2}; // ? attribute
 
   public:
     constexpr explicit PrinterToBitmap(Bitmap8b* bmp)
