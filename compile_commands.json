@@ -26,7 +26,6 @@
             "-Wno-unused",
         ],
         "directory": "/home/c/w/pczero",
-        "file": "/home/c/w/pczero/src/main.cpp",
-        "output": "/home/c/w/pczero/bin/src/main.o"
+        "file": "src/main.cpp",
     }
 ]
