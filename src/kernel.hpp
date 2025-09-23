@@ -9,7 +9,6 @@
 //
 
 #include "lib.hpp"
-#include "osca.hpp"
 
 // sample tasks implemented in `main.cpp`
 extern "C" [[noreturn]] auto tsk0() -> void;
