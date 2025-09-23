@@ -85,7 +85,7 @@ class Game {
     }
 
     static auto is_in_play_area(const Object& o) -> bool {
-        const Scale bounding_radius = o.bounding_radius();
+        const Real bounding_radius = o.bounding_radius();
         const PhysicsState& phy = o.phy_const();
         const Real xmax =
             Real(Game::play_area_top_left.x + Game::play_area_dim.width());
@@ -140,8 +140,8 @@ constexpr TypeBits tb_bosses = 32;
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - -
 
 class Enemy final : public Object {
-    static constexpr Scale def_scale = 5;
-    static constexpr Scale def_bounding_radius = def_scale * sqrt_of_2;
+    static constexpr Real def_scale = 5;
+    static constexpr Real def_bounding_radius = def_scale * sqrt_of_2;
 
   public:
     Enemy()
@@ -179,8 +179,8 @@ class Enemy final : public Object {
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - -
 
 class Bullet final : public Object {
-    static constexpr Scale def_scale = 0.5;
-    static constexpr Scale def_bounding_radius = def_scale * sqrt_of_2;
+    static constexpr Real def_scale = 0.5;
+    static constexpr Real def_bounding_radius = def_scale * sqrt_of_2;
 
     TimeSec created_time_ = time;
 
@@ -218,8 +218,8 @@ class Bullet final : public Object {
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - -
 
 class Ship final : public Object {
-    static constexpr Scale def_scale = 4;
-    static constexpr Scale def_bounding_radius = def_scale * sqrt_of_2;
+    static constexpr Real def_scale = 4;
+    static constexpr Real def_bounding_radius = def_scale * sqrt_of_2;
     static constexpr AngleDeg turning_rate = 90;
     static constexpr Scalar speed = 20;
     static constexpr TimeSec fire_rate = .2;
@@ -412,7 +412,7 @@ class Ship final : public Object {
 
 class Wall final : public Object {
   public:
-    Wall(const Scale scale, const Point& position, const AngleRad angle)
+    Wall(const Real scale, const Point& position, const AngleRad angle)
         : Object{tb_walls,          tb_none,  Game::wall_def, scale,
                  scale * sqrt_of_2, position, angle,          3} {}
 };
@@ -420,8 +420,8 @@ class Wall final : public Object {
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - -
 
 class Missile final : public Object {
-    static constexpr Scale def_scale = 2;
-    static constexpr Scale def_bounding_radius = def_scale * sqrt_of_2;
+    static constexpr Real def_scale = 2;
+    static constexpr Real def_bounding_radius = def_scale * sqrt_of_2;
 
   public:
     Missile()
@@ -452,8 +452,8 @@ class Missile final : public Object {
 //--- --  - - -- -- - --- ---- -- ----- - ------ - -- -- - - ---- -- - -- - -
 
 class Boss final : public Object {
-    static constexpr Scale def_scale = 3;
-    static constexpr Scale def_bounding_radius = def_scale * sqrt_of_2;
+    static constexpr Real def_scale = 3;
+    static constexpr Real def_bounding_radius = def_scale * sqrt_of_2;
     static constexpr TimeSec boss_lifetime = 10;
 
     Count health_ = 5;

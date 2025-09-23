@@ -49,8 +49,10 @@ constexpr inline auto deg_to_rad(const AngleDeg deg) -> AngleRad {
 
 template <typename T>
 constexpr auto draw_bounding_circle(Bitmap<T>& bmp, const Point& pos,
-                                    const Scale radius) -> void {
-    Count segments = Count(5 * radius); // ? magic number
+                                    const Real radius, const T color = 1,
+                                    const Real segments_per_radius = 5)
+    -> void {
+    Count segments = Count(segments_per_radius * radius);
     AngleRad th = 0;
     AngleRad dth = 2 * PI / AngleRad(segments);
     while (segments--) {
@@ -59,7 +61,7 @@ constexpr auto draw_bounding_circle(Bitmap<T>& bmp, const Point& pos,
         sin_and_cos(th, fsin, fcos);
         const Coord x = pos.x + radius * fcos;
         const Coord y = pos.y + radius * fsin;
-        bmp.draw_dot({x, y}, 1); // blue dot
+        bmp.draw_dot({x, y}, color);
         th += dth;
     }
 }
@@ -71,7 +73,7 @@ template <typename T> class MatrixT {
     T xu{}, yu{}, tu{};
 
   public:
-    auto set_transform(const Scale scale, const AngleRad rotation,
+    auto set_transform(const T scale, const AngleRad rotation,
                        const VectorT<T>& translation) -> void {
         T fcos = 0;
         T fsin = 0;
@@ -263,7 +265,7 @@ using TypeBits = u32;
 using Flags8b = u8;
 using Scalar = Real;
 
-constexpr Scale sqrt_of_2 = Real(1.414213562);
+constexpr Real sqrt_of_2 = Real(1.414213562);
 
 class Object {
     // pointer to element in 'all' list containing pointer to this object
@@ -279,7 +281,7 @@ class Object {
     // and 'phy_' relocated)
     PhysicsState* phy_{};
     // scale is used in model to world transform
-    Scale scale_{};
+    Real scale_{};
     // contains the drawable and bounding shape definition
     // ? modifiable using pointer instead
     const ObjectDef& def_;
@@ -295,9 +297,9 @@ class Object {
     // angle used in 'Mmw_'
     AngleRad Mmw_angle_{};
     // scale used in 'Mmw_'
-    Scale Mmw_scale_{};
+    Real Mmw_scale_{};
     // bounding radius that includes all points. usually: scale_*sqrt(2)
-    Scale bounding_radius_{};
+    Real bounding_radius_{};
     Color8b color_{}; // shape color
     Flags8b flags_{}; // bit 1: is dead
                       // bit 2: 'points_world_' need update
@@ -305,9 +307,8 @@ class Object {
 
   public:
     Object(const TypeBits type_bits, const TypeBits type_bits_collision_mask,
-           const ObjectDef& def, const Scale scale,
-           const Scalar bounding_radius, const Point& position,
-           const AngleRad angle, const Color8b color)
+           const ObjectDef& def, const Real scale, const Scalar bounding_radius,
+           const Point& position, const AngleRad angle, const Color8b color)
         : type_bits_{type_bits},
           type_bits_collision_mask_{type_bits_collision_mask},
           phy_{PhysicsState::alloc()}, scale_{scale}, def_{def},
@@ -373,15 +374,15 @@ class Object {
         return *phy_;
     }
 
-    inline constexpr auto scale() const -> Scale { return scale_; }
+    inline constexpr auto scale() const -> Real { return scale_; }
 
-    inline constexpr auto scale(const Scale s) -> void { scale_ = s; }
+    inline constexpr auto scale(const Real s) -> void { scale_ = s; }
 
     inline constexpr auto def() const -> const ObjectDef& { return def_; }
 
     inline constexpr auto is_alive() const -> bool { return !(flags_ & 1); }
 
-    inline constexpr auto bounding_radius() const -> Scale {
+    inline constexpr auto bounding_radius() const -> Real {
         return bounding_radius_;
     }
 

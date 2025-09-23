@@ -76,8 +76,6 @@ inline auto abs(const Real in) -> Real {
     return v;
 }
 
-using Scale = Real;
-
 // implements a 2d vector
 template <typename T> struct VectorT {
     T x{}, y{};
@@ -91,7 +89,7 @@ template <typename T> struct VectorT {
     }
 
     // scales and returns this vector
-    inline constexpr auto scale(const Scale s) -> VectorT& {
+    inline constexpr auto scale(const T s) -> VectorT& {
         x *= s;
         y *= s;
         return *this;
@@ -105,7 +103,7 @@ template <typename T> struct VectorT {
     }
 
     // increases by 'v' scaled by 's' and returns this vector
-    inline constexpr auto inc_by(const VectorT& v, const Scale s) -> VectorT& {
+    inline constexpr auto inc_by(const VectorT& v, const T s) -> VectorT& {
         x += v.x * s;
         y += v.y * s;
         return *this;
