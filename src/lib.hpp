@@ -49,7 +49,7 @@ class Data {
         pz_memcpy(d.address(), address_, n); // ? check bounds
     }
 
-    inline auto clear(u8 byte = 0) const -> void {
+    inline auto clear(const u8 byte = 0) const -> void {
         pz_memset(address_, byte, size_);
     }
 
@@ -96,7 +96,7 @@ template <typename T> struct VectorT {
     }
 
     // increases and returns this vector by 'v'
-    inline constexpr auto inc_by(const VectorT& v) -> VectorT {
+    inline constexpr auto inc_by(const VectorT& v) -> VectorT& {
         x += v.x;
         y += v.y;
         return *this;
