@@ -2,6 +2,7 @@
 // reviewed: 2024-03-09
 //           2024-03-13
 //           2025-05-04
+//           2025-09-22
 
 //
 // osca kernel
@@ -54,8 +55,8 @@ extern "C" auto osca_on_exception() -> void {
 }
 
 // note: The FSAVE instruction saves a 108-byte data structure to memory
-// (fpu_state), with the first byte of the field needed to be aligned to a
-// 16-byte boundary.
+//       (fpu_state), with the first byte of the field needed to be aligned to a
+//       16-byte boundary.
 alignas(16) struct Task osca_tasks[]{
     //                 :-> 0b01 grabs keyboard focus, 0b10 running
     // eip esp eflags bits id edi esi ebp esp0 ebx edx ecx eax
@@ -68,6 +69,7 @@ alignas(16) struct Task osca_tasks[]{
     {u32(tsk3), 0xa'0000 + 320 * 196, 0, 0b10, 6, 0, 0, 0, 0, 0, 0, 2, 160},
     {u32(tsk3), 0xa'0000 + 320 * 200, 0, 0b10, 7, 0, 0, 0, 0, 0, 0, 4, 180},
 };
+
 const Task* const osca_tasks_end =
     osca_tasks + sizeof(osca_tasks) / sizeof(Task);
 
@@ -95,11 +97,13 @@ class Heap final {
 
     Heap(const Data& data, const Size entries_size)
         : data_{data}, entries_size_{entries_size} {
+
         // place start of free memory
         mem_pos_ = reinterpret_cast<char*>(data.address());
 
         // place used entries area at top of the heap
         ls_used_ = static_cast<Entry*>(data.end()) - entries_size;
+
         // check that list start is within bounds
         if (reinterpret_cast<char*>(ls_used_) < mem_pos_) {
             osca_crash("Heap:1");
@@ -109,6 +113,7 @@ class Heap final {
 
         // place free entries area before used entries
         ls_free_ = ls_used_ - entries_size;
+
         // check that list start is within bounds
         if (reinterpret_cast<char*>(ls_free_) < mem_pos_) {
             osca_crash("Heap:2");
@@ -132,22 +137,30 @@ class Heap final {
 
             // found a matching size entry
             void* ptr = ent->ptr;
+
             // check that next entry is within the list
             if (ls_used_pos_ >= ls_used_end_) {
                 osca_crash("Heap:3");
             }
+
             // move to used entries
             *ls_used_pos_ = *ent;
             ls_used_pos_++;
             ls_free_pos_--;
+
+            // move last free entry to current position that has been allocated
+            // avoiding gaps
             *ent = *ls_free_pos_;
+
             // debugging (can be removed)
             pz_memset(ls_free_pos_, 0x0f, sizeof(Entry));
             return ptr;
         }
+
         // did not find in free list, create new
         char* ptr = mem_pos_;
         mem_pos_ += size_bytes;
+
         // check bounds
         if (mem_pos_ > mem_end_) {
             osca_crash("Heap:4");
@@ -155,6 +168,7 @@ class Heap final {
         if (ls_used_pos_ >= ls_used_end_) {
             osca_crash("Heap:5");
         }
+
         // write to used list
         *ls_used_pos_ = {ptr, size_bytes};
         ls_used_pos_++;
@@ -176,6 +190,8 @@ class Heap final {
             if (ls_free_pos_ >= ls_free_end_) {
                 osca_crash("Heap:6");
             }
+
+            // add entry to free slots
             *ls_free_pos_ = *ent;
             ls_free_pos_++;
 
@@ -187,8 +203,10 @@ class Heap final {
             // debugging (can be removed)
             pz_memset(ptr, 0x0f, SizeBytes(size));
             pz_memset(ls_used_pos_, 0x0f, sizeof(Entry));
+
             return;
         }
+
         // did not find the allocated memory. probably a double delete
         osca_crash("Heap:7");
     }
@@ -244,8 +262,8 @@ Keyboard keyboard;
 // focused task that should read keyboard
 inline Task* osca_task_focused{};
 
-// declared in linker script `link.ld` after code and data at first 64KB
 // boundary address of symbol marks start of contiguous memory
+// note: declared in linker script `link.ld` after code and data at first 64KB
 extern "C" int free_mem_start_symbol;
 
 // called by osca before starting tasks
@@ -296,13 +314,14 @@ extern "C" auto osca_init() -> void {
 
     // initiate heap with a size of 320*100 B
     heap = Heap{{free_mem_start, 320 * 100}, heap_entries_size};
+
     // fill buffers with colors for debugging output
     heap.clear(0x2c);
     heap.clear_heap_entries(0x2e, 0x2f);
 }
 
 // called by osca from the keyboard interrupt
-// there is no task switch during this function
+// note: there is no task switch during this function
 extern "C" auto osca_on_key(const u8 scan_code) -> void {
     static bool keyboard_ctrl_pressed{};
 
