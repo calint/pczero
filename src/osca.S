@@ -3,9 +3,12 @@
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - info
 # reviewed: 2024-03-10
 #           2025-05-04
+#           2025-09-23
+#
 # tested on:
-# * linux 6.5.0 qemu-system-i386 8.0.4
-#         6.14.4                 9.2.3
+# * linux 6.5.0   qemu-system-i386 8.0.4
+#         6.14.4                   9.2.3
+#         6.16.8                   10.1.0 
 # * asus zenbook UX305CA
 #
 # memory map from https://wiki.osdev.org/Memory_Map_(x86)
@@ -53,6 +56,7 @@
 #   page 3-424 Vol. 2A: FSAVE/FNSAVE—Store x87 FPU State
 #   FSAVE m94/108byte Store FPU state to m94byte or m108byte
 .set TASK_STRUCT_SIZE,TASK_STRUCT_OFFSET_FPU_STATE+108+4
+# note: +4 is padding in `struct Task`
 .set TASK_BIT_FOCUS_KEYBOARD,1
 .set TASK_BIT_RUNNING,2
 .set EFLAGS_BIT_IF,0x200 # the 'Interrupt enable flag' bit
