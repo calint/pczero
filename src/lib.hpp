@@ -138,8 +138,9 @@ template <typename T> struct VectorT {
 
     // returns magnitude squared
     inline constexpr auto magnitude2() const -> T { return x * x + y * y; }
-    // inline constexpr auto operator<=>(const VectorT&)const=default; // ? does
-    // not compile in clang++ without includes from std
+
+    // inline constexpr auto operator<=>(const VectorT&) const = default;
+    // ? does not compile in clang++ without includes from std
 };
 
 template <typename T>
