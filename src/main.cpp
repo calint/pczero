@@ -1,6 +1,7 @@
 // reviewed: 2024-03-09
 //           2024-03-13
 //           2025-05-04
+//           2025-09-22
 
 #include "kernel.hpp"
 
@@ -91,10 +92,9 @@ extern "C" [[noreturn]] auto tsk0() -> void {
             }
             pb.backspace().p(ch).p('_');
         }
-        osca_yield(); // ?! if it is only task running osca 'hangs'
-                      // because no interrupts get through due to
-                      // almost all time spent in non-interruptable
-                      // osca_yield code
+        osca_yield(); // ?! if it is only task running osca 'hangs' because no
+                      // interrupts get through due to almost all time spent in
+                      // non-interruptable osca_yield code
 
         // osca_halt(); // pauses task until next interrupt
     }
@@ -126,7 +126,7 @@ extern "C" [[noreturn]] auto tsk2() -> void {
         // draw red line
         pz_memset(Address(0xa'0000 + 320 * 155), 4, 320);
 
-        // copy osca stack
+        // copy osca stack (initially set to boot sector loaded binary)
         Data src_stk = Data(Address(0x7b00), 256);
         Data dst_stk = Data(Address(0xa'0000 + 320 * 156), 256); // on screen
         src_stk.to(dst_stk);
