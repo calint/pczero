@@ -86,7 +86,7 @@ class Game {
 
     static auto is_in_play_area(const Object& o) -> bool {
         const Real bounding_radius = o.bounding_radius();
-        const PhysicsState& phy = o.phy_const();
+        const PhysicsState& phy = o.phy();
         const Real xmax =
             Real(Game::play_area_top_left.x + Game::play_area_dim.width());
         const Real xmin = Real(Game::play_area_top_left.x);
@@ -165,7 +165,7 @@ class Enemy final : public Object {
         }
         if (!Game::is_in_play_area(*this)) {
             // ?! reversing velocity is not always enough
-            phy().velocity.y = -phy().velocity.y;
+            phy().linear_velocity.y = -phy().linear_velocity.y;
         }
         return true;
     }
@@ -256,11 +256,11 @@ class Ship final : public Object {
     auto turn_still() -> void { phy().angular_velocity = 0; }
 
     auto thrust_fwd() -> void {
-        phy().velocity = forward_vector().scale(speed);
+        phy().linear_velocity = forward_vector().scale(speed);
     }
 
     auto thrust_rev() -> void {
-        phy().velocity = forward_vector().negate().scale(speed);
+        phy().linear_velocity = forward_vector().negate().scale(speed);
     }
 
     // returns false if object is dead
@@ -269,7 +269,7 @@ class Ship final : public Object {
             return false;
         }
         if (!Game::is_in_play_area(*this)) {
-            phy().velocity = {0, 0};
+            phy().linear_velocity = {0, 0};
         }
         if (!auto_aim_at_boss) {
             return true;
@@ -297,9 +297,9 @@ class Ship final : public Object {
         Vector v =
             forward_vector().scale(bounding_radius() + b->bounding_radius());
         PhysicsState& bp = b->phy();
-        bp.position = phy_const().position + v;
-        bp.velocity = v.normalize().scale(Bullet::speed);
-        bp.angle = phy_const().angle;
+        bp.position = phy().position + v;
+        bp.linear_velocity = v.normalize().scale(Bullet::speed);
+        bp.angle = phy().angle;
     }
 
   private:
@@ -308,7 +308,7 @@ class Ship final : public Object {
         -> void {
         // aim and shoot at target current location
         constexpr Real margin_of_error = Real(0.01);
-        Vector v_tgt = target.phy_const().position - phy_const().position;
+        Vector v_tgt = target.phy().position - phy().position;
         v_tgt.normalize();
         Vector v_fwd = forward_vector();
         // draw trajectory of bullet
@@ -367,9 +367,9 @@ class Ship final : public Object {
                                            const bool draw_trajectory = false)
         -> Vector {
         TimeStepSec t = 0;
-        Point p_tgt = target.phy_const().position;
-        Vector v_tgt = target.phy_const().velocity;
-        const Vector a_tgt = target.phy_const().acceleration;
+        Point p_tgt = target.phy().position;
+        Vector v_tgt = target.phy().linear_velocity;
+        const Vector a_tgt = target.phy().acceleration;
         while (t < eval_t) {
             t += eval_dt;
             // get expected position of target
@@ -381,7 +381,7 @@ class Ship final : public Object {
             }
 
             // aim vector to the expected location
-            const Vector v_aim = p_tgt - phy_const().position;
+            const Vector v_aim = p_tgt - phy().position;
             // get t for bullet to reach expected location
             const TimeStepSec t_bullet = v_aim.magnitude() / Bullet::speed;
             // note: optimizing away sqrt() in magnitude() reduces precision
@@ -397,8 +397,8 @@ class Ship final : public Object {
                     // draw aim vector
                     Vector v = v_aim;
                     v.normalize().scale(Bullet::speed);
-                    Game::draw_trajectory(phy_const().position, v, t_bullet,
-                                          eval_dt, 2);
+                    Game::draw_trajectory(phy().position, v, t_bullet, eval_dt,
+                                          2);
                 }
                 return v_aim;
             }
@@ -503,7 +503,7 @@ auto Game::create_scene() -> void {
         o->phy().position = {i, 60};
         o->phy().angle = deg_to_rad(i);
         o->phy().angular_velocity = deg_to_rad(10);
-        o->phy().velocity = {0, 2};
+        o->phy().linear_velocity = {0, 2};
     }
 }
 
@@ -530,7 +530,7 @@ auto Game::create_boss() -> void {
         boss_vel.inc_by({-5, 2});
     }
     o->phy().position = boss_pos;
-    o->phy().velocity = boss_vel;
+    o->phy().linear_velocity = boss_vel;
     o->phy().angular_velocity = deg_to_rad(25);
 }
 
@@ -759,7 +759,7 @@ auto Game::create_boss() -> void {
                 }
             }
             if (!keyb[key_w] && !keyb[key_s]) {
-                shp->phy().velocity = {0, 0};
+                shp->phy().linear_velocity = {0, 0};
             }
             if (keyb[key_j]) {
                 shp->fire();

@@ -2,6 +2,7 @@
 // reviewed: 2024-03-09
 //           2024-03-13
 //           2025-05-04
+//           2025-09-22
 
 //
 // osca game engine library
@@ -134,8 +135,9 @@ class ObjectDef final {
     // note: calculated by `init_normals`
     Vector* normals{};
 
-    // destructor cannot happen because object life time is program lifetime
-    // void operator delete(void*) = delete;
+    void operator delete(void*) = delete;
+    // note: destructor cannot happen because object life time is program
+    // lifetime
 
     // calculates the normals using the points and indexes
     // called once at program init
@@ -177,7 +179,7 @@ class Object;
 // normals)
 constexpr Size objects_size = heap_entries_size / 3;
 
-using Velocity = Vector;
+using LinearVelocity = Vector;
 using Acceleration = Vector;
 using AngularVelocity = AngleRad;
 using Time = f64;
@@ -189,7 +191,7 @@ using TimeStepSec = Real;
 class PhysicsState final {
   public:
     Point position{};
-    Velocity velocity{};
+    LinearVelocity linear_velocity{};
     Acceleration acceleration{};
     AngleRad angle{};
     AngularVelocity angular_velocity{};
@@ -198,8 +200,8 @@ class PhysicsState final {
     Object* owner{};
 
     inline auto update(const TimeStepSec dt) -> void {
-        velocity.inc_by(acceleration, dt);
-        position.inc_by(velocity, dt);
+        linear_velocity.inc_by(acceleration, dt);
+        position.inc_by(linear_velocity, dt);
         angle += angular_velocity * dt;
     }
 
@@ -335,9 +337,9 @@ class Object {
 
     // called only in 'commit_deleted()'
     virtual ~Object() {
-        // free returns a pointer to the object that has had it's
-        // physics state moved to the newly freed physics location.
-        // set the pointer of that object's `phy_` to the new location
+        // free returns a pointer to the object that has had it's physics state
+        // moved to the newly freed physics location. set the pointer of that
+        // object's `phy_` to the new location
         PhysicsState::free(this->phy_)->phy_ = phy_;
 
         // move the last object pointer in list to the slot this object had
@@ -370,9 +372,7 @@ class Object {
 
     inline constexpr auto phy() -> PhysicsState& { return *phy_; }
 
-    inline constexpr auto phy_const() const -> const PhysicsState& {
-        return *phy_;
-    }
+    inline constexpr auto phy() const -> const PhysicsState& { return *phy_; }
 
     inline constexpr auto scale() const -> Real { return scale_; }
 
@@ -417,7 +417,7 @@ class Object {
         }
 
         if (enable::draw_bounding_circle) {
-            draw_bounding_circle(dsp, phy_const().position, bounding_radius());
+            draw_bounding_circle(dsp, phy().position, bounding_radius());
         }
 
         if (enable::draw_normals) {
@@ -448,7 +448,7 @@ class Object {
         return flags_ & 2;
     }
 
-    inline constexpr auto set_world_points_need_update(const bool b) -> void {
+    inline constexpr auto world_points_need_update(const bool b) -> void {
         if (b) {
             flags_ |= 2;
         } else {
@@ -474,7 +474,7 @@ class Object {
             Mmw_.rotate(def_.normals, normals_world_.get(), def_.indexes_size);
         }
 
-        set_world_points_need_update(false);
+        world_points_need_update(false);
     }
 
     constexpr auto refresh_Mmw_if_invalid() -> void {
@@ -483,7 +483,7 @@ class Object {
             return;
         }
 
-        set_world_points_need_update(true);
+        world_points_need_update(true);
 
         Mmw_.set_transform(scale_, phy_->angle, phy_->position);
         Mmw_scale_ = scale_;
