@@ -265,7 +265,6 @@ constexpr static bool draw_bounding_circle = true;
 
 using TypeBits = u32;
 using Flags8b = u8;
-using Scalar = Real;
 
 constexpr Real sqrt_of_2 = Real(1.414213562);
 
@@ -309,7 +308,7 @@ class Object {
 
   public:
     Object(const TypeBits type_bits, const TypeBits type_bits_collision_mask,
-           const ObjectDef& def, const Real scale, const Scalar bounding_radius,
+           const ObjectDef& def, const Real scale, const Real bounding_radius,
            const Point& position, const AngleRad angle, const Color8b color)
         : type_bits_{type_bits},
           type_bits_collision_mask_{type_bits_collision_mask},

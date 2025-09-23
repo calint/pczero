@@ -47,7 +47,8 @@ class Game {
     static auto draw_axis(Bitmap8b& dsp) -> void {
         static AngleDeg deg = 0;
         static Matrix R{};
-        if (deg > 360) { // ? what if deg=730
+
+        while (deg > 360) {
             deg -= 360;
         }
         deg += 5;
@@ -185,7 +186,7 @@ class Bullet final : public Object {
     TimeSec created_time_ = time;
 
   public:
-    static constexpr Scalar speed = 40;
+    static constexpr Real speed = 40;
     static constexpr TimeSec lifetime = 10;
 
     Bullet()
@@ -221,7 +222,7 @@ class Ship final : public Object {
     static constexpr Real def_scale = 4;
     static constexpr Real def_bounding_radius = def_scale * sqrt_of_2;
     static constexpr AngleDeg turning_rate = 90;
-    static constexpr Scalar speed = 20;
+    static constexpr Real speed = 20;
     static constexpr TimeSec fire_rate = .2;
 
     TimeSec last_fired_time_ = 0;
@@ -303,11 +304,12 @@ class Ship final : public Object {
     }
 
   private:
+    // aim and shoot at target current location
     auto attack_target_current_location(const Object& target,
                                         const bool draw_trajectory = false)
         -> void {
-        // aim and shoot at target current location
         constexpr Real margin_of_error = Real(0.01);
+
         Vector v_tgt = target.phy().position - phy().position;
         v_tgt.normalize();
         Vector v_fwd = forward_vector();
@@ -335,20 +337,23 @@ class Ship final : public Object {
         -> void {
         constexpr Real intersection_time_margin_of_error = Real(0.1);
         constexpr TimeStepSec evaluation_time_step = TimeStepSec(0.05);
+        constexpr Real margin_of_error_aim = Real(0.01);
+
         Vector v_aim = find_aim_vector_for_moving_target(
             target, Bullet::lifetime, evaluation_time_step,
             intersection_time_margin_of_error, draw_trajectory);
+
         if (v_aim.x == 0 && v_aim.y == 0) {
             // did not find aim vector
             turn_still();
             return;
         }
+
         // turn towards aim vector and fire if within error margin
         v_aim.normalize();
         const Vector v_fwd = forward_vector();
         const Vector n_fwd = v_fwd.normal();
         const Real dot = v_aim.dot(n_fwd);
-        constexpr Real margin_of_error_aim = Real(0.01);
         if (abs(dot) < margin_of_error_aim) {
             turn_still();
             fire();
@@ -382,6 +387,7 @@ class Ship final : public Object {
 
             // aim vector to the expected location
             const Vector v_aim = p_tgt - phy().position;
+
             // get t for bullet to reach expected location
             const TimeStepSec t_bullet = v_aim.magnitude() / Bullet::speed;
             // note: optimizing away sqrt() in magnitude() reduces precision
@@ -501,9 +507,9 @@ auto Game::create_scene() -> void {
     for (Real i = 30; i < 300; i += 20) {
         Enemy* o = new Enemy{};
         o->phy().position = {i, 60};
+        o->phy().linear_velocity = {0, 2};
         o->phy().angle = deg_to_rad(i);
         o->phy().angular_velocity = deg_to_rad(10);
-        o->phy().linear_velocity = {0, 2};
     }
 }
 
@@ -553,6 +559,7 @@ auto Game::create_boss() -> void {
     // object definitions
     //
     //-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
+
     enemy_def = {
         5, 4,
         new Point[]{
@@ -566,7 +573,9 @@ auto Game::create_boss() -> void {
         new PointIx[]{1, 2, 3, 4} // bounding convex polygon CCW
     };
     enemy_def.init_normals();
+
     //-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
+
     ship_def = {4, 3,
                 new Point[]{
                     {0, 0},
@@ -576,14 +585,19 @@ auto Game::create_boss() -> void {
                 },
                 new PointIx[]{1, 2, 3}};
     ship_def.init_normals();
+
     //-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
-    bullet_def = {1, 1, // at least one bounding point for collision detection
+
+    bullet_def = {1, 1,
                   new Point[]{
                       {0, 0},
                   },
                   new PointIx[]{0}};
+    // note: at least one bounding point for collision detection
     bullet_def.init_normals();
+
     //-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
+
     wall_def = {4, 4,
                 new Point[]{
                     {-1, -1},
@@ -593,7 +607,9 @@ auto Game::create_boss() -> void {
                 },
                 new PointIx[]{0, 1, 2, 3}};
     wall_def.init_normals();
+
     //-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
+
     missile_def = {4, 3,
                    new Point[]{
                        {0, -1},
@@ -602,7 +618,9 @@ auto Game::create_boss() -> void {
                    },
                    new PointIx[]{0, 1, 2}};
     missile_def.init_normals();
+
     //-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
+
     constexpr Count boss_segments = 6;
     boss_def = {
         boss_segments,
@@ -611,6 +629,7 @@ auto Game::create_boss() -> void {
         create_circle_ix(boss_segments).release(),
     };
     boss_def.init_normals();
+
     //-- - -- - -- - -- -- - --- - - -- - -- - -- -- - - -- -- - - -- -- - -- -
 
     // constants used to clear screen by copying ram to vga
@@ -628,6 +647,7 @@ auto Game::create_boss() -> void {
     constexpr u8 key_d = 3;
     constexpr u8 key_spc = 4;
     constexpr u8 key_j = 5;
+
     bool keyb[6]{}; // 'wasd space j' pressed status
     u8 last_received_key = 0;
 
