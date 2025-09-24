@@ -1,4 +1,4 @@
-[ ] osca.S loads 127 sectors. that is not supported by floppy. hd-image ok
+[ ] osca.S loads 127 sectors. that is not supported by floppy. hd-image ok in qemu
 [x] kernel: make heap into an instance 
 [ ] libge: Object: allow change of ObjectDef
 [ ] lib: Data::address_offset: check if within bounds?
