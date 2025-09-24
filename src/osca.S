@@ -87,8 +87,8 @@ mov %bx,%ds     # data segment
 mov %bx,%ss     # setup stack
 mov $_start,%sp #  at 0x7c00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
-# https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)
-# read maximum 127 sectors * 512B = 65024 bytes
+# load from 1.44 MB floppy a maximum of 127 sectors * 512 B
+#  => 65024 bytes
 .set SECTORS_TO_READ,127
 cld                # clear direction (forward)
 mov $0x07e0,%bx    # to es:bx=0x7e00:0000
