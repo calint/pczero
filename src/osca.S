@@ -90,7 +90,9 @@ mov $_start,%sp #  at 0x7c00
 # https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)
 # note: assumes load from disk or USB
 #       see floppy version for vintage hardware
-# read the maximum of 63 sectors * 512 B = 32256 bytes
+# Cylinder-Head-Sector (CHS) addressing 
+# read the maximum of 63 sectors from head 0 cylinder 0
+# 63 * 512 B = 32256 bytes
 cld # clear direction (forward)
 # from cylinder 0 (%ch), sector 2 (%cl)
 #  sector starts from 1, not 0
