@@ -1,4 +1,5 @@
 # table of contents
+
 * `osca.S`
 * `osca.hpp`
 * `lib.hpp`
@@ -8,18 +9,20 @@
 * `main.cpp`
 
 ## osca.S
+
 * assembler
 * bootable binary
 * loads 63½ KB for a total program size of 64 KB
 * sets vga to video mode 320x200x8 starting at a0000h
 * sets cpu in 32 bit protected mode
 * maps interrupts to handlers
-    * 1024 Hz timer
-    * keyboard
+  * 1024 Hz timer
+  * keyboard
 * runs tasks
-    * preemptive task switch at 128 Hz
+  * preemptive task switch at 128 Hz
 
 ## osca.hpp
+
 * makes variables declared in `osca.S` available in c++
   * `osca_tick`
   * `osca_tick_lo`
@@ -38,6 +41,7 @@
   * `osca_on_key`
 
 ## lib.hpp
+
 * library of classes and functions used by `kernel.hpp` and applications
 * declares globals for printing text to display
   * `vga13h`
@@ -45,6 +49,7 @@
   * `err`
 
 ## kernel.hpp
+
 * defines tasks to run
 * implements memory allocation
 * keyboard handling
@@ -52,10 +57,13 @@
 * task activation/deactivation
 
 ## libge.hpp
+
 * game engine library
 
 ## game.hpp
+
 * sample game featuring a targeting system
 
 ## main.cpp
+
 * sample tasks
