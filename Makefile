@@ -102,11 +102,13 @@ display:
 	@echo
 
 install:
-	sudo dd if=/dev/zero of=$(INSTALL_TO) count=1000 && sync
-	sudo dd if=$(IMAGE) of=$(INSTALL_TO) && sync
+	sudo dd if=/dev/zero of=$(INSTALL_TO) bs=512 count=2880 && sync
+	sudo dd if=floppy.img of=$(INSTALL_TO) && sync
 
 dispusb:
-	sudo qemu-system-i386 -display gtk,zoom-to-fit=on -m 1M -drive file=$(INSTALL_TO),format=raw
+	sudo dd if=$(INSTALL_TO) of=usb.img bs=512 count=2880
+	sudo qemu-system-i386 -display gtk,zoom-to-fit=on -m 1M -drive file=usb.img,format=raw,if=floppy
+	rm -f usb.img
 
 readusb:
 	sudo dd if=$(INSTALL_TO) count=2 | hx | f 00000200

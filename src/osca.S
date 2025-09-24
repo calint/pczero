@@ -109,8 +109,8 @@ cmp $18,%cl        # compare for sectors per head in floppy
 jle .dsk_read      #  and if less or equal continue reading
 mov $1,%cl         # reset sector
 inc %dh            # increase head
-cmp $1,%dh         # compare for 2 heads (starting at 0)
-jle .dsk_read      #  and if less or equal continue reading
+cmp $1,%dh         # check head number is not greater than 1 
+jle .dsk_read      #  and continue reading if so  
 xor %dh,%dh        # reset head to 0
 inc %ch            # increase track
 jmp .dsk_read      # continue reading
