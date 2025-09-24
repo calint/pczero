@@ -102,7 +102,7 @@ xor %bx,%bx     #
 mov $0x0002,%cx
 xor %dh,%dh # head 0
 # %dl, drive number, is unchanged
-.lp0:
+lp0:
 mov $0x023f,%ax # command 2 (%ah), 63 sectors (%al)
 int $0x13       # read disk
 #jc .lp0         # if error retry (image file must be 64KB)
@@ -224,14 +224,14 @@ mov $isr_other,%eax # store the upper 16 bits of the handler
 shr $16,%eax        #  address in ax
 mov $IDT,%ebx       # interrupt descriptor table address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
-.lp1:
+lp1:
     movw $isr_other,        (%ebx)    # offset 0..15
     movw $0x0008,          2(%ebx)    # selector in gdt
     movb $0x00,            4(%ebx)    # unused
     movb $0x8e,            5(%ebx)    # type_attrs p,pv0,!s,i32b
     mov  %ax,              6(%ebx)    # offfset 16..31
     add $IDT_ENTRY_SIZE,%ebx
-loop .lp1
+loop lp1
 # setup IRQ 1 (keyboard) and IRQ 8 (RTC timer)
 #  high 16 bits (IDT_ENTRY_SIZE+6) 0 because handler is within 64K
 movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE   # IRQ 1: keyboard
@@ -260,11 +260,11 @@ mov %eax,%cr0      #   instruction is used then exception 7 is triggered
 # initiate the tasks' FPU state with initial values
 fninit # initiate FPU
 mov $osca_tasks,%ebx # for each task
-.lp2:
+lp2:
   fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx) # store initiated fpu state
   add $TASK_STRUCT_SIZE,%ebx
   cmp osca_tasks_end,%ebx
-  jl .lp2
+  jl lp2
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 call osca_init # calls C function declared in osca.hpp
 # restore cpu state for first task
