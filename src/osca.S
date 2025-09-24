@@ -92,17 +92,18 @@ mov $_start,%sp #  at 0x7c00
 #       see floppy version for vintage hardware
 # read 127 sectors * 512 B = 65024 bytes
 cld # clear direction (forward)
-# command 2 (%ah), number of sectors to read (%al)
-mov $0x027f,%ax
 # from cylinder 0 (%ch), sector 2 (%cl)
 #  sector starts from 1, not 0
 mov $0x0002,%cx
 xor %dh,%dh # head 0
 # %dl, drive number, is unchanged
-mov $0x07e0,%bx # to es:bx=7e00:0000
+mov $0x07e0,%bx # read data to es:bx=7e00:0000
 mov %bx,%es     #
 xor %bx,%bx     #
+.lp0:
+mov $0x027f,%ax # command 2 (%ah), 127 sectors (%al)
 int $0x13       # read disk
+#jc .lp0         # if error retry (image file must be 64KB)
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - mode 13h
 # switch to vga mode 13h (320x200x8 bmp @ 0xa0000)
 mov $0x13,%ax
