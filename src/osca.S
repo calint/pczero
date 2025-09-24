@@ -88,39 +88,33 @@ mov %bx,%ss     # setup stack
 mov $_start,%sp #  at 0x7c00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
 # https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)
-# Reading sectors with a CHS address
-#   Cylinder = 0 to 1023 (maybe 4095),
-#   Head = 0 to 15 (maybe 254, maybe 255),
-#   Sector = 1 to 63
-# AH = 2
-# AL = total sector count (0 is illegal) --
-#      cannot cross ES page boundary, or a cylinder boundary,
-#      and must be < 128
-# CH = cylinder & 0xff
-# CL = Sector | ((cylinder >> 2) & 0xC0);
-# DH = Head -- may include two more cylinder bits
-# ES:BX -> buffer
-# Set DL = "drive number" -- typically 0x80, for the "C" drive
-# INT 0x13.
-# The carry flag will be set if there is any error during the
-# read.
-# AH should be set to 0 on success.
-#
-cld # clear direction (forward)
-# read 127 sectors * 512B = 65024 bytes
-#  assumes load from USB. floppy does not support that many
-#   sectors.
-# command 2 (%ah), number of sectors to read (%al)
-mov $0x027f,%ax
-# from cylinder 0 (%ch), sector 2 (%cl)
-#  sector starts from 1, not 0
-mov $0x0002,%cx
-xor %dh,%dh # head 0
-# %dl, drive number, is unchanged
-mov $0x07e0,%bx # to es:bx=7e00:0000
-mov %bx,%es     #
-xor %bx,%bx     #
-int $0x13       # read disk
+# read maximum 127 sectors * 512B = 65024 bytes
+.set SECTORS_TO_READ,127
+cld                # clear direction (forward)
+mov $0x07e0,%bx    # to es:bx=0x7e00:0000
+mov %bx,%es        #
+xor %bx,%bx        #
+                   # %dl, drive number, is unchanged
+xor %dh,%dh        # head 0
+mov $0x0002,%cx    # track 0, sector 2 (sectors start at 1)
+.dsk_read:         # start read
+mov $0x0201,%ax    # read 1 sector
+int $0x13          # read disk
+jc .dsk_read       # if error, retry
+add $512,%bx       # increase destination address
+cmp $(SECTORS_TO_READ*512),%bx # compare for 127 sectors 
+je .dsk_done       #  and jump to done if true
+inc %cl            # next sector
+cmp $18,%cl        # compare for sectors per head in floppy
+jle .dsk_read      #  and if less or equal continue reading
+mov $1,%cl         # reset sector
+inc %dh            # increase head
+cmp $1,%dh         # compare for 2 heads (starting at 0)
+jle .dsk_read      #  and if less or equal continue reading
+xor %dh,%dh        # reset head to 0
+inc %ch            # increase track
+jmp .dsk_read      # continue reading
+.dsk_done:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - mode 13h
 # switch to vga mode 13h (320x200x8 bmp @ 0xa0000)
 mov $0x13,%ax
@@ -239,14 +233,14 @@ mov $isr_other,%eax # store the upper 16 bits of the handler
 shr $16,%eax        #  address in ax
 mov $IDT,%ebx       # interrupt descriptor table address
 mov $IDT_ENTRY_COUNT,%ecx # interrupt count
-lp1:
+.lp1:
     movw $isr_other,        (%ebx)    # offset 0..15
     movw $0x0008,          2(%ebx)    # selector in gdt
     movb $0x00,            4(%ebx)    # unused
     movb $0x8e,            5(%ebx)    # type_attrs p,pv0,!s,i32b
     mov  %ax,              6(%ebx)    # offfset 16..31
     add $IDT_ENTRY_SIZE,%ebx
-loop lp1
+loop .lp1
 # setup IRQ 1 (keyboard) and IRQ 8 (RTC timer)
 #  high 16 bits (IDT_ENTRY_SIZE+6) 0 because handler is within 64K
 movw $isr_kbd,IDT+(32+1)*IDT_ENTRY_SIZE   # IRQ 1: keyboard
@@ -275,11 +269,11 @@ mov %eax,%cr0      #   instruction is used then exception 7 is triggered
 # initiate the tasks' FPU state with initial values
 fninit # initiate FPU
 mov $osca_tasks,%ebx # for each task
-lp2:
+.lp2:
   fsave TASK_STRUCT_OFFSET_FPU_STATE(%ebx) # store initiated fpu state
   add $TASK_STRUCT_SIZE,%ebx
   cmp osca_tasks_end,%ebx
-  jl lp2
+  jl .lp2
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - start
 call osca_init # calls C function declared in osca.hpp
 # restore cpu state for first task
@@ -311,6 +305,7 @@ tmp_eax:.long 0 # used in `osca_yield` and `isr_tmr`
 tmp_ebx:.long 0 # ...
 tmp_ecx:.long 0 # ...
 tmp_eip:.long 0 # ...
+#.space 38,0x00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - signature
 .space _start+510-.,0xf
 .word 0xaa55 # pc boot sector signature

@@ -74,6 +74,8 @@ build:
 	objcopy --remove-section=.comment bin/src/main.o bin/src/main.o
 	@echo
 	ld -o $(IMAGE) $(LF) -Map bin/pczero.map && chmod -x $(IMAGE)
+	@cp $(IMAGE) floppy.img
+	@truncate -s 1474560 floppy.img 
 	@echo
 	
 print:
@@ -96,7 +98,7 @@ clean:
 	@rm -fr bin/
 
 display:
-	qemu-system-i386 -display gtk,zoom-to-fit=on -m 1M -drive file=$(IMAGE),format=raw
+	qemu-system-i386 -display gtk,zoom-to-fit=on -m 1M -drive file=floppy.img,format=raw,if=floppy
 	@echo
 
 install:
