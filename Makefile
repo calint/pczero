@@ -90,7 +90,7 @@ print:
 	@echo
 	@ls -la $(IMAGE)
 	@echo
-	@if [ $(shell stat -c "%s" $(IMAGE)) -ge 65536 ]; then echo '!!!'; echo '!!! IMAGE FILE GREATER THAN OSCA LOADS'; echo '!!!'; echo; fi
+	@if [ $(shell stat -c "%s" $(IMAGE)) -ge 32768 ]; then echo '!!!'; echo '!!! IMAGE FILE GREATER THAN OSCA LOADS'; echo '!!!'; echo; fi
 	
 clean:
 	@rm -fr bin/

@@ -90,7 +90,7 @@ mov $_start,%sp #  at 0x7c00
 # https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)
 # note: assumes load from disk or USB
 #       see floppy version for vintage hardware
-# read 127 sectors * 512 B = 65024 bytes
+# read the maximum of 63 sectors * 512 B = 32256 bytes
 cld # clear direction (forward)
 # from cylinder 0 (%ch), sector 2 (%cl)
 #  sector starts from 1, not 0
@@ -101,7 +101,7 @@ mov $0x07e0,%bx # read data to es:bx=7e00:0000
 mov %bx,%es     #
 xor %bx,%bx     #
 .lp0:
-mov $0x027f,%ax # command 2 (%ah), 127 sectors (%al)
+mov $0x023f,%ax # command 2 (%ah), 63 sectors (%al)
 int $0x13       # read disk
 #jc .lp0         # if error retry (image file must be 64KB)
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - mode 13h
