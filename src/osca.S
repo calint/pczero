@@ -95,7 +95,7 @@ mov $_start,%sp #  at 0x7c00
 #   63 * 512 B = 32256 bytes
 cld # clear direction (forward)
 # from cylinder 0 (%ch), sector 2 (%cl)
-#  sector starts from 1, not 0
+#  note: sector starts from 1, not 0
 mov $0x0002,%cx
 xor %dh,%dh # head 0
 # %dl, drive number, is unchanged
