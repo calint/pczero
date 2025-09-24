@@ -6,7 +6,7 @@
 #   strip    2.45.0
 #
 # emulated with:
-#   qemu-system-i386  10.0.3
+#   qemu-system-i386  10.1.0
 #   VirtualBox        7.0
 #
 # tested on hardware:
