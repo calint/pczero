@@ -74,6 +74,8 @@ build:
 	objcopy --remove-section=.comment bin/src/main.o bin/src/main.o
 	@echo
 	ld -o $(IMAGE) $(LF) -Map bin/pczero.map && chmod -x $(IMAGE)
+	@cp $(IMAGE) floppy.img
+	@truncate -s 1474560 floppy.img 
 	@echo
 	
 print:
@@ -96,15 +98,17 @@ clean:
 	@rm -fr bin/
 
 display:
-	qemu-system-i386 -display gtk,zoom-to-fit=on -m 1M -drive file=$(IMAGE),format=raw
+	qemu-system-i386 -display gtk,zoom-to-fit=on -m 1M -drive file=floppy.img,format=raw,if=floppy
 	@echo
 
 install:
 	sudo dd if=/dev/zero of=$(INSTALL_TO) bs=512 count=2880 && sync
-	sudo dd if=pczero.img of=$(INSTALL_TO) && sync
+	sudo dd if=floppy.img of=$(INSTALL_TO) && sync
 
 dispusb:
-	sudo qemu-system-i386 -display gtk,zoom-to-fit=on -m 1M -drive file=$(INSTALL_TO),format=raw
+	sudo dd if=$(INSTALL_TO) of=usb.img bs=512 count=2880
+	sudo qemu-system-i386 -display gtk,zoom-to-fit=on -m 1M -drive file=usb.img,format=raw,if=floppy
+	rm -f usb.img
 
 readusb:
 	sudo dd if=$(INSTALL_TO) count=2 | hx | f 00000200

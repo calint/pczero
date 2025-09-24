@@ -87,21 +87,34 @@ mov %bx,%ds     # data segment
 mov %bx,%ss     # setup stack
 mov $_start,%sp #  at 0x7c00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
-# https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)
-# read 127 sectors * 512 B = 65024 bytes
-#  assumes load from USB
-cld # clear direction (forward)
-# command 2 (%ah), number of sectors to read (%al)
-mov $0x027f,%ax
-# from cylinder 0 (%ch), sector 2 (%cl)
-#  sector starts from 1, not 0
-mov $0x0002,%cx
-xor %dh,%dh # head 0
-# %dl, drive number, is unchanged
-mov $0x07e0,%bx # to es:bx=7e00:0000
-mov %bx,%es     #
-xor %bx,%bx     #
-int $0x13       # read disk
+# load from 1.44 MB floppy a maximum of 127 sectors * 512 B
+#  => 65024 bytes
+.set SECTORS_TO_READ,127
+cld                # clear direction (forward)
+mov $0x07e0,%bx    # to es:bx=0x7e00:0000
+mov %bx,%es        #
+xor %bx,%bx        #
+                   # %dl, drive number, is unchanged
+xor %dh,%dh        # head 0
+mov $0x0002,%cx    # track 0, sector 2 (sectors start at 1)
+.dsk_read:         # start read
+mov $0x0201,%ax    # read 1 sector
+int $0x13          # read disk
+jc .dsk_read       # if error, retry
+add $512,%bx       # increase destination address
+cmp $(SECTORS_TO_READ*512),%bx # compare with read size
+je .dsk_done       #  and jump to done if true
+inc %cl            # next sector
+cmp $18,%cl        # compare for sectors per head in floppy
+jle .dsk_read      #  and if less or equal continue reading
+mov $1,%cl         # reset sector
+inc %dh            # increase head
+cmp $1,%dh         # check head number is not greater than 1
+jle .dsk_read      #  and continue reading if so
+xor %dh,%dh        # reset head to 0
+inc %ch            # increase track
+jmp .dsk_read      # continue reading
+.dsk_done:
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - mode 13h
 # switch to vga mode 13h (320x200x8 bmp @ 0xa0000)
 mov $0x13,%ax
