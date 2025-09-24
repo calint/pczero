@@ -88,8 +88,9 @@ mov %bx,%ss     # setup stack
 mov $_start,%sp #  at 0x7c00
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - load
 # https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)
+# note: assumes load from disk or USB
+#       see floppy version for vintage hardware
 # read 127 sectors * 512 B = 65024 bytes
-#  assumes load from USB
 cld # clear direction (forward)
 # command 2 (%ah), number of sectors to read (%al)
 mov $0x027f,%ax
