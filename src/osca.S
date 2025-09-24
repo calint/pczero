@@ -94,14 +94,14 @@ mov $_start,%sp #  at 0x7c00
 #  read the maximum of 63 sectors from head 0 cylinder 0
 #   63 * 512 B = 32256 bytes
 cld # clear direction (forward)
+mov $0x07e0,%bx # read data to es:bx=7e00:0000
+mov %bx,%es     #
+xor %bx,%bx     #
 # from cylinder 0 (%ch), sector 2 (%cl)
 #  note: sector starts from 1, not 0
 mov $0x0002,%cx
 xor %dh,%dh # head 0
 # %dl, drive number, is unchanged
-mov $0x07e0,%bx # read data to es:bx=7e00:0000
-mov %bx,%es     #
-xor %bx,%bx     #
 .lp0:
 mov $0x023f,%ax # command 2 (%ah), 63 sectors (%al)
 int $0x13       # read disk
