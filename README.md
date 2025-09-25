@@ -12,6 +12,7 @@ appeared, equipped with c++ from the future
 * write a micro kernel (1 KB) in assembler that does preemptive multitasking
 * handle multiple tasks and keyboard with a simple kernel written in c++
 * write a small 2d framework for a toy application
+* no dependencies, bare metal
 
 contains:
 
