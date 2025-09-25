@@ -11,6 +11,7 @@
 #
 # tested on hardware:
 #   asus zenbook UX305CA
+#   dell inspiron 1545
 #
 
 # resulting bootable image
