@@ -281,10 +281,6 @@ popf # restore flags, no op that modifies flags after this
 mov (-TASK_STRUCT_OFFSET_EFLAGS_END+TASK_STRUCT_OFFSET_ESP)(%esp),%esp
 sti # enables interrupts after next instruction
 jmp *tmp_eip # jmp to saved eip (first task)
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - spurios
-.align 4
-isr_7: # see https://wiki.osdev.org/8259_PIC#Spurious_IRQs
-  iret
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - variables
 .align 4
 osca_tick:           # timer tick (1024 Hz), 64 bit, exported
@@ -545,6 +541,11 @@ isr_fpu_done:
   sti # enables interrupts after next instruction
   iret
 
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - spurios
+.align 4
+isr_7: # see https://wiki.osdev.org/8259_PIC#Spurious_IRQs
+  iret
+  
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - other
 .align 4
 isr_other:
