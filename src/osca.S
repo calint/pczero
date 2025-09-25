@@ -288,10 +288,10 @@ osca_tick_lo:.long 0 #   low bits, exported
 osca_tick_hi:.long 0 #   high bits, exported
 osca_task_active:.long osca_tasks # pointer to active task, exported
 osca_active_fpu:.long osca_tasks # pointer to task that has the FPU
-tmp_eax:.long 0 # used in `osca_yield` and `isr_tmr`
-tmp_ebx:.long 0 # ...
-tmp_ecx:.long 0 # ...
-tmp_eip:.long 0 # ...
+tmp_eax:.long 0 # used in: `osca_yield`, `isr_tmr`, `isr_fpu`
+tmp_ebx:.long 0 #          `osca_yield`, `isr_tmr`, `isr_fpu`
+tmp_ecx:.long 0 #          `osca_yield`, `isr_tmp`, `isr_kbd`
+tmp_eip:.long 0 #          `osca_yield`, `isr_tmr`, start
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - signature
 .space _start+510-.,0xf
 .word 0xaa55 # pc boot sector signature
