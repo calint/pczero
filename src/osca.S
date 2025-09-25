@@ -10,6 +10,7 @@
 #         6.14.4                   9.2.3
 #         6.16.8                   10.1.0 
 # * asus zenbook UX305CA
+# * dell inspiron 1545
 #
 # memory map from https://wiki.osdev.org/Memory_Map_(x86)
 # ------------+--------+---------------------------------------
