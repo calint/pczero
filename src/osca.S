@@ -378,7 +378,9 @@ osca_yield_exit_without_task_switch:
   popf # restore flags
   sti # enables interrupts after next instruction
   ret
+
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - interrupts
+
 # "*NOTE* Because IA-32 tasks are not re-entrant, an
 # interrupt-handler task must disable interrupts between the
 # time it completes handling the interrupt and the time it
@@ -388,6 +390,7 @@ osca_yield_exit_without_task_switch:
 # (#GP) exception."
 #
 # —Intel Software Developer Manual
+
 ##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - 1024Hz timer
 .align 4
 isr_tmr:
@@ -540,7 +543,7 @@ isr_fpu_done:
   sti # enables interrupts after next instruction
   iret
 
-##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - spurios
+##-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- - spurious
 .align 4
 isr_7: # see https://wiki.osdev.org/8259_PIC#Spurious_IRQs
   iret
