@@ -78,6 +78,7 @@ class Game {
     inline static Count enemies_alive{};
     inline static Point boss_pos{20, 60};
     inline static Vector boss_vel{10, 0};
+    inline static Vector boss_acc{0, 9};
 
     static auto is_in_play_area(const Point& p) -> bool {
         return !(p.x >= Coord(play_area_top_left.x + play_area_dim.width()) ||
@@ -538,6 +539,7 @@ auto Game::create_boss() -> void {
     }
     o->phy().position = boss_pos;
     o->phy().linear_velocity = boss_vel;
+    o->phy().acceleration = boss_acc;
     o->phy().angular_velocity = deg_to_rad(25);
 }
 
